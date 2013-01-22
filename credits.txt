@@ -1,0 +1,13 @@
+Cybrinth created by James Dearing, copyright 2012-2013 and licensed under the GNU AGPL (see the file COPYING)
+Uses the following libraries:
+
+- Irrlicht by Nikolaus Gebhardt and others, see http://irrlicht.sourceforge.net/authors/
+- Boost Filesystem by Beman Dawes
+- TagLib by Scott Wheeler and others, see https://github.com/taglib/taglib/blob/master/AUTHORS
+- SDL_Mixer by Sam Lantinga, Stephane Peter, and Ryan Gordon
+- FreeType by David Turner, Robert Wilhelm, and Werner Lemberg.
+
+Special thanks to people who have contributed ideas to this game:
+- Charles Rogers
+- Gabe Aron
+- My brother Charles Dearing

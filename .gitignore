@@ -1,0 +1,10 @@
+*.[oa]
+*~
+*.in
+*.m4
+autom4te.cache/
+build-aux/
+Makefile
+config.log
+config.status
+src/.deps/

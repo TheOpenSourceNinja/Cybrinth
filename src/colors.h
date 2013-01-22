@@ -1,0 +1,37 @@
+/**
+ * Copyright © 2013 James Dearing.
+ * This file is part of Cybrinth.
+ * 
+ * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * 
+ * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef COLORS_H_INCLUDED
+#define COLORS_H_INCLUDED
+
+#include <irrlicht.h>
+using namespace irr;
+
+//Yes, these are CGA colors. I'm kind of going for that look, but without the low screen resolution limit.
+
+#define BLACK video::SColor(255, 0, 0, 0)
+#define BLUE video::SColor(255, 0, 0, 170)
+#define GREEN video::SColor(255, 0, 170, 0)
+#define CYAN video::SColor(255, 0, 170, 170)
+#define RED video::SColor(255, 170, 0, 0)
+#define MAGENTA video::SColor(255, 170, 0, 170)
+#define BROWN video::SColor(255, 170, 85, 0)
+#define GRAY video::SColor(255, 85, 85, 85)
+#define LIGHTGRAY video::SColor(255, 170, 170, 170)
+#define LIGHTBLUE video::SColor(255, 85, 85, 255)
+#define LIGHTGREEN video::SColor(255, 85, 255, 85)
+#define LIGHTCYAN video::SColor(255, 85, 255, 255)
+#define LIGHTRED video::SColor(255, 255, 85, 85)
+#define LIGHTMAGENTA video::SColor(255, 255, 85, 255)
+#define YELLOW video::SColor(255, 255, 255, 85)
+#define WHITE video::SColor(255, 255, 255, 255)
+
+#endif // COLORS_H_INCLUDED
