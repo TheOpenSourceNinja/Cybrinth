@@ -155,6 +155,7 @@ class GameManager : public IEventReceiver {
 		vector< u8 > winners;
 		bool antiAliasFonts;
 		void loadMusicFont();
+		u16 musicVolume;
 };
 
 #endif // GAMEMANAGER_H

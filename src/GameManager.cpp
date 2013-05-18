@@ -367,6 +367,8 @@ void GameManager::loadNextSong() {
 
 			loadMusicFont();
 		}
+
+		//Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
 	}
 }
 
@@ -414,7 +416,28 @@ void GameManager::readPrefs() {
 					wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( '\t' ) ) );
 					wstring choice = boost::algorithm::trim_copy( line.substr( line.find( '\t' ) ) );
 
-					if( preference == L"number of bots:" ) {
+                    if( preference == L"volume:" ) {
+                        try {
+							u16 choiceAsInt = boost::lexical_cast< u16 >( choice ); //Used u16 here because boost::lexical_cast refuses to convert from a wstring to a u8. u8 is technically an unsigned char, but we're using that type as an 8-bit unsigned integer
+
+							if( choiceAsInt <= 100 && choiceAsInt >= 0 ) {
+								wcout << L"Volume is " << static_cast<int>( choiceAsInt ) << "%" << endl;
+								musicVolume = choiceAsInt;
+								Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+								wcout << L"Volume is really " << 100 * Mix_VolumeMusic( -1 ) / MIX_MAX_VOLUME << "%" << endl;
+							} else if( choiceAsInt < 0 ) {
+								wcerr << L"Warning: Volume less than zero: " << static_cast<unsigned int>( choiceAsInt ) << endl;
+								Mix_VolumeMusic( 0 );
+								musicVolume = 0;
+							} else {
+							    wcerr << L"Warning: Volume greater than 100%: " << static_cast<unsigned int>( choiceAsInt ) << endl;
+							    Mix_VolumeMusic( MIX_MAX_VOLUME );
+							    musicVolume = 100;
+							}
+						} catch( boost::bad_lexical_cast error ) {
+							wcerr << L"Error reading volume preference (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
+						}
+					} else if( preference == L"number of bots:" ) {
 						try {
 							u16 choiceAsInt = boost::lexical_cast< u16 >( choice ); //Used u16 here because boost::lexical_cast refuses to convert from a wstring to a u8. u8 is technically an unsigned char, but we're using that type as an 8-bit unsigned integer
 							//choiceAsInt -= '0'; //Convert from a character to its equivalent number
@@ -423,7 +446,7 @@ void GameManager::readPrefs() {
 								numBots = choiceAsInt;
 								wcout << L"Number of bots is " << static_cast<int>( choiceAsInt ) << endl;
 							} else {
-								wcerr << L"Warning: Number of bots not less than number of players (number of players may not have been read yet): " << static_cast<unsigned int>( choiceAsInt ) << endl;
+								wcerr << L"Warning: Number of bots not less than or equal to number of players (number of players may not have been read yet): " << static_cast<unsigned int>( choiceAsInt ) << endl;
 								numBots = choiceAsInt;
 							}
 						} catch( boost::bad_lexical_cast error ) {
