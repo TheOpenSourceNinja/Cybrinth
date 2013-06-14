@@ -24,6 +24,7 @@ AI::AI( u8 newPlayer ) {
 	setPlayer( newPlayer );
 	setup( NULL, 0, 0, NULL );
 	lastTimeMoved = 0;
+	movementDelay = 300;
 }
 
 void AI::setPlayer( u8 newPlayer ) {
@@ -40,25 +41,55 @@ void AI::setup( MazeCell ** newMaze, u8 newCols, u8 newRows, GameManager *newGM 
 	rows = newRows;
 	pathTaken.clear();
 	cellsVisited.clear();
+	
+	for( std::vector< core::dimension2d< u8 > >::size_type i = 0; i < pathsToLockedCells.size(); i++ ) {
+		pathsToLockedCells[ i ].clear();
+	}
+	pathsToLockedCells.clear();
 	gm = newGM;
 }
 
 void AI::allKeysFound() { //Right now it simply clears pathTaken and cellsVisited, effectively starting the maze exploration over. Definitely a kluge, but it works.
-	pathTaken.clear();
-	cellsVisited.clear();
-	/*for( size_t l = 0; l < lockedCells.size(); l++ ) {
-		for( size_t c = 0; c < cellsVisited.size(); c++ ) {
-			if( lockedCells[ l ] == cellsVisited[ c ] ) {
-				cellsVisited.erase( cellsVisited.begin() + c );
+	//pathTaken.clear();
+	//cellsVisited.clear();
+	if( gm->debug ) {
+		std::wcout << L"All keys found" << std::endl;
+	}
+	core::position2d< u8 > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
+	
+	for( std::vector< std::vector< core::position2d< u8 > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
+		
+		for( std::vector< core::position2d< u8 > >::size_type i = 0; i < pathsToLockedCells[ o ].size(); i++ ) {
+
+			std::vector< core::position2d< u8 > >::size_type j = 0;
+			while( j < cellsVisited.size() ) {
+				
+				if( ( cellsVisited[ j ].X == pathsToLockedCells[ o ][ i ].X && cellsVisited[ j ].Y == pathsToLockedCells[ o ][ i ].Y ) ) {
+					if( gm->debug ) {
+						gm->maze[cellsVisited[ j ].X][cellsVisited[ j ].Y].visited = false; //So we can infer the path from AI to locks
+					}
+					cellsVisited.erase( cellsVisited.begin() + j );
+					j--;
+				}
+				j++;
 			}
 		}
-	}*/
+		
+		//Reduce memory usage: We're done with these now, so clear them.
+		//pathsToLockedCells[ o ].clear();
+		//pathsToLockedCells[ o ].shrink_to_fit(); C++11 not GCC's default yet
+		std::vector< core::position2d< u8 > >().swap( pathsToLockedCells[ o ] );
+	}
+	//Reduce memory usage: We're done with these now, so clear them.
+	//pathsToLockedCells.clear();
+	//pathsToLockedCells.shrink_to_fit(); C++11 not GCC's default yet
+	std::vector< std::vector< core::position2d< u8 > > >().swap( pathsToLockedCells );
 }
 
 bool AI::alreadyVisited( core::position2d< u8 > position ) {
 	bool result = false;
 
-	size_t i = 0;
+	std::vector< core::position2d< u8 > >::size_type i = 0;
 	while( i < cellsVisited.size() && result != true ) {
 		if( cellsVisited[ i ].X == position.X && cellsVisited[ i ].Y == position.Y ) {
 			result = true;
@@ -71,10 +102,8 @@ bool AI::alreadyVisited( core::position2d< u8 > position ) {
 
 void AI::move() {
 	lastTimeMoved = gm->timer->getRealTime();
-	Player* player = gm->getPlayer( controlsPlayer );
-	u8 playerX = player->getX();
-	u8 playerY = player->getY();
-	core::position2d< u8 > currentPosition( playerX, playerY );
+	//Player* player = gm->getPlayer( controlsPlayer );
+	core::position2d< u8 > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 
 	if( pathTaken.size() == 0 ) { //Ensures that the player's start position is marked as visited
 		pathTaken.push_back( currentPosition );
@@ -84,63 +113,93 @@ void AI::move() {
 		cellsVisited.push_back( currentPosition );
 	}
 
-	vector<char> possibleDirections;
-	if( !( playerX == gm->goal.getX() && playerY == gm->goal.getY() ) ) {
-		if( maze[ playerX ][ playerY ].hasLock() ) {
-			lockedCells.push_back( currentPosition );
+	std::vector<char> possibleDirections;
+	if( !( currentPosition.X == gm->goal.getX() && currentPosition.Y == gm->goal.getY() ) ) {
+		if( maze[ currentPosition.X ][ currentPosition.Y ].hasLock() ) {
+			pathsToLockedCells.push_back( vector< core::position2d< u8 > >() );
+			pathsToLockedCells.back().push_back( currentPosition );
 		}
-		if( playerX < ( cols - 1 ) && maze[ playerX + 1 ][ playerY ].hasLock() ) {
-			lockedCells.push_back( core::position2d< u8 >( playerX + 1, playerY ) );
+		if( currentPosition.X < ( cols - 1 ) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].hasLock() ) {
+			pathsToLockedCells.push_back( vector< core::position2d< u8 > >() );
+			pathsToLockedCells.back().push_back( core::position2d< u8 >( currentPosition.X + 1, currentPosition.Y ) );
 		}
-		if( playerY < ( rows - 1 ) && maze[ playerX ][ playerY + 1 ].hasLock() ) {
-			lockedCells.push_back( core::position2d< u8 >( playerX, playerY + 1 ) );
+		if( currentPosition.Y < ( rows - 1 ) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].hasLock() ) {
+			pathsToLockedCells.push_back( vector< core::position2d< u8 > >() );
+			pathsToLockedCells.back().push_back( core::position2d< u8 >( currentPosition.X, currentPosition.Y + 1 ) );
 		}
 
-		if( playerY > 0 && maze[ playerX ][ playerY ].getTop() == '0' && !alreadyVisited( core::position2d< u8 >( playerX, playerY - 1 ) ) ) {
+		if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == '0' && !alreadyVisited( core::position2d< u8 >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 			possibleDirections.push_back('u');
 		}
-		if( playerX > 0 && maze[ playerX ][ playerY ].getLeft() == '0' && !alreadyVisited( core::position2d< u8 >( playerX - 1, playerY ) ) ) {
+		if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == '0' && !alreadyVisited( core::position2d< u8 >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 			possibleDirections.push_back('l');
 		}
-		if( playerY < (rows - 1) && maze[ playerX ][ playerY + 1 ].getTop() == '0' && !alreadyVisited( core::position2d< u8 >( playerX, playerY + 1 ) ) ) {
+		if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == '0' && !alreadyVisited( core::position2d< u8 >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 			possibleDirections.push_back('d');
 		}
-		if( playerX < (cols - 1) && maze[ playerX + 1 ][ playerY ].getLeft() == '0' && !alreadyVisited( core::position2d< u8 >( playerX + 1, playerY ) ) ) {
+		if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == '0' && !alreadyVisited( core::position2d< u8 >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 			possibleDirections.push_back('r');
 		}
 	}
 
 	//Go back to previous position
-	if( possibleDirections.size() == 0 && pathTaken.size() != 0 && !( playerX == gm->goal.getX() && playerY == gm->goal.getY() ) ) {
+	if( possibleDirections.size() == 0 && pathTaken.size() != 0 && !( currentPosition.X == gm->goal.getX() && currentPosition.Y == gm->goal.getY() ) ) {
 		pathTaken.pop_back();
 		core::position2d< u8 > oldPosition = pathTaken.back();
-		if( oldPosition.X < playerX ) {
+		for( std::vector< std::vector< core::dimension2d< u8 > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
+			pathsToLockedCells[ o ].push_back( oldPosition );
+		}
+		if( oldPosition.X < currentPosition.X ) {
 			gm->movePlayerOnX( controlsPlayer, -1 );
-		} else if( oldPosition.X > playerX ) {
+		} else if( oldPosition.X > currentPosition.X ) {
 			gm->movePlayerOnX( controlsPlayer, 1 );
-		} else if( oldPosition.Y < playerY ) {
+		} else if( oldPosition.Y < currentPosition.Y ) {
 			gm->movePlayerOnY( controlsPlayer, -1 );
-		} else { //if( oldPosition.Y > playerY ) {
+		} else { //if( oldPosition.Y > currentPosition.Y ) {
 			gm->movePlayerOnY( controlsPlayer, 1 );
 		}
-	} else if ( !( playerX == gm->goal.getX() && playerY == gm->goal.getY() ) ) {
+	} else if ( !( currentPosition.X == gm->goal.getX() && currentPosition.Y == gm->goal.getY() ) ) { //Go to next position
 		u8 choiceNum = rand() % possibleDirections.size();
 		char choice = possibleDirections.at( choiceNum );
 		switch( choice ) {
 			case 'u': {
-				pathTaken.push_back( core::position2d< u8 >( playerX, playerY - 1 ) );
+				core::position2d< u8 > position( currentPosition.X, currentPosition.Y - 1 );
+				pathTaken.push_back( position );
+				for( std::vector< std::vector< core::dimension2d< u8 > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
+					//for( std::vector< core::dimension2d< u8 > >::size_type i = 0; i < pathsToLockedCells[ o ].size(); i++ ) {
+						pathsToLockedCells[ o ].push_back( position );
+					//}
+				}
 				gm->movePlayerOnY( controlsPlayer, -1 );
 			} break;
 			case 'd': {
-				pathTaken.push_back( core::position2d< u8 >( playerX, playerY + 1 ) );
+				core::position2d< u8 > position( currentPosition.X, currentPosition.Y + 1 );
+				pathTaken.push_back( position );
+				for( std::vector< std::vector< core::dimension2d< u8 > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
+					//for( std::vector< core::dimension2d< u8 > >::size_type i = 0; i < pathsToLockedCells[ o ].size(); i++ ) {
+						pathsToLockedCells[ o ].push_back( position );
+					//}
+				}
 				gm->movePlayerOnY( controlsPlayer, 1 );
 			} break;
 			case 'l': {
-				pathTaken.push_back( core::position2d< u8 >( playerX - 1, playerY ) );
+				core::position2d< u8 > position( currentPosition.X - 1, currentPosition.Y );
+				pathTaken.push_back( position );
+				for( std::vector< std::vector< core::dimension2d< u8 > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
+					//for( std::vector< core::dimension2d< u8 > >::size_type i = 0; i < pathsToLockedCells[ o ].size(); i++ ) {
+						pathsToLockedCells[ o ].push_back( position );
+					//}
+				}
 				gm->movePlayerOnX( controlsPlayer, -1 );
 			} break;
 			case 'r': {
-				pathTaken.push_back( core::position2d< u8 >( playerX + 1, playerY ) );
+				core::position2d< u8 > position( currentPosition.X + 1, currentPosition.Y );
+				pathTaken.push_back( position );
+				for( std::vector< std::vector< core::dimension2d< u8 > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
+					//for( std::vector< core::dimension2d< u8 > >::size_type i = 0; i < pathsToLockedCells[ o ].size(); i++ ) {
+						pathsToLockedCells[ o ].push_back( position );
+					//}
+				}
 				gm->movePlayerOnX( controlsPlayer, 1 );
 			} break;
 		}

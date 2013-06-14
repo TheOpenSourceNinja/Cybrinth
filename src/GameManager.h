@@ -8,12 +8,12 @@
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
-
+ 
 #ifndef GAMEMANAGER_H
 #define GAMEMANAGER_H
-
+ 
 #define BOOST_FILESYSTEM_NO_DEPRECATED //Recommended by the Boost filesystem library documentation to prevent us from using functions which will be removed in later versions
-
+ 
 #include "AI.h"
 #include "MazeCell.h"
 #include "font_manager.h"
@@ -32,11 +32,11 @@
 #include <SDL/SDL.h>
 #include <SDL_mixer.h>
 #include <queue>
-
+ 
 using namespace irr;
 using namespace std;
 using boost::asio::ip::tcp;
-
+ 
 class GameManager : public IEventReceiver {
 	public:
 		GameManager();
@@ -49,12 +49,12 @@ class GameManager : public IEventReceiver {
 		Goal goal;
 		bool getDebugStatus();
 		ITimer* timer;
+		MazeCell** maze;
+		bool debug;
 	protected:
 	private:
-		bool debug;
 		IrrlichtDevice* device;
 		video::IVideoDriver* driver;
-		MazeCell ** maze;
 		u8 cols;
 		u8 rows;
 		core::dimension2d<u32> windowSize;
@@ -82,7 +82,7 @@ class GameManager : public IEventReceiver {
 		MenuOption exitGame;
 		MenuOption backToGame;
 		gui::IGUIEnvironment* gui;
-		Mix_Music *music;
+		Mix_Music* music;
 		int channel;
 		//void musicFinished();
 		bool musicPlaying;
@@ -90,7 +90,7 @@ class GameManager : public IEventReceiver {
 		u8 numLocks;
 		vector<Collectable> stuff;
 		void makeRandomLevel();
-		void recurseRandom( u8 x, u8 y, u16 depth, u16 numSoFar);
+		void recurseRandom( u8 x, u8 y, u16 depth, u16 numSoFar );
 		//u8 numKeys;
 		FontManager fm;
 		gui::IGUIFont* clockFont;
@@ -113,7 +113,7 @@ class GameManager : public IEventReceiver {
 		//boost::asio::io_service io_service;
 		void loadNextSong();
 		bool allowSmallSize;
-		void *get_in_addr( struct sockaddr *sa );
+		void* get_in_addr( struct sockaddr* sa );
 		NetworkManager network;
 		bool enableJoystick;
 		u32 joystickChosen;
@@ -157,5 +157,6 @@ class GameManager : public IEventReceiver {
 		void loadMusicFont();
 		u16 musicVolume;
 };
-
+ 
 #endif // GAMEMANAGER_H
+ 

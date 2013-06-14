@@ -26,6 +26,7 @@ Player::Player() {
 	setColor( RED );
 	image = NULL;
 	stepsTaken = 0;
+	isHuman = true;
 }
 
 Player::~Player() {

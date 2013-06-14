@@ -20,7 +20,6 @@
 class GameManager; //Avoids circular dependency
 
 using namespace irr;
-using namespace std;
 
 class AI {
 	public:
@@ -40,9 +39,9 @@ class AI {
 	private:
 		GameManager * gm;
 		u8 controlsPlayer;
-		vector< core::position2d< u8 > > cellsVisited;
-		vector< core::position2d< u8 > > pathTaken;
-		vector< core::position2d< u8 > > lockedCells;
+		std::vector< core::position2d< u8 > > cellsVisited;
+		std::vector< core::position2d< u8 > > pathTaken;
+		std::vector< std::vector< core::position2d< u8 > > > pathsToLockedCells;
 		bool alreadyVisited( core::position2d< u8 > position );
 		u8 cols;
 		u8 rows;

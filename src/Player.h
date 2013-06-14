@@ -28,6 +28,7 @@ class Player : public Object {
 		void moveX( s8 val );
 		void moveY( s8 val );
 		u32 stepsTaken;
+		bool isHuman;
 	protected:
 	private:
 };
