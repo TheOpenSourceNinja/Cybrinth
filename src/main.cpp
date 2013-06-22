@@ -11,5 +11,13 @@
 #include "GameManager.h"
 
 int main() {
-	return ( new GameManager() )->run();
+	try {
+		GameManager* gm = new GameManager();
+		s32 returnValue = gm->run();
+		delete gm;
+		return returnValue;
+	} catch ( exception e ) {
+		std::wcerr << e.what() << std::endl;
+		return -99;
+	}
 }

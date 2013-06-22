@@ -20,13 +20,6 @@ AI::AI() {
 	movementDelay = 300; //TODO: Allow custom AI movement delays for increased/decreased challenge
 }
 
-AI::AI( u8 newPlayer ) {
-	setPlayer( newPlayer );
-	setup( NULL, 0, 0, NULL );
-	lastTimeMoved = 0;
-	movementDelay = 300;
-}
-
 void AI::setPlayer( u8 newPlayer ) {
 	controlsPlayer = newPlayer;
 }
@@ -49,11 +42,11 @@ void AI::setup( MazeCell ** newMaze, u8 newCols, u8 newRows, GameManager *newGM 
 	gm = newGM;
 }
 
-void AI::allKeysFound() { //Right now it simply clears pathTaken and cellsVisited, effectively starting the maze exploration over. Definitely a kluge, but it works.
+void AI::allKeysFound() { //Makes the bot 'forget' that it has visited certain maze cells
 	//pathTaken.clear();
 	//cellsVisited.clear();
-	if( gm->debug ) {
-		std::wcout << L"All keys found" << std::endl;
+	if( gm->getDebugStatus() ) {
+		std::wcout << L"Bot " << static_cast<unsigned int>( controlsPlayer ) << L" acknowledging all keys found" << std::endl;
 	}
 	core::position2d< u8 > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 	
@@ -65,7 +58,7 @@ void AI::allKeysFound() { //Right now it simply clears pathTaken and cellsVisite
 			while( j < cellsVisited.size() ) {
 				
 				if( ( cellsVisited[ j ].X == pathsToLockedCells[ o ][ i ].X && cellsVisited[ j ].Y == pathsToLockedCells[ o ][ i ].Y ) ) {
-					if( gm->debug ) {
+					if( gm->getDebugStatus() ) {
 						gm->maze[cellsVisited[ j ].X][cellsVisited[ j ].Y].visited = false; //So we can infer the path from AI to locks
 					}
 					cellsVisited.erase( cellsVisited.begin() + j );
@@ -102,7 +95,6 @@ bool AI::alreadyVisited( core::position2d< u8 > position ) {
 
 void AI::move() {
 	lastTimeMoved = gm->timer->getRealTime();
-	//Player* player = gm->getPlayer( controlsPlayer );
 	core::position2d< u8 > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 
 	if( pathTaken.size() == 0 ) { //Ensures that the player's start position is marked as visited
@@ -114,7 +106,9 @@ void AI::move() {
 	}
 
 	std::vector<char> possibleDirections;
-	if( !( currentPosition.X == gm->goal.getX() && currentPosition.Y == gm->goal.getY() ) ) {
+	if( !( currentPosition.X == gm->getGoal().getX() && currentPosition.Y == gm->getGoal().getY() ) ) {
+	
+		//Check for locks
 		if( maze[ currentPosition.X ][ currentPosition.Y ].hasLock() ) {
 			pathsToLockedCells.push_back( vector< core::position2d< u8 > >() );
 			pathsToLockedCells.back().push_back( currentPosition );
@@ -128,6 +122,7 @@ void AI::move() {
 			pathsToLockedCells.back().push_back( core::position2d< u8 >( currentPosition.X, currentPosition.Y + 1 ) );
 		}
 
+		//See which direction(s) the bot can move
 		if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == '0' && !alreadyVisited( core::position2d< u8 >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 			possibleDirections.push_back('u');
 		}
@@ -142,12 +137,14 @@ void AI::move() {
 		}
 	}
 
-	//Go back to previous position
-	if( possibleDirections.size() == 0 && pathTaken.size() != 0 && !( currentPosition.X == gm->goal.getX() && currentPosition.Y == gm->goal.getY() ) ) {
+	//If we can't go anywhere new, go back to previous position
+	if( possibleDirections.size() == 0 && pathTaken.size() != 0 && !( currentPosition.X == gm->getGoal().getX() && currentPosition.Y == gm->getGoal().getY() ) ) {
 		pathTaken.pop_back();
 		core::position2d< u8 > oldPosition = pathTaken.back();
 		for( std::vector< std::vector< core::dimension2d< u8 > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
-			pathsToLockedCells[ o ].push_back( oldPosition );
+			if( pathsToLockedCells[ o ].back() != oldPosition ) {
+				pathsToLockedCells[ o ].push_back( oldPosition );
+			}
 		}
 		if( oldPosition.X < currentPosition.X ) {
 			gm->movePlayerOnX( controlsPlayer, -1 );
@@ -158,7 +155,7 @@ void AI::move() {
 		} else { //if( oldPosition.Y > currentPosition.Y ) {
 			gm->movePlayerOnY( controlsPlayer, 1 );
 		}
-	} else if ( !( currentPosition.X == gm->goal.getX() && currentPosition.Y == gm->goal.getY() ) ) { //Go to next position
+	} else if ( !( currentPosition.X == gm->getGoal().getX() && currentPosition.Y == gm->getGoal().getY() ) ) { //Go to next position
 		u8 choiceNum = rand() % possibleDirections.size();
 		char choice = possibleDirections.at( choiceNum );
 		switch( choice ) {

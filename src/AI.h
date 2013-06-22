@@ -25,7 +25,6 @@ class AI {
 	public:
 		/** Default constructor */
 		AI();
-		AI( u8 newPlayer );
 		/** Default destructor */
 		virtual ~AI();
 		void setPlayer( u8 newPlayer );
