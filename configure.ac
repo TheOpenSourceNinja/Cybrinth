@@ -14,7 +14,7 @@ AC_CONFIG_FILES([Makefile])
 AC_PROG_CXX
 
 # Checks for libraries.
-PKG_CHECK_MODULES([DEPS], [freetype2 >= 15.0.9 SDL_mixer >= 1.2.12 taglib >= 1.8.0]) # Some libraries provide files for pkg-config
+PKG_CHECK_MODULES([DEPS], [freetype2 >= 14.1.8 SDL_mixer >= 1.2.12 taglib >= 1.7.2]) # Some libraries provide files for pkg-config
 AC_ARG_WITH([irrlicht-include-path], [AS_HELP_STRING([--with-irrlicht-include-path], [location of the Irrlicht headers, defaults to /usr/include/irrlicht])], [IRRLICHT_CFLAGS="-I$withval"], [IRRLICHT_CFLAGS='-I/usr/include/irrlicht'])
 AC_SUBST([IRRLICHT_CFLAGS])
 AC_ARG_WITH([irrlicht-lib-path], [AS_HELP_STRING([--with-irrlicht-lib-path], [location of the Irrlicht library])], [IRRLICHT_LIBS="-L$withval -lIrrlicht"], [IRRLICHT_LIBS='-lIrrlicht'])
