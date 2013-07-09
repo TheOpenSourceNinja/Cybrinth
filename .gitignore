@@ -19,11 +19,9 @@
 *.dirstamp
 *.bak
 autom4te.cache/
-build-aux/
 Makefile
 config.log
 config.status
 src/.deps/
 cybrinth
 how to use git
-music/*
