@@ -12,7 +12,6 @@
 #include <iostream>
 
 using namespace std;
-using namespace irr;
 
 Goal::Goal() {
 	setColor( WHITE );
@@ -22,17 +21,17 @@ Goal::~Goal() {
 	//dtor
 }
 
-void Goal::loadImage( video::IVideoDriver* driver ) {
+void Goal::loadImage( irr::video::IVideoDriver* driver ) {
 	//image = driver->getTexture( "diamond.png" );
 	loadImage( driver, 1 );
 }
 
-void Goal::loadImage( video::IVideoDriver* driver, u32 size ) {
-	video::IImage *tempImage = driver->createImage( video::ECF_A8R8G8B8, core::dimension2d<u32>( size, size ) );
-	tempImage->fill( video::SColor( 0, 0, 0, 0) ); //Fills the image with invisibility!
+void Goal::loadImage( irr::video::IVideoDriver* driver, uint32_t size ) {
+	irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d<uint32_t>( size, size ) );
+	tempImage->fill( irr::video::SColor( 0, 0, 0, 0) ); //Fills the image with invisibility!
 
-	for( u32 x = 0; x <= ( size / 2 ); x++ ) {
-		for( u32 y = 0; y <= x; y++ ) {
+	for( uint32_t x = 0; x <= ( size / 2 ); x++ ) {
+		for( uint32_t y = 0; y <= x; y++ ) {
 			tempImage->setPixel( x, y + ( size / 2 ), WHITE );
 			tempImage->setPixel( size - x, y + ( size / 2 ), WHITE );
 			tempImage->setPixel( x, size - ( y + ( size / 2 ) ), WHITE );
@@ -44,10 +43,10 @@ void Goal::loadImage( video::IVideoDriver* driver, u32 size ) {
 	image = driver->addTexture( L"goalDiamond", tempImage );
 }
 
-void Goal::draw( video::IVideoDriver* driver, u32 width, u32 height ) {
+void Goal::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
 	//Object::draw( driver, width, height );
 
-	u32 size;
+	uint32_t size;
 
 	if( width < height ) {
 		size = width;
@@ -60,12 +59,12 @@ void Goal::draw( video::IVideoDriver* driver, u32 width, u32 height ) {
 	}
 
 	if( image != NULL ) {
-		s32 cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
-		s32 cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
-		video::SColor colorArray[] = {colorTwo, colorTwo, colorTwo, colorTwo};
+		int32_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
+		int32_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
+		irr::video::SColor colorArray[] = {colorTwo, colorTwo, colorTwo, colorTwo};
 		driver->draw2DImage( image,
-							 core::rect<s32>( cornerX, cornerY, cornerX + size, cornerY + size ),
-							 core::rect<s32>( core::position2d<s32>( 0, 0 ), image->getSize() ),
+							 irr::core::rect<int32_t>( cornerX, cornerY, cornerX + size, cornerY + size ),
+							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), image->getSize() ),
 							 0, //The clipping rectangle, so we can draw only part of the image if we want. Zero means draw the whole thing.
 							 colorArray,
 							 true );
@@ -74,13 +73,13 @@ void Goal::draw( video::IVideoDriver* driver, u32 width, u32 height ) {
 		cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
 		cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
 
-		for( u8 a = 0; a < 4; a++ ) {
+		for( uint8_t a = 0; a < 4; a++ ) {
 			colorArray[a] = colorOne;
 		}
 
 		driver->draw2DImage( image,
-							 core::rect<s32>( cornerX, cornerY, cornerX + size, cornerY + size ),
-							 core::rect<s32>( core::position2d<s32>( 0, 0 ), image->getSize() ),
+							 irr::core::rect<int32_t>( cornerX, cornerY, cornerX + size, cornerY + size ),
+							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), image->getSize() ),
 							 0, //The clipping rectangle, so we can draw only part of the image if we want. Zero means draw the whole thing.
 							 colorArray,
 							 true );

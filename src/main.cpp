@@ -13,7 +13,7 @@
 int main() {
 	try {
 		GameManager* gm = new GameManager();
-		s32 returnValue = gm->run();
+		int returnValue = gm->run();
 		delete gm;
 		return returnValue;
 	} catch ( exception e ) {

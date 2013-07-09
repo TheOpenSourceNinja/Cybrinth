@@ -15,21 +15,22 @@
 using namespace std;
 
 MazeCell::MazeCell() {
-	top = '0';
-	left = '0';
-	bottom = '0';
-	right = '0';
+	top = 'n';
+	left = 'n';
+	bottom = 'n';
+	right = 'n';
 	visited = false;
 	distanceFromStart = 999;
 	id = 0;
 	setVisitorColor(BLACK);
+	visible = true;
 }
 
-void MazeCell::setVisitorColor( video::SColor color ) {
+void MazeCell::setVisitorColor( irr::video::SColor color ) {
 	visitorColor = color;
 }
 
-video::SColor MazeCell::getVisitorColor() {
+irr::video::SColor MazeCell::getVisitorColor() {
 	return visitorColor;
 }
 
@@ -70,20 +71,20 @@ void MazeCell::setRight( char val ) {
 }
 
 void MazeCell::removeLocks() {
-	if( top == 'l' || top == 'L' ) {
-		top = '0';
+	if( top == 'l' ) {
+		top = 'n';
 	}
 
-	if( left == 'l' || left == 'L' ) {
-		left = '0';
+	if( left == 'l' ) {
+		left = 'n';
 	}
 
-	if( bottom == 'l' || bottom == 'L' ) {
-		bottom = '0';
+	if( bottom == 'l' ) {
+		bottom = 'n';
 	}
 
-	if( right == 'l' || right == 'L' ) {
-		right = '0';
+	if( right == 'l' ) {
+		right = 'n';
 	}
 }
 
@@ -97,16 +98,16 @@ bool MazeCell::hasLock() {
 
 bool MazeCell::isDeadEnd() {
 	bool result = false;
-	if ( top == '0' && left != '0' && bottom != '0' && right != '0' ) {
+	if ( top == 'n' && left != 'n' && bottom != 'n' && right != 'n' ) {
 		//wcout << L"Dead end (top)" << endl;
 		result = true;
-	} else if ( top != '0' && left == '0' && bottom != '0' && right != '0' ) {
+	} else if ( top != 'n' && left == 'n' && bottom != 'n' && right != 'n' ) {
 		//wcout << L"Dead end (left)" << endl;
 		result = true;
-	} else if ( top != '0' && left != '0' && bottom == '0' && right != '0' ) {
+	} else if ( top != 'n' && left != 'n' && bottom == 'n' && right != 'n' ) {
 		//wcout << L"Dead end (bottom)" << endl;
 		result = true;
-	} else if ( top != '0' && left != '0' && bottom != '0' && right == '0' ) {
+	} else if ( top != 'n' && left != 'n' && bottom != 'n' && right == 'n' ) {
 		//wcout << L"Dead end (right)" << endl;
 		result = true;
 	} else {

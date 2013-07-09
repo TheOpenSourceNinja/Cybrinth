@@ -15,65 +15,84 @@
 #define BOOST_FILESYSTEM_NO_DEPRECATED //Recommended by the Boost filesystem library documentation to prevent us from using functions which will be removed in later versions
  
 #include "AI.h"
-#include "MazeCell.h"
-#include "font_manager.h"
-#include "Player.h"
-#include "Goal.h"
 #include "Collectable.h"
-#include "MenuOption.h"
-#include "PlayerStart.h"
+#include "font_manager.h"
+#include "Goal.h"
 #include "gui_freetype_font.h"
+#include "KeyMapping.h"
+#include "MazeManager.h"
+#include "MenuOption.h"
 #include "NetworkManager.h"
+#include "Player.h"
+#include "PlayerStart.h"
 #include "StringConverter.h"
-#include <irrlicht.h>
-#include <vector>
-#include <filesystem.hpp>
+
 #include <asio.hpp>
-#include <SDL/SDL.h>
+#include <irrlicht.h>
 #include <SDL_mixer.h>
+#include <SDL/SDL.h>
 #include <queue>
+#include <vector>
  
 using namespace irr;
 using namespace std;
 using boost::asio::ip::tcp;
- 
+
 class GameManager : public IEventReceiver {
 	public:
 		//Functions----------------------------------
+		void drawAll();
+		
 		GameManager();
 		virtual ~GameManager();
 		bool getDebugStatus();
+		MazeManager getMazeManager();
 		Goal getGoal();
-		Player* getPlayer( u8 p );
+		Player* getPlayer( uint8_t p );
 		
-		void movePlayerOnX( u8 p, s8 direction );
-		void movePlayerOnY( u8 p, s8 direction );
+		void movePlayerOnX( uint8_t p, int8_t direction );
+		void movePlayerOnY( uint8_t p, int8_t direction );
 		
 		bool OnEvent( const SEvent& );
 		
-		s32 run();
+		void resetThings();
+		int run();
 		
 		
 		//Non-functions----------------------------------
-		MazeCell** maze;
+		vector< AI > bot;
+		
+		IrrlichtDevice* device;
+		video::IVideoDriver* driver;
+		
+		Goal goal;
+		gui::IGUIEnvironment* gui;
+		
+		uint32_t loadingDelay;
+		
+		uint8_t numBots;
+		uint8_t numLocks;
+		uint8_t numPlayers;
+		
+		vector<Player> player;
+		vector<PlayerStart> playerStart;
+		
+		uint32_t randomSeed;
+		
+		StringConverter stringConverter;
+		vector<Collectable> stuff;
+		
 		ITimer* timer;
+		uint32_t timeStartedLoading;
 		
 	protected:
 	private:
 		//Functions----------------------------------
 		bool allHumansAtGoal();
 		
-		bool canGetTo( u8 startX, u8 startY, u8 goalX, u8 goalY );
-		bool canGetToAllCollectables( u8 startX, u8 startY );
-		
-		void drawAll();
 		void drawBackground();
 		
-		bool existsAnythingAt( u8 x, u8 y );
-		
 		void loadFonts();
-		void loadFromFile();
-		bool loadFromFile( boost::filesystem::path src );
 		void loadMusicFont();
 		void loadNextSong();
 		void loadProTips();
@@ -81,15 +100,9 @@ class GameManager : public IEventReceiver {
 		void loadTipFont();
 		
 		void makeMusicList();
-		void makeRandomLevel();
 		
 		void readPrefs();
-		void recurseRandom( u8 x, u8 y, u16 depth, u16 numSoFar );
-		void resetThings();
-		void resizeMaze( u8 newCols, u8 newRows );
 		
-		void saveToFile();
-		bool saveToFile( boost::filesystem::path dest );
 		void setupBackground();
 		void startLoadingScreen();
 		
@@ -123,41 +136,28 @@ class GameManager : public IEventReceiver {
 		
 		
 		//unsigned 8-bit integers----------------------------------
-		u8 backgroundChosen;
+		uint8_t backgroundChosen;
 		
-		u8 cols;
+		uint8_t myPlayer; //If in client mode, control only one player
 		
-		u8 myPlayer; //If in client mode, control only one player
+		uint8_t numKeysFound;
 		
-		u8 numBots;
-		u8 numKeysFound;
-		u8 numLocks;
-		u8 numPlayers;
+		uint8_t sideDisplaySizeDenominator;
 		
-		u8 rows;
-		
-		u8 sideDisplaySizeDenominator;
-		
-		vector< u8 > winners;
+		vector< uint8_t > winners;
 		
 		
 		//unsigned 16-bit integers----------------------------------
-		u16 musicVolume;
+		uint16_t musicVolume;
 		
 		
 		//unsigned 32-bit integers----------------------------------
-		u32 bitsPerPixel;
+		uint32_t bitsPerPixel;
 		
-		u32 cellWidth;
-		u32 cellHeight;
+		uint32_t cellWidth;
+		uint32_t cellHeight;
 		
-		u32 joystickChosen;
-		
-		u32 loadingDelay;
-		
-		u32 randomSeed;
-		
-		u32 timeStartedLoading;
+		uint32_t joystickChosen;
 		
 		
 		//wide character strings----------------------------------
@@ -180,30 +180,26 @@ class GameManager : public IEventReceiver {
 		
 		//Our own types----------------------------------
 		MenuOption backToGame;
-		vector< AI > bot;
 		
 		MenuOption exitGame;
 		
 		FontManager fm;
 		
-		Goal goal;
+		vector< KeyMapping > keyMap;
 		
 		MenuOption loadMaze;
+		
+		MazeManager mazeManager;
 		
 		NetworkManager network;
 		MenuOption newGame;
 		
-		vector<Player> player;
-		vector<PlayerStart> playerStart;
-		
 		MenuOption saveMaze;
-		StringConverter stringConverter;
-		vector<Collectable> stuff;
 		
 		
 		//2D dimensions----------------------------------
-		core::dimension2d<u32> viewportSize;
-		core::dimension2d<u32> windowSize;
+		core::dimension2d<uint32_t> viewportSize;
+		core::dimension2d<uint32_t> windowSize;
 		
 		
 		//Fonts----------------------------------
@@ -222,13 +218,9 @@ class GameManager : public IEventReceiver {
 		//Misc. Irrlicht types----------------------------------
 		scene::ISceneManager* bgscene;
 		
-		IrrlichtDevice* device;
-		video::IVideoDriver* driver;
 		video::E_DRIVER_TYPE driverType;
 		
 		gui::IGUIFileOpenDialog* fileChooser;
-		
-		gui::IGUIEnvironment* gui;
 		
 		core::array<SJoystickInfo> joystickInfo;
 		

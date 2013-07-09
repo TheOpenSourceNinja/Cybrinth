@@ -25,12 +25,12 @@ void PlayerStart::reset() {
 	distanceFromExit = 0;
 }
 
-void PlayerStart::loadImage( video::IVideoDriver* driver ) {
+void PlayerStart::loadImage( irr::video::IVideoDriver* driver ) {
 	loadImage( driver, 1 );
 }
 
-void PlayerStart::loadImage( video::IVideoDriver* driver, u32 size ) {
-	video::IImage *tempImage = driver->createImage( video::ECF_A8R8G8B8, core::dimension2d<u32>( size, size ) );
+void PlayerStart::loadImage( irr::video::IVideoDriver* driver, uint32_t size ) {
+	irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d<uint32_t>( size, size ) );
 	tempImage->fill( WHITE ); //Fills the image with invisibility!
 	setColor( BLACK );
 
@@ -38,8 +38,8 @@ void PlayerStart::loadImage( video::IVideoDriver* driver, u32 size ) {
 	image = driver->addTexture( L"playerStart", tempImage );
 }
 
-void PlayerStart::draw( video::IVideoDriver* driver, u32 width, u32 height ) {
-	u32 size;
+void PlayerStart::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
+	uint32_t size;
 
 	if( width < height ) {
 		size = width;

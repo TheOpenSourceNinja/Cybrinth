@@ -25,6 +25,7 @@
 #include <SDL/SDL.h>
 #include <SDL_mixer.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <time.h>
 #include <queue>
 #include <date_time/posix_time/posix_time.hpp>
@@ -74,18 +75,18 @@ using boost::asio::ip::tcp;
 
 
 bool GameManager::allHumansAtGoal() {
-	vector< u8 > humanPlayers; //Get a list of players
+	vector< uint8_t > humanPlayers; //Get a list of players
 	
-	for( u8 p = 0; p < numPlayers; p++ ) {
+	for( uint8_t p = 0; p < numPlayers; p++ ) {
 		humanPlayers.push_back( p );
 	}
 	
 	bool result = false;
 	
-	for( u8 b = 0; b < numBots; b++ ) { //Remove bots from the list
-		u8 botPlayer = bot[ b ].getPlayer();
+	for( uint8_t b = 0; b < numBots; b++ ) { //Remove bots from the list
+		uint8_t botPlayer = bot[ b ].getPlayer();
 		
-		for( u32 p = 0; p < humanPlayers.size(); p++ ) {
+		for( uint32_t p = 0; p < humanPlayers.size(); p++ ) {
 			if( humanPlayers[ p ] == botPlayer ) {
 				humanPlayers.erase( humanPlayers.begin() + p );
 			}
@@ -95,66 +96,12 @@ bool GameManager::allHumansAtGoal() {
 	if( humanPlayers.size() > 0 ) {
 		result = true;
 		
-		for( u32 p = 0; ( p < humanPlayers.size() && result == true ); p++ ) {
+		for( uint32_t p = 0; ( p < humanPlayers.size() && result == true ); p++ ) {
 			if( !( player[ humanPlayers[ p ] ].getX() == goal.getX() && player[ humanPlayers[ p ] ].getY() == goal.getY() ) ) {
 				result = false;
 			}
 		}
 		
-	}
-	
-	return result;
-}
-
-//Recursively searches the maze to see if it can get from start to end
-bool GameManager::canGetTo( u8 startX, u8 startY, u8 goalX, u8 goalY ) {
-	bool found = false;
-	if( debug ) {
-		wcout << L"Searching for a way from " << static_cast<unsigned int>( startX ) << L"x" << static_cast<unsigned int>( startY ) << L" to " << static_cast<unsigned int>( goalX ) << L"x" << static_cast<unsigned int>( goalY ) << endl;
-	}
-	maze[startX][startY].visited = true;
-	
-	if( startX == goalX && startY == goalY ) {
-		found = true;
-	} else {
-		if( startY > 0 && maze[startX][startY].getTop() == '0' && maze[startX][startY - 1].visited == false ) {
-			found = canGetTo( startX, startY - 1, goalX, goalY );
-		}
-		
-		if( found == false && startY < ( rows - 1 ) && maze[startX][startY + 1].getTop() == '0' && maze[startX][startY + 1].visited == false ) {
-			found = canGetTo( startX, startY + 1, goalX, goalY );
-		}
-		
-		if( found == false && startX < ( cols - 1 ) && maze[startX + 1][startY].getLeft() == '0' && maze[startX + 1][startY].visited == false ) {
-			found = canGetTo( startX + 1, startY, goalX, goalY );
-		}
-		
-		if( found == false && startX > 0 && maze[startX][startY].getLeft() == '0' && maze[startX - 1][startY].visited == false ) {
-			found = canGetTo( startX - 1, startY, goalX, goalY );
-		}
-	}
-	
-	return found;
-}
-
-//Iterates through all collectables, calls canGetTo on their locations
-bool GameManager::canGetToAllCollectables( u8 startX, u8 startY ) {
-	bool result = true;
-	
-	for( u32 i = 0; ( i < stuff.size() && result == true ); i++ ) {
-	
-		//Do this here because canGetTo() uses the visited variable
-		for( u8 x = 0; x < cols; x++ ) {
-			for( u8 y = 0; y < rows; y++ ) {
-				maze[x][y].visited = false;
-			}
-		}
-		
-		bool otherResult = canGetTo( startX, startY, stuff[i].getX(), stuff[i].getY() );
-		
-		if( otherResult == false ) {
-			result = false;
-		}
 	}
 	
 	return result;
@@ -168,31 +115,31 @@ void GameManager::drawAll() {
 		
 		//Draws player trails ("footprints")
 		if( markTrails ) {
-			for( u8 x = 0; x < cols; x++ ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
-				for( u8 y = 0; y < rows; y++ ) {
-					if( maze[ x ][ y ].visited ) {
-						s32 dotSize = cellWidth / 5;
+			for( uint8_t x = 0; x < mazeManager.cols; x++ ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
+				for( uint8_t y = 0; y < mazeManager.rows; y++ ) {
+					if( mazeManager.maze[ x ][ y ].visited ) {
+						int32_t dotSize = cellWidth / 5;
 						
 						if( dotSize < 2 ) {
 							dotSize = 2;
 						}
 						
-						driver->draw2DRectangle( maze[ x ][ y ].getVisitorColor() , core::rect<s32>( core::position2d<s32>(( x * cellWidth ) + ( 0.5 * cellWidth ) - ( 0.5 * dotSize ), ( y * cellHeight ) + ( 0.5 * cellHeight ) - ( 0.5 * dotSize ) ), core::dimension2d<s32>( dotSize, dotSize ) ) );
+						driver->draw2DRectangle( mazeManager.maze[ x ][ y ].getVisitorColor() , core::rect<int32_t>( core::position2d<int32_t>(( x * cellWidth ) + ( 0.5 * cellWidth ) - ( 0.5 * dotSize ), ( y * cellHeight ) + ( 0.5 * cellHeight ) - ( 0.5 * dotSize ) ), core::dimension2d<int32_t>( dotSize, dotSize ) ) );
 					}
 				}
 			}
 		}
 		
-		for( u32 ps = 0; ps < playerStart.size(); ps++ ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts.
+		for( uint32_t ps = 0; ps < playerStart.size(); ps++ ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts.
 			playerStart[ ps ].draw( driver, cellWidth, cellHeight );
 		}
 		
 		//Drawing bots before human players makes it easier to play against large numbers of bots
-		for( u8 i = 0; i < numBots; i++ ) {
+		for( uint8_t i = 0; i < numBots; i++ ) {
 			player[ bot[ i ].getPlayer() ].draw( driver, cellWidth, cellHeight );
 		}
 		
-		for( u8 p = 0; p < numPlayers; p++ ) {
+		for( uint8_t p = 0; p < numPlayers; p++ ) {
 			if( player[ p ].isHuman ) {
 				player[ p ].draw( driver, cellWidth, cellHeight );
 			}
@@ -200,35 +147,9 @@ void GameManager::drawAll() {
 		
 		goal.draw( driver, cellWidth, cellHeight );
 		
-		video::SColor wallColor = WHITE;
-		video::SColor lockColor = BROWN;
+		mazeManager.draw( driver, cellWidth, cellHeight );
 		
-		for( u8 x = 0; x < cols; x++ ) {
-			for( u8 y = 0; y < rows; y++ ) {
-				if( maze[x][y].getTop() == '1' ) {
-					driver->draw2DLine( core::position2d<s32>( x * cellWidth, y * cellHeight ), core::position2d<s32>(( x + 1 )*cellWidth, y * cellHeight ), wallColor );
-				} else if( maze[x][y].getTop() == 'l' ) {
-					driver->draw2DLine( core::position2d<s32>( x * cellWidth, y * cellHeight ), core::position2d<s32>(( x + 1 )*cellWidth, y * cellHeight ), lockColor );
-				}
-				
-				if( maze[x][y].getLeft() == '1' ) {
-					driver->draw2DLine( core::position2d<s32>( x * cellWidth, y * cellHeight ), core::position2d<s32>( x * cellWidth, ( y + 1 )*cellHeight ), wallColor );
-				} else if( maze[x][y].getLeft() == 'l' ) {
-					driver->draw2DLine( core::position2d<s32>( x * cellWidth, y * cellHeight ), core::position2d<s32>( x * cellWidth, ( y + 1 )*cellHeight ), lockColor );
-				}
-				
-				//Only cells on the right or bottom edge of the maze should have anything other than '0' as right or bottom, and then it should only be a solid '1'
-				if( maze[x][y].getRight() == '1' ) {
-					driver->draw2DLine( core::position2d<s32>(( x + 1 )*cellWidth, y * cellHeight ), core::position2d<s32>(( x + 1 )*cellWidth, ( y + 1 )*cellHeight ), wallColor );
-				}
-				
-				if( maze[x][y].getBottom() == '1' ) {
-					driver->draw2DLine( core::position2d<s32>( x * cellWidth, ( y + 1 )*cellHeight ), core::position2d<s32>(( x + 1 )*cellWidth, ( y + 1 )*cellHeight ), wallColor );
-				}
-			}
-		}
-		
-		for( u32 i = 0; i < stuff.size(); i++ ) {
+		for( uint32_t i = 0; i < stuff.size(); i++ ) {
 			stuff[i].draw( driver, cellWidth, cellHeight );
 		}
 		
@@ -241,33 +162,33 @@ void GameManager::drawAll() {
 		}
 		
 		
-		u32 spaceBetween = windowSize.Height / 30;
-		u32 textY = spaceBetween;
+		uint32_t spaceBetween = windowSize.Height / 30;
+		uint32_t textY = spaceBetween;
 		
 		time_t currentTime = time( NULL );
 		wchar_t clockTime[9];
 		wcsftime( clockTime, 9, L"%H:%M:%S", localtime( &currentTime ) );
-		core::dimension2d<u32> tempDimensions = clockFont->getDimension( core::stringw( clockTime ).c_str() );
-		core::rect<s32> tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		core::dimension2d<uint32_t> tempDimensions = clockFont->getDimension( core::stringw( clockTime ).c_str() );
+		core::rect<int32_t> tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		clockFont->draw( clockTime, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
 		
 		core::stringw timeLabel( L"Time:" );
 		textY += tempDimensions.Height;
 		tempDimensions = textFont->getDimension( timeLabel.c_str() );
-		tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		textFont->draw( L"Time:", tempRectangle, YELLOW, true, true, &tempRectangle );
 		core::stringw timerStr( "" );
 		timerStr += ( timer->getTime() / 1000 );
 		timerStr += L" seconds";
 		textY += tempDimensions.Height;
 		tempDimensions = textFont->getDimension( timerStr.c_str() );
-		tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		textFont->draw( timerStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 		
 		core::stringw keysFoundStr( L"Keys found:" );
 		textY += tempDimensions.Height;
 		tempDimensions = textFont->getDimension( keysFoundStr.c_str() );
-		tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		textFont->draw( keysFoundStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 		
 		core::stringw keyStr;
@@ -276,19 +197,19 @@ void GameManager::drawAll() {
 		keyStr += numLocks;
 		textY += tempDimensions.Height;
 		tempDimensions = textFont->getDimension( keyStr.c_str() );
-		tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		textFont->draw( keyStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 		
 		core::stringw seedLabel( L"Random seed:" );
 		textY += tempDimensions.Height;
 		tempDimensions = textFont->getDimension( seedLabel.c_str() );
-		tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		textFont->draw( seedLabel, tempRectangle, YELLOW, true, true, &tempRectangle );
 		
 		core::stringw seedStr( randomSeed );
 		textY += tempDimensions.Height;
 		tempDimensions = textFont->getDimension( seedStr.c_str() );
-		tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		textFont->draw( seedStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 		
 		core::stringw headfor( L"Head for" );
@@ -300,7 +221,7 @@ void GameManager::drawAll() {
 		}
 		
 		if( numKeysFound >= numLocks ) {
-			tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( headfor, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
 		}
 		
@@ -309,7 +230,7 @@ void GameManager::drawAll() {
 		tempDimensions = textFont->getDimension( theexit.c_str() );
 		
 		if( numKeysFound >= numLocks ) {
-			tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( theexit, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
 		}
 		
@@ -317,65 +238,65 @@ void GameManager::drawAll() {
 			core::stringw nowplaying( L"Now playing:" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( nowplaying.c_str() );
-			tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( nowplaying, tempRectangle, YELLOW, true, true, &tempRectangle );
 			
 			textY += tempDimensions.Height;
 			tempDimensions = musicTagFont->getDimension( musicTitle.c_str() );
-			tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			musicTagFont->draw( musicTitle, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
 			
 			core::stringw by( L"by" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( by.c_str() );
-			tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( by, tempRectangle, YELLOW, true, true, &tempRectangle );
 			
 			textY += tempDimensions.Height;
 			tempDimensions = musicTagFont->getDimension( musicArtist.c_str() );
-			tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			musicTagFont->draw( musicArtist, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
 			
 			core::stringw fromalbum( L"from album" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( fromalbum.c_str() );
-			tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( fromalbum, tempRectangle, YELLOW, true, true, &tempRectangle );
 			
 			textY += tempDimensions.Height;
 			tempDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
-			tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			musicTagFont->draw( musicAlbum, tempRectangle, LIGHTGRAY, true, true, &tempRectangle );
 			
 			core::stringw volume( L"Volume:" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( volume.c_str() );
-			tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( volume, tempRectangle, YELLOW, true, true, &tempRectangle );
 			
 			core::stringw volumeNumber( musicVolume );
 			volumeNumber.append( L"%" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( volumeNumber.c_str() );
-			tempRectangle = core::rect<s32>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( volumeNumber, tempRectangle, LIGHTRED, true, true, &tempRectangle );
 		}
 		
 		gui->drawAll();
 	} else {
-		core::dimension2d<u32> tempDimensions = loadingFont->getDimension( loading.c_str() );
-		u32 textY = 0;
-		core::rect< s32 > tempRectangle(( windowSize.Width / 2 ) - ( tempDimensions.Width / 2 ), textY, ( windowSize.Width / 2 ) + ( tempDimensions.Width / 2 ), tempDimensions.Height + textY );
+		core::dimension2d<uint32_t> tempDimensions = loadingFont->getDimension( loading.c_str() );
+		uint32_t textY = 0;
+		core::rect< int32_t > tempRectangle(( windowSize.Width / 2 ) - ( tempDimensions.Width / 2 ), textY, ( windowSize.Width / 2 ) + ( tempDimensions.Width / 2 ), tempDimensions.Height + textY );
 		loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
 		
 		textY = tempDimensions.Height + textY + 1;
 		tempDimensions = tipFont->getDimension( proTipPrefix.c_str() );
-		tempRectangle = core::rect< s32 >( 0, textY, tempDimensions.Width, tempDimensions.Height + textY );
+		tempRectangle = core::rect< int32_t >( 0, textY, tempDimensions.Width, tempDimensions.Height + textY );
 		tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
 		
-		u32 textX = tempDimensions.Width + 1;
+		uint32_t textX = tempDimensions.Width + 1;
 		tempDimensions = tipFont->getDimension( proTips.at( currentProTip ).c_str() );
-		tempRectangle = core::rect< s32 >( textX, textY, tempDimensions.Width + textX, tempDimensions.Height + textY );
+		tempRectangle = core::rect< int32_t >( textX, textY, tempDimensions.Width + textX, tempDimensions.Height + textY );
 		tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
 	}
 	
@@ -391,22 +312,6 @@ void GameManager::drawBackground() {
 		default:
 			break;
 	}
-}
-
-bool GameManager::existsAnythingAt( u8 x, u8 y ) {
-	bool result = false;
-	
-	if( goal.getX() == x && goal.getY() == y ) {
-		result = true;
-	}
-	
-	for( u32 i = 0; ( result == false && i < stuff.size() ); i++ ) {
-		if( stuff[i].getX() == x && stuff[i].getY() == y ) {
-			result = true;
-		}
-	}
-	
-	return result;
 }
 
 //I... am... DESTRUCTOOOOOOORRRRR!!!!!!!!!
@@ -429,24 +334,15 @@ GameManager::~GameManager() {
 		
 		SDL_Quit();
 	}
-	
-	for( u8 i = 0 ; i < cols ; i++ ) {
-		delete [] maze[ i ];
-	}
-		
-	delete [] maze ;
 }
 
 GameManager::GameManager() {
+	mazeManager.setGameManager(this);
 	fontFile = "Ubuntu-R.ttf";
 	isServer = false;
 	antiAliasFonts = true;
 	currentProTip = 0;
 	sideDisplaySizeDenominator = 6; //What fraction of the screen's width is set aside for displaying text, statistics, etc. during play.
-	
-	//resizeMaze() will set cols and rows to whatever gets passed into it; we're making them zero here only so that resizeMaze() doesn't try to copy from the nonexistent previous maze.
-	cols = 0;
-	rows = 0;
 	
 	device = createDevice( video::EDT_NULL ); //Must create a null device before calling readPrefs();
 	
@@ -456,6 +352,22 @@ GameManager::GameManager() {
 	}
 	
 	readPrefs();
+	
+	uint8_t nonPlayerActions = 0;
+	keyMap.resize( 4 * ( numPlayers - numBots ) + nonPlayerActions );
+	for( uint8_t i = 0; i < 4 * ( numPlayers - numBots ); i += 4 ) {
+		keyMap.at( i ).setAction( 'u' );
+		keyMap.at( i + 1 ).setAction( 'd' );
+		keyMap.at( i + 2 ).setAction( 'l' );
+		keyMap.at( i + 3 ).setAction( 'r' ); 
+		keyMap.at( i ).setPlayer( i / 4 );
+		keyMap.at( i + 1 ).setPlayer( i / 4 );
+		keyMap.at( i + 2 ).setPlayer( i / 4 );
+		keyMap.at( i + 3 ).setPlayer( i / 4 );
+		if( debug ) {
+			wcout << L"Set keyMap " << i << L" player to " << i / 4 << endl;
+		}
+	}
 	
 	if( fullscreen && !allowSmallSize ) {
 		windowSize = device->getVideoModeList()->getDesktopResolution();
@@ -498,7 +410,7 @@ GameManager::GameManager() {
 	if( !gui ) {
 		wcerr << L"Error: Cannot get GUI environment" << endl;
 	} else {
-		for( u32 i = 0; i < gui::EGDC_COUNT ; i++ ) {
+		for( uint32_t i = 0; i < gui::EGDC_COUNT ; i++ ) {
 			video::SColor guiSkinColor = gui->getSkin()->getColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ) );
 			guiSkinColor.setAlpha( 255 );
 			gui->getSkin()->setColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ), guiSkinColor );
@@ -624,13 +536,13 @@ GameManager::GameManager() {
 	if( numBots <= numPlayers && numBots > 0 ) {
 		bot.resize( numBots );
 		
-		for( u8 i = 0; i < numBots; i++ ) {
+		for( uint8_t i = 0; i < numBots; i++ ) {
 			bot[ i ].setPlayer( numPlayers - ( i + 1 ) ) ;
 			player[ bot[ i ].getPlayer() ].isHuman = false;
 		}
 	}
 	
-	for( u8 p = 0; p < numPlayers; p++ ) {
+	for( uint8_t p = 0; p < numPlayers; p++ ) {
 		player[p].setColorBasedOnNum( p );
 		player[p].loadImage( driver );
 	}
@@ -640,7 +552,7 @@ GameManager::GameManager() {
 	if( debug && enableJoystick && device->activateJoysticks( joystickInfo ) ) { //activateJoysticks fills joystickInfo with info about each joystick
 		wcout << L"Joystick support is enabled and " << joystickInfo.size() << L" joystick(s) are present." << std::endl;
 		
-		for( u32 joystick = 0; joystick < joystickInfo.size(); ++joystick ) {
+		for( uint32_t joystick = 0; joystick < joystickInfo.size(); ++joystick ) {
 			wcout << L"Joystick " << joystick << L":" << endl;
 			wcout << L"\tName: '" << joystickInfo[joystick].Name.c_str() << L"'" << endl;
 			wcout << L"\tAxes: " << joystickInfo[joystick].Axes << endl;
@@ -683,25 +595,28 @@ Goal GameManager::getGoal() {
 	return goal;
 }
 
-Player* GameManager::getPlayer( u8 p ) {
+MazeManager GameManager::getMazeManager() {
+	return mazeManager;
+}
+
+Player* GameManager::getPlayer( uint8_t p ) {
 	if( p < numPlayers ) {
 		return &player.at( p );
 	} else {
-		wcerr << "getPlayer() error: Request for player (" << static_cast<int>( p ) << ">= numPlayers (" << static_cast<int>( numPlayers ) << ")" << endl;
+		wcerr << "getPlayer() error: Request for player (" << p << ">= numPlayers (" << numPlayers << ")" << endl;
 		return NULL;
 	}
 }
 
 void GameManager::loadFonts() {
-
 	//These were split off into separate functions because they are needed more often than loadFonts()
 	loadTipFont();
 	loadMusicFont();
 	
-	core::dimension2d< u32 > fontDimensions;
-	u32 size = windowSize.Width / 25; //25 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
+	core::dimension2d< uint32_t > fontDimensions;
+	uint32_t size = windowSize.Width / 25; //25 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
 	
-	do {
+	do { //Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
 		loadingFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 		fontDimensions = loadingFont->getDimension( loading.c_str() );
 		size -= 1;
@@ -724,50 +639,11 @@ void GameManager::loadFonts() {
 	} while( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) );
 }
 
-void GameManager::loadFromFile() {
-	loadFromFile( L"default.maz" );
-}
-
-bool GameManager::loadFromFile( boost::filesystem::path src ) {
-	try {
-		if( !exists( src ) ) {
-			wcerr << L"Error: File not found: " << src << endl;
-			return false;
-		} else if( is_directory( src ) ) {
-			wcerr << L"Error: Directory specified, file needed. " << src << endl;
-			return false;
-		}
-		
-		boost::filesystem::wifstream file; //Identical to a standard C++ fstream, except it takes Boost paths
-		file.open( src, ios::in );
-		
-		if( file.is_open() ) {
-			resetThings();
-			file >> randomSeed;
-			file.close();
-			srand( randomSeed );
-			makeRandomLevel();
-			return true;
-		} else {
-			wcerr << L"Cannot open file " << src << endl;
-			return false;
-		}
-	} catch( const boost::filesystem::filesystem_error& e ) {
-		wcerr << e.what() << endl;
-		return false;
-	} catch( exception& e ) {
-		wcerr << e.what() << endl;
-		return false;
-	}
-	
-	return false;
-}
-
 //Like loadTipFont() above, this guesses a good font size, then repeatedly adjusts the size and reloads the font until everything fits.
 void GameManager::loadMusicFont() {
-	u32 maxWidth = ( windowSize.Width / sideDisplaySizeDenominator );
-	u32 size = 0;
-	u32 numerator = 2.5 * maxWidth; //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
+	uint32_t maxWidth = ( windowSize.Width / sideDisplaySizeDenominator );
+	uint32_t size = 0;
+	uint32_t numerator = 2.5 * maxWidth; //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
 	
 	//I felt it looked best if all three (artist, album, and title) had the same font size, so we're picking the longest of the three and basing the font size on its length.
 	if( musicArtist.size() >= musicAlbum.size() && musicArtist.size() > 0 ) {
@@ -788,9 +664,9 @@ void GameManager::loadMusicFont() {
 		size = numerator;
 	}
 	
-	core::dimension2d< u32 > artistDimensions;
-	core::dimension2d< u32 > albumDimensions;
-	core::dimension2d< u32 > titleDimensions;
+	core::dimension2d< uint32_t > artistDimensions;
+	core::dimension2d< uint32_t > albumDimensions;
+	core::dimension2d< uint32_t > titleDimensions;
 	
 	do {
 		musicTagFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
@@ -807,8 +683,8 @@ void GameManager::loadNextSong() {
 	}
 	
 	//Figure out where we are in the music list
-	u32 positionInList = 0;
-	for( u32 i = 0; i < musicList.size(); i++ ) {
+	uint32_t positionInList = 0;
+	for( uint32_t i = 0; i < musicList.size(); i++ ) {
 		if( musicList[i] == currentMusic ) {
 			positionInList = i;
 			break;
@@ -914,7 +790,7 @@ void GameManager::loadProTips() {
 			
 			if( proTipsFile.is_open() ) {
 				wstring line;
-				u16 lineNum = 0;
+				uint16_t lineNum = 0;
 				
 				while( proTipsFile.good() ) {
 					lineNum++;
@@ -947,7 +823,7 @@ void GameManager::loadProTips() {
 
 //Guesses a size that will work for showing pro tips. Keeps adjusting the size and reloading the font until everything fits.
 void GameManager::loadTipFont() {
-	u32 maxWidth = windowSize.Width;
+	uint32_t maxWidth = windowSize.Width;
 	unsigned int size;
 	core::stringw tipIncludingPrefix = proTipPrefix;
 	
@@ -958,7 +834,7 @@ void GameManager::loadTipFont() {
 		size = maxWidth / 10; //10 is also arbitrarily chosen.
 	}
 	
-	core::dimension2d<u32> tipDimensions;
+	core::dimension2d<uint32_t> tipDimensions;
 	
 	do {
 		tipFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
@@ -971,14 +847,14 @@ void GameManager::loadTipFont() {
 void GameManager::makeMusicList() {
 	musicList.clear(); //The music list should be empty anyway, since makeMusicList() only gets called once, but just in case...
 	
-	u8 numMusicDecoders = Mix_GetNumMusicDecoders();
+	uint8_t numMusicDecoders = Mix_GetNumMusicDecoders();
 	
 	if( debug ) {
 		wcout << L"makeMusicList() called" << endl;
-		wcout << L"There are " << static_cast<unsigned int>( numMusicDecoders ) << L" music decoders available. They are:" << endl;
+		wcout << L"There are " << numMusicDecoders << L" music decoders available. They are:" << endl;
 		
-		for( u8 decoder = 0; decoder < numMusicDecoders; decoder++ ) {
-			wcout << static_cast<unsigned int>( decoder ) << L": " << Mix_GetMusicDecoder( decoder ) << endl;
+		for( uint8_t decoder = 0; decoder < numMusicDecoders; decoder++ ) {
+			wcout << decoder << L": " << Mix_GetMusicDecoder( decoder ) << endl;
 		}
 	}
 	
@@ -1031,262 +907,48 @@ void GameManager::makeMusicList() {
 	}
 }
 
-//Does everything involved in making the maze, calls other functions as needed.
-void GameManager::makeRandomLevel() {
-	drawAll();
-	
-	srand( randomSeed ); //randomSeed is set either by resetThings() or by loadFromFile()
-	u8 tempCols = rand() % 28 + 2;
-	u8 tempRows = tempCols + ( rand() % 5 );
-	resizeMaze( tempCols, tempRows );
-	
-	for( u8 x = 0; x < cols; x++ ) {
-		for( u8 y = 0; y < rows; y++ ) {
-			maze[x][y].setTop( '1' );
-			maze[x][y].setLeft( '1' );
-			maze[x][y].setRight( '0' );
-			maze[x][y].setBottom( '0' );
-			maze[x][y].visited = false;
-		}
-	}
-	
-	for( u8 p = 0; p < numPlayers; p++ ) {
-		playerStart[p].reset();
-	}
-	
-	//do {
-	//player.setX(rand() % cols);
-	//player.setY(rand() % rows);
-	goal.setX( rand() % cols );
-	goal.setY( rand() % rows );
-	//} while (player.getX() == goal.getX() && player.getY() == goal.getY());
-	
-	numLocks = ( rand() % 10 ) % cols;
-	//numLocks = rand() % ( cols * rows ); //Uncomment this for a crazy number of keys!
-	
-	recurseRandom( goal.getX(), goal.getY(), 0, 0 ); //Start recursion from the goal; for some reason that makes the mazes harder than if we started recursion from the player's starting point.
-	
-	//Add walls at maze borders
-	for( u8 x = 0; x < cols; x++ ) {
-		maze[x][0].setTop( '1' );
-		maze[x][rows-1].setBottom( '1' );
-	}
-	
-	for( u8 y = 0; y < rows; y++ ) {
-		maze[0][y].setLeft( '1' );
-		maze[cols-1][y].setRight( '1' );
-	}
-	
-	for( u8 x = 1; x < cols; x++ ) {
-		for( u8 y = 0; y < rows; y++ ) {
-			maze[x-1][y].setRight( maze[x][y].getLeft() );
-		}
-	}
-	
-	for( u8 x = 0; x < cols; x++ ) {
-		for( u8 y = 1; y < rows; y++ ) {
-			maze[x][y-1].setBottom( maze[x][y].getTop() );
-		}
-	}
-	
-	//Find all dead ends. I'm sure it would be more efficient to do this during maze generation rather than going back through afterward, but I can't be bothered with that now.
-	vector<u8> deadEndsX;
-	vector<u8> deadEndsY;
-	
-	for( u8 x = 0; x < cols; x++ ) {
-		for( u8 y = 0; y < rows; y++ ) {
-			if( maze[x][y].isDeadEnd() ) {
-				deadEndsX.push_back( x );
-				deadEndsY.push_back( y );
-			}
-		}
-	}
-	
-	//Remove player starts from list of dead ends
-	for( u8 p = 0; p < numPlayers; p++ ) {
-		for( u32 i = 0; i < deadEndsX.size(); i++ ) {
-			if( playerStart[p].getX() == deadEndsX[i] && playerStart[p].getY() == deadEndsY[i] ) {
-				deadEndsX.erase( deadEndsX.begin() + i );
-				deadEndsY.erase( deadEndsY.begin() + i );
-			}
-		}
-	}
-	
-	//Remove goal from list of dead ends
-	for( u32 i = 0; i < deadEndsX.size(); i++ ) {
-		if( goal.getX() == deadEndsX[i] && goal.getY() == deadEndsY[i] ) {
-			deadEndsX.erase( deadEndsX.begin() + i );
-			deadEndsY.erase( deadEndsY.begin() + i );
-		}
-	}
-	
-	if( numLocks > deadEndsX.size() ) {
-		numLocks = deadEndsX.size();
-	}
-	
-	u8 numKeys = numLocks;
-	
-	//Place keys in dead ends
-	vector<u8> keyPlaceX;
-	vector<u8> keyPlaceY;
-	
-	for( u8 k = 0; k < numKeys; k++ ) {
-		vector<u8> chosenPlaces;
-		
-		if( deadEndsX.size() == 0 ) {
-			deadEndsX.push_back( playerStart[0].getX() );
-			deadEndsY.push_back( playerStart[0].getY() );
-		}
-		//Pick one of the dead ends randomly.
-		u8 chosen = rand() % deadEndsX.size();
-		
-		//Finally, create a key and put it there.
-		Collectable temp;
-		temp.setX( deadEndsX.at( chosen ) );
-		temp.setY( deadEndsY.at( chosen ) );
-		temp.setType( COLLECTABLE_KEY );
-		temp.loadImage( driver );
-		stuff.push_back( temp );
-		
-		//Remove chosen from the list of dead ends so no other keys go there
-		deadEndsX.erase( deadEndsX.begin() + chosen );
-		deadEndsY.erase( deadEndsY.begin() + chosen );
-	}
-	
-	for( u8 p = 0; p < numPlayers; p++ ) {
-		player[p].setPos( playerStart[p].getX(), playerStart[p].getY() );
-	}
-	
-	if( numLocks > 0 ) {
-		//Place locks
-		//Place first lock at the goal
-		if( maze[goal.getX()][goal.getY()].getTop() == '0' ) {
-			maze[goal.getX()][goal.getY()].setTop( 'l' );
-		} else if( maze[goal.getX()][goal.getY()].getLeft() == '0' ) {
-			maze[goal.getX()][goal.getY()].setLeft( 'l' );
-		} else if( maze[goal.getX()][goal.getY() + 1].getTop() == '0' ) {
-			maze[goal.getX()][goal.getY() + 1].setTop( 'l' );
-		} else if( maze[goal.getX() + 1][goal.getY()].getLeft() == '0' ) {
-			maze[goal.getX() + 1][goal.getY()].setLeft( 'l' );
-		}
-		
-		u8 numLocksPlaced = 1;
-		
-		while( device->run() != false && numLocksPlaced < numLocks && timer->getTime() < timeStartedLoading + loadingDelay ) {
-			u8 tempX = rand() % cols;
-			u8 tempY = rand() % rows;
-			
-			if( maze[tempX][tempY].getTop() == '0' ) {
-				maze[tempX][tempY].setTop( 'l' );
-				
-				if( canGetToAllCollectables( playerStart[0].getX(), playerStart[0].getY() ) ) {
-					numLocksPlaced += 1;
-					if( debug ) {
-						wcout << L"Placed lock " << static_cast<unsigned int>( numLocksPlaced ) << L" at " << static_cast<unsigned int>( tempX ) << L"x" << static_cast<unsigned int>( tempY ) << endl;
-					}
-				} else {
-					maze[tempX][tempY].setTop( '0' );
-				}
-			} else if( maze[tempX][tempY].getLeft() == '0' ) {
-				maze[tempX][tempY].setLeft( 'l' );
-				
-				if( canGetToAllCollectables( playerStart[0].getX(), playerStart[0].getY() ) ) {
-					numLocksPlaced += 1;
-					if( debug ) {
-						wcout << L"Placed lock " << static_cast<unsigned int>( numLocksPlaced ) << L" at " << static_cast<unsigned int>( tempX ) << L"x" << static_cast<unsigned int>( tempY ) << endl;
-					}
-				} else {
-					maze[tempX][tempY].setLeft( '0' );
-				}
-			}
-		}
-		
-		timer->stop();
-		timer->setTime( 0 );
-		if( debug ) {
-			wcout << L"numLocksPlaced: " << static_cast<unsigned int>( numLocksPlaced ) << L"\tnumLocks: " << static_cast<unsigned int>( numLocks ) << endl;
-		}
-		
-		if( numLocksPlaced < numLocks ) {
-			int keysToRemove = numLocks - numLocksPlaced;
-			
-			for( u32 i = 0; ( i < stuff.size() && keysToRemove > 0 ); i++ ) {
-				if( debug ) {
-					wcout << L"keysToRemove: " << static_cast<unsigned int>( keysToRemove ) << endl;
-				}
-				
-				if( stuff[i].getType() == COLLECTABLE_KEY ) {
-					stuff.erase( stuff.begin() + i );
-					i = 0;
-					keysToRemove -= 1;
-				}
-			}
-		}
-		
-		numKeys = numLocks = numLocksPlaced;
-	}
-	
-	for( u8 x = 0; x < cols; x++ ) {
-		for( u8 y = 0; y < rows; y++ ) {
-			maze[x][y].visited = false;
-		}
-	}
-	
-	for( u8 p = 0; p < numPlayers; p++ ) {
-		maze[ playerStart[ p ].getX()][ playerStart[ p ].getY()].visited = true;
-		maze[ playerStart[ p ].getX()][ playerStart[ p ].getY()].setVisitorColor( player[ p ].getColorTwo() );
-	}
-	
-	//Set up bots;
-	if( numBots > 0 ) {
-		for( u8 i = 0; i < numBots; i++ ) {
-			bot[ i ].setup( maze, cols, rows, this );
-		}
-	}
-}
-
-void GameManager::movePlayerOnX( u8 p, s8 direction ) {
+void GameManager::movePlayerOnX( uint8_t p, int8_t direction ) {
 	if( numPlayers > p ) {
 		if( direction < 0 ) {
-			if( player[ p ].getX() > 0 && maze[ player[ p ].getX()][ player[ p ].getY()].getLeft() == '0' ) {
+			if( player[ p ].getX() > 0 && mazeManager.maze[ player[ p ].getX()][ player[ p ].getY()].getLeft() == 'n' ) {
 				player[ p ].moveX( -1 );
 			}
 		} else {
-			if( player[ p ].getX() < ( cols - 1 ) && maze[ player[ p ].getX() + 1 ][ player[ p ].getY()].getLeft() == '0' ) {
+			if( player[ p ].getX() < ( mazeManager.cols - 1 ) && mazeManager.maze[ player[ p ].getX() + 1 ][ player[ p ].getY()].getLeft() == 'n' ) {
 				player[ p ].moveX( 1 );
 			}
 		}
 		
 		network.sendPlayerPos( p, player[p].getX(), player[p].getY() );
-		maze[ player[ p ].getX()][ player[ p ].getY()].visited = true;
+		mazeManager.maze[ player[ p ].getX()][ player[ p ].getY()].visited = true;
 		
 		if( player[ p ].stepsTaken % 2 == 0 ) {
-			maze[ player[ p ].getX()][ player[ p ].getY()].setVisitorColor( player[ p ].getColorTwo() );
+			mazeManager.maze[ player[ p ].getX()][ player[ p ].getY()].setVisitorColor( player[ p ].getColorTwo() );
 		} else {
-			maze[ player[ p ].getX()][ player[ p ].getY()].setVisitorColor( player[ p ].getColorOne() );
+			mazeManager.maze[ player[ p ].getX()][ player[ p ].getY()].setVisitorColor( player[ p ].getColorOne() );
 		}
 	}
 }
 
-void GameManager::movePlayerOnY( u8 p, s8 direction ) {
+void GameManager::movePlayerOnY( uint8_t p, int8_t direction ) {
 	if( numPlayers > p ) {
 		if( direction < 0 ) {
-			if( player[p].getY() > 0 && maze[player[p].getX()][player[p].getY()].getTop() == '0' ) {
+			if( player[p].getY() > 0 && mazeManager.maze[player[p].getX()][player[p].getY()].getTop() == 'n' ) {
 				player[p].moveY( -1 );
 			}
 		} else {
-			if( player[p].getY() < ( rows - 1 ) && maze[player[p].getX()][player[p].getY() + 1].getTop() == '0' ) {
+			if( player[p].getY() < ( mazeManager.rows - 1 ) && mazeManager.maze[player[p].getX()][player[p].getY() + 1].getTop() == 'n' ) {
 				player[p].moveY( 1 );
 			}
 		}
 		
 		network.sendPlayerPos( p, player[p].getX(), player[p].getY() );
-		maze[ player[ p ].getX()][ player[ p ].getY()].visited = true;
+		mazeManager.maze[ player[ p ].getX()][ player[ p ].getY()].visited = true;
 		
 		if( player[ p ].stepsTaken % 2 == 0 ) {
-			maze[ player[ p ].getX()][ player[ p ].getY()].setVisitorColor( player[ p ].getColorTwo() );
+			mazeManager.maze[ player[ p ].getX()][ player[ p ].getY()].setVisitorColor( player[ p ].getColorTwo() );
 		} else {
-			maze[ player[ p ].getX()][ player[ p ].getY()].setVisitorColor( player[ p ].getColorOne() );
+			mazeManager.maze[ player[ p ].getX()][ player[ p ].getY()].setVisitorColor( player[ p ].getColorOne() );
 		}
 	}
 }
@@ -1467,25 +1129,25 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			switch( event.MouseInput.Event ) {
 				case EMIE_LMOUSE_PRESSED_DOWN: {
 					if( showingMenu ) {
-						if( exitGame.isWithin( event.MouseInput.X, event.MouseInput.Y ) ) {
+						if( exitGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
 							device->closeDevice();
 							donePlaying = true;
 							return true;
-						} else if( loadMaze.isWithin( event.MouseInput.X, event.MouseInput.Y ) ) {
+						} else if( loadMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
 							fileChooser = gui->addFileOpenDialog( L"Select a Maze", true, 0, -1 );
 							//wcout << L"Directory: " << fileChooser->getDirectoryName().c_str() << endl;
 							//loadFromFile();
 							return true;
-						} else if( saveMaze.isWithin( event.MouseInput.X, event.MouseInput.Y ) ) {
-							saveToFile();
+						} else if( saveMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
+							mazeManager.saveToFile();
 							return true;
-						} else if( newGame.isWithin( event.MouseInput.X, event.MouseInput.Y ) ) {
+						} else if( newGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
 							//randomSeed = time( NULL );
 							resetThings();
-							makeRandomLevel();
+							mazeManager.makeRandomLevel();
 							
 							return true;
-						} else if( backToGame.isWithin( event.MouseInput.X, event.MouseInput.Y ) ) {
+						} else if( backToGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
 							showingMenu = false;
 							return true;
 						}
@@ -1583,7 +1245,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 		break;
 		case EET_JOYSTICK_INPUT_EVENT: {
 			if( event.JoystickEvent.Joystick == joystickChosen ) {
-				core::array<s16> verticalAxes;
+				core::array<int16_t> verticalAxes;
 				verticalAxes.push_back( SEvent::SJoystickEvent::AXIS_Y );
 				
 				bool joystickMovedUp = false;
@@ -1591,8 +1253,8 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				bool joystickMovedRight = false;
 				bool joystickMovedLeft = false;
 				
-				for( u32 i = 0; i < verticalAxes.size(); i++ ) {
-					if( event.JoystickEvent.Axis[i] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
+				for( uint32_t i = 0; i < verticalAxes.size(); i++ ) {
+					if( event.JoystickEvent.Axis[i] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by int16_t's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
 						if( debug ) {
 							wcout << L"Axis value: " << event.JoystickEvent.Axis[i] << endl;
 						}
@@ -1629,7 +1291,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						wcout << L"Folder: " << core::stringw( fileChooser->getDirectoryName() ).c_str() << L"\tFile: " << core::stringw( fileChooser->getFileName() ).c_str() << endl;
 					}
 					
-					loadFromFile( fileChooser->getFileName() );
+					mazeManager.loadFromFile( fileChooser->getFileName() );
 					return true;
 					break;
 				}
@@ -1659,7 +1321,7 @@ void GameManager::readPrefs() {
 	bitsPerPixel = 16;
 	vsync = true;
 	driverType = video::EDT_OPENGL;
-	windowSize = core::dimension2d< u32 >( 640, 480 );
+	windowSize = core::dimension2d< uint32_t >( 640, 480 );
 	allowSmallSize = false;
 	playMusic = true;
 	enableJoystick = false;
@@ -1686,7 +1348,7 @@ void GameManager::readPrefs() {
 		
 		if( prefsFile.is_open() ) {
 			wstring line;
-			u16 lineNum = 0;
+			uint16_t lineNum = 0;
 			
 			while( prefsFile.good() ) {
 				lineNum++;
@@ -1702,21 +1364,21 @@ void GameManager::readPrefs() {
 					
 					if( preference == L"volume:" ) {
 						try {
-							u16 choiceAsInt = boost::lexical_cast< u16 >( choice ); //Used u16 here because boost::lexical_cast refuses to convert from a wstring to a u8. u8 is technically an unsigned char, but we're using that type as an 8-bit unsigned integer
+							uint16_t choiceAsInt = boost::lexical_cast< uint16_t >( choice ); //Used uint16_t here because boost::lexical_cast refuses to convert from a wstring to a uint8_t. uint8_t is technically an unsigned char, but we're using that type as an 8-bit unsigned integer
 							
 							if( choiceAsInt <= 100 && choiceAsInt >= 0 ) {
 								musicVolume = choiceAsInt;
 								Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
 								if( debug ) {
-									wcout << L"Volume should be " << static_cast<int>( choiceAsInt ) << "%" << endl;
+									wcout << L"Volume should be " << choiceAsInt << "%" << endl;
 									wcout << L"Volume is really " << 100 * Mix_VolumeMusic( -1 ) / MIX_MAX_VOLUME << "%" << endl;
 								}
 							} else if( choiceAsInt < 0 ) {
-								wcerr << L"Warning: Volume less than zero: " << static_cast<unsigned int>( choiceAsInt ) << endl;
+								wcerr << L"Warning: Volume less than zero: " << choiceAsInt << endl;
 								Mix_VolumeMusic( 0 );
 								musicVolume = 0;
 							} else {
-								wcerr << L"Warning: Volume greater than 100%: " << static_cast<unsigned int>( choiceAsInt ) << endl;
+								wcerr << L"Warning: Volume greater than 100%: " << choiceAsInt << endl;
 								Mix_VolumeMusic( MIX_MAX_VOLUME );
 								musicVolume = 100;
 							}
@@ -1725,15 +1387,15 @@ void GameManager::readPrefs() {
 						}
 					} else if( preference == L"number of bots:" ) {
 						try {
-							u16 choiceAsInt = boost::lexical_cast< u16 >( choice ); //Used u16 here because boost::lexical_cast refuses to convert from a wstring to a u8. u8 is technically an unsigned char, but we're using that type as an 8-bit unsigned integer
+							uint16_t choiceAsInt = boost::lexical_cast< uint16_t >( choice ); //Used uint16_t here because boost::lexical_cast refuses to convert from a wstring to a uint8_t. uint8_t is technically an unsigned char, but we're using that type as an 8-bit unsigned integer
 							
 							if( choiceAsInt <= numPlayers ) {
 								numBots = choiceAsInt;
 								if( debug ) {
-									wcout << L"Number of bots is " << static_cast<int>( choiceAsInt ) << endl;
+									wcout << L"Number of bots is " << choiceAsInt << endl;
 								}
 							} else {
-								wcerr << L"Warning: Number of bots not less than or equal to number of players (number of players may not have been read yet): " << static_cast<unsigned int>( choiceAsInt ) << endl;
+								wcerr << L"Warning: Number of bots not less than or equal to number of players (number of players may not have been read yet): " << choiceAsInt << endl;
 								numBots = choiceAsInt;
 							}
 						} catch( boost::bad_lexical_cast error ) {
@@ -1788,7 +1450,7 @@ void GameManager::readPrefs() {
 						}
 					} else if( preference == L"bits per pixel:" ) {
 						try {
-							u32 choiceAsInt = boost::lexical_cast<u32>( choice );
+							uint32_t choiceAsInt = boost::lexical_cast<uint32_t>( choice );
 							
 							if( choiceAsInt <= 32 ) {
 								bitsPerPixel = choiceAsInt;
@@ -1875,22 +1537,22 @@ void GameManager::readPrefs() {
 						
 					} else if( preference == L"number of players:" ) {
 						try {
-							u16 choiceAsInt = boost::lexical_cast<u16>( choice ); //Used u16 here because boost::lexical_cast refuses to convert from a wstring to a u8. u8 is technically an unsigned char, but we're using that type as an 8-bit unsigned integer
+							uint16_t choiceAsInt = boost::lexical_cast<uint16_t>( choice ); //Used uint16_t here because boost::lexical_cast refuses to convert from a wstring to a uint8_t. uint8_t is technically an unsigned char, but we're using that type as an 8-bit unsigned integer
 							
-							if( choiceAsInt > UCHAR_MAX ) { //The maximum number of players is whatever a u8 can hold, presumably 255 (the 8 is the minimum number of bits, it may not be the true number).
+							if( choiceAsInt > UCHAR_MAX ) { //The maximum number of players is whatever a uint8_t can hold, presumably 255 (the 8 is the minimum number of bits, it may not be the true number).
 								choiceAsInt = UCHAR_MAX;
 							}
 							
 							if( choiceAsInt <= 4 && choiceAsInt > 0 ) {
 								numPlayers = choiceAsInt;
 								if( debug ) {
-									wcout << L"Number of players is " << static_cast<int>( choiceAsInt ) << endl;
+									wcout << L"Number of players is " << choiceAsInt << endl;
 								}
 							} else if( choiceAsInt > 4 ) {
-								wcerr << L"Warning: Number of players not less than or equal to 4: " << static_cast<unsigned int>( choiceAsInt ) << endl;
+								wcerr << L"Warning: Number of players not less than or equal to 4: " << choiceAsInt << endl;
 								numPlayers = choiceAsInt;
 							} else {
-								wcerr << L"Warning: Number of players is zero or not a number: " << static_cast<unsigned int>( choiceAsInt ) << L". Setting number of players to default." << endl;
+								wcerr << L"Warning: Number of players is zero or not a number: " << choiceAsInt << L". Setting number of players to default." << endl;
 							}
 						} catch( boost::bad_lexical_cast error ) {
 							wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
@@ -1904,16 +1566,16 @@ void GameManager::readPrefs() {
 							wcout << L"Window size: " << width << L"x" << height << endl;
 						}
 						
-						u32 widthAsInt = boost::lexical_cast<u32>( width );
-						u32 heightAsInt = boost::lexical_cast<u32>( height );
+						uint32_t widthAsInt = boost::lexical_cast<uint32_t>( width );
+						uint32_t heightAsInt = boost::lexical_cast<uint32_t>( height );
 						
 						if( widthAsInt < 320 || heightAsInt < 240 ) {
 							wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << endl;
 						} else if( widthAsInt == 320 && heightAsInt == 240 ) {
 							wcout << L"Rock on, CGA graphics. Rock on." << endl;
-							windowSize = core::dimension2d<u32>( widthAsInt, heightAsInt );
+							windowSize = core::dimension2d<uint32_t>( widthAsInt, heightAsInt );
 						} else {
-							windowSize = core::dimension2d<u32>( widthAsInt, heightAsInt );
+							windowSize = core::dimension2d<uint32_t>( widthAsInt, heightAsInt );
 						}
 						
 					} else if( preference == L"play music:" ) {
@@ -1937,7 +1599,7 @@ void GameManager::readPrefs() {
 						}
 						
 						try {
-							u16 choiceAsInt = boost::lexical_cast<u16>( choice );
+							uint16_t choiceAsInt = boost::lexical_cast<uint16_t>( choice );
 							network.setPort( choiceAsInt );
 						} catch( boost::bad_lexical_cast error ) {
 							wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
@@ -1961,7 +1623,7 @@ void GameManager::readPrefs() {
 							wcout << L"Joystick number: " << choice << endl;
 						}
 						try {
-							u32 choiceAsInt = boost::lexical_cast<u32>( choice );
+							uint32_t choiceAsInt = boost::lexical_cast<uint32_t>( choice );
 							joystickChosen = choiceAsInt;
 						} catch (boost::bad_lexical_cast error ) {
 							wcerr << L"Error reading joystick number (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
@@ -2002,80 +1664,6 @@ void GameManager::readPrefs() {
 	}
 }
 
-//Generates the maze recursively
-void GameManager::recurseRandom( u8 x, u8 y, u16 depth, u16 numSoFar ) {
-	device->run();
-	drawAll();
-	
-	maze[x][y].visited = true;
-	maze[x][y].id = numSoFar;
-	
-	for( u8 p = 0; p < numPlayers; p++ ) {
-		if( depth >= playerStart[p].distanceFromExit ) {
-			playerStart[p].setPos( x, y );
-			playerStart[p].distanceFromExit = depth;
-		}
-	}
-	
-	bool keepGoing = true;
-	
-	while( keepGoing ) {
-		numSoFar += 1;
-		
-		switch( rand() % 4 ) { //4 = number of directions (up, down, left, right)
-			case 0: //Left
-			
-				if( x > 0 && maze[x-1][y].visited == false ) {
-					maze[x][y].setLeft( '0' );
-					
-					recurseRandom( x - 1, y, depth + 1, numSoFar );
-				}
-				
-				break;
-				
-			case 1: //Right
-			
-				if( x < cols - 1 && maze[x+1][y].visited == false ) {
-					maze[x+1][y].setLeft( '0' );
-					
-					recurseRandom( x + 1, y, depth + 1, numSoFar );
-				}
-				
-				break;
-				
-			case 2: //Up
-			
-				if( y > 0 && maze[x][y-1].visited == false ) {
-					maze[x][y].setTop( '0' );
-					
-					recurseRandom( x, y - 1, depth + 1, numSoFar );
-				}
-				
-				break;
-				
-			case 3: //Down
-			
-				if( y < rows - 1 && maze[x][y+1].visited == false ) {
-					maze[x][y+1].setTop( '0' );
-					
-					recurseRandom( x, y + 1, depth + 1, numSoFar );
-				}
-				
-				break;
-		}
-		
-		//If we've reached a dead end, don't keep going. Otherwise do.
-		keepGoing = false;
-		if(( x > 0 && maze[x-1][y].visited == false )
-				|| ( x < cols - 1 && maze[x+1][y].visited == false )
-				|| ( y > 0 && maze[x][y-1].visited == false )
-				|| ( y < rows - 1 && maze[x][y+1].visited == false )
-		  ) {
-			keepGoing = true;
-		}
-	}
-}
-
 //Resets miscellaneous stuff between mazes
 void GameManager::resetThings() {
 	randomSeed = time( NULL );
@@ -2088,18 +1676,18 @@ void GameManager::resetThings() {
 	numLocks = 0;
 	donePlaying = false;
 	
-	for( u8 p = 0; p < numPlayers; p++ ) {
+	for( uint8_t p = 0; p < numPlayers; p++ ) {
 		playerStart[ p ].reset();
 		player[ p ].stepsTaken = 0;
 	}
 	
-	for( u32 i = 0; i < stuff.size(); i++ ) {
+	for( uint32_t i = 0; i < stuff.size(); i++ ) {
 		stuff[ i ].loadImage( driver );
 	}
 	
-	for( u8 x = 0; x < cols; x++ ) {
-		for( u8 y = 0; y < rows; y++ ) {
-			maze[ x ][ y ].visited = false;
+	for( uint8_t x = 0; x < mazeManager.cols; x++ ) {
+		for( uint8_t y = 0; y < mazeManager.rows; y++ ) {
+			mazeManager.maze[ x ][ y ].visited = false;
 		}
 	}
 	
@@ -2115,61 +1703,12 @@ void GameManager::resetThings() {
 	loadTipFont();
 }
 
-//Creates a new maze of the desired size, copies from old maze to new, then deletes old maze
-void GameManager::resizeMaze( u8 newCols, u8 newRows ) {
-	u8 oldCols = cols;
-	u8 oldRows = rows;
-	
-	if( debug && ( newCols < oldCols || newRows < oldRows ) ) {
-		wcerr << L"Warning: New maze size smaller than old in some dimension. newCols: " << static_cast<unsigned int>( newCols ) << L" oldCols: " << static_cast<unsigned int>( oldCols ) << L" newRows: " << static_cast<unsigned int>( newRows ) << L" oldRows: " << static_cast<unsigned int>( oldRows ) << endl;
-	}
-	
-	MazeCell** temp = new MazeCell *[newCols];
-	
-	for( int i = 0 ; i < newCols ; i++ ) {
-		temp[i] = new MazeCell[newRows];
-	}
-		
-	u8 colsToCopy;
-	
-	if( newCols > oldCols ) {
-		colsToCopy = oldCols;
-	} else {
-		colsToCopy = newCols;
-	}
-	
-	u8 rowsToCopy;
-	
-	if( newRows > oldRows ) {
-		rowsToCopy = oldRows;
-	} else {
-		rowsToCopy = newRows;
-	}
-	
-	for( u8 x = 0; x < colsToCopy; x++ ) {
-		for( u8 y = 0; y < rowsToCopy; y++ ) {
-			temp[x][y] = maze[x][y];
-		}
-	}
-	
-	for( u8 i = 0 ; i < oldCols ; i++ ) {
-		delete [] maze[ i ];
-	}
-		
-	delete [] maze ;
-	
-	cols = newCols;
-	rows = newRows;
-	
-	maze = temp;
-}
-
 //Should only be called by main() in main.cpp
-s32 GameManager::run() {
+int GameManager::run() {
  
 	while( device->run() && !donePlaying ) {
 		resetThings();
-		makeRandomLevel();
+		mazeManager.makeRandomLevel();
 		
 		showingMenu = false; //Temporary workaround until I figure out where in makeRandomLevel() this is being overwritten
 		
@@ -2179,7 +1718,7 @@ s32 GameManager::run() {
 				showingLoadingScreen = false;
 			}
 			
-			u32 fps = driver->getFPS();
+			uint32_t fps = driver->getFPS();
 			if( debug ) {
 				//wcout << L"FPS: " << fps << endl;
 			}
@@ -2202,12 +1741,12 @@ s32 GameManager::run() {
 			}
 			
 			if(( !showingLoadingScreen && device->isWindowActive() ) || debug ) {
-				cellWidth = ( viewportSize.Width ) / cols;
-				cellHeight = ( viewportSize.Height ) / rows;
+				cellWidth = ( viewportSize.Width ) / mazeManager.cols;
+				cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 				
 				//It's the bots' turn to move now.
 				if( !( showingMenu || showingLoadingScreen ) && numBots > 0 ) {
-					for( u8 i = 0; i < numBots; i++ ) {
+					for( uint8_t i = 0; i < numBots; i++ ) {
 						if( debug || allHumansAtGoal() || bot[ i ].lastTimeMoved < timer->getRealTime() - bot[ i ].movementDelay ) {
 							bot[ i ].move();
 						}
@@ -2218,8 +1757,8 @@ s32 GameManager::run() {
 				drawAll();
 			
 				//Check if any of the players have landed on a collectable item
-				for( u8 p = 0; p < numPlayers; p++ ) {
-					for( u32 s = 0; s < stuff.size(); s++ ) {
+				for( uint8_t p = 0; p < numPlayers; p++ ) {
+					for( uint32_t s = 0; s < stuff.size(); s++ ) {
 						if( player[p].getX() == stuff[s].getX() && player[p].getY() == stuff[s].getY() ) {
 							switch( stuff[s].getType() ) {
 								case COLLECTABLE_KEY: {
@@ -2227,13 +1766,13 @@ s32 GameManager::run() {
 									stuff.erase( stuff.begin() + s );
 									
 									if( numKeysFound >= numLocks ) {
-										for( u8 c = 0; c < cols; c++ ) {
-											for( u8 r = 0; r < rows; r++ ) {
-												maze[c][r].removeLocks();
+										for( uint8_t c = 0; c < mazeManager.cols; c++ ) {
+											for( uint8_t r = 0; r < mazeManager.rows; r++ ) {
+												mazeManager.maze[c][r].removeLocks();
 											}
 										}
 									
-										for( u8 b = 0; b < numBots; b++ ) {
+										for( uint8_t b = 0; b < numBots; b++ ) {
 											bot[ b ].allKeysFound();
 										}
 									}
@@ -2248,11 +1787,11 @@ s32 GameManager::run() {
 				}
 			
 			
-				for( u8 p = 0; p < numPlayers; p++ ) {
+				for( uint8_t p = 0; p < numPlayers; p++ ) {
 					if(( player[p].getX() == goal.getX() ) && player[p].getY() == goal.getY() ) { //Make a list of who finished in what order
 						bool alreadyFinished = false; //Indicates whether the player is already on the winners list
 						
-						for( u32 i = 0; i < winners.size() && !alreadyFinished; i++ ) {
+						for( uint32_t i = 0; i < winners.size() && !alreadyFinished; i++ ) {
 							if( p == winners.at( i ) ) {
 								alreadyFinished = true;
 							}
@@ -2285,7 +1824,7 @@ s32 GameManager::run() {
 						if( debug ) {
 							std::wcout << L"New connections exist." << std::endl;
 						}
-						network.sendMaze( maze, cols, rows );
+						network.sendMaze( mazeManager.maze, mazeManager.cols, mazeManager.rows );
 						network.sendGoal( goal );
 						network.sendPlayerStarts( playerStart );
 						network.sendU8( numKeysFound, L"NUMKEYSFOUND" );
@@ -2318,7 +1857,7 @@ s32 GameManager::run() {
 				wcout << L"On to the next level!" << endl;
 				wcout << L"Winners:";
 				
-				for( u32 i = 0; i < winners.size(); i++ ) {
+				for( uint32_t i = 0; i < winners.size(); i++ ) {
 					wcout << L" " << winners.at( i );
 				}
 				
@@ -2331,47 +1870,8 @@ s32 GameManager::run() {
 	return 0;
 }
 
-void GameManager::saveToFile() {
-	saveToFile( L"default.maz" );
-}
-
-bool GameManager::saveToFile( boost::filesystem::path dest ) {
-	try {
-		if( is_directory( dest ) ) {
-			wcerr << L"Error: Directory specified, file needed. " << dest << endl;
-			return false;
-		}
-		
-		boost::filesystem::wofstream file; //Identical to a standard C++ wofstream, except it takes Boost paths
-		file.open( dest, ios::out );
-		
-		if( file.is_open() ) {
-			file << randomSeed;
-			irr::core::stringw message( L"This maze has been saved to the file " );
-			message += stringConverter.convert( dest.wstring() );
-			gui->addMessageBox( L"Maze saved", message.c_str() );
-			file.close();
-		} else {
-			irr::core::stringw message( L"Cannot save to file " );
-			message += stringConverter.convert( dest.wstring() );
-			wcerr << message.c_str() << endl;
-			gui->addMessageBox( L"Maze NOT saved", message.c_str() );
-		}
-		
-		return true;
-	} catch( const boost::filesystem::filesystem_error& e ) {
-		wcerr << e.what() << endl;
-		return false;
-	} catch( exception& e ) {
-		wcerr << e.what() << endl;
-		return false;
-	}
-	
-	return false;
-}
-
 void GameManager::setupBackground() {
-	u8 availableBackgrounds = 1; //The number of different background animations to choose from
+	uint8_t availableBackgrounds = 1; //The number of different background animations to choose from
 	
 	backgroundChosen = rand() % availableBackgrounds;
 	if( debug ) {
@@ -2386,7 +1886,7 @@ void GameManager::setupBackground() {
 			scene::IParticleSystemSceneNode* ps = bgscene->addParticleSystemSceneNode( false );
 			
 			scene::IParticleEmitter* em = ps->createBoxEmitter(
-											  camera->getViewFrustum()->getBoundingBox(), //core::aabbox3d<f32>(-7,-7,-7,7,7,7), // emitter size
+											  camera->getViewFrustum()->getBoundingBox(), //core::aabbox3d< float >(-7,-7,-7,7,7,7), // emitter size
 											  core::vector3df( 0.0f, 0.0f, -0.1f ), // initial direction
 											  100, 500,                            // Min & max emit rate
 											  CYAN,       // darkest color
@@ -2410,7 +1910,7 @@ void GameManager::setupBackground() {
 			//ps->setMaterialTexture( 0, driver->getTexture( "star.png" ) );
 			ps->setMaterialType( video::EMT_TRANSPARENT_ALPHA_CHANNEL );
 			
-			video::IImage* pixelImage = driver->createImage( video::ECF_A8R8G8B8, core::dimension2d<u32>( 1, 1 ) );
+			video::IImage* pixelImage = driver->createImage( video::ECF_A8R8G8B8, core::dimension2d<uint32_t>( 1, 1 ) );
 			//pixelImage->fill( WHITE );
 			pixelImage->setPixel( 0, 0, WHITE, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
 			video::ITexture* pixelTexture = driver->addTexture( "pixel", pixelImage );

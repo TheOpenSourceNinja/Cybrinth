@@ -13,30 +13,30 @@
 #define MENUOPTION_H
 
 #include <irrlicht.h>
+#include <stdint.h>
 
-using namespace irr;
 using namespace std;
 
 class MenuOption {
 	public:
 		MenuOption();
 		virtual ~MenuOption();
-		u32 getX();
-		void setX( u32 val );
-		u32 getY();
-		void setY( u32 val );
-		void setFont( gui::IGUIFont* newFont );
-		void draw( video::IVideoDriver* driver );
-		bool isWithin( core::position2d<u32> test );
-		bool isWithin( u32 testX, u32 testY );
-		void setText( core::stringw newText );
+		uint32_t getX();
+		void setX( uint32_t val );
+		uint32_t getY();
+		void setY( uint32_t val );
+		void setFont( irr::gui::IGUIFont* newFont );
+		void draw( irr::video::IVideoDriver* driver );
+		bool contains( irr::core::position2d<uint32_t> test );
+		bool contains( uint32_t testX, uint32_t testY );
+		void setText( irr::core::stringw newText );
 	protected:
 	private:
-		u32 x;
-		u32 y;
-		core::dimension2d<u32> dimension;
-		gui::IGUIFont* font;
-		core::stringw text;
+		uint32_t x;
+		uint32_t y;
+		irr::core::dimension2d<uint32_t> dimension;
+		irr::gui::IGUIFont* font;
+		irr::core::stringw text;
 		void setDimension();
 };
 

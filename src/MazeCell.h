@@ -13,8 +13,7 @@
 #define MAZECELL_H
 
 #include <irrlicht.h>
-
-using namespace irr;
+#include <stdint.h>
 
 class MazeCell {
 	public:
@@ -30,19 +29,20 @@ class MazeCell {
 		void setRight( char val );
 		void removeLocks();
 		bool visited; //Used by the maze generation algorithm to ensure there are no loops, by canGetTo() to indicate which cells it's already look at, and during play for the players' own use.
-		u16 distanceFromStart;
-		u16 id;
+		uint16_t distanceFromStart;
+		uint16_t id;
 		bool isDeadEnd();
-		video::SColor getVisitorColor();
-		void setVisitorColor(video::SColor color);
+		irr::video::SColor getVisitorColor();
+		void setVisitorColor( irr::video::SColor color );
 		bool hasLock();
+		bool visible;
 	protected:
 	private:
 		char top;
 		char left;
 		char bottom; //Useless except on maze borders and when checking if it's a dead end. Do not rely on this to be accurate.
 		char right; //Ditto.
-		video::SColor visitorColor;
+		irr::video::SColor visitorColor;
 };
 
 #endif // MAZECELL_H

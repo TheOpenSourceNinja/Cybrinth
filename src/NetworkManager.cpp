@@ -43,7 +43,7 @@ NetworkManager::NetworkManager() {
     #endif
 }
 
-void NetworkManager::setPort( u16 newPort ) {
+void NetworkManager::setPort( uint16_t newPort ) {
 	if( newPort <= 1023 ) {
 		std::wcerr << L"Warning: Port " << newPort << L" is in the \"well-known\" range (0-1023). This may not work. Recommend using ports above 49151." << std::endl;
 	} else if( newPort <= 49151 ) {
@@ -210,9 +210,9 @@ bool NetworkManager::hasNewPlayerConnected() {
 	}
 }
 
-void NetworkManager::sendMaze( MazeCell ** maze, u8 cols, u8 rows ) {
+void NetworkManager::sendMaze( MazeCell ** maze, uint8_t cols, uint8_t rows ) {
 	//char buffer[sizeof(cols) + sizeof(rows) + (cols * rows)];
-	std::vector<u8> toSend;
+	std::vector<uint8_t> toSend;
 	toSend.reserve( 9 + 7 + 2 + ( cols * rows * 4 ) );
 	toSend.push_back( 'S' );
 	toSend.push_back( 'T' );
@@ -226,8 +226,8 @@ void NetworkManager::sendMaze( MazeCell ** maze, u8 cols, u8 rows ) {
 	toSend.push_back( cols );
 	toSend.push_back( rows );
 
-	for( u8 c = 0; c < cols; c++ ) {
-		for( u8 r = 0; r < rows; r++ ) {
+	for( uint8_t c = 0; c < cols; c++ ) {
+		for( uint8_t r = 0; r < rows; r++ ) {
 			toSend.push_back( maze[c][r].getTop() );
 			toSend.push_back( maze[c][r].getLeft() );
 			toSend.push_back( maze[c][r].getBottom() );
@@ -259,10 +259,10 @@ void NetworkManager::sendMaze( MazeCell ** maze, u8 cols, u8 rows ) {
 	}
 }
 
-void NetworkManager::sendPlayerPos( u8 player, u8 x, u8 y ) {
-	//std::wcout << L"Sending player " << static_cast<unsigned int>( player ) << L" position " << static_cast<unsigned int>( x ) << L"," << static_cast<unsigned int>( y ) << std::endl;
+void NetworkManager::sendPlayerPos( uint8_t player, uint8_t x, uint8_t y ) {
+	//std::wcout << L"Sending player " << player << L" position " << x << L"," << y << std::endl;
 
-	std::vector<u8> toSend;
+	std::vector<uint8_t> toSend;
 	toSend.reserve( 6 + 3 + 4 );
 	toSend.push_back( 'S' );
 	toSend.push_back( 'T' );
@@ -295,7 +295,7 @@ void NetworkManager::sendPlayerPos( u8 player, u8 x, u8 y ) {
 }
 
 void NetworkManager::sendGoal( Goal goal ) {
-	std::vector<u8> toSend;
+	std::vector<uint8_t> toSend;
 	toSend.reserve( 6 + 2 + 4 );
 	toSend.push_back( 'S' );
 	toSend.push_back( 'T' );
@@ -310,7 +310,7 @@ void NetworkManager::sendGoal( Goal goal ) {
 	toSend.push_back( 'D' );
 	toSend.push_back( 'G' );
 
-	std::wcout << L"Sending goal at " << static_cast<unsigned int>( goal.getX() ) << L"," << static_cast<unsigned int>( goal.getY() ) << std::endl;
+	std::wcout << L"Sending goal at " << goal.getX() << L"," << goal.getY() << std::endl;
 
 	for( int j = 0; j <= fdmax; j++ ) {
 		//send to everyone! except the listener
@@ -329,7 +329,7 @@ void NetworkManager::sendGoal( Goal goal ) {
 }
 
 void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
-	std::vector<u8> toSend;
+	std::vector<uint8_t> toSend;
 	toSend.reserve( 7 + starts.size() + 5 );
 	toSend.push_back( 'S' );
 	toSend.push_back( 'T' );
@@ -340,11 +340,11 @@ void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 	toSend.push_back( 'S' );
 	toSend.push_back( starts.size() );
 
-	for( u8 i = 0; i < starts.size(); i++ ) {
+	for( uint8_t i = 0; i < starts.size(); i++ ) {
 		toSend.push_back( i );
 		toSend.push_back( starts[i].getX() );
 		toSend.push_back( starts[i].getY() );
-		std::wcout << L"Send player start #" << static_cast<unsigned int>( i ) << L" at " << static_cast<unsigned int>( starts[i].getX() ) << L"," << static_cast<unsigned int>( starts[i].getY() ) << std::endl;
+		std::wcout << L"Send player start #" << i << L" at " << starts[i].getX() << L"," << starts[i].getY() << std::endl;
 	}
 
 	toSend.push_back( 'E' );
@@ -369,10 +369,10 @@ void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 	}
 }
 
-void NetworkManager::sendU8( u8 num, std::wstring desc ) {
-	std::wcout << L"Sending u8 " << desc << L": " << static_cast<unsigned int>( num ) << std::endl;
+void NetworkManager::sendU8( uint8_t num, std::wstring desc ) {
+	std::wcout << L"Sending uint8_t " << desc << L": " << num << std::endl;
 
-	std::vector<u8> toSend;
+	std::vector<uint8_t> toSend;
 	toSend.reserve( 5 + ( desc.size() * 2 ) + 1 + 3 );
 	toSend.push_back( 'S' );
 	toSend.push_back( 'T' );
@@ -381,7 +381,7 @@ void NetworkManager::sendU8( u8 num, std::wstring desc ) {
 	toSend.push_back( 'T' );
 	boost::algorithm::to_upper( desc );
 
-	for( u8 i = 0; i < desc.size(); i++ ) {
+	for( uint8_t i = 0; i < desc.size(); i++ ) {
 		toSend.push_back( desc[i] );
 	}
 
@@ -391,7 +391,7 @@ void NetworkManager::sendU8( u8 num, std::wstring desc ) {
 	toSend.push_back( 'N' );
 	toSend.push_back( 'D' );
 
-	for( u8 i = 0; i < desc.size(); i++ ) {
+	for( uint8_t i = 0; i < desc.size(); i++ ) {
 		toSend.push_back( desc[i] );
 	}
 
@@ -412,7 +412,7 @@ void NetworkManager::sendU8( u8 num, std::wstring desc ) {
 }
 
 void NetworkManager::sendCollectables( std::vector<Collectable> stuff ) {
-	std::vector<u8> toSend;
+	std::vector<uint8_t> toSend;
 	toSend.reserve( 6 + stuff.size() + 4 );
 	toSend.push_back( 'S' );
 	toSend.push_back( 'T' );
@@ -421,12 +421,12 @@ void NetworkManager::sendCollectables( std::vector<Collectable> stuff ) {
 	toSend.push_back( 'T' );
 	toSend.push_back( 'C' );
 
-	for( u8 i = 0; i < stuff.size(); i++ ) {
+	for( uint8_t i = 0; i < stuff.size(); i++ ) {
 		toSend.push_back( i );
 		toSend.push_back( stuff[i].getType() );
 		toSend.push_back( stuff[i].getX() );
 		toSend.push_back( stuff[i].getY() );
-		std::wcout << L"Sending collectable #" << static_cast<unsigned int>( i ) << L" of type " << static_cast<unsigned int>( stuff[i].getType() ) << L" at " << static_cast<unsigned int>( stuff[i].getX() ) << L"," << static_cast<unsigned int>( stuff[i].getY() ) << std::endl;
+		std::wcout << L"Sending collectable #" << i << L" of type " << stuff[i].getType() << L" at " << stuff[i].getX() << L"," << stuff[i].getY() << std::endl;
 	}
 
 	toSend.push_back( 'E' );

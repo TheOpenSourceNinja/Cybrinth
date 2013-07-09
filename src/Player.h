@@ -16,18 +16,16 @@
 #include "Object.h"
 #include "colors.h"
 
-using namespace irr;
-
 class Player : public Object {
 	public:
 		Player();
 		virtual ~Player();
-		void draw( video::IVideoDriver* driver, u32 width, u32 height );
-		void loadImage( video::IVideoDriver* driver );
-		void loadImage( video::IVideoDriver* driver, u32 size );
-		void moveX( s8 val );
-		void moveY( s8 val );
-		u32 stepsTaken;
+		void draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height );
+		void loadImage( irr::video::IVideoDriver* driver );
+		void loadImage( irr::video::IVideoDriver* driver, uint32_t size );
+		void moveX( int8_t val );
+		void moveY( int8_t val );
+		uint32_t stepsTaken;
 		bool isHuman;
 	protected:
 	private:

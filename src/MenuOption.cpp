@@ -14,12 +14,10 @@
 
 #include <irrlicht.h>
 
-using namespace irr;
-
 MenuOption::MenuOption() {
 	x = 0;
 	y = 0;
-	dimension = core::dimension2d<u32>( 0, 0 );
+	dimension = irr::core::dimension2d<uint32_t>( 0, 0 );
 	text = "";
 	font = NULL;
 }
@@ -28,12 +26,12 @@ MenuOption::~MenuOption() {
 	//dtor
 }
 
-void MenuOption::setText( core::stringw newText ) {
+void MenuOption::setText( irr::core::stringw newText ) {
 	text = newText;
 	setDimension();
 }
 
-void MenuOption::setFont( gui::IGUIFont* newFont ) {
+void MenuOption::setFont( irr::gui::IGUIFont* newFont ) {
 	font = newFont;
 	setDimension();
 }
@@ -42,38 +40,38 @@ void MenuOption::setDimension() {
 	if( font != NULL ) {
 		dimension = font->getDimension( text.c_str() );
 	} else {
-		dimension = core::dimension2d<u32>( 0, 0 );
+		dimension = irr::core::dimension2d<uint32_t>( 0, 0 );
 	}
 }
 
-void MenuOption::draw( video::IVideoDriver* driver ) {
-	//driver->draw2DImage( image, core::position2d<s32>( x, y ) );
+void MenuOption::draw( irr::video::IVideoDriver* driver ) {
+	//driver->draw2DImage( image, core::position2d<int32_t>( x, y ) );
 	if( font != NULL ) {
-		font->draw( text, core::rect<s32>( x, y, dimension.Width, dimension.Height ), LIGHTCYAN );
+		font->draw( text, irr::core::rect<int32_t>( x, y, dimension.Width, dimension.Height ), LIGHTCYAN );
 	}
 }
 
-void MenuOption::setX( u32 val ) {
+void MenuOption::setX( uint32_t val ) {
 	x = val;
 }
 
-void MenuOption::setY( u32 val ) {
+void MenuOption::setY( uint32_t val ) {
 	y = val;
 }
 
-u32 MenuOption::getX() {
+uint32_t MenuOption::getX() {
 	return x;
 }
 
-u32 MenuOption::getY() {
+uint32_t MenuOption::getY() {
 	return y;
 }
 
-bool MenuOption::isWithin( core::position2d<u32> test ) {
+bool MenuOption::contains( irr::core::position2d<uint32_t> test ) {
 	return ( test.X >= x && test.Y >= y && test.X <= x + dimension.Width && test.Y <= y + dimension.Height );
 	//return true;
 }
 
-bool MenuOption::isWithin( u32 testX, u32 testY ) {
-	return isWithin( core::position2d<u32>( testX, testY ) );
+bool MenuOption::contains( uint32_t testX, uint32_t testY ) {
+	return contains( irr::core::position2d<uint32_t>( testX, testY ) );
 }

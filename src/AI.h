@@ -19,31 +19,29 @@
 //#include "GameManager.h"
 class GameManager; //Avoids circular dependency
 
-using namespace irr;
-
 class AI {
 	public:
 		/** Default constructor */
 		AI();
 		/** Default destructor */
 		virtual ~AI();
-		void setPlayer( u8 newPlayer );
-		void setup( MazeCell ** newMaze, u8 newCols, u8 newRows,  GameManager * newGM ); //Provides the AI with whatever info it needs to work.
+		void setPlayer( uint8_t newPlayer );
+		void setup( MazeCell ** newMaze, uint8_t newCols, uint8_t newRows,  GameManager * newGM ); //Provides the AI with whatever info it needs to work.
 		void move(); //Needs to call GameManager's movePlayerOnX and movePlayerOnY functions.
 		void allKeysFound();
-		u32 lastTimeMoved;
-		u8 getPlayer();
-		u32 movementDelay; //How long to delay between movements
+		uint32_t lastTimeMoved;
+		uint8_t getPlayer();
+		uint32_t movementDelay; //How long to delay between movements
 	protected:
 	private:
 		GameManager * gm;
-		u8 controlsPlayer;
-		std::vector< core::position2d< u8 > > cellsVisited;
-		std::vector< core::position2d< u8 > > pathTaken;
-		std::vector< std::vector< core::position2d< u8 > > > pathsToLockedCells;
-		bool alreadyVisited( core::position2d< u8 > position );
-		u8 cols;
-		u8 rows;
+		uint8_t controlsPlayer;
+		std::vector< irr::core::position2d< uint8_t > > cellsVisited;
+		std::vector< irr::core::position2d< uint8_t > > pathTaken;
+		std::vector< std::vector< irr::core::position2d< uint8_t > > > pathsToLockedCells;
+		bool alreadyVisited( irr::core::position2d< uint8_t > position );
+		uint8_t cols;
+		uint8_t rows;
 		MazeCell ** maze;
 };
 

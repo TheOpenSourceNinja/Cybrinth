@@ -14,15 +14,16 @@
 
 #include "Object.h"
 
+#include <irrlicht.h>
 
 class PlayerStart : public Object {
 	public:
 		PlayerStart();
 		virtual ~PlayerStart();
 		void reset();
-		void loadImage( video::IVideoDriver* driver );
-		void loadImage( video::IVideoDriver* driver, u32 size );
-		void draw( video::IVideoDriver* driver, u32 width, u32 height );
+		void loadImage( irr::video::IVideoDriver* driver );
+		void loadImage( irr::video::IVideoDriver* driver, uint32_t size );
+		void draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height );
 	protected:
 	private:
 };

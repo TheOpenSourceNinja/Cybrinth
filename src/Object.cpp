@@ -26,20 +26,20 @@ Object::Object() {
 Object::~Object() {
 }
 
-void Object::setPos( u8 newX, u8 newY ) {
+void Object::setPos( uint8_t newX, uint8_t newY ) {
 	setX( newX );
 	setY( newY );
 }
 
-u8 Object::getY() {
+uint8_t Object::getY() {
 	return y;
 }
 
-u8 Object::getX() {
+uint8_t Object::getX() {
 	return x;
 }
 
-void Object::moveY( s8 val ) {
+void Object::moveY( int8_t val ) {
 	if( !moving ) {
 		y += val;
 		moving = true;
@@ -51,7 +51,7 @@ void Object::moveY( s8 val ) {
 	}
 }
 
-void Object::moveX( s8 val ) {
+void Object::moveX( int8_t val ) {
 	if( !moving ) {
 		x += val;
 		moving = true;
@@ -63,19 +63,19 @@ void Object::moveX( s8 val ) {
 	}
 }
 
-void Object::setX( u8 val ) {
+void Object::setX( uint8_t val ) {
 	x = val;
 	xInterp = x;
 }
 
-void Object::setY( u8 val ) {
+void Object::setY( uint8_t val ) {
 	y = val;
 	yInterp = y;
 }
 
-void Object::draw( video::IVideoDriver* driver, u32 width, u32 height ) {
+void Object::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
 	if( moving ) {
-		f64 speed = .2;
+		float speed = .2;
 
 		if( x > xInterp ) {
 			xInterp += speed;
@@ -99,7 +99,7 @@ void Object::draw( video::IVideoDriver* driver, u32 width, u32 height ) {
 		yInterp = y;
 	}
 
-	u32 size;
+	uint32_t size;
 
 	if( width < height ) {
 		size = width;
@@ -108,13 +108,13 @@ void Object::draw( video::IVideoDriver* driver, u32 width, u32 height ) {
 	}
 
 	if( image != NULL ) {
-		s32 cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
-		s32 cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
-		//driver->draw2DImage(image, core::position2d<s32>(cornerX, cornerY));
-		video::SColor colorArray[] = {colorOne, colorOne, colorOne, colorOne};
+		int32_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
+		int32_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
+		//driver->draw2DImage(image, core::position2d<int32_t>(cornerX, cornerY));
+		irr::video::SColor colorArray[] = {colorOne, colorOne, colorOne, colorOne};
 		driver->draw2DImage( image,
-							 core::rect<s32>( cornerX, cornerY, cornerX + size, cornerY + size ),
-							 core::rect<s32>( core::position2d<s32>( 0, 0 ), image->getSize() ),
+							 irr::core::rect<int32_t>( cornerX, cornerY, cornerX + size, cornerY + size ),
+							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), image->getSize() ),
 							 0, //The clipping rectangle, so we can draw only part of the image if we want. Zero means draw the whole thing.
 							 colorArray,
 							 true );
@@ -122,10 +122,10 @@ void Object::draw( video::IVideoDriver* driver, u32 width, u32 height ) {
 }
 
 /*void Object::loadImage(video::IVideoDriver* driver) {
-	image = driver->addTexture(core::dimension2d<u32>(1,1), "empty");
+	image = driver->addTexture(core::dimension2d<uint32_t>(1,1), "empty");
 }*/
 
-void Object::setColor( video::SColor newColor ) {
+void Object::setColor( irr::video::SColor newColor ) {
 	if( newColor == BLACK ) {
 		colorTwo = BLACK;
 		colorOne = GRAY;
@@ -180,19 +180,19 @@ void Object::setColor( video::SColor newColor ) {
 	}
 }
 
-video::SColor Object::getColorOne() {
+irr::video::SColor Object::getColorOne() {
 	return colorOne;
 }
 
-video::SColor Object::getColorTwo() {
+irr::video::SColor Object::getColorTwo() {
 	return colorTwo;
 }
 
-video::SColor Object::getColor() {
+irr::video::SColor Object::getColor() {
 	return getColorOne();
 }
 
-void Object::setColorBasedOnNum( u8 num ) {
+void Object::setColorBasedOnNum( uint8_t num ) {
 	switch( num % 13 ) {
 		case 0: {
 			setColor( RED ); //Special case: We don't want the player to be black (color 0) against a black background;

@@ -14,19 +14,21 @@
 
 #include "Object.h"
 
+#include <irrlicht.h>
+
 #define COLLECTABLE_KEY 1
 
 class Collectable : public Object {
 	public:
 		Collectable();
 		virtual ~Collectable();
-		void setType( u8 );
-		u8 getType();
-		void loadImage( video::IVideoDriver* driver );
-		//void draw(video::IVideoDriver* driver, u32 width, u32 height);
+		void setType( uint8_t );
+		uint8_t getType();
+		void loadImage( irr::video::IVideoDriver* driver );
+		//void draw(video::IVideoDriver* driver, uint32_t width, uint32_t height);
 	protected:
 	private:
-		u8 type;
+		uint8_t type;
 };
 
 #endif // COLLECTABLE_H

@@ -31,7 +31,7 @@ irr::core::stringw StringConverter::convert( TagLib::wstring input ) {
 
 TagLib::wstring StringConverter::convert( irr::core::stringw input ) {
 	TagLib::wstring result;
-	/*irr::u32 it;
+	/*irr::uint32_t it;
 	for ( it = 0; it < input.size(); it++ ) {
 		result.append( input[ it ] );
 	}*/

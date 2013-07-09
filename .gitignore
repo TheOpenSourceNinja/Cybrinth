@@ -17,6 +17,7 @@
 *.app
 *.layout
 *.dirstamp
+*.bak
 autom4te.cache/
 build-aux/
 Makefile

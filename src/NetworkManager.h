@@ -38,22 +38,20 @@
 #include "PlayerStart.h"
 #include "Collectable.h"
 
-using namespace irr;
-
 class NetworkManager {
 	public:
 		NetworkManager();
 		virtual ~NetworkManager();
 		int setup(bool isServer);
 		bool hasNewPlayerConnected();
-		u8 getNewPlayer();
+		uint8_t getNewPlayer();
 		int checkForConnections();
-		void sendMaze( MazeCell ** maze, u8 cols, u8 rows );
-		void sendPlayerPos( u8 player, u8 x, u8 y );
-		void setPort( u16 newPort );
+		void sendMaze( MazeCell ** maze, uint8_t cols, uint8_t rows );
+		void sendPlayerPos( uint8_t player, uint8_t x, uint8_t y );
+		void setPort( uint16_t newPort );
 		void sendGoal( Goal goal );
 		void sendPlayerStarts( std::vector<PlayerStart> starts );
-		void sendU8( u8 num, std::wstring desc );
+		void sendU8( uint8_t num, std::wstring desc );
 		void sendCollectables( std::vector<Collectable> stuff );
 		bool receiveData();
 	protected:
@@ -75,7 +73,7 @@ class NetworkManager {
 		struct timeval timeout;
 		void *get_in_addr( struct sockaddr *sa );
 		int sendData( int sockfd, unsigned char *buf, size_t *len );
-		u8 receivedData[51]; //51 is the maximum possible size of a maze plus "STARTMAZE" and "ENDMAZE"
+		uint8_t receivedData[51]; //51 is the maximum possible size of a maze plus "STARTMAZE" and "ENDMAZE"
 
 		#if defined WINDOWS
 		WSADATA wsaData;   // if this doesn't work

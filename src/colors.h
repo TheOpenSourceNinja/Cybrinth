@@ -13,25 +13,24 @@
 #define COLORS_H_INCLUDED
 
 #include <irrlicht.h>
-using namespace irr;
 
 //Yes, these are CGA colors. I'm kind of going for that look, but without the low screen resolution limit.
 
-#define BLACK video::SColor(255, 0, 0, 0)
-#define BLUE video::SColor(255, 0, 0, 170)
-#define GREEN video::SColor(255, 0, 170, 0)
-#define CYAN video::SColor(255, 0, 170, 170)
-#define RED video::SColor(255, 170, 0, 0)
-#define MAGENTA video::SColor(255, 170, 0, 170)
-#define BROWN video::SColor(255, 170, 85, 0)
-#define GRAY video::SColor(255, 85, 85, 85)
-#define LIGHTGRAY video::SColor(255, 170, 170, 170)
-#define LIGHTBLUE video::SColor(255, 85, 85, 255)
-#define LIGHTGREEN video::SColor(255, 85, 255, 85)
-#define LIGHTCYAN video::SColor(255, 85, 255, 255)
-#define LIGHTRED video::SColor(255, 255, 85, 85)
-#define LIGHTMAGENTA video::SColor(255, 255, 85, 255)
-#define YELLOW video::SColor(255, 255, 255, 85)
-#define WHITE video::SColor(255, 255, 255, 255)
+#define BLACK irr::video::SColor(255, 0, 0, 0)
+#define BLUE irr::video::SColor(255, 0, 0, 170)
+#define GREEN irr::video::SColor(255, 0, 170, 0)
+#define CYAN irr::video::SColor(255, 0, 170, 170)
+#define RED irr::video::SColor(255, 170, 0, 0)
+#define MAGENTA irr::video::SColor(255, 170, 0, 170)
+#define BROWN irr::video::SColor(255, 170, 85, 0)
+#define GRAY irr::video::SColor(255, 85, 85, 85)
+#define LIGHTGRAY irr::video::SColor(255, 170, 170, 170)
+#define LIGHTBLUE irr::video::SColor(255, 85, 85, 255)
+#define LIGHTGREEN irr::video::SColor(255, 85, 255, 85)
+#define LIGHTCYAN irr::video::SColor(255, 85, 255, 255)
+#define LIGHTRED irr::video::SColor(255, 255, 85, 85)
+#define LIGHTMAGENTA irr::video::SColor(255, 255, 85, 255)
+#define YELLOW irr::video::SColor(255, 255, 255, 85)
+#define WHITE irr::video::SColor(255, 255, 255, 255)
 
 #endif // COLORS_H_INCLUDED

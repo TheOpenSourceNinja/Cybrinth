@@ -79,11 +79,23 @@
 		<Unit filename="src/Goal.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="src/KeyMapping.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/KeyMapping.h">
+			<Option target="cybrinth" />
+		</Unit>
 		<Unit filename="src/MazeCell.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/MazeCell.h">
 			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="src/MazeManager.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/MazeManager.h">
+			<Option target="cybrinth" />
 		</Unit>
 		<Unit filename="src/MenuOption.cpp">
 			<Option target="&lt;{~None~}&gt;" />

@@ -14,7 +14,6 @@
 #include "colors.h"
 #include <cmath>
 
-using namespace irr;
 using namespace std;
 
 Player::Player() {
@@ -33,22 +32,25 @@ Player::~Player() {
 	//dtor
 }
 
-void Player::loadImage( video::IVideoDriver* driver ) {
-	//image = driver->getTexture( "circle.png" );
+void Player::loadImage( irr::video::IVideoDriver* driver ) {
 	loadImage( driver, 1 );
 }
 
-void Player::loadImage( video::IVideoDriver* driver, u32 size ) {
-	video::IImage *tempImage = driver->createImage( video::ECF_A8R8G8B8, core::dimension2d<u32>( size, size ) );
-	tempImage->fill( video::SColor( 0, 0, 0, 0) ); //Fills the image with invisibility!
+//Draws a filled circle. Somebody please implement a faster algorithm.
+void Player::loadImage( irr::video::IVideoDriver* driver, uint32_t size ) {
+	irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< uint32_t >( size, size ) );
+	tempImage->fill( irr::video::SColor( 0, 0, 0, 0) ); //Fills the image with invisibility!
 
-	s32 radius = size / 2;
-	core::position2d< s32 > origin( radius, radius );
-	f32 rSquared = pow( radius, 2 );
-	for( s32 x = -radius; x < radius; x++ ) {
-		s32 height = static_cast< s32 >( sqrt( rSquared - pow( x, 2 ) ) );
-		for( s32 y = -height; y < height; y++ ) {
+	int32_t radius = size / 2;
+	irr::core::position2d< int32_t > origin( radius, radius );
+	float rSquared = pow( radius, 2 );
+	for( int32_t x = -radius; x <= 0; x++ ) {
+		int32_t height = static_cast< int32_t >( sqrt( rSquared - pow( x, 2 ) ) );
+		for( int32_t y = -height; y <= 0; y++ ) {
 			tempImage->setPixel( x + origin.X, y + origin.Y, WHITE );
+			tempImage->setPixel( x + origin.X, -y + origin.Y, WHITE );
+			tempImage->setPixel( -x + origin.X, y + origin.Y, WHITE );
+			tempImage->setPixel( -x + origin.X, -y + origin.Y, WHITE );
 		}
 	}
 
@@ -56,11 +58,10 @@ void Player::loadImage( video::IVideoDriver* driver, u32 size ) {
 	image = driver->addTexture( L"playerCircle", tempImage );
 }
 
-void Player::draw( video::IVideoDriver* driver, u32 width, u32 height ) {
-	//Object::draw(driver, width, height);
+void Player::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
 
 	if( moving ) {
-		f64 speed = .2;
+		float speed = .2;
 
 		if( x > xInterp ) {
 			xInterp += speed;
@@ -84,7 +85,7 @@ void Player::draw( video::IVideoDriver* driver, u32 width, u32 height ) {
 		yInterp = y;
 	}
 
-	u32 size;
+	uint32_t size;
 
 	if( width < height ) {
 		size = width;
@@ -97,12 +98,12 @@ void Player::draw( video::IVideoDriver* driver, u32 width, u32 height ) {
 	}
 
 	if( image != NULL ) {
-		s32 cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
-		s32 cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
-		video::SColor colorArray[] = {colorTwo, colorTwo, colorTwo, colorTwo};
+		int32_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
+		int32_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
+		irr::video::SColor colorArray[] = {colorTwo, colorTwo, colorTwo, colorTwo};
 		driver->draw2DImage( image,
-							 core::rect<s32>( cornerX, cornerY, cornerX + size, cornerY + size ),
-							 core::rect<s32>( core::position2d<s32>( 0, 0 ), image->getSize() ),
+							 irr::core::rect<int32_t>( cornerX, cornerY, cornerX + size, cornerY + size ),
+							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), image->getSize() ),
 							 0, //The clipping rectangle, so we can draw only part of the image if we want. Zero means draw the whole thing.
 							 colorArray,
 							 true );
@@ -111,25 +112,25 @@ void Player::draw( video::IVideoDriver* driver, u32 width, u32 height ) {
 		cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
 		cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
 
-		for( u8 a = 0; a < 4; a++ ) {
+		for( uint8_t a = 0; a < 4; a++ ) {
 			colorArray[a] = colorOne;
 		}
 
 		driver->draw2DImage( image,
-							 core::rect<s32>( cornerX, cornerY, cornerX + size, cornerY + size ),
-							 core::rect<s32>( core::position2d<s32>( 0, 0 ), image->getSize() ),
+							 irr::core::rect<int32_t>( cornerX, cornerY, cornerX + size, cornerY + size ),
+							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), image->getSize() ),
 							 0, //The clipping rectangle, so we can draw only part of the image if we want. Zero means draw the whole thing.
 							 colorArray,
 							 true );
 	}
 }
 
-void Player::moveX( s8 val ) {
+void Player::moveX( int8_t val ) {
 	Object::moveX( val );
 	stepsTaken += 1;
 }
 
-void Player::moveY( s8 val ) {
+void Player::moveY( int8_t val ) {
 	Object::moveY( val );
 	stepsTaken += 1;
 }

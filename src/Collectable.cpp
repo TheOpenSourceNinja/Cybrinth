@@ -24,7 +24,7 @@ Collectable::~Collectable() {
 	//dtor
 }
 
-void Collectable::setType( u8 newType ) {
+void Collectable::setType( uint8_t newType ) {
 	type = newType;
 
 	switch( type ) {
@@ -36,11 +36,11 @@ void Collectable::setType( u8 newType ) {
 	}
 }
 
-u8 Collectable::getType() {
+uint8_t Collectable::getType() {
 	return type;
 }
 
-void Collectable::loadImage( video::IVideoDriver* driver ) {
+void Collectable::loadImage( irr::video::IVideoDriver* driver ) {
 	switch( type ) {
 		case COLLECTABLE_KEY: {
 				image = driver->getTexture( L"key.png" );
@@ -54,14 +54,3 @@ void Collectable::loadImage( video::IVideoDriver* driver ) {
 		default: break;
 	}
 }
-
-/*void Collectable::draw(video::IVideoDriver* driver, u32 width, u32 height) {
-	if (image != NULL) {
-		f64 cornerX = xInterp*width;
-		f64 cornerY = yInterp*height;
-		driver->draw2DImage(image, core::position2d<s32>(cornerX, cornerY));
-	} else {
-		wcerr << L"Image is null" << endl;
-	}
-}
-*/

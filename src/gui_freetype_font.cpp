@@ -1,4 +1,4 @@
-//This file downloaded from http://www.michaelzeilfelder.de/irrlicht.htm#TrueType. The copyright statement and license below do not apply to that original version, only to the modified version contained here.
+//This file originally downloaded from http://www.michaelzeilfelder.de/irrlicht.htm#TrueType. The copyright statement and license below do not apply to that original version, only to the modified version contained here.
 /**
  * Copyright © 2013 James Dearing.
  * This file is part of Cybrinth.
@@ -101,8 +101,8 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 					imgw = imgh;
 				}
 
-				s32 offx = left;
-				s32 offy = size - top;
+				int32_t offx = left;
+				int32_t offy = size - top;
 
 				if( offx + texw > freetypeFont->LargestGlyph.Width )
 					freetypeFont->LargestGlyph.Width = offx + texw;
@@ -184,8 +184,8 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 			imgw16 = imgh16;
 		}
 
-		s32 offx = left;
-		s32 offy = size - top;
+		int32_t offx = left;
+		int32_t offy = size - top;
 
 		if( offx + texw > freetypeFont->LargestGlyph.Width )
 			freetypeFont->LargestGlyph.Width = offx + texw;
@@ -388,7 +388,7 @@ inline u32 CGUIFreetypeFont::getWidthFromCharacter( wchar_t c ) const {
 
 	if( n > 0 ) {
 		int w = Glyphs[n - 1]->texw;
-		s32 left = Glyphs[n - 1]->left;
+		int32_t left = Glyphs[n - 1]->left;
 
 		if( w + left > 0 )
 			return w + left;
@@ -403,12 +403,12 @@ inline u32 CGUIFreetypeFont::getWidthFromCharacter( wchar_t c ) const {
 
 
 //! draws an text and clips it to the specified rectangle if wanted
-void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::core::rect<s32>& position, video::SColor color, bool hcenter, bool vcenter, const core::rect<s32>* clip ) {
+void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::core::rect<int32_t>& position, video::SColor color, bool hcenter, bool vcenter, const core::rect<int32_t>* clip ) {
 	if( !Driver )
 		return;
 
-	core::dimension2d<s32> textDimension;
-	core::position2d<s32> offset = position.UpperLeftCorner;
+	core::dimension2d<int32_t> textDimension;
+	core::position2d<int32_t> offset = position.UpperLeftCorner;
 	video::SColor colors[4];
 
 	for( int i = 0; i < 4; i++ ) {
@@ -434,32 +434,32 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 
 		if( n > 0 ) {
 			if( AntiAlias ) {
-//				s32 imgw = Glyphs[n-1]->imgw;
-//				s32 imgh = Glyphs[n-1]->imgh;
-				s32 texw = Glyphs[n-1]->texw;
-				s32 texh = Glyphs[n-1]->texh;
-				s32 offx = Glyphs[n-1]->left;
-				s32 offy = Glyphs[n-1]->size - Glyphs[n-1]->top;
+//				int32_t imgw = Glyphs[n-1]->imgw;
+//				int32_t imgh = Glyphs[n-1]->imgh;
+				int32_t texw = Glyphs[n-1]->texw;
+				int32_t texh = Glyphs[n-1]->texh;
+				int32_t offx = Glyphs[n-1]->left;
+				int32_t offy = Glyphs[n-1]->size - Glyphs[n-1]->top;
 
 				if( Driver->getDriverType() != video::EDT_SOFTWARE ) {
 					if( !Transparency )
 						color.color |= 0xff000000;
 
-					Driver->draw2DImage( Glyphs[n-1]->tex, core::position2d<s32>( offset.X + offx, offset.Y + offy ), core::rect<s32>( 0, 0, texw, texh ), clip, color, true );
+					Driver->draw2DImage( Glyphs[n-1]->tex, core::position2d<int32_t>( offset.X + offx, offset.Y + offy ), core::rect<int32_t>( 0, 0, texw, texh ), clip, color, true );
 				} else {
-					s32 a = color.getAlpha();
-					s32 r = color.getRed();
-					s32 g = color.getGreen();
-					s32 b = color.getBlue();
+					int32_t a = color.getAlpha();
+					int32_t r = color.getRed();
+					int32_t g = color.getGreen();
+					int32_t b = color.getBlue();
 					u8 *pt = Glyphs[n-1]->image;
 
 					if( !Transparency )	a = 255;
 
 					for( int y = 0; y < texh; y++ ) {
 						for( int x = 0; x < texw; x++ ) {
-							if( !clip || clip->isPointInside( core::position2d<s32>( offset.X + x + offx, offset.Y + y + offy ) ) ) {
+							if( !clip || clip->isPointInside( core::position2d<int32_t>( offset.X + x + offx, offset.Y + y + offy ) ) ) {
 								if( *pt ) {
-									Driver->draw2DRectangle( video::SColor(( a * *pt ) / 255, r, g, b ), core::rect<s32>( offset.X + x + offx, offset.Y + y + offy, offset.X + x + offx + 1, offset.Y + y + offy + 1 ) );
+									Driver->draw2DRectangle( video::SColor(( a * *pt ) / 255, r, g, b ), core::rect<int32_t>( offset.X + x + offx, offset.Y + y + offy, offset.X + x + offx + 1, offset.Y + y + offy + 1 ) );
 								}
 
 								pt++;
@@ -468,20 +468,20 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 					}
 				}
 			} else {
-//				s32 imgw = Glyphs[n-1]->imgw16;
-//				s32 imgh = Glyphs[n-1]->imgh16;
-				s32 texw = Glyphs[n-1]->texw16;
-				s32 texh = Glyphs[n-1]->texh16;
-				s32 offx = Glyphs[n-1]->left16;
-				s32 offy = Glyphs[n-1]->size - Glyphs[n-1]->top16;
+//				int32_t imgw = Glyphs[n-1]->imgw16;
+//				int32_t imgh = Glyphs[n-1]->imgh16;
+				int32_t texw = Glyphs[n-1]->texw16;
+				int32_t texh = Glyphs[n-1]->texh16;
+				int32_t offx = Glyphs[n-1]->left16;
+				int32_t offy = Glyphs[n-1]->size - Glyphs[n-1]->top16;
 
 				if( !Transparency ) {
 					color.color |= 0xff000000;
 				}
 
 				Driver->draw2DImage( Glyphs[n-1]->tex16,
-									 core::position2d<s32>( offset.X + offx, offset.Y + offy ),
-									 core::rect<s32>( 0, 0, texw, texh ),
+									 core::position2d<int32_t>( offset.X + offx, offset.Y + offy ),
+									 core::rect<int32_t>( 0, 0, texw, texh ),
 									 clip, color, true );
 			}
 
@@ -495,9 +495,9 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 }
 
 //! Calculates the index of the character in the text which is on a specific position.
-s32 CGUIFreetypeFont::getCharacterFromPos( const wchar_t* text, s32 pixel_x ) const {
-	s32 x = 0;
-	s32 idx = 0;
+int32_t CGUIFreetypeFont::getCharacterFromPos( const wchar_t* text, int32_t pixel_x ) const {
+	int32_t x = 0;
+	int32_t idx = 0;
 
 	while( text[idx] ) {
 		x += getWidthFromCharacter( text[idx] );
