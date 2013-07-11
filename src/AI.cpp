@@ -1,11 +1,11 @@
 /**
  * Copyright © 2013 James Dearing.
  * This file is part of Cybrinth.
- * 
+ *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
- * 
+ *
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 
@@ -35,7 +35,7 @@ void AI::setup( MazeCell ** newMaze, uint8_t newCols, uint8_t newRows, GameManag
 	rows = newRows;
 	pathTaken.clear();
 	cellsVisited.clear();
-	
+
 	for( std::vector< core::dimension2d< uint8_t > >::size_type i = 0; i < pathsToLockedCells.size(); i++ ) {
 		pathsToLockedCells[ i ].clear();
 	}
@@ -50,25 +50,22 @@ void AI::allKeysFound() { //Makes the bot 'forget' that it has visited certain m
 		std::wcout << L"Bot " << controlsPlayer << L" acknowledging all keys found" << std::endl;
 	}
 	core::position2d< uint8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
-	
+
 	for( std::vector< std::vector< core::position2d< uint8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
-		
+
 		for( std::vector< core::position2d< uint8_t > >::size_type i = 0; i < pathsToLockedCells[ o ].size(); i++ ) {
 
 			std::vector< core::position2d< uint8_t > >::size_type j = 0;
 			while( j < cellsVisited.size() ) {
-				
+
 				if( ( cellsVisited[ j ].X == pathsToLockedCells[ o ][ i ].X && cellsVisited[ j ].Y == pathsToLockedCells[ o ][ i ].Y ) ) {
-					if( gm->getDebugStatus() ) {
-						gm->getMazeManager().maze[cellsVisited[ j ].X][cellsVisited[ j ].Y].visited = false; //So we can infer the path from AI to locks
-					}
 					cellsVisited.erase( cellsVisited.begin() + j );
 					j--;
 				}
 				j++;
 			}
 		}
-		
+
 		//Reduce memory usage: We're done with these now, so clear them.
 		//pathsToLockedCells[ o ].clear();
 		//pathsToLockedCells[ o ].shrink_to_fit(); C++11 not GCC's default yet
@@ -108,7 +105,7 @@ void AI::move() {
 
 	std::vector<char> possibleDirections;
 	if( !( currentPosition.X == gm->getGoal().getX() && currentPosition.Y == gm->getGoal().getY() ) ) {
-	
+
 		//Check for locks
 		if( maze[ currentPosition.X ][ currentPosition.Y ].hasLock() ) {
 			pathsToLockedCells.push_back( vector< core::position2d< uint8_t > >() );
