@@ -111,7 +111,9 @@ void GameManager::drawAll() {
 	driver->beginScene();
 
 	if( !showingLoadingScreen ) {
-		drawBackground();
+		if( showBackgrounds ) {
+			drawBackground();
+		}
 
 		//Draws player trails ("footprints")
 		if( markTrails ) {
@@ -305,16 +307,14 @@ void GameManager::drawAll() {
 }
 
 void GameManager::drawBackground() {
-    if( showBackgrounds ) {
-        switch( backgroundChosen ) {
-            case 0: {
-                bgscene->drawAll();
-            }
-            break;
-            default:
-                break;
-        }
-    }
+	switch( backgroundChosen ) {
+		case 0: {
+			bgscene->drawAll();
+		}
+		break;
+		default:
+			break;
+	}
 }
 
 //I... am... DESTRUCTOOOOOOORRRRR!!!!!!!!!
@@ -402,6 +402,17 @@ GameManager::GameManager() {
 	driver = device->getVideoDriver(); //Not sure if this would be possible with a null device, which is why we don't exit
 	if( !driver ) {
 		wcerr << L"Error: Cannot get video driver" << endl;
+	}
+
+	driver->setTextureCreationFlag( video::ETCF_NO_ALPHA_CHANNEL, false );
+	driver->setTextureCreationFlag( video::ETCF_CREATE_MIP_MAPS, false );
+	if( driverType == video::EDT_SOFTWARE || driverType == video:: EDT_BURNINGSVIDEO ) {
+		driver->setTextureCreationFlag( video::ETCF_OPTIMIZED_FOR_SPEED, true );
+	} else {
+		driver->setTextureCreationFlag( video::ETCF_OPTIMIZED_FOR_QUALITY, true );
+	}
+	if( driverType = video::EDT_SOFTWARE ) {
+		driver->setTextureCreationFlag( video::ETCF_ALLOW_NON_POWER_2, false );
 	}
 
 	bgscene = device->getSceneManager(); //Not sure if this would be possible with a null device, which is why we don't exit
@@ -642,7 +653,7 @@ void GameManager::loadFonts() {
 	} while( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) );
 }
 
-//Like loadTipFont() above, this guesses a good font size, then repeatedly adjusts the size and reloads the font until everything fits.
+//Like loadTipFont() below, this guesses a good font size, then repeatedly adjusts the size and reloads the font until everything fits.
 void GameManager::loadMusicFont() {
 	uint32_t maxWidth = ( windowSize.Width / sideDisplaySizeDenominator );
 	uint32_t size = 0;
@@ -1722,7 +1733,10 @@ void GameManager::resetThings() {
 
 	won = false;
 	bgscene->clear();
-	setupBackground();
+
+	if( showBackgrounds ) {
+		setupBackground();
+	}
 	timer->setTime( 0 );
 	timer->start();
 	startLoadingScreen();

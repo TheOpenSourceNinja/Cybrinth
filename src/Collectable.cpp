@@ -69,21 +69,38 @@ irr::video::ITexture* Collectable::imageToTexture( irr::video::IVideoDriver* dri
 
 void Collectable::resizeImage( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
 	irr::video::IImage* tempImage = textureToImage( driver, image );
-	driver->removeTexture( image );
+	//driver->removeTexture( image );
+	//image->drop();
 	irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< irr::u32 >( width, height ) );
 	tempImage->copyToScaling( tempImage2 );
-	tempImage->drop();
+	//tempImage->drop();
 	image = imageToTexture( driver, tempImage2, L"resized" );
-	tempImage2->drop();
+	//tempImage2->drop();
 }
 
 void Collectable::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
 	uint32_t smaller = height;
+	uint32_t larger = width;
 	if( smaller > width ) {
 		smaller = width;
+		larger = height;
 	}
-	if( image->getSize() != irr::core::dimension2d< irr::u32 >( smaller, smaller ) ) {
-		//resizeImage( driver, width, height );
+
+	wcout << smaller << L" <= " << larger << endl;
+	uint32_t desiredSize = smaller;
+	/*//desiredSize++;
+	desiredSize |= desiredSize >> 1;
+	desiredSize |= desiredSize >> 2;
+	desiredSize |= desiredSize >> 4;
+	desiredSize |= desiredSize >> 8;
+	desiredSize |= desiredSize >> 16;
+	desiredSize = ( desiredSize >> 1 ) + 1;
+	//desiredSize--;*/
+	wcout << L"desiredSize: " << desiredSize << endl;
+
+	if( image->getSize() != irr::core::dimension2d< irr::u32 >( desiredSize, desiredSize ) ) {
+		resizeImage( driver, desiredSize, desiredSize );
 	}
+	wcout << L"test" << endl;
 	Object::draw( driver, width, height );
 }
