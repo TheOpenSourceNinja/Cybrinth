@@ -80,27 +80,15 @@ void Collectable::resizeImage( irr::video::IVideoDriver* driver, uint32_t width,
 
 void Collectable::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
 	uint32_t smaller = height;
-	uint32_t larger = width;
 	if( smaller > width ) {
 		smaller = width;
-		larger = height;
 	}
 
-	wcout << smaller << L" <= " << larger << endl;
-	uint32_t desiredSize = smaller;
-	/*//desiredSize++;
-	desiredSize |= desiredSize >> 1;
-	desiredSize |= desiredSize >> 2;
-	desiredSize |= desiredSize >> 4;
-	desiredSize |= desiredSize >> 8;
-	desiredSize |= desiredSize >> 16;
-	desiredSize = ( desiredSize >> 1 ) + 1;
-	//desiredSize--;*/
-	wcout << L"desiredSize: " << desiredSize << endl;
+	//wcout << L"desired size: " << smaller << endl;
 
-	if( image->getSize() != irr::core::dimension2d< irr::u32 >( desiredSize, desiredSize ) ) {
-		resizeImage( driver, desiredSize, desiredSize );
+	if( image->getSize() != irr::core::dimension2d< irr::u32 >( smaller, smaller ) ) {
+		resizeImage( driver, smaller, smaller );
 	}
-	wcout << L"test" << endl;
+
 	Object::draw( driver, width, height );
 }
