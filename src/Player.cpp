@@ -1,11 +1,11 @@
 /**
  * Copyright © 2013 James Dearing.
  * This file is part of Cybrinth.
- * 
+ *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
- * 
+ *
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Player.h"
@@ -23,7 +23,7 @@ Player::Player() {
 	yInterp = 0;
 	moving = false;
 	setColor( RED );
-	image = NULL;
+	texture = NULL;
 	stepsTaken = 0;
 	isHuman = true;
 }
@@ -32,12 +32,12 @@ Player::~Player() {
 	//dtor
 }
 
-void Player::loadImage( irr::video::IVideoDriver* driver ) {
-	loadImage( driver, 1 );
+void Player::loadTexture( irr::video::IVideoDriver* driver ) {
+	loadTexture( driver, 1 );
 }
 
 //Draws a filled circle. Somebody please implement a faster algorithm.
-void Player::loadImage( irr::video::IVideoDriver* driver, uint32_t size ) {
+void Player::loadTexture( irr::video::IVideoDriver* driver, uint32_t size ) {
 	irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< uint32_t >( size, size ) );
 	tempImage->fill( irr::video::SColor( 0, 0, 0, 0) ); //Fills the image with invisibility!
 
@@ -54,8 +54,8 @@ void Player::loadImage( irr::video::IVideoDriver* driver, uint32_t size ) {
 		}
 	}
 
-	driver->removeTexture( image );
-	image = driver->addTexture( L"playerCircle", tempImage );
+	driver->removeTexture( texture );
+	texture = driver->addTexture( L"playerCircle", tempImage );
 }
 
 void Player::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
@@ -93,18 +93,18 @@ void Player::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t he
 		size = height;
 	}
 
-	if( image->getSize().Width != size ) {
-		loadImage( driver, size );
+	if( texture->getSize().Width != size ) {
+		loadTexture( driver, size );
 	}
 
-	if( image != NULL ) {
+	if( texture != NULL ) {
 		int32_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
 		int32_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
 		irr::video::SColor colorArray[] = {colorTwo, colorTwo, colorTwo, colorTwo};
-		driver->draw2DImage( image,
+		driver->draw2DImage( texture,
 							 irr::core::rect<int32_t>( cornerX, cornerY, cornerX + size, cornerY + size ),
-							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), image->getSize() ),
-							 0, //The clipping rectangle, so we can draw only part of the image if we want. Zero means draw the whole thing.
+							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), texture->getSize() ),
+							 0, //The clipping rectangle, so we can draw only part of the texture if we want. Zero means draw the whole thing.
 							 colorArray,
 							 true );
 
@@ -116,10 +116,10 @@ void Player::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t he
 			colorArray[a] = colorOne;
 		}
 
-		driver->draw2DImage( image,
+		driver->draw2DImage( texture,
 							 irr::core::rect<int32_t>( cornerX, cornerY, cornerX + size, cornerY + size ),
-							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), image->getSize() ),
-							 0, //The clipping rectangle, so we can draw only part of the image if we want. Zero means draw the whole thing.
+							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), texture->getSize() ),
+							 0, //The clipping rectangle, so we can draw only part of the texture if we want. Zero means draw the whole thing.
 							 colorArray,
 							 true );
 	}

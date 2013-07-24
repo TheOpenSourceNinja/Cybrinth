@@ -40,13 +40,13 @@ uint8_t Collectable::getType() {
 	return type;
 }
 
-void Collectable::loadImage( irr::video::IVideoDriver* driver ) {
+void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 	switch( type ) {
 		case COLLECTABLE_KEY: {
-				image = driver->getTexture( L"key.png" );
+				texture = driver->getTexture( L"key.png" );
 
-				if( image == NULL ) {
-					wcerr << L"Key image not loaded" << endl;
+				if( texture == NULL ) {
+					wcerr << L"Key texture not loaded" << endl;
 				}
 
 				break;
@@ -68,13 +68,13 @@ irr::video::ITexture* Collectable::imageToTexture( irr::video::IVideoDriver* dri
 }
 
 void Collectable::resizeImage( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
-	irr::video::IImage* tempImage = textureToImage( driver, image );
-	//driver->removeTexture( image );
-	//image->drop();
+	irr::video::IImage* tempImage = textureToImage( driver, texture );
+	//driver->removeTexture( texture );
+	//texture->drop();
 	irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< irr::u32 >( width, height ) );
 	tempImage->copyToScaling( tempImage2 );
 	//tempImage->drop();
-	image = imageToTexture( driver, tempImage2, L"resized" );
+	texture = imageToTexture( driver, tempImage2, L"resized" );
 	//tempImage2->drop();
 }
 
@@ -86,7 +86,7 @@ void Collectable::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32
 
 	//wcout << L"desired size: " << smaller << endl;
 
-	if( image->getSize() != irr::core::dimension2d< irr::u32 >( smaller, smaller ) ) {
+	if( texture->getSize() != irr::core::dimension2d< irr::u32 >( smaller, smaller ) ) {
 		resizeImage( driver, smaller, smaller );
 	}
 

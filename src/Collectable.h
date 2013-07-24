@@ -24,14 +24,14 @@ class Collectable : public Object {
 		virtual ~Collectable();
 		void setType( uint8_t );
 		uint8_t getType();
-		void loadImage( irr::video::IVideoDriver* driver );
+		void loadTexture( irr::video::IVideoDriver* driver );
 		void draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height );
 	protected:
 	private:
 		uint8_t type;
 		void resizeImage( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height );
 		irr::video::IImage* textureToImage( irr::video::IVideoDriver* driver, irr::video::ITexture* texture );
-		irr::video::ITexture* imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* image, irr::core::stringw name );
+		irr::video::ITexture* imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* texture, irr::core::stringw name );
 };
 
 #endif // COLLECTABLE_H

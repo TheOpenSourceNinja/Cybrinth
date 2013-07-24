@@ -341,11 +341,19 @@ GameManager::~GameManager() {
 
 GameManager::GameManager() {
 	mazeManager.setGameManager(this);
-	fontFile = "Ubuntu-R.ttf";
 	isServer = false;
-	antiAliasFonts = true;
+	antiAliasFonts = false;
 	currentProTip = 0;
 	sideDisplaySizeDenominator = 6; //What fraction of the screen's width is set aside for displaying text, statistics, etc. during play.
+
+	fontFile = "";
+	boost::filesystem::recursive_directory_iterator end;
+	for( boost::filesystem::recursive_directory_iterator i(L"./"); i != end; i++ ) {
+		if( !is_directory( i->path() ) && boost::iequals( i->path().extension().generic_wstring(), L".ttf" ) ) {
+			fontFile = i->path().generic_string();
+			break;
+		}
+	}
 
 	device = createDevice( video::EDT_NULL ); //Must create a null device before calling readPrefs();
 
@@ -388,8 +396,13 @@ GameManager::GameManager() {
 	device = createDevice( driverType, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver ); //Most of these parameters were read from the preferences file
 
 	if( !device ) {
-		wcerr << L"Error: Cannot create device" << endl;
-		exit( -2 );
+		wcerr << L"Error: Cannot create device. Trying software renderer." << endl;
+		device = createDevice( video::EDT_SOFTWARE, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
+
+		if( !device ) {
+			wcerr << L"Error: Even the software renderer didn't work. Exiting." << endl;
+			exit( -2 );
+		}
 	}
 	device->setWindowCaption( L"Cybrinth" );
 
@@ -512,10 +525,6 @@ GameManager::GameManager() {
 	rows = 0;
 	resizeMaze( 1, 1 ); //This gets called here... why?*/
 
-
-	driver->setTextureCreationFlag( video::ETCF_NO_ALPHA_CHANNEL, false );
-	driver->setTextureCreationFlag( video::ETCF_OPTIMIZED_FOR_QUALITY, true );
-
 	loadFonts();
 	newGame.setText( L"New maze" );
 	newGame.setFont( clockFont );
@@ -533,10 +542,11 @@ GameManager::GameManager() {
 	stats = L"Player stats";
 	steps = L"Steps";
 
-	loadMaze.setY( 100 );
-	saveMaze.setY( 200 );
-	exitGame.setY( 300 );
-	backToGame.setY( 400 );
+	newGame.setY( 0 );
+	loadMaze.setY( 1 * windowSize.Height / 5 );
+	saveMaze.setY( 2 * windowSize.Height / 5 );
+	exitGame.setY( 3 * windowSize.Height / 5 );
+	backToGame.setY( 4 * windowSize.Height / 5 );
 
 	//timer = device->getTimer();
 
@@ -558,10 +568,10 @@ GameManager::GameManager() {
 
 	for( uint8_t p = 0; p < numPlayers; p++ ) {
 		player[p].setColorBasedOnNum( p );
-		player[p].loadImage( driver );
+		player[p].loadTexture( driver );
 	}
 
-	goal.loadImage( driver );
+	goal.loadTexture( driver );
 
 	if( debug && enableJoystick && device->activateJoysticks( joystickInfo ) ) { //activateJoysticks fills joystickInfo with info about each joystick
 		wcout << L"Joystick support is enabled and " << joystickInfo.size() << L" joystick(s) are present." << std::endl;
@@ -628,29 +638,47 @@ void GameManager::loadFonts() {
 	loadMusicFont();
 
 	core::dimension2d< uint32_t > fontDimensions;
-	uint32_t size = windowSize.Width / 25; //25 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
+	uint32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
 
 	do { //Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
 		loadingFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-		fontDimensions = loadingFont->getDimension( loading.c_str() );
-		size -= 1;
-	} while( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) );
+		if( loadingFont != NULL ) {
+			fontDimensions = loadingFont->getDimension( loading.c_str() );
+			size -= 1;
+		}
+	} while( loadingFont != NULL && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+
+	if( loadingFont == NULL ) {
+		loadingFont = gui->getBuiltInFont();
+	}
 
 	size = ( windowSize.Width / sideDisplaySizeDenominator );
 
 	do {
 		textFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-		fontDimensions = textFont->getDimension( L"Random seed: " );
-		size -= 1;
-	} while( fontDimensions.Width + viewportSize.Width > windowSize.Width );
+		if( textFont != NULL ) {
+			fontDimensions = textFont->getDimension( L"Random seed: " );
+			size -= 1;
+		}
+	} while( textFont != NULL && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
+
+	if( textFont == NULL ) {
+		textFont = gui->getBuiltInFont();
+	}
 
 	size = ( windowSize.Width / sideDisplaySizeDenominator );
 
 	do {
 		clockFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-		fontDimensions = clockFont->getDimension( L"00:00:00" );
-		size -= 1;
-	} while( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) );
+		if( clockFont != NULL ) {
+			fontDimensions = clockFont->getDimension( L"00:00:00" );
+			size -= 1;
+		}
+	} while( clockFont != NULL && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+
+	if( clockFont == NULL ) {
+		clockFont = gui->getBuiltInFont();
+	}
 }
 
 //Like loadTipFont() below, this guesses a good font size, then repeatedly adjusts the size and reloads the font until everything fits.
@@ -684,11 +712,17 @@ void GameManager::loadMusicFont() {
 
 	do {
 		musicTagFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-		artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
-		albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
-		titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
-		size -= 1;
-	} while( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth );
+		if( musicTagFont != NULL ) {
+			artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
+			albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
+			titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
+			size -= 1;
+		}
+	} while( musicTagFont != NULL && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
+
+	if( musicTagFont == NULL ) {
+		musicTagFont = gui->getBuiltInFont();
+	}
 }
 
 void GameManager::loadNextSong() {
@@ -852,9 +886,15 @@ void GameManager::loadTipFont() {
 
 	do {
 		tipFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-		tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
-		size -= 1;
-	} while( tipDimensions.Width > maxWidth );
+		if( tipFont != NULL ) {
+			tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
+			size -= 1;
+		}
+	} while( tipFont != NULL && ( tipDimensions.Width > maxWidth ) );
+
+	if( tipFont == NULL ) {
+		tipFont = gui->getBuiltInFont();
+	}
 }
 
 //Finds all playable music files in the ./music folder and compiles them into a list
@@ -1722,7 +1762,7 @@ void GameManager::resetThings() {
 	}
 
 	for( uint32_t i = 0; i < stuff.size(); i++ ) {
-		stuff[ i ].loadImage( driver );
+		stuff[ i ].loadTexture( driver );
 	}
 
 	for( uint8_t x = 0; x < mazeManager.cols; x++ ) {

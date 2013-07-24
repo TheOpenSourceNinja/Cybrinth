@@ -31,6 +31,7 @@
 #include <irrlicht.h>
 #include <SDL_mixer.h>
 #include <SDL/SDL.h>
+#include <string.h>
 #include <queue>
 #include <vector>
 
@@ -176,7 +177,7 @@ class GameManager : public IEventReceiver {
 
 
 		//Non-wide character strings----------------------------------
-		core::stringc fontFile;
+		string fontFile;
 
 
 		//Our own types----------------------------------

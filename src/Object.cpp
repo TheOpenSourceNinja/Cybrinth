@@ -1,11 +1,11 @@
 /**
  * Copyright © 2013 James Dearing.
  * This file is part of Cybrinth.
- * 
+ *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
- * 
+ *
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Object.h"
@@ -20,7 +20,7 @@ Object::Object() {
 	yInterp = 0;
 	moving = false;
 	distanceFromExit = 0;
-	image = NULL;
+	texture = NULL;
 }
 
 Object::~Object() {
@@ -107,22 +107,22 @@ void Object::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t he
 		size = height;
 	}
 
-	if( image != NULL ) {
+	if( texture != NULL ) {
 		int32_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
 		int32_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
-		//driver->draw2DImage(image, core::position2d<int32_t>(cornerX, cornerY));
+		//driver->draw2DImage(texture, core::position2d<int32_t>(cornerX, cornerY));
 		irr::video::SColor colorArray[] = {colorOne, colorOne, colorOne, colorOne};
-		driver->draw2DImage( image,
+		driver->draw2DImage( texture,
 							 irr::core::rect<int32_t>( cornerX, cornerY, cornerX + size, cornerY + size ),
-							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), image->getSize() ),
-							 0, //The clipping rectangle, so we can draw only part of the image if we want. Zero means draw the whole thing.
+							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), texture->getSize() ),
+							 0, //The clipping rectangle, so we can draw only part of the texture if we want. Zero means draw the whole thing.
 							 colorArray,
 							 true );
 	}
 }
 
-/*void Object::loadImage(video::IVideoDriver* driver) {
-	image = driver->addTexture(core::dimension2d<uint32_t>(1,1), "empty");
+/*void Object::loadTexture(video::IVideoDriver* driver) {
+	texture = driver->addTexture(core::dimension2d<uint32_t>(1,1), "empty");
 }*/
 
 void Object::setColor( irr::video::SColor newColor ) {

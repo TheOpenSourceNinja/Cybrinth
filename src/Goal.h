@@ -22,8 +22,8 @@ class Goal : public Object {
 		Goal();
 		virtual ~Goal();
 		void draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height );
-		void loadImage( irr::video::IVideoDriver* driver );
-		void loadImage( irr::video::IVideoDriver* driver, uint32_t size );
+		void loadTexture( irr::video::IVideoDriver* driver );
+		void loadTexture( irr::video::IVideoDriver* driver, uint32_t size );
 	protected:
 	private:
 };
