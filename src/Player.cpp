@@ -10,9 +10,7 @@
 */
 #include "Player.h"
 #include <irrlicht.h>
-#include <iostream>
 #include "colors.h"
-#include <cmath>
 
 using namespace std;
 

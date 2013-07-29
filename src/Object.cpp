@@ -9,6 +9,7 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Object.h"
+#include "colors.h"
 #include <iostream>
 
 using namespace std;

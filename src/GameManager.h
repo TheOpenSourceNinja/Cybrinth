@@ -27,12 +27,9 @@
 #include "PlayerStart.h"
 #include "StringConverter.h"
 
-//#include <asio.hpp>
 #include <irrlicht.h>
 #include <SDL_mixer.h>
-#include <SDL/SDL.h>
 #include <string.h>
-#include <queue>
 #include <vector>
 
 using namespace irr;
@@ -163,6 +160,7 @@ class GameManager : public IEventReceiver {
 
 
 		//wide character strings----------------------------------
+		core::stringw fontFile;
 		core::stringw loading;
 
 		core::stringw musicAlbum;
@@ -177,7 +175,7 @@ class GameManager : public IEventReceiver {
 
 
 		//Non-wide character strings----------------------------------
-		string fontFile;
+		//string fontFile;
 
 
 		//Our own types----------------------------------

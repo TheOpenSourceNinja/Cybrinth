@@ -13,7 +13,6 @@
 #define GOAL_H
 
 #include "Object.h"
-#include "colors.h"
 
 #include <irrlicht.h>
 

@@ -9,6 +9,7 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "PlayerStart.h"
+#include "colors.h"
 
 PlayerStart::PlayerStart() {
 	reset();
@@ -31,7 +32,7 @@ void PlayerStart::loadTexture( irr::video::IVideoDriver* driver ) {
 
 void PlayerStart::loadTexture( irr::video::IVideoDriver* driver, uint32_t size ) {
 	irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d<uint32_t>( size, size ) );
-	tempImage->fill( WHITE ); //Fills the image with invisibility!
+	tempImage->fill( WHITE );
 	setColor( BLACK );
 
 	driver->removeTexture( texture );

@@ -9,10 +9,8 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "NetworkManager.h"
-#include <vector>
-#include <lexical_cast.hpp>
+#include "GameManager.h"
 #include <algorithm/string.hpp>
-#include <taglib/taglib.h> //Only here because it defines what a wstring is, possibly overriding the definition which may be in the compiler's standard include files
 
 // get sockaddr, IPv4 or IPv6:
 void *NetworkManager::get_in_addr( struct sockaddr *sa ) {
@@ -25,7 +23,7 @@ void *NetworkManager::get_in_addr( struct sockaddr *sa ) {
 
 NetworkManager::NetworkManager() {
 	//ctor
-	port = "61187";
+	port = 61187;
 	newPlayer = 0;
 	rv = 0;
 	ai = NULL;
@@ -34,6 +32,7 @@ NetworkManager::NetworkManager() {
 	yes = 1;
 	backlog = 0;
 	fdmax = 0;
+	setGameManager( NULL );
 
 	#if defined WINDOWS
 	if (WSAStartup(MAKEWORD(1,1), &wsaData) != 0) {
@@ -43,25 +42,31 @@ NetworkManager::NetworkManager() {
     #endif
 }
 
+void NetworkManager::setGameManager( GameManager* newGM ) {
+	gm = newGM;
+}
+
 void NetworkManager::setPort( uint16_t newPort ) {
 	if( newPort <= 1023 ) {
 		std::wcerr << L"Warning: Port " << newPort << L" is in the \"well-known\" range (0-1023). This may not work. Recommend using ports above 49151." << std::endl;
 	} else if( newPort <= 49151 ) {
 		std::wcerr << L"Warning: Port " << newPort << L" is in the \"registered ports\" range (1024-49151). This may not work. Recommend using ports above 49151." << std::endl;
 	} else {
-		//std::wcout << L"Setting port to " << newPort << L"." << std::endl;
+		if( gm != NULL && gm->getDebugStatus() ) {
+			std::wcout << L"Setting port to " << newPort << L"." << std::endl;
+		}
 	}
 
-	port = boost::lexical_cast<std::string>( newPort );
+	port = newPort;
 }
 
-int NetworkManager::setup(bool isServer) {
+int NetworkManager::setup( bool isServer ) {
 	memset( &hints, 0, sizeof hints );
 	hints.ai_family = AF_INET6; // AF_INET or AF_INET6 to force version, AF_UNSPEC otherwise
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE; //fill in my IP for me
 
-	rv = getaddrinfo( NULL, port.c_str(), &hints, &ai );
+	rv = getaddrinfo( NULL, irr::core::stringc( port ).c_str(), &hints, &ai );
 
 	if( rv != 0 ) {
 		std::wcerr << L"getaddrinfo: " << gai_strerror( rv ) << std::endl;

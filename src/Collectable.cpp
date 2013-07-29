@@ -10,6 +10,7 @@
 */
 
 #include "Collectable.h"
+#include "colors.h"
 #include <iostream>
 
 using namespace std;

@@ -12,7 +12,6 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include "colors.h"
 #include <irrlicht.h>
 #include <stdint.h>
 

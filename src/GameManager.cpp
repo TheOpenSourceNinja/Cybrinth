@@ -12,33 +12,11 @@
 #define BOOST_FILESYSTEM_NO_DEPRECATED //Recommended by the Boost filesystem library documentation to prevent us from using functions which will be removed in later versions
 
 #include "GameManager.h"
-#include "font_manager.h"
-#include <iostream>
-#include <irrlicht.h>
-#include <vector>
-#include <filesystem.hpp>
 #include <filesystem/fstream.hpp>
 #include <algorithm/string.hpp>
-#include <lexical_cast.hpp>
-#include <bind.hpp>
-#include <SDL/SDL.h>
-#include <SDL_mixer.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <time.h>
-#include <queue>
-#include <date_time/posix_time/posix_time.hpp>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <iostream>
-#include <errno.h>
-#include <sstream>
+#include <boost/lexical_cast.hpp>
 #include <taglib/fileref.h>
-#include <taglib/tag.h>
-#include <climits>
+#include <SDL/SDL.h>
 
 #if defined WINDOWS //Networking stuff
 #include <winsock.h>
@@ -339,9 +317,10 @@ GameManager::~GameManager() {
 }
 
 GameManager::GameManager() {
-	mazeManager.setGameManager(this);
+	network.setGameManager( this );
+	mazeManager.setGameManager( this );
 	isServer = false;
-	antiAliasFonts = false;
+	antiAliasFonts = true;
 	currentProTip = 0;
 	sideDisplaySizeDenominator = 6; //What fraction of the screen's width is set aside for displaying text, statistics, etc. during play.
 
@@ -349,7 +328,7 @@ GameManager::GameManager() {
 	boost::filesystem::recursive_directory_iterator end;
 	for( boost::filesystem::recursive_directory_iterator i(L"./"); i != end; i++ ) {
 		if( !is_directory( i->path() ) && boost::iequals( i->path().extension().generic_wstring(), L".ttf" ) ) {
-			fontFile = i->path().generic_string();
+			fontFile = i->path().c_str();
 			break;
 		}
 	}
@@ -1463,7 +1442,6 @@ void GameManager::readPrefs() {
 								wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
 							}
 						} else if( preference == L"show background animations:" ) {
-							wcout << L"test" << endl;
 							if( choice == L"true" ) {
 								if( debug ) {
 									wcout << L"Show backgrounds is ON" << endl;

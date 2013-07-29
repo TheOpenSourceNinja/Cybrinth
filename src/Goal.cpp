@@ -8,6 +8,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
+#include "colors.h"
 #include "Goal.h"
 #include <iostream>
 

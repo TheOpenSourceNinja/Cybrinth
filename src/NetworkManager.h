@@ -1,26 +1,23 @@
 /**
  * Copyright © 2013 James Dearing.
  * This file is part of Cybrinth.
- * 
+ *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
- * 
+ *
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #ifndef NETWORKMANAGER_H
 #define NETWORKMANAGER_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <iostream>
-#include <errno.h>
-#include <sstream>
+#include "Goal.h"
+#include "MazeCell.h"
+#include "PlayerStart.h"
+#include "Collectable.h"
 #include <irrlicht.h>
+#include <sstream>
 #include <vector>
 
 #if defined WINDOWS
@@ -33,16 +30,15 @@
 #include <netdb.h>
 #endif
 
-#include "Goal.h"
-#include "MazeCell.h"
-#include "PlayerStart.h"
-#include "Collectable.h"
+//#include "GameManager.h"
+class GameManager; //Avoids circular dependency
 
 class NetworkManager {
 	public:
 		NetworkManager();
 		virtual ~NetworkManager();
-		int setup(bool isServer);
+		int setup( bool isServer );
+		void setGameManager( GameManager * newGM );
 		bool hasNewPlayerConnected();
 		uint8_t getNewPlayer();
 		int checkForConnections();
@@ -56,9 +52,10 @@ class NetworkManager {
 		bool receiveData();
 	protected:
 	private:
+		GameManager * gm;
 		unsigned int newPlayer;
 		struct addrinfo hints;
-		std::string port; //Does not need to be a wstring because it only ever contains numbers
+		uint16_t port;
 		int rv;
 		struct addrinfo *ai;
 		int listener;
