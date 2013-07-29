@@ -46,13 +46,15 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 		case COLLECTABLE_KEY: {
 				texture = driver->getTexture( L"key.png" );
 
-				if( texture == NULL ) {
-					wcerr << L"Key texture not loaded" << endl;
-				}
-
 				break;
 			}
 		default: break;
+	}
+
+	if( texture == NULL ) {
+		irr::video::IImage* temp = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< uint32_t >( 2, 2 ) );
+		temp->fill( WHITE );
+		texture = imageToTexture( driver, temp, "generic collectable" );
 	}
 }
 

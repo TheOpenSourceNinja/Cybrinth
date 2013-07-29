@@ -264,19 +264,21 @@ void GameManager::drawAll() {
 
 		gui->drawAll();
 	} else {
-		core::dimension2d<uint32_t> tempDimensions = loadingFont->getDimension( loading.c_str() );
-		uint32_t textY = 0;
-		core::rect< int32_t > tempRectangle(( windowSize.Width / 2 ) - ( tempDimensions.Width / 2 ), textY, ( windowSize.Width / 2 ) + ( tempDimensions.Width / 2 ), tempDimensions.Height + textY );
+		core::dimension2d< uint32_t > loadingDimensions = loadingFont->getDimension( loading.c_str() );
+		int32_t textY = 0;
+		int32_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
+		core::rect< int32_t > tempRectangle(textX, textY, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + textY );
 		loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
 
-		textY = tempDimensions.Height + textY + 1;
-		tempDimensions = tipFont->getDimension( proTipPrefix.c_str() );
-		tempRectangle = core::rect< int32_t >( 0, textY, tempDimensions.Width, tempDimensions.Height + textY );
+		textY = loadingDimensions.Height + textY + 1;
+		core::dimension2d< uint32_t > proTipPrefixDimensions = tipFont->getDimension( proTipPrefix.c_str() );
+		core::dimension2d< uint32_t > proTipDimensions = tipFont->getDimension( proTips.at( currentProTip ).c_str() );
+		textX = ( windowSize.Width / 2 ) - ( ( proTipPrefixDimensions.Width + proTipDimensions.Width ) / 2 );
+		tempRectangle = core::rect< int32_t >( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
 		tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
 
-		uint32_t textX = tempDimensions.Width + 1;
-		tempDimensions = tipFont->getDimension( proTips.at( currentProTip ).c_str() );
-		tempRectangle = core::rect< int32_t >( textX, textY, tempDimensions.Width + textX, tempDimensions.Height + textY );
+		textX += proTipPrefixDimensions.Width;
+		tempRectangle = core::rect< int32_t >( textX, textY, proTipDimensions.Width + textX, proTipDimensions.Height + textY );
 		tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
 	}
 
