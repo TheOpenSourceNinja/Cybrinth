@@ -20,7 +20,6 @@
 #include <filesystem/fstream.hpp>
 #include <algorithm/string.hpp>
 #include <lexical_cast.hpp>
-//#include <asio.hpp>
 #include <bind.hpp>
 #include <SDL/SDL.h>
 #include <SDL_mixer.h>
@@ -71,7 +70,7 @@
 
 using namespace std;
 using namespace irr;
-using boost::asio::ip::tcp;
+//using boost::asio::ip::tcp;
 
 
 bool GameManager::allHumansAtGoal() {

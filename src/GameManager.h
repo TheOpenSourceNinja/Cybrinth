@@ -27,7 +27,7 @@
 #include "PlayerStart.h"
 #include "StringConverter.h"
 
-#include <asio.hpp>
+//#include <asio.hpp>
 #include <irrlicht.h>
 #include <SDL_mixer.h>
 #include <SDL/SDL.h>
@@ -37,7 +37,7 @@
 
 using namespace irr;
 using namespace std;
-using boost::asio::ip::tcp;
+//using boost::asio::ip::tcp;
 
 class GameManager : public IEventReceiver {
 	public:
