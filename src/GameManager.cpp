@@ -1406,7 +1406,7 @@ void GameManager::readPrefs() {
 
 						if( preference == L"volume:" ) {
 							try {
-								uint16_t choiceAsInt = boost::lexical_cast< uint16_t >( choice ); //Used uint16_t here because boost::lexical_cast refuses to convert from a wstring to a uint8_t. uint8_t is technically an unsigned char, but we're using that type as an 8-bit unsigned integer
+								uint16_t choiceAsInt = boost::lexical_cast< uint16_t >( choice );
 
 								if( choiceAsInt <= 100 && choiceAsInt >= 0 ) {
 									musicVolume = choiceAsInt;
@@ -1429,7 +1429,7 @@ void GameManager::readPrefs() {
 							}
 						} else if( preference == L"number of bots:" ) {
 							try {
-								uint16_t choiceAsInt = boost::lexical_cast< uint16_t >( choice ); //Used uint16_t here because boost::lexical_cast refuses to convert from a wstring to a uint8_t. uint8_t is technically an unsigned char, but we're using that type as an 8-bit unsigned integer
+								uint16_t choiceAsInt = boost::lexical_cast< uint16_t >( choice );
 
 								if( choiceAsInt <= numPlayers ) {
 									numBots = choiceAsInt;
@@ -1506,7 +1506,7 @@ void GameManager::readPrefs() {
 							}
 						} else if( preference == L"bits per pixel:" ) {
 							try {
-								uint32_t choiceAsInt = boost::lexical_cast<uint32_t>( choice );
+								uint32_t choiceAsInt = boost::lexical_cast< uint32_t >( choice );
 
 								if( choiceAsInt <= 32 ) {
 									bitsPerPixel = choiceAsInt;
@@ -1593,7 +1593,7 @@ void GameManager::readPrefs() {
 
 						} else if( preference == L"number of players:" ) {
 							try {
-								uint16_t choiceAsInt = boost::lexical_cast<uint16_t>( choice ); //Used uint16_t here because boost::lexical_cast refuses to convert from a wstring to a uint8_t. uint8_t is technically an unsigned char, but we're using that type as an 8-bit unsigned integer
+								uint16_t choiceAsInt = boost::lexical_cast<uint16_t>( choice );
 
 								if( choiceAsInt > UCHAR_MAX ) { //The maximum number of players is whatever a uint8_t can hold, presumably 255 (the 8 is the minimum number of bits, it may not be the true number).
 									choiceAsInt = UCHAR_MAX;
