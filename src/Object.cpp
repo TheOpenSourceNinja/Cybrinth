@@ -27,20 +27,20 @@ Object::Object() {
 Object::~Object() {
 }
 
-void Object::setPos( uint8_t newX, uint8_t newY ) {
+void Object::setPos( uint_least8_t newX, uint_least8_t newY ) {
 	setX( newX );
 	setY( newY );
 }
 
-uint8_t Object::getY() {
+uint_least8_t Object::getY() {
 	return y;
 }
 
-uint8_t Object::getX() {
+uint_least8_t Object::getX() {
 	return x;
 }
 
-void Object::moveY( int8_t val ) {
+void Object::moveY( int_fast8_t val ) {
 	if( !moving ) {
 		y += val;
 		moving = true;
@@ -52,7 +52,7 @@ void Object::moveY( int8_t val ) {
 	}
 }
 
-void Object::moveX( int8_t val ) {
+void Object::moveX( int_fast8_t val ) {
 	if( !moving ) {
 		x += val;
 		moving = true;
@@ -64,17 +64,17 @@ void Object::moveX( int8_t val ) {
 	}
 }
 
-void Object::setX( uint8_t val ) {
+void Object::setX( uint_least8_t val ) {
 	x = val;
 	xInterp = x;
 }
 
-void Object::setY( uint8_t val ) {
+void Object::setY( uint_least8_t val ) {
 	y = val;
 	yInterp = y;
 }
 
-void Object::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
+void Object::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
 	if( moving ) {
 		float speed = .2;
 
@@ -100,7 +100,7 @@ void Object::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t he
 		yInterp = y;
 	}
 
-	uint32_t size;
+	uint_least16_t size;
 
 	if( width < height ) {
 		size = width;
@@ -109,75 +109,74 @@ void Object::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t he
 	}
 
 	if( texture != NULL ) {
-		int32_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
-		int32_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
-		//driver->draw2DImage(texture, core::position2d<int32_t>(cornerX, cornerY));
-		irr::video::SColor colorArray[] = {colorOne, colorOne, colorOne, colorOne};
+		int_least16_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
+		int_least16_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
+		irr::video::SColor colorArray[] = {colorTwo, colorTwo, colorTwo, colorTwo};
 		driver->draw2DImage( texture,
-							 irr::core::rect<int32_t>( cornerX, cornerY, cornerX + size, cornerY + size ),
-							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), texture->getSize() ),
+							 irr::core::rect< irr::s32 >( cornerX, cornerY, cornerX + size, cornerY + size ),
+							 irr::core::rect< irr::s32 >( irr::core::position2d< irr::s32 >( 0, 0 ), texture->getSize() ),
 							 0, //The clipping rectangle, so we can draw only part of the texture if we want. Zero means draw the whole thing.
-							 colorArray,
-							 true );
+							 0, //"Array of 4 colors denoting the color values of the corners of the destRect". Zero means use the texture's own colors.
+							 true ); //Whether to use the texture's alpha channel
 	}
 }
 
 /*void Object::loadTexture(video::IVideoDriver* driver) {
-	texture = driver->addTexture(core::dimension2d<uint32_t>(1,1), "empty");
+	texture = driver->addTexture(core::dimension2d<uint_least16_t>(1,1), "empty");
 }*/
 
 void Object::setColor( irr::video::SColor newColor ) {
 	if( newColor == BLACK ) {
-		colorTwo = BLACK;
-		colorOne = GRAY;
-	} else if( newColor == GRAY ) {
-		colorTwo = GRAY;
 		colorOne = BLACK;
+		colorTwo = GRAY;
+	} else if( newColor == GRAY ) {
+		colorOne = GRAY;
+		colorTwo = BLACK;
 	} else if( newColor == BLUE) {
-		colorTwo = BLUE;
-		colorOne = LIGHTBLUE;
-	} else if( newColor == LIGHTBLUE ) {
-		colorTwo = LIGHTBLUE;
 		colorOne = BLUE;
+		colorTwo = LIGHTBLUE;
+	} else if( newColor == LIGHTBLUE ) {
+		colorOne = LIGHTBLUE;
+		colorTwo = BLUE;
 	} else if( newColor == GREEN ) {
-		colorTwo = GREEN;
-		colorOne = LIGHTGREEN;
-	} else if( newColor == LIGHTGREEN ) {
-		colorTwo = LIGHTGREEN;
 		colorOne = GREEN;
+		colorTwo = LIGHTGREEN;
+	} else if( newColor == LIGHTGREEN ) {
+		colorOne = LIGHTGREEN;
+		colorTwo = GREEN;
 	} else if( newColor == CYAN ) {
-		colorTwo = CYAN;
-		colorOne = LIGHTCYAN;
-	} else if( newColor == LIGHTCYAN ) {
-		colorTwo = LIGHTCYAN;
 		colorOne = CYAN;
+		colorTwo = LIGHTCYAN;
+	} else if( newColor == LIGHTCYAN ) {
+		colorOne = LIGHTCYAN;
+		colorTwo = CYAN;
 	} else if( newColor == RED ) {
-		colorTwo = RED;
-		colorOne = LIGHTRED;
-	} else if( newColor == LIGHTRED ) {
-		colorTwo = LIGHTRED;
 		colorOne = RED;
+		colorTwo = LIGHTRED;
+	} else if( newColor == LIGHTRED ) {
+		colorOne = LIGHTRED;
+		colorTwo = RED;
 	} else if( newColor == MAGENTA ) {
-		colorTwo = MAGENTA;
-		colorOne = LIGHTMAGENTA;
-	} else if( newColor == LIGHTMAGENTA ) {
+		colorOne = MAGENTA;
 		colorTwo = LIGHTMAGENTA;
-		colorOne = MAGENTA;
+	} else if( newColor == LIGHTMAGENTA ) {
+		colorOne = LIGHTMAGENTA;
+		colorTwo = MAGENTA;
 	} else if( newColor == BROWN ) {
-		colorTwo = YELLOW;
-		colorOne = BROWN;
-	} else if( newColor == YELLOW ) {
-		colorTwo = BROWN;
 		colorOne = YELLOW;
+		colorTwo = BROWN;
+	} else if( newColor == YELLOW ) {
+		colorOne = BROWN;
+		colorTwo = YELLOW;
 	} else if( newColor == LIGHTGRAY ) {
-		colorTwo = LIGHTGRAY;
-		colorOne = WHITE;
-	} else if( newColor == WHITE ) {
-		colorTwo = WHITE;
 		colorOne = LIGHTGRAY;
+		colorTwo = WHITE;
+	} else if( newColor == WHITE ) {
+		colorOne = WHITE;
+		colorTwo = LIGHTGRAY;
 	} else {
-		colorTwo = GREEN; //Magenta on a green background: Never used in DOS games because, on composite monitors, it left too much color 'smearing'. Likewise, it should never be used in this game.
-		colorOne = MAGENTA;
+		colorOne = GREEN; //Magenta on a green background: Never used in DOS games because, on composite monitors, it left too much color 'smearing'. Likewise, it should never be used in this game.
+		colorTwo = MAGENTA;
 	}
 }
 
@@ -193,7 +192,7 @@ irr::video::SColor Object::getColor() {
 	return getColorOne();
 }
 
-void Object::setColorBasedOnNum( uint8_t num ) {
+void Object::setColorBasedOnNum( uint_least8_t num ) {
 	switch( num % 13 ) {
 		case 0: {
 			setColor( RED ); //Special case: We don't want the player to be black (color 0) against a black background;

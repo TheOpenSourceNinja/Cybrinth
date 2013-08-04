@@ -2,11 +2,11 @@
 /**
  * Copyright © 2013 James Dearing.
  * This file is part of Cybrinth.
- * 
+ *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
- * 
+ *
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 
@@ -15,6 +15,7 @@
 #if COMPILE_WITH_FREETYPE
 
 #include <cassert>
+#include <cstdint>
 
 using namespace irr;
 using namespace gui;
@@ -50,7 +51,6 @@ CGUITTGlyph::~CGUITTGlyph() {
 	delete[] image;
 }
 
-//void CGUITTGlyph::cache(u32 idx_, CGUITTFace& ttFace_, video::IVideoDriver* driver_, irr::core::dimension2d<irr::u32> &largestSize)
 void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 	assert( freetypeFont );
 
@@ -101,8 +101,8 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 					imgw = imgh;
 				}
 
-				int32_t offx = left;
-				int32_t offy = size - top;
+				s32 offx = left;
+				s32 offy = size - top;
 
 				if( offx + texw > freetypeFont->LargestGlyph.Width )
 					freetypeFont->LargestGlyph.Width = offx + texw;
@@ -140,7 +140,7 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 
 				c8 name[128];
 				sprintf( name, "ttf%d_%d_%p", idx_, size, ( void * ) freetypeFont );
-				video::IImage *img = freetypeFont->Driver->createImageFromData( video::ECF_A8R8G8B8, core::dimension2d<u32>( imgw, imgh ), texd );
+				video::IImage *img = freetypeFont->Driver->createImageFromData( video::ECF_A8R8G8B8, core::dimension2d< u32 >( imgw, imgh ), texd );
 				setGlyphTextureFlags( freetypeFont->Driver );
 				tex = freetypeFont->Driver->addTexture( name, img );
 				img->drop();
@@ -184,8 +184,8 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 			imgw16 = imgh16;
 		}
 
-		int32_t offx = left;
-		int32_t offy = size - top;
+		s32 offx = left;
+		s32 offy = size - top;
 
 		if( offx + texw > freetypeFont->LargestGlyph.Width )
 			freetypeFont->LargestGlyph.Width = offx + texw;
@@ -214,7 +214,7 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 
 		c8 name[128];
 		sprintf( name, "ttf%d_%d_%p_16", idx_, size, ( void * ) freetypeFont );
-		video::IImage *img = freetypeFont->Driver->createImageFromData( video::ECF_A1R5G5B5, core::dimension2d<u32>( imgw16, imgh16 ), texd16 );
+		video::IImage *img = freetypeFont->Driver->createImageFromData( video::ECF_A1R5G5B5, core::dimension2d< u32 >( imgw16, imgh16 ), texd16 );
 		setGlyphTextureFlags( freetypeFont->Driver );
 		tex16 = freetypeFont->Driver->addTexture( name, img );
 		img->drop();
@@ -230,16 +230,16 @@ bool CGUITTGlyph::mTexFlagMip = false;
 
 void CGUITTGlyph::setGlyphTextureFlags( video::IVideoDriver* driver_ ) {
 	mTexFlag16 = driver_->getTextureCreationFlag( video::ETCF_ALWAYS_16_BIT );
-	mTexFlag32 = driver_->getTextureCreationFlag( video::ETCF_ALWAYS_32_BIT );
+	mTexFlag16 = driver_->getTextureCreationFlag( video::ETCF_ALWAYS_32_BIT );
 	mTexFlagMip = driver_->getTextureCreationFlag( video::ETCF_CREATE_MIP_MAPS );
 	driver_->setTextureCreationFlag( video::ETCF_ALWAYS_16_BIT, false );
-	driver_->setTextureCreationFlag( video::ETCF_ALWAYS_32_BIT, true );
+	driver_->setTextureCreationFlag( video::ETCF_ALWAYS_16_BIT, true );
 	driver_->setTextureCreationFlag( video::ETCF_CREATE_MIP_MAPS, false );
 }
 
 void CGUITTGlyph::restoreTextureFlags( video::IVideoDriver* driver_ ) {
 	driver_->setTextureCreationFlag( video::ETCF_ALWAYS_16_BIT, mTexFlag16 );
-	driver_->setTextureCreationFlag( video::ETCF_ALWAYS_32_BIT, mTexFlag32 );
+	driver_->setTextureCreationFlag( video::ETCF_ALWAYS_16_BIT, mTexFlag16 );
 	driver_->setTextureCreationFlag( video::ETCF_CREATE_MIP_MAPS, mTexFlagMip );
 }
 
@@ -367,8 +367,8 @@ u32 CGUIFreetypeFont::getGlyphByChar( wchar_t c ) const {
 }
 
 //! returns the dimension of a text
-core::dimension2d<u32> CGUIFreetypeFont::getDimension( const wchar_t* text ) const {
-	core::dimension2d<u32> dim( 0, Glyphs[0]->size );
+core::dimension2d< u32 > CGUIFreetypeFont::getDimension( const wchar_t* text ) const {
+	core::dimension2d< u32 > dim( 0, Glyphs[0]->size );
 
 	for( const wchar_t* p = text; *p; ++p ) {
 		dim.Width += getWidthFromCharacter( *p );
@@ -384,11 +384,11 @@ core::dimension2d<u32> CGUIFreetypeFont::getDimension( const wchar_t* text ) con
 
 
 inline u32 CGUIFreetypeFont::getWidthFromCharacter( wchar_t c ) const {
-	u32 n = getGlyphByChar( c );
+	u16 n = getGlyphByChar( c );
 
 	if( n > 0 ) {
 		int w = Glyphs[n - 1]->texw;
-		int32_t left = Glyphs[n - 1]->left;
+		int_least16_t left = Glyphs[n - 1]->left;
 
 		if( w + left > 0 )
 			return w + left;
@@ -403,12 +403,12 @@ inline u32 CGUIFreetypeFont::getWidthFromCharacter( wchar_t c ) const {
 
 
 //! draws an text and clips it to the specified rectangle if wanted
-void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::core::rect<int32_t>& position, video::SColor color, bool hcenter, bool vcenter, const core::rect<int32_t>* clip ) {
+void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::core::rect< irr::s32 >& position, video::SColor color, bool hcenter, bool vcenter, const core::rect< irr::s32 >* clip ) {
 	if( !Driver )
 		return;
 
-	core::dimension2d<int32_t> textDimension;
-	core::position2d<int32_t> offset = position.UpperLeftCorner;
+	core::dimension2d< irr::s32 > textDimension;
+	core::position2d< irr::s32 > offset = position.UpperLeftCorner;
 	video::SColor colors[4];
 
 	for( int i = 0; i < 4; i++ ) {
@@ -434,32 +434,32 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 
 		if( n > 0 ) {
 			if( AntiAlias ) {
-//				int32_t imgw = Glyphs[n-1]->imgw;
-//				int32_t imgh = Glyphs[n-1]->imgh;
-				int32_t texw = Glyphs[n-1]->texw;
-				int32_t texh = Glyphs[n-1]->texh;
-				int32_t offx = Glyphs[n-1]->left;
-				int32_t offy = Glyphs[n-1]->size - Glyphs[n-1]->top;
+//				s32 imgw = Glyphs[n-1]->imgw;
+//				s32 imgh = Glyphs[n-1]->imgh;
+				s32 texw = Glyphs[n-1]->texw;
+				s32 texh = Glyphs[n-1]->texh;
+				s32 offx = Glyphs[n-1]->left;
+				s32 offy = Glyphs[n-1]->size - Glyphs[n-1]->top;
 
 				if( Driver->getDriverType() != video::EDT_SOFTWARE ) {
 					if( !Transparency )
 						color.color |= 0xff000000;
 
-					Driver->draw2DImage( Glyphs[n-1]->tex, core::position2d<int32_t>( offset.X + offx, offset.Y + offy ), core::rect<int32_t>( 0, 0, texw, texh ), clip, color, true );
+					Driver->draw2DImage( Glyphs[n-1]->tex, core::position2d< irr::s32 >( offset.X + offx, offset.Y + offy ), core::rect< irr::s32 >( 0, 0, texw, texh ), clip, color, true );
 				} else {
-					int32_t a = color.getAlpha();
-					int32_t r = color.getRed();
-					int32_t g = color.getGreen();
-					int32_t b = color.getBlue();
+					s32 a = color.getAlpha();
+					s32 r = color.getRed();
+					s32 g = color.getGreen();
+					s32 b = color.getBlue();
 					u8 *pt = Glyphs[n-1]->image;
 
 					if( !Transparency )	a = 255;
 
 					for( int y = 0; y < texh; y++ ) {
 						for( int x = 0; x < texw; x++ ) {
-							if( !clip || clip->isPointInside( core::position2d<int32_t>( offset.X + x + offx, offset.Y + y + offy ) ) ) {
+							if( !clip || clip->isPointInside( core::position2d< irr::s32 >( offset.X + x + offx, offset.Y + y + offy ) ) ) {
 								if( *pt ) {
-									Driver->draw2DRectangle( video::SColor(( a * *pt ) / 255, r, g, b ), core::rect<int32_t>( offset.X + x + offx, offset.Y + y + offy, offset.X + x + offx + 1, offset.Y + y + offy + 1 ) );
+									Driver->draw2DRectangle( video::SColor(( a * *pt ) / 255, r, g, b ), core::rect< irr::s32 >( offset.X + x + offx, offset.Y + y + offy, offset.X + x + offx + 1, offset.Y + y + offy + 1 ) );
 								}
 
 								pt++;
@@ -468,20 +468,20 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 					}
 				}
 			} else {
-//				int32_t imgw = Glyphs[n-1]->imgw16;
-//				int32_t imgh = Glyphs[n-1]->imgh16;
-				int32_t texw = Glyphs[n-1]->texw16;
-				int32_t texh = Glyphs[n-1]->texh16;
-				int32_t offx = Glyphs[n-1]->left16;
-				int32_t offy = Glyphs[n-1]->size - Glyphs[n-1]->top16;
+//				s32 imgw = Glyphs[n-1]->imgw16;
+//				s32 imgh = Glyphs[n-1]->imgh16;
+				s32 texw = Glyphs[n-1]->texw16;
+				s32 texh = Glyphs[n-1]->texh16;
+				s32 offx = Glyphs[n-1]->left16;
+				s32 offy = Glyphs[n-1]->size - Glyphs[n-1]->top16;
 
 				if( !Transparency ) {
 					color.color |= 0xff000000;
 				}
 
 				Driver->draw2DImage( Glyphs[n-1]->tex16,
-									 core::position2d<int32_t>( offset.X + offx, offset.Y + offy ),
-									 core::rect<int32_t>( 0, 0, texw, texh ),
+									 core::position2d< irr::s32 >( offset.X + offx, offset.Y + offy ),
+									 core::rect< irr::s32 >( 0, 0, texw, texh ),
 									 clip, color, true );
 			}
 
@@ -495,9 +495,9 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 }
 
 //! Calculates the index of the character in the text which is on a specific position.
-int32_t CGUIFreetypeFont::getCharacterFromPos( const wchar_t* text, int32_t pixel_x ) const {
-	int32_t x = 0;
-	int32_t idx = 0;
+irr::s32  CGUIFreetypeFont::getCharacterFromPos( const wchar_t* text, irr::s32 pixel_x ) const {
+	irr::s32 x = 0;
+	irr::s32 idx = 0;
 
 	while( text[idx] ) {
 		x += getWidthFromCharacter( text[idx] );

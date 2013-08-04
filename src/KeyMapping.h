@@ -2,7 +2,7 @@
 #define KEYMAPPING_H
 
 #include <irrlicht.h>
-#include <stdint.h>
+#include <cstdint>
 
 class KeyMapping
 {
@@ -30,16 +30,16 @@ class KeyMapping
 		/** Access player
 		 * \return The current value of player
 		 */
-		uint8_t getPlayer();
+		uint_least8_t getPlayer();
 		/** Set player
 		 * \param val New value to set
 		 */
-		void setPlayer( uint8_t val );
+		void setPlayer( uint_least8_t val );
 	protected:
 	private:
 		irr::EKEY_CODE key; //!< Member variable "key"
 		unsigned char action; //!< Member variable "action"
-		uint8_t player;
+		uint_least8_t player;
 };
 
 #endif // KEYMAPPING_H

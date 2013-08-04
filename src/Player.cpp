@@ -35,20 +35,34 @@ void Player::loadTexture( irr::video::IVideoDriver* driver ) {
 }
 
 //Draws a filled circle. Somebody please implement a faster algorithm.
-void Player::loadTexture( irr::video::IVideoDriver* driver, uint32_t size ) {
-	irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< uint32_t >( size, size ) );
+void Player::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size ) {
+	irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( size, size ) );
 	tempImage->fill( irr::video::SColor( 0, 0, 0, 0) ); //Fills the image with invisibility!
 
-	int32_t radius = size / 2;
-	irr::core::position2d< int32_t > origin( radius, radius );
+	int_fast16_t radius = size / 2;
+	irr::core::position2d< int_fast16_t > origin( radius, radius );
 	float rSquared = pow( radius, 2 );
-	for( int32_t x = -radius; x <= 0; x++ ) {
-		int32_t height = static_cast< int32_t >( sqrt( rSquared - pow( x, 2 ) ) );
-		for( int32_t y = -height; y <= 0; y++ ) {
-			tempImage->setPixel( x + origin.X, y + origin.Y, WHITE );
-			tempImage->setPixel( x + origin.X, -y + origin.Y, WHITE );
-			tempImage->setPixel( -x + origin.X, y + origin.Y, WHITE );
-			tempImage->setPixel( -x + origin.X, -y + origin.Y, WHITE );
+	for( int_fast16_t x = -radius; x <= 0; x++ ) {
+		int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
+		for( int_fast16_t y = -height; y <= 0; y++ ) {
+			tempImage->setPixel( x + origin.X, y + origin.Y, colorOne );
+			tempImage->setPixel( x + origin.X, -y + origin.Y, colorOne );
+			tempImage->setPixel( -x + origin.X, y + origin.Y, colorOne );
+			tempImage->setPixel( -x + origin.X, -y + origin.Y, colorOne );
+		}
+	}
+
+	size /= 2;
+
+	radius = size / 2;
+	rSquared = pow( radius, 2 );
+	for( int_fast16_t x = -radius; x <= 0; x++ ) {
+		int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
+		for( int_fast16_t y = -height; y <= 0; y++ ) {
+			tempImage->setPixel( x + origin.X, y + origin.Y, colorTwo );
+			tempImage->setPixel( x + origin.X, -y + origin.Y, colorTwo );
+			tempImage->setPixel( -x + origin.X, y + origin.Y, colorTwo );
+			tempImage->setPixel( -x + origin.X, -y + origin.Y, colorTwo );
 		}
 	}
 
@@ -56,34 +70,8 @@ void Player::loadTexture( irr::video::IVideoDriver* driver, uint32_t size ) {
 	texture = driver->addTexture( L"playerCircle", tempImage );
 }
 
-void Player::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
-
-	if( moving ) {
-		float speed = .2;
-
-		if( x > xInterp ) {
-			xInterp += speed;
-		} else if( x < xInterp ) {
-			xInterp -= speed;
-		}
-
-		if( y > yInterp ) {
-			yInterp += speed;
-		} else if( y < yInterp ) {
-			yInterp -= speed;
-		}
-
-		if(( x >= ( xInterp - speed ) ) && ( x <= ( xInterp + speed ) ) && ( y >= ( yInterp - speed ) ) && ( y <= ( yInterp + speed ) ) ) {
-			moving = false;
-			xInterp = x;
-			yInterp = y;
-		}
-	} else {
-		xInterp = x;
-		yInterp = y;
-	}
-
-	uint32_t size;
+void Player::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
+	uint_least16_t size;
 
 	if( width < height ) {
 		size = width;
@@ -95,40 +83,15 @@ void Player::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t he
 		loadTexture( driver, size );
 	}
 
-	if( texture != NULL ) {
-		int32_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
-		int32_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
-		irr::video::SColor colorArray[] = {colorTwo, colorTwo, colorTwo, colorTwo};
-		driver->draw2DImage( texture,
-							 irr::core::rect<int32_t>( cornerX, cornerY, cornerX + size, cornerY + size ),
-							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), texture->getSize() ),
-							 0, //The clipping rectangle, so we can draw only part of the texture if we want. Zero means draw the whole thing.
-							 colorArray,
-							 true );
-
-		size /= 2;
-		cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
-		cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
-
-		for( uint8_t a = 0; a < 4; a++ ) {
-			colorArray[a] = colorOne;
-		}
-
-		driver->draw2DImage( texture,
-							 irr::core::rect<int32_t>( cornerX, cornerY, cornerX + size, cornerY + size ),
-							 irr::core::rect<int32_t>( irr::core::position2d<int32_t>( 0, 0 ), texture->getSize() ),
-							 0, //The clipping rectangle, so we can draw only part of the texture if we want. Zero means draw the whole thing.
-							 colorArray,
-							 true );
-	}
+	Object::draw( driver, width, height );
 }
 
-void Player::moveX( int8_t val ) {
+void Player::moveX( int_fast8_t val ) {
 	Object::moveX( val );
 	stepsTaken += 1;
 }
 
-void Player::moveY( int8_t val ) {
+void Player::moveY( int_fast8_t val ) {
 	Object::moveY( val );
 	stepsTaken += 1;
 }

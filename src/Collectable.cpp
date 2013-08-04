@@ -25,7 +25,7 @@ Collectable::~Collectable() {
 	//dtor
 }
 
-void Collectable::setType( uint8_t newType ) {
+void Collectable::setType( uint_least8_t newType ) {
 	type = newType;
 
 	switch( type ) {
@@ -37,7 +37,7 @@ void Collectable::setType( uint8_t newType ) {
 	}
 }
 
-uint8_t Collectable::getType() {
+uint_least8_t Collectable::getType() {
 	return type;
 }
 
@@ -52,7 +52,7 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 	}
 
 	if( texture == NULL ) {
-		irr::video::IImage* temp = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< uint32_t >( 2, 2 ) );
+		irr::video::IImage* temp = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( 2, 2 ) );
 		temp->fill( WHITE );
 		texture = imageToTexture( driver, temp, "generic collectable" );
 	}
@@ -70,7 +70,7 @@ irr::video::ITexture* Collectable::imageToTexture( irr::video::IVideoDriver* dri
 	return texture;
 }
 
-void Collectable::resizeImage( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
+void Collectable::resizeImage( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
 	irr::video::IImage* tempImage = textureToImage( driver, texture );
 	//driver->removeTexture( texture );
 	//texture->drop();
@@ -81,8 +81,8 @@ void Collectable::resizeImage( irr::video::IVideoDriver* driver, uint32_t width,
 	//tempImage2->drop();
 }
 
-void Collectable::draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height ) {
-	uint32_t smaller = height;
+void Collectable::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
+	uint_least16_t smaller = height;
 	if( smaller > width ) {
 		smaller = width;
 	}

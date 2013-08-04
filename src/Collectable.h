@@ -22,14 +22,14 @@ class Collectable : public Object {
 	public:
 		Collectable();
 		virtual ~Collectable();
-		void setType( uint8_t );
-		uint8_t getType();
+		void setType( uint_least8_t );
+		uint_least8_t getType();
 		void loadTexture( irr::video::IVideoDriver* driver );
-		void draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height );
+		void draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height );
 	protected:
 	private:
-		uint8_t type;
-		void resizeImage( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height );
+		uint_least8_t type;
+		void resizeImage( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height );
 		irr::video::IImage* textureToImage( irr::video::IVideoDriver* driver, irr::video::ITexture* texture );
 		irr::video::ITexture* imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* texture, irr::core::stringw name );
 };

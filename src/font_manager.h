@@ -13,7 +13,6 @@
 #ifndef FONT_MANAGER_H
 #define FONT_MANAGER_H
 
-//#include <string>
 #include <map>
 #include <irrlicht.h>
 

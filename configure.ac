@@ -3,6 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([Cybrinth], [0.01], [dearingj@lifetime.oregonstate.edu])
+AC_LANG(C++)
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
 
@@ -29,12 +30,13 @@ AC_ARG_WITH([boostsystem-lib-path], [AS_HELP_STRING([--with-boostsystem-lib-path
 AC_SUBST([BOOSTSYSTEM_LIBS])
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h unistd.h wchar.h])
+AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h unistd.h wchar.h cstdlib irrlicht/irrlicht.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_SIZE_T
+AC_TYPE_UINT32_T
 
 # Checks for library functions.
 AC_CHECK_FUNCS([memset pow select socket sqrt strerror])

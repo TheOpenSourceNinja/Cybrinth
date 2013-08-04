@@ -27,6 +27,7 @@
 #include "PlayerStart.h"
 #include "StringConverter.h"
 
+#include <cstdint>
 #include <irrlicht.h>
 #include <SDL_mixer.h>
 #include <string.h>
@@ -40,16 +41,17 @@ class GameManager : public IEventReceiver {
 	public:
 		//Functions----------------------------------
 		void drawAll();
+		void drawLoadingScreen();
 
 		GameManager();
 		virtual ~GameManager();
 		bool getDebugStatus();
 		MazeManager getMazeManager();
 		Goal getGoal();
-		Player* getPlayer( uint8_t p );
+		Player* getPlayer( uint_least8_t p );
 
-		void movePlayerOnX( uint8_t p, int8_t direction );
-		void movePlayerOnY( uint8_t p, int8_t direction );
+		void movePlayerOnX( uint_least8_t p, int_fast8_t direction );
+		void movePlayerOnY( uint_least8_t p, int_fast8_t direction );
 
 		bool OnEvent( const SEvent& );
 
@@ -66,22 +68,22 @@ class GameManager : public IEventReceiver {
 		Goal goal;
 		gui::IGUIEnvironment* gui;
 
-		uint32_t loadingDelay;
+		uint_least16_t loadingDelay;
 
-		uint8_t numBots;
-		uint8_t numLocks;
-		uint8_t numPlayers;
+		uint_least8_t numBots;
+		uint_least8_t numLocks;
+		uint_least8_t numPlayers;
 
 		vector<Player> player;
 		vector<PlayerStart> playerStart;
 
-		uint32_t randomSeed;
+		uint_least16_t randomSeed;
 
 		StringConverter stringConverter;
 		vector<Collectable> stuff;
 
 		ITimer* timer;
-		uint32_t timeStartedLoading;
+		uint_least16_t timeStartedLoading;
 
 	protected:
 	private:
@@ -135,28 +137,28 @@ class GameManager : public IEventReceiver {
 
 
 		//unsigned 8-bit integers----------------------------------
-		uint8_t backgroundChosen;
+		uint_least8_t backgroundChosen;
 
-		uint8_t myPlayer; //If in client mode, control only one player
+		uint_least8_t myPlayer; //If in client mode, control only one player
 
-		uint8_t numKeysFound;
+		uint_least8_t numKeysFound;
 
-		uint8_t sideDisplaySizeDenominator;
+		uint_least8_t sideDisplaySizeDenominator;
 
-		vector< uint8_t > winners;
+		vector< uint_least8_t > winners;
 
 
 		//unsigned 16-bit integers----------------------------------
-		uint16_t musicVolume;
+		uint_least16_t musicVolume;
 
 
-		//unsigned 32-bit integers----------------------------------
-		uint32_t bitsPerPixel;
+		//unsigned 16-bit integers----------------------------------
+		uint_least16_t bitsPerPixel;
 
-		uint32_t cellWidth;
-		uint32_t cellHeight;
+		uint_least16_t cellWidth;
+		uint_least16_t cellHeight;
 
-		uint32_t joystickChosen;
+		uint_least16_t joystickChosen;
 
 
 		//wide character strings----------------------------------
@@ -172,10 +174,6 @@ class GameManager : public IEventReceiver {
 
 		core::stringw stats;
 		core::stringw steps;
-
-
-		//Non-wide character strings----------------------------------
-		//string fontFile;
 
 
 		//Our own types----------------------------------
@@ -198,8 +196,8 @@ class GameManager : public IEventReceiver {
 
 
 		//2D dimensions----------------------------------
-		core::dimension2d<uint32_t> viewportSize;
-		core::dimension2d<uint32_t> windowSize;
+		core::dimension2d<uint_least16_t> viewportSize;
+		core::dimension2d<uint_least32_t> windowSize;
 
 
 		//Fonts----------------------------------

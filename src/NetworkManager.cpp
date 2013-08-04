@@ -46,7 +46,7 @@ void NetworkManager::setGameManager( GameManager* newGM ) {
 	gm = newGM;
 }
 
-void NetworkManager::setPort( uint16_t newPort ) {
+void NetworkManager::setPort( uint_least16_t newPort ) {
 	if( newPort <= 1023 ) {
 		std::wcerr << L"Warning: Port " << newPort << L" is in the \"well-known\" range (0-1023). This may not work. Recommend using ports above 49151." << std::endl;
 	} else if( newPort <= 49151 ) {
@@ -83,11 +83,11 @@ int NetworkManager::setup( bool isServer ) {
 		if (isServer) {
 			setsockopt( listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof( int ) );
 
-			if( bind( listener, p->ai_addr, p->ai_addrlen ) < 0 ) {
+			/*if( bind( listener, p->ai_addr, p->ai_addrlen ) < 0 ) { //Commenting this out because I'm not focusing on networking right now,so don't want to debug
 				std::wcerr << L"server bind() error: " << strerror( errno ) << std::endl;
 				close( listener );
 				continue;
-			}
+			}*/
 		} else { //client
 			if (connect(listener, p->ai_addr, p->ai_addrlen) < 0) {
 				close(listener);
@@ -215,9 +215,9 @@ bool NetworkManager::hasNewPlayerConnected() {
 	}
 }
 
-void NetworkManager::sendMaze( MazeCell ** maze, uint8_t cols, uint8_t rows ) {
+void NetworkManager::sendMaze( MazeCell ** maze, uint_least8_t cols, uint_least8_t rows ) {
 	//char buffer[sizeof(cols) + sizeof(rows) + (cols * rows)];
-	std::vector<uint8_t> toSend;
+	std::vector<uint_least8_t> toSend;
 	toSend.reserve( 9 + 7 + 2 + ( cols * rows * 4 ) );
 	toSend.push_back( 'S' );
 	toSend.push_back( 'T' );
@@ -231,8 +231,8 @@ void NetworkManager::sendMaze( MazeCell ** maze, uint8_t cols, uint8_t rows ) {
 	toSend.push_back( cols );
 	toSend.push_back( rows );
 
-	for( uint8_t c = 0; c < cols; c++ ) {
-		for( uint8_t r = 0; r < rows; r++ ) {
+	for( uint_fast8_t c = 0; c < cols; c++ ) {
+		for( uint_fast8_t r = 0; r < rows; r++ ) {
 			toSend.push_back( maze[c][r].getTop() );
 			toSend.push_back( maze[c][r].getLeft() );
 			toSend.push_back( maze[c][r].getBottom() );
@@ -264,10 +264,10 @@ void NetworkManager::sendMaze( MazeCell ** maze, uint8_t cols, uint8_t rows ) {
 	}
 }
 
-void NetworkManager::sendPlayerPos( uint8_t player, uint8_t x, uint8_t y ) {
+void NetworkManager::sendPlayerPos( uint_least8_t player, uint_least8_t x, uint_least8_t y ) {
 	//std::wcout << L"Sending player " << player << L" position " << x << L"," << y << std::endl;
 
-	std::vector<uint8_t> toSend;
+	std::vector<uint_least8_t> toSend;
 	toSend.reserve( 6 + 3 + 4 );
 	toSend.push_back( 'S' );
 	toSend.push_back( 'T' );
@@ -300,7 +300,7 @@ void NetworkManager::sendPlayerPos( uint8_t player, uint8_t x, uint8_t y ) {
 }
 
 void NetworkManager::sendGoal( Goal goal ) {
-	std::vector<uint8_t> toSend;
+	std::vector<uint_least8_t> toSend;
 	toSend.reserve( 6 + 2 + 4 );
 	toSend.push_back( 'S' );
 	toSend.push_back( 'T' );
@@ -334,7 +334,7 @@ void NetworkManager::sendGoal( Goal goal ) {
 }
 
 void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
-	std::vector<uint8_t> toSend;
+	std::vector<uint_least8_t> toSend;
 	toSend.reserve( 7 + starts.size() + 5 );
 	toSend.push_back( 'S' );
 	toSend.push_back( 'T' );
@@ -345,7 +345,7 @@ void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 	toSend.push_back( 'S' );
 	toSend.push_back( starts.size() );
 
-	for( uint8_t i = 0; i < starts.size(); i++ ) {
+	for( uint_fast8_t i = 0; i < starts.size(); i++ ) {
 		toSend.push_back( i );
 		toSend.push_back( starts[i].getX() );
 		toSend.push_back( starts[i].getY() );
@@ -374,10 +374,10 @@ void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 	}
 }
 
-void NetworkManager::sendU8( uint8_t num, std::wstring desc ) {
-	std::wcout << L"Sending uint8_t " << desc << L": " << num << std::endl;
+void NetworkManager::sendU8( uint_least8_t num, std::wstring desc ) {
+	std::wcout << L"Sending uint_least8_t " << desc << L": " << num << std::endl;
 
-	std::vector<uint8_t> toSend;
+	std::vector<uint_least8_t> toSend;
 	toSend.reserve( 5 + ( desc.size() * 2 ) + 1 + 3 );
 	toSend.push_back( 'S' );
 	toSend.push_back( 'T' );
@@ -386,7 +386,7 @@ void NetworkManager::sendU8( uint8_t num, std::wstring desc ) {
 	toSend.push_back( 'T' );
 	boost::algorithm::to_upper( desc );
 
-	for( uint8_t i = 0; i < desc.size(); i++ ) {
+	for( uint_fast8_t i = 0; i < desc.size(); i++ ) {
 		toSend.push_back( desc[i] );
 	}
 
@@ -396,7 +396,7 @@ void NetworkManager::sendU8( uint8_t num, std::wstring desc ) {
 	toSend.push_back( 'N' );
 	toSend.push_back( 'D' );
 
-	for( uint8_t i = 0; i < desc.size(); i++ ) {
+	for( uint_fast8_t i = 0; i < desc.size(); i++ ) {
 		toSend.push_back( desc[i] );
 	}
 
@@ -417,7 +417,7 @@ void NetworkManager::sendU8( uint8_t num, std::wstring desc ) {
 }
 
 void NetworkManager::sendCollectables( std::vector<Collectable> stuff ) {
-	std::vector<uint8_t> toSend;
+	std::vector<uint_least8_t> toSend;
 	toSend.reserve( 6 + stuff.size() + 4 );
 	toSend.push_back( 'S' );
 	toSend.push_back( 'T' );
@@ -426,7 +426,7 @@ void NetworkManager::sendCollectables( std::vector<Collectable> stuff ) {
 	toSend.push_back( 'T' );
 	toSend.push_back( 'C' );
 
-	for( uint8_t i = 0; i < stuff.size(); i++ ) {
+	for( uint_fast8_t i = 0; i < stuff.size(); i++ ) {
 		toSend.push_back( i );
 		toSend.push_back( stuff[i].getType() );
 		toSend.push_back( stuff[i].getX() );

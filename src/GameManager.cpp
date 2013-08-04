@@ -15,8 +15,9 @@
 #include <filesystem/fstream.hpp>
 #include <algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <taglib/fileref.h>
 #include <SDL/SDL.h>
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
 
 #if defined WINDOWS //Networking stuff
 #include <winsock.h>
@@ -52,18 +53,18 @@ using namespace irr;
 
 
 bool GameManager::allHumansAtGoal() {
-	vector< uint8_t > humanPlayers; //Get a list of players
+	vector< uint_least8_t > humanPlayers; //Get a list of players
 
-	for( uint8_t p = 0; p < numPlayers; p++ ) {
+	for( uint_fast8_t p = 0; p < numPlayers; p++ ) {
 		humanPlayers.push_back( p );
 	}
 
 	bool result = false;
 
-	for( uint8_t b = 0; b < numBots; b++ ) { //Remove bots from the list
-		uint8_t botPlayer = bot[ b ].getPlayer();
+	for( uint_fast8_t b = 0; b < numBots; b++ ) { //Remove bots from the list
+		uint_least8_t botPlayer = bot[ b ].getPlayer();
 
-		for( uint32_t p = 0; p < humanPlayers.size(); p++ ) {
+		for( uint_fast16_t p = 0; p < humanPlayers.size(); p++ ) {
 			if( humanPlayers[ p ] == botPlayer ) {
 				humanPlayers.erase( humanPlayers.begin() + p );
 			}
@@ -73,7 +74,7 @@ bool GameManager::allHumansAtGoal() {
 	if( humanPlayers.size() > 0 ) {
 		result = true;
 
-		for( uint32_t p = 0; ( p < humanPlayers.size() && result == true ); p++ ) {
+		for( uint_fast16_t p = 0; ( p < humanPlayers.size() && result == true ); p++ ) {
 			if( !( player[ humanPlayers[ p ] ].getX() == goal.getX() && player[ humanPlayers[ p ] ].getY() == goal.getY() ) ) {
 				result = false;
 			}
@@ -94,36 +95,36 @@ void GameManager::drawAll() {
 
 		//Draws player trails ("footprints")
 		if( markTrails ) {
-			for( uint8_t x = 0; x < mazeManager.cols; x++ ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
-				for( uint8_t y = 0; y < mazeManager.rows; y++ ) {
+			for( uint_fast8_t x = 0; x < mazeManager.cols; x++ ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
+				for( uint_fast8_t y = 0; y < mazeManager.rows; y++ ) {
 					if( mazeManager.maze[ x ][ y ].visited ) {
-						int32_t dotSize = cellWidth / 5;
+						int_fast16_t dotSize = cellWidth / 5;
 
 						if( dotSize < 2 ) {
 							dotSize = 2;
 						}
 
-						driver->draw2DRectangle( mazeManager.maze[ x ][ y ].getVisitorColor() , core::rect<int32_t>( core::position2d<int32_t>(( x * cellWidth ) + ( 0.5 * cellWidth ) - ( 0.5 * dotSize ), ( y * cellHeight ) + ( 0.5 * cellHeight ) - ( 0.5 * dotSize ) ), core::dimension2d<int32_t>( dotSize, dotSize ) ) );
+						driver->draw2DRectangle( mazeManager.maze[ x ][ y ].getVisitorColor() , core::rect<s32>( core::position2d<s32>(( x * cellWidth ) + ( 0.5 * cellWidth ) - ( 0.5 * dotSize ), ( y * cellHeight ) + ( 0.5 * cellHeight ) - ( 0.5 * dotSize ) ), core::dimension2d< s32 >( dotSize, dotSize ) ) );
 					}
 				}
 			}
 		}
 
-		for( uint32_t ps = 0; ps < playerStart.size(); ps++ ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts.
+		for( uint_fast16_t ps = 0; ps < playerStart.size(); ps++ ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts.
 			playerStart[ ps ].draw( driver, cellWidth, cellHeight );
 		}
 
 		//Because of a texture resizing bug in Irrlicht's software renderers, we draw the items (currently all keys, which use a large png as a texture) before the players (which generate their own texture at the correct size) and the maze walls.
-		for( uint32_t i = 0; i < stuff.size(); i++ ) {
+		for( uint_fast16_t i = 0; i < stuff.size(); i++ ) {
 			stuff[i].draw( driver, cellWidth, cellHeight );
 		}
 
 		//Drawing bots before human players makes it easier to play against large numbers of bots
-		for( uint8_t i = 0; i < numBots; i++ ) {
+		for( uint_fast8_t i = 0; i < numBots; i++ ) {
 			player[ bot[ i ].getPlayer() ].draw( driver, cellWidth, cellHeight );
 		}
 
-		for( uint8_t p = 0; p < numPlayers; p++ ) {
+		for( uint_fast8_t p = 0; p < numPlayers; p++ ) {
 			if( player[ p ].isHuman ) {
 				player[ p ].draw( driver, cellWidth, cellHeight );
 			}
@@ -142,33 +143,33 @@ void GameManager::drawAll() {
 		}
 
 
-		uint32_t spaceBetween = windowSize.Height / 30;
-		uint32_t textY = spaceBetween;
+		uint_least32_t spaceBetween = windowSize.Height / 30;
+		uint_least32_t textY = spaceBetween;
 
 		time_t currentTime = time( NULL );
 		wchar_t clockTime[9];
 		wcsftime( clockTime, 9, L"%H:%M:%S", localtime( &currentTime ) );
-		core::dimension2d<uint32_t> tempDimensions = clockFont->getDimension( core::stringw( clockTime ).c_str() );
-		core::rect<int32_t> tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		core::dimension2d<uint_least32_t> tempDimensions = clockFont->getDimension( core::stringw( clockTime ).c_str() );
+		core::rect<int_least32_t> tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		clockFont->draw( clockTime, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
 
 		core::stringw timeLabel( L"Time:" );
 		textY += tempDimensions.Height;
 		tempDimensions = textFont->getDimension( timeLabel.c_str() );
-		tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		textFont->draw( L"Time:", tempRectangle, YELLOW, true, true, &tempRectangle );
 		core::stringw timerStr( "" );
 		timerStr += ( timer->getTime() / 1000 );
 		timerStr += L" seconds";
 		textY += tempDimensions.Height;
 		tempDimensions = textFont->getDimension( timerStr.c_str() );
-		tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		textFont->draw( timerStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 		core::stringw keysFoundStr( L"Keys found:" );
 		textY += tempDimensions.Height;
 		tempDimensions = textFont->getDimension( keysFoundStr.c_str() );
-		tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		textFont->draw( keysFoundStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 		core::stringw keyStr;
@@ -177,19 +178,19 @@ void GameManager::drawAll() {
 		keyStr += numLocks;
 		textY += tempDimensions.Height;
 		tempDimensions = textFont->getDimension( keyStr.c_str() );
-		tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		textFont->draw( keyStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 		core::stringw seedLabel( L"Random seed:" );
 		textY += tempDimensions.Height;
 		tempDimensions = textFont->getDimension( seedLabel.c_str() );
-		tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		textFont->draw( seedLabel, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 		core::stringw seedStr( randomSeed );
 		textY += tempDimensions.Height;
 		tempDimensions = textFont->getDimension( seedStr.c_str() );
-		tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 		textFont->draw( seedStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 		core::stringw headfor( L"Head for" );
@@ -201,7 +202,7 @@ void GameManager::drawAll() {
 		}
 
 		if( numKeysFound >= numLocks ) {
-			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( headfor, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
 		}
 
@@ -210,7 +211,7 @@ void GameManager::drawAll() {
 		tempDimensions = textFont->getDimension( theexit.c_str() );
 
 		if( numKeysFound >= numLocks ) {
-			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( theexit, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
 		}
 
@@ -218,68 +219,53 @@ void GameManager::drawAll() {
 			core::stringw nowplaying( L"Now playing:" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( nowplaying.c_str() );
-			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( nowplaying, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 			textY += tempDimensions.Height;
 			tempDimensions = musicTagFont->getDimension( musicTitle.c_str() );
-			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			musicTagFont->draw( musicTitle, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
 
 			core::stringw by( L"by" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( by.c_str() );
-			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( by, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 			textY += tempDimensions.Height;
 			tempDimensions = musicTagFont->getDimension( musicArtist.c_str() );
-			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			musicTagFont->draw( musicArtist, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
 
 			core::stringw fromalbum( L"from album" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( fromalbum.c_str() );
-			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( fromalbum, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 			textY += tempDimensions.Height;
 			tempDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
-			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			musicTagFont->draw( musicAlbum, tempRectangle, LIGHTGRAY, true, true, &tempRectangle );
 
 			core::stringw volume( L"Volume:" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( volume.c_str() );
-			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( volume, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 			core::stringw volumeNumber( musicVolume );
 			volumeNumber.append( L"%" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( volumeNumber.c_str() );
-			tempRectangle = core::rect<int32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( volumeNumber, tempRectangle, LIGHTRED, true, true, &tempRectangle );
 		}
 
 		gui->drawAll();
 	} else {
-		core::dimension2d< uint32_t > loadingDimensions = loadingFont->getDimension( loading.c_str() );
-		int32_t textY = 0;
-		int32_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
-		core::rect< int32_t > tempRectangle(textX, textY, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + textY );
-		loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
-
-		textY = loadingDimensions.Height + textY + 1;
-		core::dimension2d< uint32_t > proTipPrefixDimensions = tipFont->getDimension( proTipPrefix.c_str() );
-		core::dimension2d< uint32_t > proTipDimensions = tipFont->getDimension( proTips.at( currentProTip ).c_str() );
-		textX = ( windowSize.Width / 2 ) - ( ( proTipPrefixDimensions.Width + proTipDimensions.Width ) / 2 );
-		tempRectangle = core::rect< int32_t >( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
-		tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
-
-		textX += proTipPrefixDimensions.Width;
-		tempRectangle = core::rect< int32_t >( textX, textY, proTipDimensions.Width + textX, proTipDimensions.Height + textY );
-		tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
+		drawLoadingScreen();
 	}
 
 	driver->endScene();
@@ -293,6 +279,36 @@ void GameManager::drawBackground() {
 		break;
 		default:
 			break;
+	}
+}
+
+void GameManager::drawLoadingScreen() {
+	if( loadingFont == NULL ) {
+		loadingFont = gui->getBuiltInFont();
+	}
+
+	core::dimension2d< uint_fast16_t > loadingDimensions = loadingFont->getDimension( loading.c_str() );
+	int_fast16_t textY = 0;
+	int_fast16_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
+	core::rect< int_fast16_t > tempRectangle(textX, textY, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + textY );
+	loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
+
+
+	if( proTips.size() > 0 ) {
+		if( tipFont == NULL ) {
+			tipFont = gui->getBuiltInFont();
+		}
+
+		textY = loadingDimensions.Height + textY + 1;
+		core::dimension2d< uint_fast16_t > proTipPrefixDimensions = tipFont->getDimension( proTipPrefix.c_str() );
+		core::dimension2d< uint_fast16_t > proTipDimensions = tipFont->getDimension( proTips.at( currentProTip ).c_str() );
+		textX = ( windowSize.Width / 2 ) - ( ( proTipPrefixDimensions.Width + proTipDimensions.Width ) / 2 );
+		tempRectangle = core::rect< int_fast16_t >( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
+		tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
+
+		textX += proTipPrefixDimensions.Width;
+		tempRectangle = core::rect< int_fast16_t >( textX, textY, proTipDimensions.Width + textX, proTipDimensions.Height + textY );
+		tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
 	}
 }
 
@@ -319,6 +335,18 @@ GameManager::~GameManager() {
 }
 
 GameManager::GameManager() {
+	//Just wanted to be totally sure that these point to NULL before being set otherwise
+	clockFont = NULL;
+	loadingFont = NULL;
+	musicTagFont = NULL;
+	statsFont = NULL;
+	textFont = NULL;
+	tipFont = NULL;
+
+	loading = L"Loading...";
+	proTipPrefix = L"Pro tip: ";
+	stats = L"Player stats";
+	steps = L"Steps";
 	network.setGameManager( this );
 	mazeManager.setGameManager( this );
 	isServer = false;
@@ -329,13 +357,13 @@ GameManager::GameManager() {
 	fontFile = "";
 	boost::filesystem::recursive_directory_iterator end;
 	for( boost::filesystem::recursive_directory_iterator i(L"./"); i != end; i++ ) {
-		if( !is_directory( i->path() ) && boost::iequals( i->path().extension().generic_wstring(), L".ttf" ) ) {
+		if( !is_directory( i->path() ) && boost::iequals( i->path().extension().generic_wstring(), L".ttf" ) ) { //Can we use formats other than TTF? What about identifying files without the use of extensions?
 			fontFile = i->path().c_str();
 			break;
 		}
 	}
 
-	device = createDevice( video::EDT_NULL ); //Must create a null device before calling readPrefs();
+	device = createDevice( video::EDT_NULL ); //Must create a device before calling readPrefs();
 
 	if( !device ) {
 		wcerr << L"Error: Cannot create null device. Something is definitely wrong here!" << endl;
@@ -344,9 +372,9 @@ GameManager::GameManager() {
 
 	readPrefs();
 
-	uint8_t nonPlayerActions = 0;
+	uint_least8_t nonPlayerActions = 0;
 	keyMap.resize( 4 * ( numPlayers - numBots ) + nonPlayerActions );
-	for( uint8_t i = 0; i < 4 * ( numPlayers - numBots ); i += 4 ) {
+	for( uint_fast8_t i = 0; i < 4 * ( numPlayers - numBots ); i += 4 ) {
 		keyMap.at( i ).setAction( 'u' );
 		keyMap.at( i + 1 ).setAction( 'd' );
 		keyMap.at( i + 2 ).setAction( 'l' );
@@ -369,7 +397,7 @@ GameManager::GameManager() {
 	bool sbuffershadows = false; //Would not be visible anyway since this game is 2D
 	IEventReceiver* receiver = this;
 
-	device->closeDevice(); //Signals to the null device that it needs to close itself on next run() so that we can create a non-null device
+	device->closeDevice(); //Signals to the existing device that it needs to close itself on next run() so that we can create a new device
 	device->run(); //This is next run()
 	device->drop(); //Cleans up after the device
 
@@ -384,7 +412,26 @@ GameManager::GameManager() {
 			exit( -2 );
 		}
 	}
-	device->setWindowCaption( L"Cybrinth" );
+
+	gui = device->getGUIEnvironment(); //Put this before drawLoadingScreen() because drawLoadingScreen() needs gui
+	if( !gui ) {
+		wcerr << L"Error: Cannot get GUI environment" << endl;
+		exit( -2 );
+	} else {
+		for( uint_fast16_t i = 0; i < gui::EGDC_COUNT ; i++ ) {
+			video::SColor guiSkinColor = gui->getSkin()->getColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ) );
+			guiSkinColor.setAlpha( 255 );
+			gui->getSkin()->setColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ), guiSkinColor );
+		}
+	}
+
+	device->getVideoDriver()->beginScene(true, false, BLACK);
+	drawLoadingScreen();
+	device->getVideoDriver()->endScene();
+
+	loadProTips();
+
+	device->setWindowCaption( core::stringw( PACKAGE_STRING ).c_str() );
 
 	if( debug ) {
 		device->getLogger()->setLogLevel( ELL_INFORMATION );
@@ -413,16 +460,6 @@ GameManager::GameManager() {
 		wcerr << L"Error: Cannot get scene manager" << endl;
 	}
 
-	gui = device->getGUIEnvironment(); //Not sure if this would be possible with a null device, which is why we don't exit
-	if( !gui ) {
-		wcerr << L"Error: Cannot get GUI environment" << endl;
-	} else {
-		for( uint32_t i = 0; i < gui::EGDC_COUNT ; i++ ) {
-			video::SColor guiSkinColor = gui->getSkin()->getColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ) );
-			guiSkinColor.setAlpha( 255 );
-			gui->getSkin()->setColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ), guiSkinColor );
-		}
-	}
 
 	if( playMusic ) {
 
@@ -433,9 +470,9 @@ GameManager::GameManager() {
 
 		//Set the audio properties we hope to get: sample rate, channels, etc.
 		int audio_rate = 44100; //44.1 KHz is the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
-		Uint16 audio_format = AUDIO_S16SYS;
-		int audio_channels = 2;
-		int audio_buffers = 4096;
+		Uint16 audio_format = AUDIO_S16SYS; //CDs use signed 16-bit audio. SYS means use the system's native endianness.
+		int audio_channels = 2; //Almost everything uses stereo. I wish surround sound were more common.
+		int audio_buffers = 4096; //Magic number! Change it if you dare, and see what happeens.
 
 		if( Mix_OpenAudio( audio_rate, audio_format, audio_channels, audio_buffers ) != 0 ) {
 			wcerr << L"Unable to initialize audio: " << Mix_GetError() << endl;
@@ -501,11 +538,14 @@ GameManager::GameManager() {
 		}
 	}
 
-	/*cols = 0;
-	rows = 0;
-	resizeMaze( 1, 1 ); //This gets called here... why?*/
-
+	if( debug ) {
+		wcout << L"About to call loadFonts()" << endl;
+	}
 	loadFonts();
+	if( debug ) {
+		wcout << L"Returned from loadFonts()" << endl;
+	}
+
 	newGame.setText( L"New maze" );
 	newGame.setFont( clockFont );
 	loadMaze.setText( L"Load maze" );
@@ -517,18 +557,11 @@ GameManager::GameManager() {
 	backToGame.setText( L"Back to game" );
 	backToGame.setFont( clockFont );
 
-	loading = L"Loading...";
-	proTipPrefix = L"Pro tip: ";
-	stats = L"Player stats";
-	steps = L"Steps";
-
 	newGame.setY( 0 );
 	loadMaze.setY( 1 * windowSize.Height / 5 );
 	saveMaze.setY( 2 * windowSize.Height / 5 );
 	exitGame.setY( 3 * windowSize.Height / 5 );
 	backToGame.setY( 4 * windowSize.Height / 5 );
-
-	//timer = device->getTimer();
 
 	player.resize( numPlayers );
 	playerStart.resize( numPlayers );
@@ -540,13 +573,13 @@ GameManager::GameManager() {
 	if( numBots <= numPlayers && numBots > 0 ) {
 		bot.resize( numBots );
 
-		for( uint8_t i = 0; i < numBots; i++ ) {
+		for( uint_fast8_t i = 0; i < numBots; i++ ) {
 			bot[ i ].setPlayer( numPlayers - ( i + 1 ) ) ;
 			player[ bot[ i ].getPlayer() ].isHuman = false;
 		}
 	}
 
-	for( uint8_t p = 0; p < numPlayers; p++ ) {
+	for( uint_fast8_t p = 0; p < numPlayers; p++ ) {
 		player[p].setColorBasedOnNum( p );
 		player[p].loadTexture( driver );
 	}
@@ -556,7 +589,7 @@ GameManager::GameManager() {
 	if( debug && enableJoystick && device->activateJoysticks( joystickInfo ) ) { //activateJoysticks fills joystickInfo with info about each joystick
 		wcout << L"Joystick support is enabled and " << joystickInfo.size() << L" joystick(s) are present." << std::endl;
 
-		for( uint32_t joystick = 0; joystick < joystickInfo.size(); ++joystick ) {
+		for( uint_fast16_t joystick = 0; joystick < joystickInfo.size(); ++joystick ) {
 			wcout << L"Joystick " << joystick << L":" << endl;
 			wcout << L"\tName: '" << joystickInfo[joystick].Name.c_str() << L"'" << endl;
 			wcout << L"\tAxes: " << joystickInfo[joystick].Axes << endl;
@@ -586,9 +619,11 @@ GameManager::GameManager() {
 	//Set up networking
 	network.setup( isServer );
 
+	timer = device->getTimer();
 
-	timer = device->getTimer(); //timer must be set before loadProTips() is called only because loadProTips() calls resetThings(), which uses the timer.
-	loadProTips();
+	if( debug ) {
+		wcout << L"end of GameManager construtor" << endl;
+	}
 }
 
 bool GameManager::getDebugStatus() {
@@ -603,7 +638,7 @@ MazeManager GameManager::getMazeManager() {
 	return mazeManager;
 }
 
-Player* GameManager::getPlayer( uint8_t p ) {
+Player* GameManager::getPlayer( uint_least8_t p ) {
 	if( p < numPlayers ) {
 		return &player.at( p );
 	} else {
@@ -613,18 +648,24 @@ Player* GameManager::getPlayer( uint8_t p ) {
 }
 
 void GameManager::loadFonts() {
+	if( debug ) {
+		wcout << L"loadFonts called" << endl;
+	}
 	//These were split off into separate functions because they are needed more often than loadFonts()
 	loadTipFont();
 	loadMusicFont();
+	if( debug ) {
+		wcout << L"Returned from loadMusicFont" << endl;
+	}
 
-	core::dimension2d< uint32_t > fontDimensions;
-	uint32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
+	core::dimension2d< uint_least32_t > fontDimensions;
+	uint_least32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
 
 	do { //Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
 		loadingFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 		if( loadingFont != NULL ) {
 			fontDimensions = loadingFont->getDimension( loading.c_str() );
-			size -= 1;
+			size -= 2;
 		}
 	} while( loadingFont != NULL && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
@@ -632,18 +673,38 @@ void GameManager::loadFonts() {
 		loadingFont = gui->getBuiltInFont();
 	}
 
+	if( debug ) {
+		wcout << L"loadingFont is loaded" << endl;
+	}
+
 	size = ( windowSize.Width / sideDisplaySizeDenominator );
 
 	do {
+		if( debug ) {
+			wcout << L"About to load textFont in loop (size " << size << L")" << endl;
+		}
 		textFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+		if( debug ) {
+			wcout << L"Loaded textFont in loop (size " << size << L")" << endl;
+		}
 		if( textFont != NULL ) {
+			if( debug ) {
+				wcout << L"textFont is not null" << endl;
+			}
 			fontDimensions = textFont->getDimension( L"Random seed: " );
-			size -= 1;
+			if( debug ) {
+				wcout << L"fontDimensions set to " << fontDimensions.Width << L"x" << fontDimensions.Height << endl;
+			}
+			size -= 2;
 		}
 	} while( textFont != NULL && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
 
 	if( textFont == NULL ) {
 		textFont = gui->getBuiltInFont();
+	}
+
+	if( debug ) {
+		wcout << L"textFont is loaded" << endl;
 	}
 
 	size = ( windowSize.Width / sideDisplaySizeDenominator );
@@ -652,56 +713,66 @@ void GameManager::loadFonts() {
 		clockFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 		if( clockFont != NULL ) {
 			fontDimensions = clockFont->getDimension( L"00:00:00" );
-			size -= 1;
+			size -= 2;
 		}
 	} while( clockFont != NULL && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
 	if( clockFont == NULL ) {
 		clockFont = gui->getBuiltInFont();
 	}
+
+	if( debug ) {
+		wcout << L"clockFont is loaded" << endl;
+	}
 }
 
 //Like loadTipFont() below, this guesses a good font size, then repeatedly adjusts the size and reloads the font until everything fits.
 void GameManager::loadMusicFont() {
-	uint32_t maxWidth = ( windowSize.Width / sideDisplaySizeDenominator );
-	uint32_t size = 0;
-	uint32_t numerator = 2.5 * maxWidth; //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
-
-	//I felt it looked best if all three (artist, album, and title) had the same font size, so we're picking the longest of the three and basing the font size on its length.
-	if( musicArtist.size() >= musicAlbum.size() && musicArtist.size() > 0 ) {
-		if( musicArtist.size() >= musicTitle.size() ) {
-			size = numerator / musicArtist.size();
-		} else if( musicTitle.size() > 0 ) {
-			size = numerator / musicTitle.size();
-		}
-	} else {
-		if( musicAlbum.size() >= musicTitle.size() && musicAlbum.size() > 0 ) {
-			size = numerator / musicAlbum.size();
-		} else if( musicTitle.size() > 0 ) {
-			size = numerator / musicTitle.size();
-		}
+	if( debug ) {
+		wcout << L"loadMusicFont called" << endl;
 	}
 
-	if( size == 0 ) { //If none of album, artist, and title had lengths greater than zero: maybe they haven't been read yet, or maybe the file doesn't contain those tags.
-		size = numerator;
-	}
+	if( playMusic ) {
+		uint_fast32_t maxWidth = ( windowSize.Width / sideDisplaySizeDenominator );
+		uint_fast32_t size = 0;
+		uint_fast32_t numerator = 2.5 * maxWidth; //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
 
-	core::dimension2d< uint32_t > artistDimensions;
-	core::dimension2d< uint32_t > albumDimensions;
-	core::dimension2d< uint32_t > titleDimensions;
-
-	do {
-		musicTagFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-		if( musicTagFont != NULL ) {
-			artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
-			albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
-			titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
-			size -= 1;
+		//I felt it looked best if all three (artist, album, and title) had the same font size, so we're picking the longest of the three and basing the font size on its length.
+		if( musicArtist.size() >= musicAlbum.size() && musicArtist.size() > 0 ) {
+			if( musicArtist.size() >= musicTitle.size() ) {
+				size = numerator / musicArtist.size();
+			} else if( musicTitle.size() > 0 ) {
+				size = numerator / musicTitle.size();
+			}
+		} else {
+			if( musicAlbum.size() >= musicTitle.size() && musicAlbum.size() > 0 ) {
+				size = numerator / musicAlbum.size();
+			} else if( musicTitle.size() > 0 ) {
+				size = numerator / musicTitle.size();
+			}
 		}
-	} while( musicTagFont != NULL && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
 
-	if( musicTagFont == NULL ) {
-		musicTagFont = gui->getBuiltInFont();
+		if( size == 0 ) { //If none of album, artist, and title had lengths greater than zero: maybe they haven't been read yet, or maybe the file doesn't contain those tags.
+			size = numerator;
+		}
+
+		core::dimension2d< uint_fast32_t > artistDimensions;
+		core::dimension2d< uint_fast32_t > albumDimensions;
+		core::dimension2d< uint_fast32_t > titleDimensions;
+
+		do {
+			musicTagFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+			if( musicTagFont != NULL ) {
+				artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
+				albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
+				titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
+				size -= 2;
+			}
+		} while( musicTagFont != NULL && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
+
+		if( musicTagFont == NULL ) {
+			musicTagFont = gui->getBuiltInFont();
+		}
 	}
 }
 
@@ -711,8 +782,8 @@ void GameManager::loadNextSong() {
 	}
 
 	//Figure out where we are in the music list
-	uint32_t positionInList = 0;
-	for( uint32_t i = 0; i < musicList.size(); i++ ) {
+	uint_least16_t positionInList = 0;
+	for( uint_fast16_t i = 0; i < musicList.size(); i++ ) {
 		if( musicList[i] == currentMusic ) {
 			positionInList = i;
 			break;
@@ -818,7 +889,7 @@ void GameManager::loadProTips() {
 
 			if( proTipsFile.is_open() ) {
 				wstring line;
-				uint16_t lineNum = 0;
+				uint_fast16_t lineNum = 0;
 
 				while( proTipsFile.good() ) {
 					lineNum++;
@@ -835,8 +906,7 @@ void GameManager::loadProTips() {
 
 				proTipsFile.close();
 
-				resetThings(); //Only calling this here because it sets randomSeed;
-				srand( randomSeed );
+				srand( time( NULL ) );
 				random_shuffle( proTips.begin(), proTips.end() );
 			} else {
 				wcerr << L"Error: Unable to open pro tips file even though it exists. Check its access permissions." << endl;
@@ -851,8 +921,12 @@ void GameManager::loadProTips() {
 
 //Guesses a size that will work for showing pro tips. Keeps adjusting the size and reloading the font until everything fits.
 void GameManager::loadTipFont() {
-	uint32_t maxWidth = windowSize.Width;
-	unsigned int size;
+	if( debug ) {
+		wcout << L"loadTipFont called" << endl;
+	}
+
+	uint_fast32_t maxWidth = windowSize.Width;
+	uint_fast32_t size;
 	core::stringw tipIncludingPrefix = proTipPrefix;
 
 	if( proTips.size() > 0 ) { //If pro tips have been loaded, guess size based on tip length.
@@ -862,13 +936,13 @@ void GameManager::loadTipFont() {
 		size = maxWidth / 10; //10 is also arbitrarily chosen.
 	}
 
-	core::dimension2d<uint32_t> tipDimensions;
+	core::dimension2d<uint_fast32_t> tipDimensions;
 
 	do {
 		tipFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 		if( tipFont != NULL ) {
 			tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
-			size -= 1;
+			size -= 2;
 		}
 	} while( tipFont != NULL && ( tipDimensions.Width > maxWidth ) );
 
@@ -881,13 +955,12 @@ void GameManager::loadTipFont() {
 void GameManager::makeMusicList() {
 	musicList.clear(); //The music list should be empty anyway, since makeMusicList() only gets called once, but just in case...
 
-	uint8_t numMusicDecoders = Mix_GetNumMusicDecoders();
-
 	if( debug ) {
 		wcout << L"makeMusicList() called" << endl;
+		uint_least8_t numMusicDecoders = Mix_GetNumMusicDecoders();
 		wcout << L"There are " << numMusicDecoders << L" music decoders available. They are:" << endl;
 
-		for( uint8_t decoder = 0; decoder < numMusicDecoders; decoder++ ) {
+		for( uint_fast8_t decoder = 0; decoder < numMusicDecoders; decoder++ ) {
 			wcout << decoder << L": " << Mix_GetMusicDecoder( decoder ) << endl;
 		}
 	}
@@ -914,11 +987,10 @@ void GameManager::makeMusicList() {
 		boost::filesystem::recursive_directory_iterator end;
 
 		for( boost::filesystem::recursive_directory_iterator i( musicPath ); i != end; i++ ) {
-			if( !is_directory( i->path() ) ) {
+			if( !is_directory( i->path() ) ) { //We've found a file
 				//Attempts to load a file as music. If successful, unload the file and add it to musicList.
 				//This way the game is certain to accept any file formats the music library can use.
-				Mix_Music* temp;
-				temp = Mix_LoadMUS( i->path().c_str() );
+				Mix_Music* temp = Mix_LoadMUS( i->path().c_str() );
 
 				if( temp != NULL ) {
 					musicList.push_back( i->path() );
@@ -941,7 +1013,7 @@ void GameManager::makeMusicList() {
 	}
 }
 
-void GameManager::movePlayerOnX( uint8_t p, int8_t direction ) {
+void GameManager::movePlayerOnX( uint_least8_t p, int_fast8_t direction ) {
 	if( numPlayers > p ) {
 		if( direction < 0 ) {
 			if( player[ p ].getX() > 0 && mazeManager.maze[ player[ p ].getX()][ player[ p ].getY()].getLeft() == 'n' ) {
@@ -964,7 +1036,7 @@ void GameManager::movePlayerOnX( uint8_t p, int8_t direction ) {
 	}
 }
 
-void GameManager::movePlayerOnY( uint8_t p, int8_t direction ) {
+void GameManager::movePlayerOnY( uint_least8_t p, int_fast8_t direction ) {
 	if( numPlayers > p ) {
 		if( direction < 0 ) {
 			if( player[p].getY() > 0 && mazeManager.maze[player[p].getX()][player[p].getY()].getTop() == 'n' ) {
@@ -1252,6 +1324,8 @@ bool GameManager::OnEvent( const SEvent& event ) {
 					}*/
 
 					viewportSize.set( windowSize.Width - ( windowSize.Width / sideDisplaySizeDenominator ), windowSize.Height - 1 );
+					cellWidth = ( viewportSize.Width ) / mazeManager.cols;
+					cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 					loadFonts();
 					return true;
 				}
@@ -1279,7 +1353,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 		break;
 		case EET_JOYSTICK_INPUT_EVENT: {
 			if( event.JoystickEvent.Joystick == joystickChosen ) {
-				core::array<int16_t> verticalAxes;
+				core::array<int_least16_t> verticalAxes;
 				verticalAxes.push_back( SEvent::SJoystickEvent::AXIS_Y );
 
 				bool joystickMovedUp = false;
@@ -1287,8 +1361,8 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				bool joystickMovedRight = false;
 				bool joystickMovedLeft = false;
 
-				for( uint32_t i = 0; i < verticalAxes.size(); i++ ) {
-					if( event.JoystickEvent.Axis[i] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by int16_t's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
+				for( uint_fast16_t i = 0; i < verticalAxes.size(); i++ ) {
+					if( event.JoystickEvent.Axis[i] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
 						if( debug ) {
 							wcout << L"Axis value: " << event.JoystickEvent.Axis[i] << endl;
 						}
@@ -1356,7 +1430,7 @@ void GameManager::readPrefs() {
 	bitsPerPixel = 16;
 	vsync = true;
 	driverType = video::EDT_OPENGL;
-	windowSize = core::dimension2d< uint32_t >( 640, 480 );
+	windowSize = core::dimension2d< uint_least16_t >( 640, 480 );
 	allowSmallSize = false;
 	playMusic = true;
 	enableJoystick = false;
@@ -1383,7 +1457,7 @@ void GameManager::readPrefs() {
 
 		if( prefsFile.is_open() ) {
 			wstring line;
-			uint16_t lineNum = 0;
+			uint_fast16_t lineNum = 0;
 
 			while( prefsFile.good() ) {
 				lineNum++;
@@ -1406,7 +1480,7 @@ void GameManager::readPrefs() {
 
 						if( preference == L"volume:" ) {
 							try {
-								uint16_t choiceAsInt = boost::lexical_cast< uint16_t >( choice );
+								uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 
 								if( choiceAsInt <= 100 && choiceAsInt >= 0 ) {
 									musicVolume = choiceAsInt;
@@ -1429,7 +1503,7 @@ void GameManager::readPrefs() {
 							}
 						} else if( preference == L"number of bots:" ) {
 							try {
-								uint16_t choiceAsInt = boost::lexical_cast< uint16_t >( choice );
+								uint_least8_t choiceAsInt = boost::lexical_cast< short int >( choice ); //uint_least8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
 
 								if( choiceAsInt <= numPlayers ) {
 									numBots = choiceAsInt;
@@ -1506,15 +1580,15 @@ void GameManager::readPrefs() {
 							}
 						} else if( preference == L"bits per pixel:" ) {
 							try {
-								uint32_t choiceAsInt = boost::lexical_cast< uint32_t >( choice );
+								uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 
-								if( choiceAsInt <= 32 ) {
+								if( choiceAsInt <= 16 ) {
 									bitsPerPixel = choiceAsInt;
 									if( debug ) {
 										wcout << L"Bits per pixel is " << choiceAsInt << endl;
 									}
 								} else {
-									wcerr << L"Warning: Bits per pixel not less than or equal to 32: " << choiceAsInt << endl;
+									wcerr << L"Warning: Bits per pixel not less than or equal to 16: " << choiceAsInt << endl;
 									bitsPerPixel = choiceAsInt;
 								}
 							} catch( boost::bad_lexical_cast error ) {
@@ -1593,10 +1667,10 @@ void GameManager::readPrefs() {
 
 						} else if( preference == L"number of players:" ) {
 							try {
-								uint16_t choiceAsInt = boost::lexical_cast<uint16_t>( choice );
+								uint_least8_t choiceAsInt = boost::lexical_cast< short int >( choice ); //uint_least8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
 
-								if( choiceAsInt > UCHAR_MAX ) { //The maximum number of players is whatever a uint8_t can hold, presumably 255 (the 8 is the minimum number of bits, it may not be the true number).
-									choiceAsInt = UCHAR_MAX;
+								if( choiceAsInt > UINT_LEAST8_MAX ) { //The maximum number of players is whatever a uint_least8_t can hold, presumably 255 (the 8 is the minimum number of bits, it may not be the true number).
+									choiceAsInt = UINT_LEAST8_MAX;
 								}
 
 								if( choiceAsInt <= 4 && choiceAsInt > 0 ) {
@@ -1622,16 +1696,16 @@ void GameManager::readPrefs() {
 								wcout << L"Window size: " << width << L"x" << height << endl;
 							}
 
-							uint32_t widthAsInt = boost::lexical_cast<uint32_t>( width );
-							uint32_t heightAsInt = boost::lexical_cast<uint32_t>( height );
+							uint_fast16_t widthAsInt = boost::lexical_cast< uint_fast16_t >( width );
+							uint_fast16_t heightAsInt = boost::lexical_cast< uint_fast16_t >( height );
 
-							if( widthAsInt < 320 || heightAsInt < 240 ) {
+							if( widthAsInt < 160 || heightAsInt < 240 ) {
 								wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << endl;
-							} else if( widthAsInt == 320 && heightAsInt == 240 ) {
+							} else if( widthAsInt == 160 && heightAsInt == 240 ) {
 								wcout << L"Rock on, CGA graphics. Rock on." << endl;
-								windowSize = core::dimension2d<uint32_t>( widthAsInt, heightAsInt );
+								windowSize = core::dimension2d<uint_least16_t>( widthAsInt, heightAsInt );
 							} else {
-								windowSize = core::dimension2d<uint32_t>( widthAsInt, heightAsInt );
+								windowSize = core::dimension2d<uint_least16_t>( widthAsInt, heightAsInt );
 							}
 
 						} else if( preference == L"play music:" ) {
@@ -1655,7 +1729,7 @@ void GameManager::readPrefs() {
 							}
 
 							try {
-								uint16_t choiceAsInt = boost::lexical_cast<uint16_t>( choice );
+								uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 								network.setPort( choiceAsInt );
 							} catch( boost::bad_lexical_cast error ) {
 								wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
@@ -1679,7 +1753,7 @@ void GameManager::readPrefs() {
 								wcout << L"Joystick number: " << choice << endl;
 							}
 							try {
-								uint32_t choiceAsInt = boost::lexical_cast<uint32_t>( choice );
+								uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 								joystickChosen = choiceAsInt;
 							} catch (boost::bad_lexical_cast error ) {
 								wcerr << L"Error reading joystick number (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
@@ -1735,17 +1809,17 @@ void GameManager::resetThings() {
 	numLocks = 0;
 	donePlaying = false;
 
-	for( uint8_t p = 0; p < numPlayers; p++ ) {
+	for( uint_fast8_t p = 0; p < numPlayers; p++ ) {
 		playerStart[ p ].reset();
 		player[ p ].stepsTaken = 0;
 	}
 
-	for( uint32_t i = 0; i < stuff.size(); i++ ) {
+	for( uint_fast16_t i = 0; i < stuff.size(); i++ ) {
 		stuff[ i ].loadTexture( driver );
 	}
 
-	for( uint8_t x = 0; x < mazeManager.cols; x++ ) {
-		for( uint8_t y = 0; y < mazeManager.rows; y++ ) {
+	for( uint_fast8_t x = 0; x < mazeManager.cols; x++ ) {
+		for( uint_fast8_t y = 0; y < mazeManager.rows; y++ ) {
 			mazeManager.maze[ x ][ y ].visited = false;
 		}
 	}
@@ -1767,12 +1841,11 @@ void GameManager::resetThings() {
 
 //Should only be called by main() in main.cpp
 int GameManager::run() {
-
 	while( device->run() && !donePlaying ) {
 		resetThings();
 		mazeManager.makeRandomLevel();
-
-		showingMenu = false; //Temporary workaround until I figure out where in makeRandomLevel() this is being overwritten
+		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
+		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 
 		while( device->run() && !won && !donePlaying ) {
 
@@ -1780,16 +1853,14 @@ int GameManager::run() {
 				showingLoadingScreen = false;
 			}
 
-			uint32_t fps = driver->getFPS();
-			if( debug ) {
-				//wcout << L"FPS: " << fps << endl;
+			if( driver->getFPS() > 60 ) {
+				/*These next 3 lines are for limiting processor usage. I really
+				 *doubt they're all needed, so comment one or another if you
+				 *experience slowness. Two are provided by Irrlicht and the other by SDL.*/
+				//device->yield();
+				device->sleep( 17 ); //17 = 1/60 of a second, rounded up, in milliseconds. My monitor refreshes at 60 Hz.
+				//SDL_Delay( 17 );
 			}
-			/*These next 3 lines are for limiting processor usage. I really
-			 *doubt they're all needed, so comment one or another if you
-			 *experience slowness. Two are provided by Irrlicht and the other by SDL.*/
-			//device->yield();
-			device->sleep( 17 ); //17 = 1/60 of a second, rounded up, in milliseconds. My monitor refreshes at 60 Hz.
-			//SDL_Delay( 17 );
 
 			if( driver->getScreenSize() != windowSize ) { //If the window has been resized. Only here until Irrlicht implements proper window resize events.
 				SEvent temp;
@@ -1803,12 +1874,9 @@ int GameManager::run() {
 			}
 
 			if(( !showingLoadingScreen && device->isWindowActive() ) || debug ) {
-				cellWidth = ( viewportSize.Width ) / mazeManager.cols;
-				cellHeight = ( viewportSize.Height ) / mazeManager.rows;
-
 				//It's the bots' turn to move now.
 				if( !( showingMenu || showingLoadingScreen ) && numBots > 0 ) {
-					for( uint8_t i = 0; i < numBots; i++ ) {
+					for( uint_fast8_t i = 0; i < numBots; i++ ) {
 						if( debug || allHumansAtGoal() || bot[ i ].lastTimeMoved < timer->getRealTime() - bot[ i ].movementDelay ) {
 							bot[ i ].move();
 						}
@@ -1819,8 +1887,8 @@ int GameManager::run() {
 				drawAll();
 
 				//Check if any of the players have landed on a collectable item
-				for( uint8_t p = 0; p < numPlayers; p++ ) {
-					for( uint32_t s = 0; s < stuff.size(); s++ ) {
+				for( uint_fast8_t p = 0; p < numPlayers; p++ ) {
+					for( uint_fast16_t s = 0; s < stuff.size(); s++ ) {
 						if( player[p].getX() == stuff[s].getX() && player[p].getY() == stuff[s].getY() ) {
 							switch( stuff[s].getType() ) {
 								case COLLECTABLE_KEY: {
@@ -1828,13 +1896,13 @@ int GameManager::run() {
 									stuff.erase( stuff.begin() + s );
 
 									if( numKeysFound >= numLocks ) {
-										for( uint8_t c = 0; c < mazeManager.cols; c++ ) {
-											for( uint8_t r = 0; r < mazeManager.rows; r++ ) {
+										for( uint_fast8_t c = 0; c < mazeManager.cols; c++ ) {
+											for( uint_fast8_t r = 0; r < mazeManager.rows; r++ ) {
 												mazeManager.maze[c][r].removeLocks();
 											}
 										}
 
-										for( uint8_t b = 0; b < numBots; b++ ) {
+										for( uint_fast8_t b = 0; b < numBots; b++ ) {
 											bot[ b ].allKeysFound();
 										}
 									}
@@ -1849,11 +1917,11 @@ int GameManager::run() {
 				}
 
 
-				for( uint8_t p = 0; p < numPlayers; p++ ) {
+				for( uint_fast8_t p = 0; p < numPlayers; p++ ) {
 					if(( player[p].getX() == goal.getX() ) && player[p].getY() == goal.getY() ) { //Make a list of who finished in what order
 						bool alreadyFinished = false; //Indicates whether the player is already on the winners list
 
-						for( uint32_t i = 0; i < winners.size() && !alreadyFinished; i++ ) {
+						for( uint_fast16_t i = 0; i < winners.size() && !alreadyFinished; i++ ) {
 							if( p == winners.at( i ) ) {
 								alreadyFinished = true;
 							}
@@ -1919,7 +1987,7 @@ int GameManager::run() {
 				wcout << L"On to the next level!" << endl;
 				wcout << L"Winners:";
 
-				for( uint32_t i = 0; i < winners.size(); i++ ) {
+				for( uint_fast16_t i = 0; i < winners.size(); i++ ) {
 					wcout << L" " << winners.at( i );
 				}
 
@@ -1933,7 +2001,7 @@ int GameManager::run() {
 }
 
 void GameManager::setupBackground() {
-	uint8_t availableBackgrounds = 1; //The number of different background animations to choose from
+	uint_least8_t availableBackgrounds = 1; //The number of different background animations to choose from
 
 	backgroundChosen = rand() % availableBackgrounds;
 	if( debug ) {
@@ -1972,7 +2040,7 @@ void GameManager::setupBackground() {
 			//ps->setMaterialTexture( 0, driver->getTexture( "star.png" ) );
 			ps->setMaterialType( video::EMT_TRANSPARENT_ALPHA_CHANNEL );
 
-			video::IImage* pixelImage = driver->createImage( video::ECF_A8R8G8B8, core::dimension2d<uint32_t>( 1, 1 ) );
+			video::IImage* pixelImage = driver->createImage( video::ECF_A8R8G8B8, core::dimension2d< u32 >( 1, 1 ) );
 			//pixelImage->fill( WHITE );
 			pixelImage->setPixel( 0, 0, WHITE, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
 			video::ITexture* pixelTexture = driver->addTexture( "pixel", pixelImage );
@@ -1987,6 +2055,7 @@ void GameManager::setupBackground() {
 void GameManager::startLoadingScreen() {
 	showingLoadingScreen = true;
 	timeStartedLoading = timer->getRealTime();
+	drawLoadingScreen();
 }
 
 void GameManager::takeScreenShot() {

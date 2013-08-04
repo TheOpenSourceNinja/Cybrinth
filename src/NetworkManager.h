@@ -40,14 +40,14 @@ class NetworkManager {
 		int setup( bool isServer );
 		void setGameManager( GameManager * newGM );
 		bool hasNewPlayerConnected();
-		uint8_t getNewPlayer();
+		uint_least8_t getNewPlayer();
 		int checkForConnections();
-		void sendMaze( MazeCell ** maze, uint8_t cols, uint8_t rows );
-		void sendPlayerPos( uint8_t player, uint8_t x, uint8_t y );
-		void setPort( uint16_t newPort );
+		void sendMaze( MazeCell ** maze, uint_least8_t cols, uint_least8_t rows );
+		void sendPlayerPos( uint_least8_t player, uint_least8_t x, uint_least8_t y );
+		void setPort( uint_least16_t newPort );
 		void sendGoal( Goal goal );
 		void sendPlayerStarts( std::vector<PlayerStart> starts );
-		void sendU8( uint8_t num, std::wstring desc );
+		void sendU8( uint_least8_t num, std::wstring desc );
 		void sendCollectables( std::vector<Collectable> stuff );
 		bool receiveData();
 	protected:
@@ -55,7 +55,7 @@ class NetworkManager {
 		GameManager * gm;
 		unsigned int newPlayer;
 		struct addrinfo hints;
-		uint16_t port;
+		uint_least16_t port;
 		int rv;
 		struct addrinfo *ai;
 		int listener;
@@ -70,7 +70,7 @@ class NetworkManager {
 		struct timeval timeout;
 		void *get_in_addr( struct sockaddr *sa );
 		int sendData( int sockfd, unsigned char *buf, size_t *len );
-		uint8_t receivedData[51]; //51 is the maximum possible size of a maze plus "STARTMAZE" and "ENDMAZE"
+		uint_least8_t receivedData[51]; //51 is the maximum possible size of a maze plus "STARTMAZE" and "ENDMAZE"
 
 		#if defined WINDOWS
 		WSADATA wsaData;   // if this doesn't work

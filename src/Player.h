@@ -20,12 +20,12 @@ class Player : public Object {
 	public:
 		Player();
 		virtual ~Player();
-		void draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height );
+		void draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height );
 		void loadTexture( irr::video::IVideoDriver* driver );
-		void loadTexture( irr::video::IVideoDriver* driver, uint32_t size );
-		void moveX( int8_t val );
-		void moveY( int8_t val );
-		uint32_t stepsTaken;
+		void loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size );
+		void moveX( int_fast8_t val );
+		void moveY( int_fast8_t val );
+		uint_least16_t stepsTaken;
 		bool isHuman;
 	protected:
 	private:

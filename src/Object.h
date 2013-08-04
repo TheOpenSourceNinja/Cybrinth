@@ -13,31 +13,31 @@
 #define OBJECT_H
 
 #include <irrlicht.h>
-#include <stdint.h>
+#include <cstdint>
 
 class Object {
 	public:
 		Object();
 		virtual ~Object();
-		uint8_t getY();
-		uint8_t getX();
-		void setPos( uint8_t newX, uint8_t newY );
-		void setX( uint8_t val );
-		void setY( uint8_t val );
-		void moveY( int8_t val );
-		void moveX( int8_t val );
-		void draw( irr::video::IVideoDriver* driver, uint32_t width, uint32_t height );
+		uint_least8_t getY();
+		uint_least8_t getX();
+		void setPos( uint_least8_t newX, uint_least8_t newY );
+		void setX( uint_least8_t val );
+		void setY( uint_least8_t val );
+		void moveY( int_fast8_t val );
+		void moveX( int_fast8_t val );
+		void draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height );
 		virtual void loadTexture( irr::video::IVideoDriver* driver ) = 0;
-		void setColorBasedOnNum( uint8_t num );
+		void setColorBasedOnNum( uint_least8_t num );
 		void setColor( irr::video::SColor newColor );
 		irr::video::SColor getColorOne();
 		irr::video::SColor getColorTwo();
 		irr::video::SColor getColor();
-		uint16_t distanceFromExit;
+		uint_least16_t distanceFromExit;
 	protected:
-		uint8_t x;
+		uint_least8_t x;
 		float xInterp;
-		uint8_t y;
+		uint_least8_t y;
 		float yInterp;
 		bool moving;
 		irr::video::ITexture* texture;

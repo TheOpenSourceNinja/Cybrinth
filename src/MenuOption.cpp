@@ -17,9 +17,9 @@
 MenuOption::MenuOption() {
 	x = 0;
 	y = 0;
-	dimension = irr::core::dimension2d<uint32_t>( 0, 0 );
-	text = "";
+	setText( "" );
 	font = NULL;
+	setDimension();
 }
 
 MenuOption::~MenuOption() {
@@ -40,38 +40,38 @@ void MenuOption::setDimension() {
 	if( font != NULL ) {
 		dimension = font->getDimension( text.c_str() );
 	} else {
-		dimension = irr::core::dimension2d<uint32_t>( 0, 0 );
+		dimension = irr::core::dimension2d<uint_least16_t>( 0, 0 );
 	}
 }
 
 void MenuOption::draw( irr::video::IVideoDriver* driver ) {
-	//driver->draw2DImage( texture, core::position2d<int32_t>( x, y ) );
+	//driver->draw2DImage( texture, core::position2d<int_least16_t>( x, y ) );
 	if( font != NULL ) {
-		font->draw( text, irr::core::rect<int32_t>( x, y, dimension.Width, dimension.Height ), LIGHTCYAN );
+		font->draw( text, irr::core::rect< irr::s32 >( x, y, dimension.Width, dimension.Height ), LIGHTCYAN );
 	}
 }
 
-void MenuOption::setX( uint32_t val ) {
+void MenuOption::setX( uint_least16_t val ) {
 	x = val;
 }
 
-void MenuOption::setY( uint32_t val ) {
+void MenuOption::setY( uint_least16_t val ) {
 	y = val;
 }
 
-uint32_t MenuOption::getX() {
+uint_least16_t MenuOption::getX() {
 	return x;
 }
 
-uint32_t MenuOption::getY() {
+uint_least16_t MenuOption::getY() {
 	return y;
 }
 
-bool MenuOption::contains( irr::core::position2d<uint32_t> test ) {
+bool MenuOption::contains( irr::core::position2d<uint_least16_t> test ) {
 	return ( test.X >= x && test.Y >= y && test.X <= x + dimension.Width && test.Y <= y + dimension.Height );
 	//return true;
 }
 
-bool MenuOption::contains( uint32_t testX, uint32_t testY ) {
-	return contains( irr::core::position2d<uint32_t>( testX, testY ) );
+bool MenuOption::contains( uint_least16_t testX, uint_least16_t testY ) {
+	return contains( irr::core::position2d<uint_least16_t>( testX, testY ) );
 }

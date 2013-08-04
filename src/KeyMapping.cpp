@@ -8,7 +8,7 @@ irr::EKEY_CODE KeyMapping::getKey() {
 	return key;
 }
 
-uint8_t KeyMapping::getPlayer() {
+uint_least8_t KeyMapping::getPlayer() {
 	return player;
 }
 
@@ -20,7 +20,7 @@ void KeyMapping::setKey( irr::EKEY_CODE val ) {
 	key = val;
 }
 
-void KeyMapping::setPlayer( uint8_t val ) {
+void KeyMapping::setPlayer( uint_least8_t val ) {
 	player = val;
 }
 
