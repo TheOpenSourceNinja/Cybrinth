@@ -22,7 +22,7 @@ StringConverter::StringConverter() {
 irr::core::stringw StringConverter::convert( TagLib::wstring input ) {
 	TagLib::wstring::iterator it;
 	irr::core::stringw result;
-	for ( it = input.begin(); it < input.end(); it++ ) {
+	for( it = input.begin(); it < input.end(); it++ ) {
 		result.append( *it );
 	}
 	result.validate(); //Not sure what this does; Irrlicht documentation just says "verify the existing string". Figured it probably wouldn't hurt to call the function here.

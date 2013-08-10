@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([Cybrinth], [0.01], [dearingj@lifetime.oregonstate.edu])
+AC_INIT([Cybrinth], [0.01], [dearingj@lifetime.oregonstate.edu], [cybrinth], [http://bettercodes.org/projects/cybrinth])
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -33,10 +33,16 @@ AC_SUBST([BOOSTSYSTEM_LIBS])
 AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h unistd.h wchar.h cstdlib irrlicht/irrlicht.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
-AC_C_INLINE
 AC_TYPE_SIZE_T
+AC_TYPE_UINT8_T
+AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
+# AC_TYPE_UINT_FAST8_T
+# AC_TYPE_UINT_LEAST8_T
+# AC_TYPE_UINT_FAST16_T
+# AC_TYPE_UINT_LEAST16_T
+# AC_TYPE_UINT_FAST32_T
+# AC_TYPE_UINT_LEAST32_T
 
 # Checks for library functions.
 AC_CHECK_FUNCS([memset pow select socket sqrt strerror])

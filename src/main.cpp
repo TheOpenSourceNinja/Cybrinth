@@ -11,7 +11,7 @@
 #include "GameManager.h"
 
 int main() {
-	wcout << L"Now starting " << PACKAGE_STRING << ". Enjoy!" << endl;
+	wcout << L"Now starting " << PACKAGE_STRING << L". Please report bugs to " << PACKAGE_BUGREPORT << L". Enjoy!" << endl;
 	try {
 		GameManager* gm = new GameManager();
 		int returnValue = gm->run();

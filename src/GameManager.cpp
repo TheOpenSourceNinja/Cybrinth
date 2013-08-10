@@ -64,7 +64,7 @@ bool GameManager::allHumansAtGoal() {
 	for( uint_fast8_t b = 0; b < numBots; b++ ) { //Remove bots from the list
 		uint_least8_t botPlayer = bot[ b ].getPlayer();
 
-		for( uint_fast16_t p = 0; p < humanPlayers.size(); p++ ) {
+		for( uint_fast8_t p = 0; p < humanPlayers.size(); p++ ) {
 			if( humanPlayers[ p ] == botPlayer ) {
 				humanPlayers.erase( humanPlayers.begin() + p );
 			}
@@ -74,7 +74,7 @@ bool GameManager::allHumansAtGoal() {
 	if( humanPlayers.size() > 0 ) {
 		result = true;
 
-		for( uint_fast16_t p = 0; ( p < humanPlayers.size() && result == true ); p++ ) {
+		for( uint_fast8_t p = 0; ( p < humanPlayers.size() && result == true ); p++ ) {
 			if( !( player[ humanPlayers[ p ] ].getX() == goal.getX() && player[ humanPlayers[ p ] ].getY() == goal.getY() ) ) {
 				result = false;
 			}
@@ -110,7 +110,7 @@ void GameManager::drawAll() {
 			}
 		}
 
-		for( uint_fast16_t ps = 0; ps < playerStart.size(); ps++ ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts.
+		for( uint_fast8_t ps = 0; ps < playerStart.size(); ps++ ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts.
 			playerStart[ ps ].draw( driver, cellWidth, cellHeight );
 		}
 
@@ -669,6 +669,16 @@ void GameManager::loadFonts() {
 		}
 	} while( loadingFont != NULL && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
+	size += 3;
+
+	do {
+		loadingFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+		if( loadingFont != NULL ) {
+			fontDimensions = loadingFont->getDimension( loading.c_str() );
+			size -= 1;
+		}
+	} while( loadingFont != NULL && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+
 	if( loadingFont == NULL ) {
 		loadingFont = gui->getBuiltInFont();
 	}
@@ -677,7 +687,7 @@ void GameManager::loadFonts() {
 		wcout << L"loadingFont is loaded" << endl;
 	}
 
-	size = ( windowSize.Width / sideDisplaySizeDenominator );
+	size = ( windowSize.Width / sideDisplaySizeDenominator ) / 6; //found through experimentation, adjust it however you like and see how many times the font gets loaded
 
 	do {
 		if( debug ) {
@@ -699,6 +709,28 @@ void GameManager::loadFonts() {
 		}
 	} while( textFont != NULL && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
 
+	size += 3;
+
+	do {
+		if( debug ) {
+			wcout << L"About to load textFont in loop (size " << size << L")" << endl;
+		}
+		textFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+		if( debug ) {
+			wcout << L"Loaded textFont in loop (size " << size << L")" << endl;
+		}
+		if( textFont != NULL ) {
+			if( debug ) {
+				wcout << L"textFont is not null" << endl;
+			}
+			fontDimensions = textFont->getDimension( L"Random seed: " );
+			if( debug ) {
+				wcout << L"fontDimensions set to " << fontDimensions.Width << L"x" << fontDimensions.Height << endl;
+			}
+			size -= 1;
+		}
+	} while( textFont != NULL && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
+
 	if( textFont == NULL ) {
 		textFont = gui->getBuiltInFont();
 	}
@@ -714,6 +746,16 @@ void GameManager::loadFonts() {
 		if( clockFont != NULL ) {
 			fontDimensions = clockFont->getDimension( L"00:00:00" );
 			size -= 2;
+		}
+	} while( clockFont != NULL && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+
+	size += 3;
+
+	do {
+		clockFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+		if( clockFont != NULL ) {
+			fontDimensions = clockFont->getDimension( L"00:00:00" );
+			size -= 1;
 		}
 	} while( clockFont != NULL && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
@@ -767,6 +809,18 @@ void GameManager::loadMusicFont() {
 				albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
 				titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
 				size -= 2;
+			}
+		} while( musicTagFont != NULL && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
+
+		size += 3;
+
+		do {
+			musicTagFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+			if( musicTagFont != NULL ) {
+				artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
+				albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
+				titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
+				size -= 1;
 			}
 		} while( musicTagFont != NULL && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
 
@@ -943,6 +997,16 @@ void GameManager::loadTipFont() {
 		if( tipFont != NULL ) {
 			tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
 			size -= 2;
+		}
+	} while( tipFont != NULL && ( tipDimensions.Width > maxWidth ) );
+
+	size += 3;
+
+	do {
+		tipFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+		if( tipFont != NULL ) {
+			tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
+			size -= 1;
 		}
 	} while( tipFont != NULL && ( tipDimensions.Width > maxWidth ) );
 
@@ -1427,7 +1491,7 @@ void GameManager::readPrefs() {
 	//Set default prefs, in case we can't get them from the file
 	showBackgrounds = true;
 	fullscreen = false;
-	bitsPerPixel = 16;
+	bitsPerPixel = 8;
 	vsync = true;
 	driverType = video::EDT_OPENGL;
 	windowSize = core::dimension2d< uint_least16_t >( 640, 480 );
@@ -1921,7 +1985,7 @@ int GameManager::run() {
 					if(( player[p].getX() == goal.getX() ) && player[p].getY() == goal.getY() ) { //Make a list of who finished in what order
 						bool alreadyFinished = false; //Indicates whether the player is already on the winners list
 
-						for( uint_fast16_t i = 0; i < winners.size() && !alreadyFinished; i++ ) {
+						for( uint_fast8_t i = 0; i < winners.size() && !alreadyFinished; i++ ) {
 							if( p == winners.at( i ) ) {
 								alreadyFinished = true;
 							}
@@ -1987,7 +2051,7 @@ int GameManager::run() {
 				wcout << L"On to the next level!" << endl;
 				wcout << L"Winners:";
 
-				for( uint_fast16_t i = 0; i < winners.size(); i++ ) {
+				for( uint_fast8_t i = 0; i < winners.size(); i++ ) {
 					wcout << L" " << winners.at( i );
 				}
 
