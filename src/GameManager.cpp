@@ -372,21 +372,7 @@ GameManager::GameManager() {
 
 	readPrefs();
 
-	uint_least8_t nonPlayerActions = 0;
-	keyMap.resize( 4 * ( numPlayers - numBots ) + nonPlayerActions );
-	for( uint_fast8_t i = 0; i < 4 * ( numPlayers - numBots ); i += 4 ) {
-		keyMap.at( i ).setAction( 'u' );
-		keyMap.at( i + 1 ).setAction( 'd' );
-		keyMap.at( i + 2 ).setAction( 'l' );
-		keyMap.at( i + 3 ).setAction( 'r' );
-		keyMap.at( i ).setPlayer( i / 4 );
-		keyMap.at( i + 1 ).setPlayer( i / 4 );
-		keyMap.at( i + 2 ).setPlayer( i / 4 );
-		keyMap.at( i + 3 ).setPlayer( i / 4 );
-		if( debug ) {
-			wcout << L"Set keyMap " << i << L" player to " << i / 4 << endl;
-		}
-	}
+	setKeys();
 
 	if( fullscreen && !allowSmallSize ) {
 		windowSize = device->getVideoModeList()->getDesktopResolution();
@@ -1126,170 +1112,63 @@ void GameManager::movePlayerOnY( uint_least8_t p, int_fast8_t direction ) {
 bool GameManager::OnEvent( const SEvent& event ) {
 	switch( event.EventType ) {
 		case EET_KEY_INPUT_EVENT: {
-			if( event.KeyInput.PressedDown && !( showingMenu || showingLoadingScreen ) ) {
-				switch( event.KeyInput.Key ) { //TODO: Allow customizable controls
-					case KEY_SNAPSHOT: //I think KEY_SNAPSHOT corresponds to print screen
-					case KEY_KEY_P: { //My computer has no print screen key, so I use the letter P instead
-						takeScreenShot();
-						break;
-					}
-
-					//left movement keys
-					case KEY_LEFT: {
-						if( numBots < ( numPlayers - 0 ) && ( isServer || myPlayer == 0 ) ) {
-							movePlayerOnX( 0, -1 );
-							return true;
+			if( event.KeyInput.PressedDown ) {
+				if( !( showingMenu || showingLoadingScreen ) ) {
+					for( vector< KeyMapping >::size_type k = 0; k < keyMap.size(); k++ ) {
+						if( event.KeyInput.Key == keyMap[ k ].getKey() ) {
+							switch( keyMap[ k ].getAction() ) {
+								case 'm': {
+									showingMenu = true;
+									return true;
+									break;
+								}
+								case 'd': {
+									movePlayerOnY( keyMap[ k ].getPlayer(), 1 );
+									return true;
+									break;
+								}
+								case 'u': {
+									movePlayerOnY( keyMap[ k ].getPlayer(), -1 );
+									return true;
+									break;
+								}
+								case 'r': {
+									movePlayerOnX( keyMap[ k ].getPlayer(), 1 );
+									return true;
+									break;
+								}
+								case 'l': {
+									movePlayerOnX( keyMap[ k ].getPlayer(), -1 );
+									return true;
+									break;
+								}
+								case 's': {
+									takeScreenShot();
+									return true;
+									break;
+								}
+							}
+							break;
 						}
-
-						break;
 					}
-					case KEY_KEY_A: {
-						if( numBots < ( numPlayers - 1 ) && ( isServer || myPlayer == 1 ) ) {
-							movePlayerOnX( 1, -1 );
-							return true;
+				} else if( showingMenu ) {
+					for( vector< KeyMapping >::size_type k = 0; k < keyMap.size(); k++ ) {
+						if( event.KeyInput.Key == keyMap[ k ].getKey() ) {
+							switch( keyMap[ k ].getAction() ) {
+								case 'm': {
+									showingMenu = false;
+									return true;
+									break;
+								}
+								case 's': {
+									takeScreenShot();
+									return true;
+									break;
+								}
+							}
+							break;
 						}
-
-						break;
 					}
-					case KEY_KEY_F: {
-						if( numBots < ( numPlayers - 2 ) && ( isServer || myPlayer == 2 ) ) {
-							movePlayerOnX( 2, -1 );
-							return true;
-						}
-
-						break;
-					}
-					case KEY_KEY_J: {
-						if( numBots < ( numPlayers - 3 ) && ( isServer || myPlayer == 3 ) ) {
-							movePlayerOnX( 3, -1 );
-							return true;
-						}
-
-						break;
-					}
-
-					//right movement keys
-					case KEY_RIGHT: {
-						if( numBots < ( numPlayers - 0 ) && ( isServer || myPlayer == 0 ) ) {
-							movePlayerOnX( 0, 1 );
-							return true;
-						}
-
-						break;
-					}
-					case KEY_KEY_D: {
-						if( numBots < ( numPlayers - 1 ) && ( isServer || myPlayer == 1 ) ) {
-							movePlayerOnX( 1, 1 );
-							return true;
-						}
-
-						break;
-					}
-					case KEY_KEY_H: {
-						if( numBots < ( numPlayers - 2 ) && ( isServer || myPlayer == 2 ) ) {
-							movePlayerOnX( 2, 1 );
-							return true;
-						}
-
-						break;
-					}
-					case KEY_KEY_L: {
-						if( numBots < ( numPlayers - 3 ) && ( isServer || myPlayer == 3 ) ) {
-							movePlayerOnX( 3, 1 );
-							return true;
-						}
-
-						break;
-					}
-
-					//up movement keys
-					case KEY_UP: {
-						if( numBots < ( numPlayers - 0 ) && ( isServer || myPlayer == 0 ) ) {
-							movePlayerOnY( 0, -1 );
-							return true;
-						}
-
-						break;
-					}
-					case KEY_KEY_W: {
-						if( numBots < ( numPlayers - 1 ) && ( isServer || myPlayer == 1 ) ) {
-							movePlayerOnY( 1, -1 );
-							return true;
-						}
-
-						break;
-					}
-					case KEY_KEY_T: {
-						if( numBots < ( numPlayers - 2 ) && ( isServer || myPlayer == 2 ) ) {
-							movePlayerOnY( 2, -1 );
-							return true;
-						}
-
-						break;
-					}
-					case KEY_KEY_I: {
-						if( numBots < ( numPlayers - 3 ) && ( isServer || myPlayer == 3 ) ) {
-							movePlayerOnY( 3, -1 );
-							return true;
-						}
-
-						break;
-					}
-
-					//down movement keys
-					case KEY_DOWN: {
-						if( numBots < ( numPlayers - 0 ) && ( isServer || myPlayer == 0 ) ) {
-							movePlayerOnY( 0, 1 );
-							return true;
-						}
-
-						break;
-					}
-					case KEY_KEY_S: {
-						if( numBots < ( numPlayers - 1 ) && ( isServer || myPlayer == 1 ) ) {
-							movePlayerOnY( 1, 1 );
-							return true;
-						}
-
-						break;
-					}
-					case KEY_KEY_G: {
-						if( numBots < ( numPlayers - 2 ) && ( isServer || myPlayer == 2 ) ) {
-							movePlayerOnY( 2, 1 );
-							return true;
-						}
-
-						break;
-					}
-					case KEY_KEY_K: {
-						if( numBots < ( numPlayers - 3 ) && ( isServer || myPlayer == 3 ) ) {
-							movePlayerOnY( 3, 1 );
-							return true;
-							\
-						}
-
-						break;
-					}
-
-					case KEY_MENU:
-					case KEY_ESCAPE: {
-						showingMenu = true;
-						return true;
-					}
-					break;
-					default:
-						break;
-				}
-			} else if( event.KeyInput.PressedDown && showingMenu ) {
-				switch( event.KeyInput.Key ) {
-					case KEY_MENU:
-					case KEY_ESCAPE: { //Get out of the menu if we're showing it and escape is pressed
-						showingMenu = false;
-						return true;
-					}
-					break;
-					default:
-						break;
 				}
 			}
 		}
@@ -2062,6 +1941,37 @@ int GameManager::run() {
 	}
 
 	return 0;
+}
+
+void GameManager::setKeys() {
+	uint_least8_t nonPlayerActions = 3; //The number of keys assigned to things other than controlling the player objects: screenshots, opening & closing the menu, etc.
+	keyMap.resize( 4 * ( numPlayers - numBots ) + nonPlayerActions );
+	for( uint_fast8_t i = 0; i < 4 * ( numPlayers - numBots ); i += 4 ) {
+		keyMap.at( i ).setAction( 'u' );
+		keyMap.at( i + 1 ).setAction( 'd' );
+		keyMap.at( i + 2 ).setAction( 'l' );
+		keyMap.at( i + 3 ).setAction( 'r' );
+		keyMap.at( i ).setPlayer( i / 4 );
+		keyMap.at( i + 1 ).setPlayer( i / 4 );
+		keyMap.at( i + 2 ).setPlayer( i / 4 );
+		keyMap.at( i + 3 ).setPlayer( i / 4 );
+		if( debug ) {
+			wcout << L"Set keyMap " << i << L" player to " << i / 4 << endl;
+		}
+	}
+
+	keyMap.at( 0 ).setKey( KEY_UP );
+	keyMap.at( 0 + 1 ).setKey( KEY_DOWN );
+	keyMap.at( 0 + 2 ).setKey( KEY_LEFT );
+	keyMap.at( 0 + 3 ).setKey( KEY_RIGHT );
+
+	keyMap.at( 4 * ( numPlayers - numBots ) ).setAction( 's' );
+	keyMap.at( 4 * ( numPlayers - numBots ) ).setKey( KEY_SNAPSHOT );
+
+	keyMap.at( 4 * ( numPlayers - numBots ) + 1 ).setAction( 'm' );
+	keyMap.at( 4 * ( numPlayers - numBots ) + 1 ).setKey( KEY_MENU );
+	keyMap.at( 4 * ( numPlayers - numBots ) + 2 ).setAction( 'm' );
+	keyMap.at( 4 * ( numPlayers - numBots ) + 2 ).setKey( KEY_ESCAPE );
 }
 
 void GameManager::setupBackground() {

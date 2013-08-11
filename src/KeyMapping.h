@@ -22,11 +22,11 @@ class KeyMapping
 		/** Access action
 		 * \return The current value of action
 		 */
-		unsigned char getAction();
+		char getAction();
 		/** Set action
 		 * \param val New value to set
 		 */
-		void setAction( unsigned char val );
+		void setAction( char val );
 		/** Access player
 		 * \return The current value of player
 		 */
@@ -38,7 +38,7 @@ class KeyMapping
 	protected:
 	private:
 		irr::EKEY_CODE key; //!< Member variable "key"
-		unsigned char action; //!< Member variable "action"
+		char action; //!< Member variable "action"
 		uint_least8_t player;
 };
 

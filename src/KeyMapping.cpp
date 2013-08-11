@@ -1,6 +1,6 @@
 #include "KeyMapping.h"
 
-unsigned char KeyMapping::getAction() {
+char KeyMapping::getAction() {
 	return action;
 }
 
@@ -12,7 +12,7 @@ uint_least8_t KeyMapping::getPlayer() {
 	return player;
 }
 
-void KeyMapping::setAction( unsigned char val ) {
+void KeyMapping::setAction( char val ) {
 	action = val;
 }
 

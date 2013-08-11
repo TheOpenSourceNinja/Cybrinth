@@ -58,6 +58,8 @@ class GameManager : public IEventReceiver {
 		void resetThings();
 		int run();
 
+		void setKeys();
+
 
 		//Non-functions----------------------------------
 		vector< AI > bot;
