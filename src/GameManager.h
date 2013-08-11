@@ -58,7 +58,7 @@ class GameManager : public IEventReceiver {
 		void resetThings();
 		int run();
 
-		void setKeys();
+		void setControls();
 
 
 		//Non-functions----------------------------------

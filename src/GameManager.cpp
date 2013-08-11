@@ -372,7 +372,7 @@ GameManager::GameManager() {
 
 	readPrefs();
 
-	setKeys();
+	setControls();
 
 	if( fullscreen && !allowSmallSize ) {
 		windowSize = device->getVideoModeList()->getDesktopResolution();
@@ -1391,344 +1391,449 @@ void GameManager::readPrefs() {
 	debug = false;
 #endif
 
-	if( !is_directory( prefsPath ) ) {
-		if( debug ) {
-			wcout << L"Loading preferences from file " << prefsPath.wstring() << endl;
-		}
-		boost::filesystem::wifstream prefsFile;
-		prefsFile.open( prefsPath, ios::in );
-
-		if( prefsFile.is_open() ) {
-			wstring line;
-			uint_fast16_t lineNum = 0;
-
-			while( prefsFile.good() ) {
-				lineNum++;
-				getline( prefsFile, line );
-				line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
-				boost::algorithm::trim( line ); //Removes trailing and leading spaces
-				boost::algorithm::to_lower( line );
-				if( debug ) {
-				    wcout << L"Line " << lineNum << L": \"" << line << "\"" << endl;
-				}
-
-
-				if( !line.empty() ) {
-					try {
-						wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( '\t' ) ) );
-						wstring choice = boost::algorithm::trim_copy( line.substr( line.find( '\t' ) ) );
-						if( debug ) {
-							wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< endl;
-						}
-
-						if( preference == L"volume:" ) {
-							try {
-								uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-
-								if( choiceAsInt <= 100 && choiceAsInt >= 0 ) {
-									musicVolume = choiceAsInt;
-									Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
-									if( debug ) {
-										wcout << L"Volume should be " << choiceAsInt << "%" << endl;
-										wcout << L"Volume is really " << 100 * Mix_VolumeMusic( -1 ) / MIX_MAX_VOLUME << "%" << endl;
-									}
-								} else if( choiceAsInt < 0 ) {
-									wcerr << L"Warning: Volume less than zero: " << choiceAsInt << endl;
-									Mix_VolumeMusic( 0 );
-									musicVolume = 0;
-								} else {
-									wcerr << L"Warning: Volume greater than 100%: " << choiceAsInt << endl;
-									Mix_VolumeMusic( MIX_MAX_VOLUME );
-									musicVolume = 100;
-								}
-							} catch( boost::bad_lexical_cast error ) {
-								wcerr << L"Error reading volume preference (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
-							}
-						} else if( preference == L"number of bots:" ) {
-							try {
-								uint_least8_t choiceAsInt = boost::lexical_cast< short int >( choice ); //uint_least8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
-
-								if( choiceAsInt <= numPlayers ) {
-									numBots = choiceAsInt;
-									if( debug ) {
-										wcout << L"Number of bots is " << choiceAsInt << endl;
-									}
-								} else {
-									wcerr << L"Warning: Number of bots not less than or equal to number of players (number of players may not have been read yet): " << choiceAsInt << endl;
-									numBots = choiceAsInt;
-								}
-							} catch( boost::bad_lexical_cast error ) {
-								wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
-							}
-						} else if( preference == L"show background animations:" ) {
-							if( choice == L"true" ) {
-								if( debug ) {
-									wcout << L"Show backgrounds is ON" << endl;
-								}
-								showBackgrounds = true;
-							} else if( choice == L"false" ) {
-								if( debug ) {
-									wcout << L"Show backgrounds is OFF" << endl;
-								}
-								showBackgrounds = false;
-							} else {
-								wcerr << L"Error reading show background animations preference on line " << lineNum  << L": \"" << choice  << endl;//<< L"\"" << endl;
-							}
-						} else if( preference == L"fullscreen:" ) {
-
-							if( choice == L"true" ) {
-								if( debug ) {
-									wcout << L"Fullscreen is ON" << endl;
-								}
-								fullscreen = true;
-							} else if( choice == L"false" ) {
-								if( debug ) {
-									wcout << L"Fullscreen is OFF" << endl;
-								}
-								fullscreen = false;
-							} else {
-								wcerr << L"Error reading fullscreen preference on line " << lineNum  << L": \"" << choice  << endl;//<< L"\"" << endl;
-							}
-						} else if( preference == L"mark player trails:" ) {
-
-							if( choice == L"true" ) {
-								if( debug ) {
-									wcout << L"Mark trails is ON" << endl;
-								}
-								markTrails = true;
-							} else if( choice == L"false" ) {
-								if( debug ) {
-									wcout << L"Mark trails is OFF" << endl;
-								}
-								markTrails = false;
-							} else {
-								wcerr << L"Error reading mark player trails preference on line " << lineNum  << L": \"" << choice  << endl;//<< L"\"" << endl;
-							}
-						} else if( preference == L"debug:" ) {
-
-	#ifndef DEBUG
-
-							if( choice == L"true" ) {
-								debug = true;
-							} else if( choice == L"false" ) {
-								debug = false;
-							} else {
-								wcerr << L"Error reading debug preference on line " << lineNum  << L": \"" << choice  << endl;//<< L"\"" << endl;
-							}
-
-	#endif
-
-							if( debug ) {
-								wcout << L"Debug is ON" << endl;
-							}
-						} else if( preference == L"bits per pixel:" ) {
-							try {
-								uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-
-								if( choiceAsInt <= 16 ) {
-									bitsPerPixel = choiceAsInt;
-									if( debug ) {
-										wcout << L"Bits per pixel is " << choiceAsInt << endl;
-									}
-								} else {
-									wcerr << L"Warning: Bits per pixel not less than or equal to 16: " << choiceAsInt << endl;
-									bitsPerPixel = choiceAsInt;
-								}
-							} catch( boost::bad_lexical_cast error ) {
-								wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
-							}
-
-						} else if( preference == L"wait for vertical sync:" ) {
-
-							if( choice == L"true" ) {
-								if( debug ) {
-									wcout << L"Vertical sync is ON" << endl;
-								}
-								vsync = true;
-							} else if( choice == L"false" ) {
-								if( debug ) {
-									wcout << L"Vertical sync is OFF" << endl;
-								}
-								vsync = false;
-							} else {
-								wcerr << L"Error reading vertical sync preference on line " << lineNum << L": \"" << choice << L"\"" << endl;
-							}
-
-						} else if( preference == L"driver type:" ) {
-
-							if( choice == L"opengl" ) {
-								driverType = video::EDT_OPENGL;
-							} else if( choice == L"direct3d9" ) {
-								driverType = video::EDT_DIRECT3D9;
-							} else if( choice == L"direct3d8" ) {
-								driverType = video::EDT_DIRECT3D8;
-							} else if( choice == L"burning's video" ) {
-								driverType = video::EDT_BURNINGSVIDEO;
-							} else if( choice == L"software" ) {
-								driverType = video::EDT_SOFTWARE;
-							} else if( choice == L"null" ) {
-								driverType = video::EDT_NULL;
-							} else {
-								wcerr << L"Warning: Selected driver type " << choice << L" not recognized. Trying OpenGL." << endl;
-								choice = L"opengl";
-							}
-
-							if( !device->isDriverSupported( driverType ) ) {
-								wcerr << L"Warning: Chosen driver type " << choice << L" is not supported on this system. ";
-
-								if( device->isDriverSupported( video::EDT_OPENGL ) ) {
-									wcerr << L"Trying OpenGL." << endl;
-									driverType = video::EDT_OPENGL;
-									choice = L"opengl";
-								} else if( device->isDriverSupported( video::EDT_DIRECT3D9 ) ) {
-									wcerr << L"Trying Direct3D 9." << endl;
-									driverType = video::EDT_DIRECT3D9;
-									choice = L"direct3d9";
-								} else if( device->isDriverSupported( video::EDT_DIRECT3D8 ) ) {
-									wcerr << L"Trying Direct3D 8." << endl;
-									driverType = video::EDT_DIRECT3D8;
-									choice = L"direct3d8";
-								} else if( device->isDriverSupported( video::EDT_BURNINGSVIDEO ) ) {
-									wcerr << L"Trying Burning's video." << endl;
-									driverType = video::EDT_BURNINGSVIDEO;
-									choice = L"burning's video";
-								} else if( device->isDriverSupported( video::EDT_SOFTWARE ) ) {
-									wcerr << L"Trying software renderer." << endl;
-									driverType = video::EDT_SOFTWARE;
-									choice = L"software";
-								} else {
-									wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << endl;
-									driverType = video::EDT_NULL;
-									choice = L"NULL";
-									debug = true;
-								}
-							}
-
-							if( debug ) {
-								wcout << L"Driver type is " << choice << endl;
-							}
-
-						} else if( preference == L"number of players:" ) {
-							try {
-								uint_least8_t choiceAsInt = boost::lexical_cast< short int >( choice ); //uint_least8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
-
-								if( choiceAsInt > UINT_LEAST8_MAX ) { //The maximum number of players is whatever a uint_least8_t can hold, presumably 255 (the 8 is the minimum number of bits, it may not be the true number).
-									choiceAsInt = UINT_LEAST8_MAX;
-								}
-
-								if( choiceAsInt <= 4 && choiceAsInt > 0 ) {
-									numPlayers = choiceAsInt;
-									if( debug ) {
-										wcout << L"Number of players is " << choiceAsInt << endl;
-									}
-								} else if( choiceAsInt > 4 ) {
-									wcerr << L"Warning: Number of players not less than or equal to 4: " << choiceAsInt << endl;
-									numPlayers = choiceAsInt;
-								} else {
-									wcerr << L"Warning: Number of players is zero or not a number: " << choiceAsInt << L". Setting number of players to default." << endl;
-								}
-							} catch( boost::bad_lexical_cast error ) {
-								wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
-							}
-
-						} else if( preference == L"window size:" ) {
-							size_t locationOfX = choice.find( L"x" );
-							wstring width = choice.substr( 0, locationOfX );
-							wstring height = choice.substr( locationOfX + 1 );
-							if( debug ) {
-								wcout << L"Window size: " << width << L"x" << height << endl;
-							}
-
-							uint_fast16_t widthAsInt = boost::lexical_cast< uint_fast16_t >( width );
-							uint_fast16_t heightAsInt = boost::lexical_cast< uint_fast16_t >( height );
-
-							if( widthAsInt < 160 || heightAsInt < 240 ) {
-								wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << endl;
-							} else if( widthAsInt == 160 && heightAsInt == 240 ) {
-								wcout << L"Rock on, CGA graphics. Rock on." << endl;
-								windowSize = core::dimension2d<uint_least16_t>( widthAsInt, heightAsInt );
-							} else {
-								windowSize = core::dimension2d<uint_least16_t>( widthAsInt, heightAsInt );
-							}
-
-						} else if( preference == L"play music:" ) {
-							if( choice == L"true" ) {
-								if( debug ) {
-									wcout << L"Play music is ON" << endl;
-								}
-								playMusic = true;
-							} else if( choice == L"false" ) {
-								if( debug ) {
-									wcout << L"Play music is OFF" << endl;
-								}
-								playMusic = false;
-							} else {
-								wcerr << L"Error reading play music preference on line " << lineNum << L": \"" << choice << L"\"" << endl;
-							}
-
-						} else if( preference == L"network port:" ) {
-							if( debug ) {
-								wcout << L"Network port: " << choice << endl;
-							}
-
-							try {
-								uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-								network.setPort( choiceAsInt );
-							} catch( boost::bad_lexical_cast error ) {
-								wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
-							}
-						} else if( preference == L"enable joystick:" ) {
-							if( choice == L"true" ) {
-								if( debug ) {
-									wcout << L"Joystick is ENABLED" << endl;
-								}
-								enableJoystick = true;
-							} else if( choice == L"false" ) {
-								if( debug ) {
-									wcout << L"Joystick is DISABLED" << endl;
-								}
-								enableJoystick = false;
-							} else {
-								wcerr << L"Error reading enable joystick preference on line " << lineNum << L": \"" << choice << L"\"" << endl;
-							}
-						} else if( preference == L"joystick number:" ) {
-							if( debug ) {
-								wcout << L"Joystick number: " << choice << endl;
-							}
-							try {
-								uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-								joystickChosen = choiceAsInt;
-							} catch (boost::bad_lexical_cast error ) {
-								wcerr << L"Error reading joystick number (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
-							}
-						} else if( preference == L"always server:" ) {
-							if( choice == L"true" ) {
-								if( debug ) {
-									wcout << L"This is always a server" << endl;
-								}
-								isServer = true;
-							} else if( choice == L"false" ) {
-								if( debug ) {
-									wcout << L"This is not always a server" << endl;
-								}
-								isServer = false;
-							} else {
-								wcerr << L"Error reading \"always server\" preference on line " << lineNum << L": \"" << choice << L"\"" << endl;
-							}
-						} else {
-							wcerr << L"Unrecognized preference on line " << lineNum << L": \"" << line << L"\"" << endl;
-						}
-					} catch ( std::exception e ) {
-						wcout << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << endl;
-					}
-				} else { //This line in the preferences file is empty
-				}
+	if( exists( prefsPath ) ) {
+		if( !is_directory( prefsPath ) ) {
+			if( debug ) {
+				wcout << L"Loading preferences from file " << prefsPath.wstring() << endl;
 			}
+			boost::filesystem::wifstream prefsFile;
+			prefsFile.open( prefsPath, ios::in );
 
-			prefsFile.close();
+			if( prefsFile.is_open() ) {
+				wstring line;
+				uint_fast16_t lineNum = 0;
+
+				while( prefsFile.good() ) {
+					lineNum++;
+					getline( prefsFile, line );
+					line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
+					boost::algorithm::trim( line ); //Removes trailing and leading spaces
+					boost::algorithm::to_lower( line );
+					if( debug ) {
+						wcout << L"Line " << lineNum << L": \"" << line << "\"" << endl;
+					}
+
+
+					if( !line.empty() ) {
+						try {
+							wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( '\t' ) ) );
+							wstring choice = boost::algorithm::trim_copy( line.substr( line.find( '\t' ) ) );
+							if( debug ) {
+								wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< endl;
+							}
+
+							if( preference == L"volume:" ) {
+								try {
+									uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
+
+									if( choiceAsInt <= 100 && choiceAsInt >= 0 ) {
+										musicVolume = choiceAsInt;
+										Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+										if( debug ) {
+											wcout << L"Volume should be " << choiceAsInt << "%" << endl;
+											wcout << L"Volume is really " << 100 * Mix_VolumeMusic( -1 ) / MIX_MAX_VOLUME << "%" << endl;
+										}
+									} else if( choiceAsInt < 0 ) {
+										wcerr << L"Warning: Volume less than zero: " << choiceAsInt << endl;
+										Mix_VolumeMusic( 0 );
+										musicVolume = 0;
+									} else {
+										wcerr << L"Warning: Volume greater than 100%: " << choiceAsInt << endl;
+										Mix_VolumeMusic( MIX_MAX_VOLUME );
+										musicVolume = 100;
+									}
+								} catch( boost::bad_lexical_cast error ) {
+									wcerr << L"Error reading volume preference (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
+								}
+							} else if( preference == L"number of bots:" ) {
+								try {
+									uint_least8_t choiceAsInt = boost::lexical_cast< short int >( choice ); //uint_least8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
+
+									if( choiceAsInt <= numPlayers ) {
+										numBots = choiceAsInt;
+										if( debug ) {
+											wcout << L"Number of bots is " << choiceAsInt << endl;
+										}
+									} else {
+										wcerr << L"Warning: Number of bots not less than or equal to number of players (number of players may not have been read yet): " << choiceAsInt << endl;
+										numBots = choiceAsInt;
+									}
+								} catch( boost::bad_lexical_cast error ) {
+									wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
+								}
+							} else if( preference == L"show background animations:" ) {
+								if( choice == L"true" ) {
+									if( debug ) {
+										wcout << L"Show backgrounds is ON" << endl;
+									}
+									showBackgrounds = true;
+								} else if( choice == L"false" ) {
+									if( debug ) {
+										wcout << L"Show backgrounds is OFF" << endl;
+									}
+									showBackgrounds = false;
+								} else {
+									wcerr << L"Error reading show background animations preference on line " << lineNum  << L": \"" << choice  << endl;//<< L"\"" << endl;
+								}
+							} else if( preference == L"fullscreen:" ) {
+
+								if( choice == L"true" ) {
+									if( debug ) {
+										wcout << L"Fullscreen is ON" << endl;
+									}
+									fullscreen = true;
+								} else if( choice == L"false" ) {
+									if( debug ) {
+										wcout << L"Fullscreen is OFF" << endl;
+									}
+									fullscreen = false;
+								} else {
+									wcerr << L"Error reading fullscreen preference on line " << lineNum  << L": \"" << choice  << endl;//<< L"\"" << endl;
+								}
+							} else if( preference == L"mark player trails:" ) {
+
+								if( choice == L"true" ) {
+									if( debug ) {
+										wcout << L"Mark trails is ON" << endl;
+									}
+									markTrails = true;
+								} else if( choice == L"false" ) {
+									if( debug ) {
+										wcout << L"Mark trails is OFF" << endl;
+									}
+									markTrails = false;
+								} else {
+									wcerr << L"Error reading mark player trails preference on line " << lineNum  << L": \"" << choice  << endl;//<< L"\"" << endl;
+								}
+							} else if( preference == L"debug:" ) {
+
+								#ifndef DEBUG
+								if( choice == L"true" ) {
+									debug = true;
+								} else if( choice == L"false" ) {
+									debug = false;
+								} else {
+									wcerr << L"Error reading debug preference on line " << lineNum  << L": \"" << choice  << endl;//<< L"\"" << endl;
+								}
+								#endif
+
+								if( debug ) {
+									wcout << L"Debug is ON" << endl;
+								}
+							} else if( preference == L"bits per pixel:" ) {
+								try {
+									uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
+
+									if( choiceAsInt <= 16 ) {
+										bitsPerPixel = choiceAsInt;
+										if( debug ) {
+											wcout << L"Bits per pixel is " << choiceAsInt << endl;
+										}
+									} else {
+										wcerr << L"Warning: Bits per pixel not less than or equal to 16: " << choiceAsInt << endl;
+										bitsPerPixel = choiceAsInt;
+									}
+								} catch( boost::bad_lexical_cast error ) {
+									wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
+								}
+
+							} else if( preference == L"wait for vertical sync:" ) {
+
+								if( choice == L"true" ) {
+									if( debug ) {
+										wcout << L"Vertical sync is ON" << endl;
+									}
+									vsync = true;
+								} else if( choice == L"false" ) {
+									if( debug ) {
+										wcout << L"Vertical sync is OFF" << endl;
+									}
+									vsync = false;
+								} else {
+									wcerr << L"Error reading vertical sync preference on line " << lineNum << L": \"" << choice << L"\"" << endl;
+								}
+
+							} else if( preference == L"driver type:" ) {
+
+								if( choice == L"opengl" ) {
+									driverType = video::EDT_OPENGL;
+								} else if( choice == L"direct3d9" ) {
+									driverType = video::EDT_DIRECT3D9;
+								} else if( choice == L"direct3d8" ) {
+									driverType = video::EDT_DIRECT3D8;
+								} else if( choice == L"burning's video" ) {
+									driverType = video::EDT_BURNINGSVIDEO;
+								} else if( choice == L"software" ) {
+									driverType = video::EDT_SOFTWARE;
+								} else if( choice == L"null" ) {
+									driverType = video::EDT_NULL;
+								} else {
+									wcerr << L"Warning: Selected driver type " << choice << L" not recognized. Trying OpenGL." << endl;
+									choice = L"opengl";
+								}
+
+								if( !device->isDriverSupported( driverType ) ) {
+									wcerr << L"Warning: Chosen driver type " << choice << L" is not supported on this system. ";
+
+									if( device->isDriverSupported( video::EDT_OPENGL ) ) {
+										wcerr << L"Trying OpenGL." << endl;
+										driverType = video::EDT_OPENGL;
+										choice = L"opengl";
+									} else if( device->isDriverSupported( video::EDT_DIRECT3D9 ) ) {
+										wcerr << L"Trying Direct3D 9." << endl;
+										driverType = video::EDT_DIRECT3D9;
+										choice = L"direct3d9";
+									} else if( device->isDriverSupported( video::EDT_DIRECT3D8 ) ) {
+										wcerr << L"Trying Direct3D 8." << endl;
+										driverType = video::EDT_DIRECT3D8;
+										choice = L"direct3d8";
+									} else if( device->isDriverSupported( video::EDT_BURNINGSVIDEO ) ) {
+										wcerr << L"Trying Burning's video." << endl;
+										driverType = video::EDT_BURNINGSVIDEO;
+										choice = L"burning's video";
+									} else if( device->isDriverSupported( video::EDT_SOFTWARE ) ) {
+										wcerr << L"Trying software renderer." << endl;
+										driverType = video::EDT_SOFTWARE;
+										choice = L"software";
+									} else {
+										wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << endl;
+										driverType = video::EDT_NULL;
+										choice = L"NULL";
+										debug = true;
+									}
+								}
+
+								if( debug ) {
+									wcout << L"Driver type is " << choice << endl;
+								}
+
+							} else if( preference == L"number of players:" ) {
+								try {
+									uint_least8_t choiceAsInt = boost::lexical_cast< short int >( choice ); //uint_least8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
+
+									if( choiceAsInt > UINT_LEAST8_MAX ) { //The maximum number of players is whatever a uint_least8_t can hold, presumably 255 (the 8 is the minimum number of bits, it may not be the true number).
+										choiceAsInt = UINT_LEAST8_MAX;
+									}
+
+									if( choiceAsInt <= 4 && choiceAsInt > 0 ) {
+										numPlayers = choiceAsInt;
+										if( debug ) {
+											wcout << L"Number of players is " << choiceAsInt << endl;
+										}
+									} else if( choiceAsInt > 4 ) {
+										wcerr << L"Warning: Number of players not less than or equal to 4: " << choiceAsInt << endl;
+										numPlayers = choiceAsInt;
+									} else {
+										wcerr << L"Warning: Number of players is zero or not a number: " << choiceAsInt << L". Setting number of players to default." << endl;
+									}
+								} catch( boost::bad_lexical_cast error ) {
+									wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
+								}
+
+							} else if( preference == L"window size:" ) {
+								size_t locationOfX = choice.find( L"x" );
+								wstring width = choice.substr( 0, locationOfX );
+								wstring height = choice.substr( locationOfX + 1 );
+								if( debug ) {
+									wcout << L"Window size: " << width << L"x" << height << endl;
+								}
+
+								uint_fast16_t widthAsInt = boost::lexical_cast< uint_fast16_t >( width );
+								uint_fast16_t heightAsInt = boost::lexical_cast< uint_fast16_t >( height );
+
+								if( widthAsInt < 160 || heightAsInt < 240 ) {
+									wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << endl;
+								} else if( widthAsInt == 160 && heightAsInt == 240 ) {
+									wcout << L"Rock on, CGA graphics. Rock on." << endl;
+									windowSize = core::dimension2d<uint_least16_t>( widthAsInt, heightAsInt );
+								} else {
+									windowSize = core::dimension2d<uint_least16_t>( widthAsInt, heightAsInt );
+								}
+
+							} else if( preference == L"play music:" ) {
+								if( choice == L"true" ) {
+									if( debug ) {
+										wcout << L"Play music is ON" << endl;
+									}
+									playMusic = true;
+								} else if( choice == L"false" ) {
+									if( debug ) {
+										wcout << L"Play music is OFF" << endl;
+									}
+									playMusic = false;
+								} else {
+									wcerr << L"Error reading play music preference on line " << lineNum << L": \"" << choice << L"\"" << endl;
+								}
+
+							} else if( preference == L"network port:" ) {
+								if( debug ) {
+									wcout << L"Network port: " << choice << endl;
+								}
+
+								try {
+									uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
+									network.setPort( choiceAsInt );
+								} catch( boost::bad_lexical_cast error ) {
+									wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
+								}
+							} else if( preference == L"enable joystick:" ) {
+								if( choice == L"true" ) {
+									if( debug ) {
+										wcout << L"Joystick is ENABLED" << endl;
+									}
+									enableJoystick = true;
+								} else if( choice == L"false" ) {
+									if( debug ) {
+										wcout << L"Joystick is DISABLED" << endl;
+									}
+									enableJoystick = false;
+								} else {
+									wcerr << L"Error reading enable joystick preference on line " << lineNum << L": \"" << choice << L"\"" << endl;
+								}
+							} else if( preference == L"joystick number:" ) {
+								if( debug ) {
+									wcout << L"Joystick number: " << choice << endl;
+								}
+								try {
+									uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
+									joystickChosen = choiceAsInt;
+								} catch (boost::bad_lexical_cast error ) {
+									wcerr << L"Error reading joystick number (is it not a number?) on line " << lineNum << L": " << error.what() << endl;
+								}
+							} else if( preference == L"always server:" ) {
+								if( choice == L"true" ) {
+									if( debug ) {
+										wcout << L"This is always a server" << endl;
+									}
+									isServer = true;
+								} else if( choice == L"false" ) {
+									if( debug ) {
+										wcout << L"This is not always a server" << endl;
+									}
+									isServer = false;
+								} else {
+									wcerr << L"Error reading \"always server\" preference on line " << lineNum << L": \"" << choice << L"\"" << endl;
+								}
+							} else {
+								wcerr << L"Unrecognized preference on line " << lineNum << L": \"" << line << L"\"" << endl;
+							}
+						} catch ( std::exception e ) {
+							wcout << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << endl;
+						}
+					} else { //This line in the preferences file is empty, so do nothing
+					}
+				}
+
+				prefsFile.close();
+			}
+		} else {
+			wcerr << L"Error: Prefs file is a directory. Cannot load prefs." << endl;
 		}
 	} else {
-		wcerr << L"Error: Prefs file is a directory. Cannot load prefs." << endl;
+		if( debug ) {
+			wcout << L"Creating preferences file " << prefsPath.wstring() << endl;
+		}
+		boost::filesystem::wofstream prefsFile;
+		prefsFile.open( prefsPath, ios::out );
+
+		if( prefsFile.is_open() ) {
+			prefsFile << L"volume:\t" << musicVolume << endl;
+			prefsFile << L"number of bots:\t" << numBots << endl;
+
+			prefsFile << L"show background animations:\t";
+			if( showBackgrounds ) {
+				prefsFile << L"true";
+			} else {
+				prefsFile << L"false";
+			}
+			prefsFile << endl;
+
+			prefsFile << L"fullscreen:\t";
+			if( fullscreen ) {
+				prefsFile << L"true";
+			} else {
+				prefsFile << L"false";
+			}
+			prefsFile << endl;
+
+			prefsFile << L"mark player trails:\t";
+			if( markTrails ) {
+				prefsFile << L"true";
+			} else {
+				prefsFile << L"false";
+			}
+			prefsFile << endl;
+
+			prefsFile << L"debug:\t";
+			if( debug ) {
+				prefsFile << L"true";
+			} else {
+				prefsFile << L"false";
+			}
+			prefsFile << endl;
+
+			prefsFile << L"bits per pixel:\t" << bitsPerPixel << endl;
+
+			prefsFile << L"wait for vertical sync:\t";
+			if( vsync ) {
+				prefsFile << L"true";
+			} else {
+				prefsFile << L"false";
+			}
+			prefsFile << endl;
+
+			prefsFile << L"driver type:\t";
+			if( driverType == video::EDT_OPENGL ) {
+				prefsFile << L"opengl";
+			} else if( driverType == video::EDT_DIRECT3D9 ) {
+				prefsFile << L"direct3d9";
+			} else if( driverType == video::EDT_DIRECT3D8 ) {
+				prefsFile << L"direct3d8";
+			} else if( driverType == video::EDT_BURNINGSVIDEO ) {
+				prefsFile << L"burning's video";
+			} else if( driverType == video::EDT_SOFTWARE ) {
+				prefsFile << L"software";
+			} else if( driverType == video::EDT_NULL ) {
+				prefsFile << L"null";
+			} else {
+				wcerr << L"Warning: Creating preferences file, selected driver type " << driverType << L" not recognized. Saving OpenGL." << endl;
+				prefsFile << L"opengl";
+			}
+			prefsFile << endl;
+
+			prefsFile << L"number of players:\t" << numPlayers << endl;
+
+			prefsFile << L"window size:\t" << windowSize.Width << L"x" << windowSize.Height << endl;
+
+			prefsFile << L"play music:\t";
+			if( playMusic ) {
+				prefsFile << L"true";
+			} else {
+				prefsFile << L"false";
+			}
+			prefsFile << endl;
+
+			prefsFile << L"network port:\t" << network.getPort() << endl;
+
+			prefsFile << L"enable joystick:\t";
+			if( enableJoystick ) {
+				prefsFile << L"true";
+			} else {
+				prefsFile << L"false";
+			}
+			prefsFile << endl;
+
+			prefsFile << L"joystick number:\t" << joystickChosen << endl;
+
+			prefsFile << L"always server:\t";
+			if( isServer ) {
+				prefsFile << L"true";
+			} else {
+				prefsFile << L"false";
+			}
+			prefsFile << endl;
+
+		}
 	}
 
 	if( !isServer ) {
@@ -1943,9 +2048,12 @@ int GameManager::run() {
 	return 0;
 }
 
-void GameManager::setKeys() {
+void GameManager::setControls() {
+	boost::filesystem::path prefsPath( L"./controls.cfg" );
 	uint_least8_t nonPlayerActions = 3; //The number of keys assigned to things other than controlling the player objects: screenshots, opening & closing the menu, etc.
 	keyMap.resize( 4 * ( numPlayers - numBots ) + nonPlayerActions );
+
+	//set defaults
 	for( uint_fast8_t i = 0; i < 4 * ( numPlayers - numBots ); i += 4 ) {
 		keyMap.at( i ).setAction( 'u' );
 		keyMap.at( i + 1 ).setAction( 'd' );

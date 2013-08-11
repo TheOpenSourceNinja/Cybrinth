@@ -45,6 +45,7 @@ class NetworkManager {
 		void sendMaze( MazeCell ** maze, uint_least8_t cols, uint_least8_t rows );
 		void sendPlayerPos( uint_least8_t player, uint_least8_t x, uint_least8_t y );
 		void setPort( uint_least16_t newPort );
+		uint_least16_t getPort();
 		void sendGoal( Goal goal );
 		void sendPlayerStarts( std::vector<PlayerStart> starts );
 		void sendU8( uint_least8_t num, std::wstring desc );

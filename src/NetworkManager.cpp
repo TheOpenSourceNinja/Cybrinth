@@ -60,6 +60,10 @@ void NetworkManager::setPort( uint_least16_t newPort ) {
 	port = newPort;
 }
 
+uint_least16_t NetworkManager::getPort() {
+	return port;
+}
+
 int NetworkManager::setup( bool isServer ) {
 	memset( &hints, 0, sizeof hints );
 	hints.ai_family = AF_INET6; // AF_INET or AF_INET6 to force version, AF_UNSPEC otherwise
