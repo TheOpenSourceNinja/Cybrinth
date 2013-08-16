@@ -10,88 +10,118 @@
 */
 #include "Player.h"
 #include <irrlicht.h>
+#include <iostream>
 #include "colors.h"
 
-using namespace std;
+
 
 Player::Player() {
-	x = 0;
-	y = 0;
-	xInterp = 0;
-	yInterp = 0;
-	moving = false;
-	setColor( RED );
-	texture = NULL;
-	stepsTaken = 0;
-	isHuman = true;
+	try {
+		x = 0;
+		y = 0;
+		xInterp = 0;
+		yInterp = 0;
+		moving = false;
+		setColor( RED );
+		texture = NULL;
+		stepsTaken = 0;
+		isHuman = true;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Player::Player(): " << e.what() << std::endl;
+	}
 }
 
 Player::~Player() {
-	//dtor
+	try {
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Player::~Player(): " << e.what() << std::endl;
+	}
 }
 
 void Player::loadTexture( irr::video::IVideoDriver* driver ) {
-	loadTexture( driver, 1 );
+	try {
+		loadTexture( driver, 1 );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Player::loadTexture(): " << e.what() << std::endl;
+	}
 }
 
 //Draws a filled circle. Somebody please implement a faster algorithm.
 void Player::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size ) {
-	irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( size, size ) );
-	tempImage->fill( irr::video::SColor( 0, 0, 0, 0) ); //Fills the image with invisibility!
+	try {
+		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( size, size ) );
+		tempImage->fill( irr::video::SColor( 0, 0, 0, 0 ) ); //Fills the image with invisibility!
+		tempImage->setPixel( size - 1, size - 1, irr::video::SColor( 0, 0, 0, 0 ) ); //Workaround for a bug in Irrlicht's software renderer
 
-	int_fast16_t radius = size / 2;
-	irr::core::position2d< int_fast16_t > origin( radius, radius );
-	float rSquared = pow( radius, 2 );
-	for( int_fast16_t x = -radius; x <= 0; x++ ) {
-		int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
-		for( int_fast16_t y = -height; y <= 0; y++ ) {
-			tempImage->setPixel( x + origin.X, y + origin.Y, colorOne );
-			tempImage->setPixel( x + origin.X, -y + origin.Y, colorOne );
-			tempImage->setPixel( -x + origin.X, y + origin.Y, colorOne );
-			tempImage->setPixel( -x + origin.X, -y + origin.Y, colorOne );
+		int_fast16_t radius = size / 2;
+		irr::core::position2d< int_fast16_t > origin( radius, radius );
+		float rSquared = pow( radius, 2 );
+		for( int_fast16_t x = -radius; x <= 0; x++ ) {
+			int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
+			for( int_fast16_t y = -height; y <= 0; y++ ) {
+				tempImage->setPixel( x + origin.X, y + origin.Y, colorOne );
+				tempImage->setPixel( x + origin.X, -y + origin.Y, colorOne );
+				tempImage->setPixel( -x + origin.X, y + origin.Y, colorOne );
+				tempImage->setPixel( -x + origin.X, -y + origin.Y, colorOne );
+			}
 		}
-	}
 
-	size /= 2;
+		size /= 2;
 
-	radius = size / 2;
-	rSquared = pow( radius, 2 );
-	for( int_fast16_t x = -radius; x <= 0; x++ ) {
-		int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
-		for( int_fast16_t y = -height; y <= 0; y++ ) {
-			tempImage->setPixel( x + origin.X, y + origin.Y, colorTwo );
-			tempImage->setPixel( x + origin.X, -y + origin.Y, colorTwo );
-			tempImage->setPixel( -x + origin.X, y + origin.Y, colorTwo );
-			tempImage->setPixel( -x + origin.X, -y + origin.Y, colorTwo );
+		radius = size / 2;
+		rSquared = pow( radius, 2 );
+		for( int_fast16_t x = -radius; x <= 0; x++ ) {
+			int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
+			for( int_fast16_t y = -height; y <= 0; y++ ) {
+				tempImage->setPixel( x + origin.X, y + origin.Y, colorTwo );
+				tempImage->setPixel( x + origin.X, -y + origin.Y, colorTwo );
+				tempImage->setPixel( -x + origin.X, y + origin.Y, colorTwo );
+				tempImage->setPixel( -x + origin.X, -y + origin.Y, colorTwo );
+			}
 		}
-	}
 
-	driver->removeTexture( texture );
-	texture = driver->addTexture( L"playerCircle", tempImage );
+
+		driver->removeTexture( texture );
+		texture = driver->addTexture( L"playerCircle", tempImage );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Player::loadTexture(): " << e.what() << std::endl;
+	}
 }
 
 void Player::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
-	uint_least16_t size;
+	try {
+		uint_least16_t size;
 
-	if( width < height ) {
-		size = width;
-	} else {
-		size = height;
+		if( width < height ) {
+			size = width;
+		} else {
+			size = height;
+		}
+
+		if( texture->getSize().Width != size ) {
+			loadTexture( driver, size );
+		}
+
+		Object::draw( driver, width, height );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Player::draw(): " << e.what() << std::endl;
 	}
-
-	if( texture->getSize().Width != size ) {
-		loadTexture( driver, size );
-	}
-
-	Object::draw( driver, width, height );
 }
 
 void Player::moveX( int_fast8_t val ) {
-	Object::moveX( val );
-	stepsTaken += 1;
+	try {
+		Object::moveX( val );
+		stepsTaken += 1;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Player::moveX(): " << e.what() << std::endl;
+	}
 }
 
 void Player::moveY( int_fast8_t val ) {
-	Object::moveY( val );
-	stepsTaken += 1;
+	try {
+		Object::moveY( val );
+		stepsTaken += 1;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Player::moveY(): " << e.what() << std::endl;
+	}
 }

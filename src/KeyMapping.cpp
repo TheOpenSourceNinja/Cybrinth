@@ -1,33 +1,67 @@
 #include "KeyMapping.h"
+#include <iostream>
 
 char KeyMapping::getAction() {
-	return action;
+	try {
+		return action;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in KeyMapping::getAction(): " << e.what() << std::endl;
+		return ' ';
+	}
 }
 
 irr::EKEY_CODE KeyMapping::getKey() {
-	return key;
+	try {
+		return key;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in KeyMapping::getKey(): " << e.what() << std::endl;
+		return irr::KEY_KEY_CODES_COUNT;
+	}
 }
 
 uint_least8_t KeyMapping::getPlayer() {
-	return player;
+	try {
+		return player;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in KeyMapping::getPlayer(): " << e.what() << std::endl;
+		return UINT_LEAST8_MAX;
+	}
 }
 
 void KeyMapping::setAction( char val ) {
-	action = val;
+	try {
+		action = val;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in KeyMapping::setAction(): " << e.what() << std::endl;
+	}
 }
 
 void KeyMapping::setKey( irr::EKEY_CODE val ) {
-	key = val;
+	try {
+		key = val;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in KeyMapping::setKey(): " << e.what() << std::endl;
+	}
 }
 
 void KeyMapping::setPlayer( uint_least8_t val ) {
-	player = val;
+	try {
+		player = val;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in KeyMapping::setPlayer(): " << e.what() << std::endl;
+	}
 }
 
 KeyMapping::KeyMapping() {
-	//ctor
+	try {
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in KeyMapping::KeyMapping(): " << e.what() << std::endl;
+	}
 }
 
 KeyMapping::~KeyMapping() {
-	//dtor
+	try {
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in KeyMapping::~KeyMapping(): " << e.what() << std::endl;
+	}
 }

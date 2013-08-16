@@ -10,47 +10,71 @@
 */
 #include "PlayerStart.h"
 #include "colors.h"
+#include <iostream>
 
 PlayerStart::PlayerStart() {
-	reset();
+	try {
+		reset();
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in PlayerStart::PlayerStart(): " << e.what() << std::endl;
+	}
 }
 
 PlayerStart::~PlayerStart() {
-	//dtor
+	try {
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in PlayerStart::~PlayerStart(): " << e.what() << std::endl;
+	}
 }
 
 void PlayerStart::reset() {
-	texture = NULL;
-	x = 0;
-	y = 0;
-	distanceFromExit = 0;
+	try {
+		texture = NULL;
+		x = 0;
+		y = 0;
+		distanceFromExit = 0;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in PlayerStart::reset(): " << e.what() << std::endl;
+	}
 }
 
 void PlayerStart::loadTexture( irr::video::IVideoDriver* driver ) {
-	loadTexture( driver, 1 );
+	try {
+		loadTexture( driver, 1 );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in PlayerStart::loadTexture(): " << e.what() << std::endl;
+	}
 }
 
 void PlayerStart::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size ) {
-	irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) );
-	tempImage->fill( WHITE );
-	setColor( BLACK );
+	try {
+		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) );
+		tempImage->fill( WHITE );
+		setColor( BLACK );
 
-	driver->removeTexture( texture );
-	texture = driver->addTexture( L"playerStart", tempImage );
+		driver->removeTexture( texture );
+		texture = driver->addTexture( L"playerStart", tempImage );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in PlayerStart::loadTexture(): " << e.what() << std::endl;
+	}
 }
 
 void PlayerStart::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
-	uint_least16_t size;
+	try {
+		uint_least16_t size;
 
-	if( width < height ) {
-		size = width;
-	} else {
-		size = height;
+		if( width < height ) {
+			size = width;
+		} else {
+			size = height;
+		}
+
+		if( texture == NULL || ( texture != NULL && texture->getSize().Width != size ) ) {
+			loadTexture( driver, size );
+		}
+
+		Object::draw( driver, width, height );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in PlayerStart::draw(): " << e.what() << std::endl;
 	}
-
-	if( texture == NULL || ( texture != NULL && texture->getSize().Width != size ) ) {
-		loadTexture( driver, size );
-	}
-
-	Object::draw( driver, width, height );
 }

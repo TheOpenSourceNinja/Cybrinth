@@ -9,16 +9,17 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "GameManager.h"
+#include <iostream>
 
 int main() {
-	wcout << L"Now starting " << PACKAGE_STRING << L". Please report bugs to " << PACKAGE_BUGREPORT << L". Enjoy!" << endl;
-	//try {
+	std::wcout << L"Now starting " << PACKAGE_STRING << L". Please report bugs to " << PACKAGE_BUGREPORT << L". Enjoy!" << std::endl;
+	try {
 		GameManager* gm = new GameManager();
 		int returnValue = gm->run();
 		delete gm;
 		return returnValue;
-	//} catch ( exception e ) {
-		//std::wcerr << e.what() << std::endl;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error caught by main(): " << e.what() << std::endl;
 		return -99;
-	//}
+	}
 }

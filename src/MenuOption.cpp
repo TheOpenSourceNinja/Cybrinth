@@ -15,63 +15,113 @@
 #include <irrlicht.h>
 
 MenuOption::MenuOption() {
-	x = 0;
-	y = 0;
-	setText( "" );
-	font = NULL;
-	setDimension();
+	try {
+		x = 0;
+		y = 0;
+		setText( "" );
+		font = NULL;
+		setDimension();
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in MenuOption::MenuOption(): " << e.what() << std::endl;
+	}
 }
 
 MenuOption::~MenuOption() {
-	//dtor
+	try {
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in MenuOption::~MenuOption(): " << e.what() << std::endl;
+	}
 }
 
 void MenuOption::setText( irr::core::stringw newText ) {
-	text = newText;
-	setDimension();
+	try {
+		text = newText;
+		setDimension();
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in MenuOption::setText(): " << e.what() << std::endl;
+	}
 }
 
 void MenuOption::setFont( irr::gui::IGUIFont* newFont ) {
-	font = newFont;
-	setDimension();
+	try {
+		font = newFont;
+		setDimension();
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in MenuOption::setFont(): " << e.what() << std::endl;
+	}
 }
 
 void MenuOption::setDimension() {
-	if( font != NULL ) {
-		dimension = font->getDimension( text.c_str() );
-	} else {
-		dimension = irr::core::dimension2d<uint_least16_t>( 0, 0 );
+	try {
+		if( font != NULL ) {
+			dimension = font->getDimension( text.c_str() );
+		} else {
+			dimension = irr::core::dimension2d<uint_least16_t>( 0, 0 );
+		}
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in MenuOption::setDimension(): " << e.what() << std::endl;
 	}
 }
 
 void MenuOption::draw( irr::video::IVideoDriver* driver ) {
-	//driver->draw2DImage( texture, core::position2d<int_least16_t>( x, y ) );
-	if( font != NULL ) {
-		font->draw( text, irr::core::rect< irr::s32 >( x, y, dimension.Width, dimension.Height ), LIGHTCYAN );
+	try {
+		//driver->draw2DImage( texture, core::position2d<int_least16_t>( x, y ) );
+		if( font != NULL ) {
+			font->draw( text, irr::core::rect< irr::s32 >( x, y, dimension.Width, dimension.Height ), LIGHTCYAN );
+		}
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in MenuOption::draw(): " << e.what() << std::endl;
 	}
 }
 
 void MenuOption::setX( uint_least16_t val ) {
-	x = val;
+	try {
+		x = val;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in MenuOption::MenuOption(): " << e.what() << std::endl;
+	}
 }
 
 void MenuOption::setY( uint_least16_t val ) {
-	y = val;
+	try {
+		y = val;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in MenuOption::MenuOption(): " << e.what() << std::endl;
+	}
 }
 
 uint_least16_t MenuOption::getX() {
-	return x;
+	try {
+		return x;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in MenuOption::getX(): " << e.what() << std::endl;
+		return UINT_LEAST16_MAX;
+	}
 }
 
 uint_least16_t MenuOption::getY() {
-	return y;
+	try {
+		return y;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in MenuOption::getY(): " << e.what() << std::endl;
+		return UINT_LEAST16_MAX;
+	}
 }
 
 bool MenuOption::contains( irr::core::position2d<uint_least16_t> test ) {
-	return ( test.X >= x && test.Y >= y && test.X <= x + dimension.Width && test.Y <= y + dimension.Height );
-	//return true;
+	try {
+		return ( test.X >= x && test.Y >= y && test.X <= x + dimension.Width && test.Y <= y + dimension.Height );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in MenuOption::contains(): " << e.what() << std::endl;
+		return false;
+	}
 }
 
 bool MenuOption::contains( uint_least16_t testX, uint_least16_t testY ) {
-	return contains( irr::core::position2d<uint_least16_t>( testX, testY ) );
+	try {
+		return contains( irr::core::position2d<uint_least16_t>( testX, testY ) );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in MenuOption::contains(): " << e.what() << std::endl;
+		return false;
+	}
 }

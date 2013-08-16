@@ -12,61 +12,80 @@
 #include "Goal.h"
 #include <iostream>
 
-using namespace std;
+
 
 Goal::Goal() {
-	setColor( WHITE );
+	try {
+		setColor( WHITE );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Goal::Goal(): " << e.what() << std::endl;
+	}
 }
 
 Goal::~Goal() {
-	//dtor
+	try {
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Goal::~Goal(): " << e.what() << std::endl;
+	}
 }
 
 void Goal::loadTexture( irr::video::IVideoDriver* driver ) {
-	//texture = driver->getTexture( "diamond.png" );
-	loadTexture( driver, 1 );
+	try {
+		//texture = driver->getTexture( "diamond.png" );
+		loadTexture( driver, 1 );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Goal::loadTexture(): " << e.what() << std::endl;
+	}
 }
 
 void Goal::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size ) {
-	irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( size, size ) );
-	tempImage->fill( irr::video::SColor( 0, 0, 0, 0) ); //Fills the image with invisibility!
+	try {
+		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( size, size ) );
+		tempImage->fill( irr::video::SColor( 0, 0, 0, 0) ); //Fills the image with invisibility!
 
-	for( uint_fast16_t x = 0; x <= ( size / 2 ); x++ ) {
-		for( uint_fast16_t y = 0; y <= x; y++ ) {
-			tempImage->setPixel( x, y + ( size / 2 ), colorOne );
-			tempImage->setPixel( size - x, y + ( size / 2 ), colorOne );
-			tempImage->setPixel( x, size - ( y + ( size / 2 ) ), colorOne );
-			tempImage->setPixel( size - x, size - ( y + ( size / 2 ) ), colorOne );
+		for( uint_fast16_t x = 0; x <= ( size / 2 ); x++ ) {
+			for( uint_fast16_t y = 0; y <= x; y++ ) {
+				tempImage->setPixel( x, y + ( size / 2 ), colorOne );
+				tempImage->setPixel( size - x, y + ( size / 2 ), colorOne );
+				tempImage->setPixel( x, size - ( y + ( size / 2 ) ), colorOne );
+				tempImage->setPixel( size - x, size - ( y + ( size / 2 ) ), colorOne );
+			}
 		}
-	}
 
-	size /= 2;
+		size /= 2;
 
-	for( uint_fast16_t x = ( size / 2 ); x <= size; x++ ) {
-		for( uint_fast16_t y = ( size / 2 ); y <= x; y++ ) {
-			tempImage->setPixel( x, y + ( size / 2 ), colorTwo );
-			tempImage->setPixel( ( size * 2 ) - x, y + ( size / 2 ), colorTwo );
-			tempImage->setPixel( x, ( size * 2 ) - ( y + ( size / 2 ) ), colorTwo );
-			tempImage->setPixel( ( size * 2 ) - x, ( size * 2 ) - ( y + ( size / 2 ) ), colorTwo );
+		for( uint_fast16_t x = ( size / 2 ); x <= size; x++ ) {
+			for( uint_fast16_t y = ( size / 2 ); y <= x; y++ ) {
+				tempImage->setPixel( x, y + ( size / 2 ), colorTwo );
+				tempImage->setPixel( ( size * 2 ) - x, y + ( size / 2 ), colorTwo );
+				tempImage->setPixel( x, ( size * 2 ) - ( y + ( size / 2 ) ), colorTwo );
+				tempImage->setPixel( ( size * 2 ) - x, ( size * 2 ) - ( y + ( size / 2 ) ), colorTwo );
+			}
 		}
-	}
 
-	driver->removeTexture( texture );
-	texture = driver->addTexture( L"goalDiamond", tempImage );
+		driver->removeTexture( texture );
+		texture = driver->addTexture( L"goalDiamond", tempImage );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Goal::loadTexture(): " << e.what() << std::endl;
+	}
 }
 
 void Goal::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
-	uint_least16_t size;
+	try {
+		uint_least16_t size;
 
-	if( width < height ) {
-		size = width;
-	} else {
-		size = height;
+		if( width < height ) {
+			size = width;
+		} else {
+			size = height;
+		}
+
+		if( texture->getSize().Width != size ) {
+			loadTexture( driver, size );
+		}
+
+		Object::draw( driver, width, height );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Goal::draw(): " << e.what() << std::endl;
 	}
-
-	if( texture->getSize().Width != size ) {
-		loadTexture( driver, size );
-	}
-
-	Object::draw( driver, width, height );
 }

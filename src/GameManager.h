@@ -34,7 +34,7 @@
 #include <vector>
 
 using namespace irr;
-using namespace std;
+
 //using boost::asio::ip::tcp;
 
 class GameManager : public IEventReceiver {
@@ -62,7 +62,7 @@ class GameManager : public IEventReceiver {
 
 
 		//Non-functions----------------------------------
-		vector< AI > bot;
+		std::vector< AI > bot;
 
 		IrrlichtDevice* device;
 		video::IVideoDriver* driver;
@@ -76,13 +76,13 @@ class GameManager : public IEventReceiver {
 		uint_least8_t numLocks;
 		uint_least8_t numPlayers;
 
-		vector<Player> player;
-		vector<PlayerStart> playerStart;
+		std::vector<Player> player;
+		std::vector<PlayerStart> playerStart;
 
 		uint_least16_t randomSeed;
 
 		StringConverter stringConverter;
-		vector<Collectable> stuff;
+		std::vector<Collectable> stuff;
 
 		ITimer* timer;
 		uint_least16_t timeStartedLoading;
@@ -150,7 +150,7 @@ class GameManager : public IEventReceiver {
 
 		uint_least8_t sideDisplaySizeDenominator;
 
-		vector< uint_least8_t > winners;
+		std::vector< uint_least8_t > winners;
 
 
 		//unsigned 16-bit integers----------------------------------
@@ -175,7 +175,7 @@ class GameManager : public IEventReceiver {
 		core::stringw musicTitle;
 
 		core::stringw proTipPrefix;
-		vector< core::stringw > proTips;
+		std::vector< core::stringw > proTips;
 
 		core::stringw stats;
 		core::stringw steps;
@@ -188,7 +188,7 @@ class GameManager : public IEventReceiver {
 
 		FontManager fm;
 
-		vector< KeyMapping > keyMap;
+		std::vector< KeyMapping > keyMap;
 
 		MenuOption loadMaze;
 
@@ -238,7 +238,7 @@ class GameManager : public IEventReceiver {
 		//Misc. Boost/Boost Filesystem types----------------------------------
 		boost::filesystem::path currentMusic;
 
-		vector<boost::filesystem::path> musicList;
+		std::vector<boost::filesystem::path> musicList;
 
 
 		//Other types----------------------------------

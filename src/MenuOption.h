@@ -15,7 +15,7 @@
 #include <irrlicht.h>
 #include <cstdint>
 
-using namespace std;
+
 
 class MenuOption {
 	public:

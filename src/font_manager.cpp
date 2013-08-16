@@ -13,94 +13,114 @@
 #include "font_manager.h"
 #include "gui_freetype_font.h"
 #include <irrlicht.h>
+#include <iostream>
 
 FontManager::FontManager() {
+	try {
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in FontManager::FontManager(): " << e.what() << std::endl;
+	}
 }
 
 FontManager::~FontManager() {
-	FontMap::iterator itFont = mFontMap.begin();
+	try {
+		FontMap::iterator itFont = mFontMap.begin();
 
-	for( ; itFont != mFontMap.end(); ++itFont ) {
-		itFont->second->drop();
-	}
+		for( ; itFont != mFontMap.end(); ++itFont ) {
+			itFont->second->drop();
+		}
 
-	FaceMap::iterator itFace = mFaceMap.begin();
+		FaceMap::iterator itFace = mFaceMap.begin();
 
-	for( ; itFace != mFaceMap.end(); ++itFace ) {
-		itFace->second->drop();
+		for( ; itFace != mFaceMap.end(); ++itFace ) {
+			itFace->second->drop();
+		}
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in FontManager::~FontManager(): " << e.what() << std::endl;
 	}
 }
 
 irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, irr::core::stringw filename_, unsigned int size_, bool antiAlias_, bool transparency_ ) {
-	/*if( !filename_ || !strlen( filename_ ) )
-		return NULL;*/
-	if( filename_.size() <= 0 ) {
-		return NULL;
-	}
-
-	// Make a unique font name for the given settings.
-	// We need a new font for each setting, but only a new face when loading a different fontfile
-	irr::core::stringw fontString( MakeFontIdentifier( filename_, size_, antiAlias_, transparency_ ) );
-	FontMap::iterator itFont = mFontMap.find( fontString );
-
-	if( itFont != mFontMap.end() )
-		return itFont->second;
-
-	// check if the face is already loaded
-	irr::core::stringw faceName( filename_ );
-	CGUITTFace * face = NULL;
-	FaceMap::iterator itFace = mFaceMap.find( faceName );
-
-	if( itFace != mFaceMap.end() ) {
-		face = itFace->second;
-	}
-
-	// no face loaded
-	if( !face ) {
-		// make a new face
-		face = new CGUITTFace;
-
-		if( !face->load( filename_ ) ) {
-			face->drop();
+	try {
+		/*if( !filename_ || !strlen( filename_ ) )
+			return NULL;*/
+		if( filename_.size() <= 0 ) {
 			return NULL;
 		}
 
-		mFaceMap[faceName] = face;
+		// Make a unique font name for the given settings.
+		// We need a new font for each setting, but only a new face when loading a different fontfile
+		irr::core::stringw fontString( MakeFontIdentifier( filename_, size_, antiAlias_, transparency_ ) );
+		FontMap::iterator itFont = mFontMap.find( fontString );
+
+		if( itFont != mFontMap.end() )
+			return itFont->second;
+
+		// check if the face is already loaded
+		irr::core::stringw faceName( filename_ );
+		CGUITTFace * face = NULL;
+		FaceMap::iterator itFace = mFaceMap.find( faceName );
+
+		if( itFace != mFaceMap.end() ) {
+			face = itFace->second;
+		}
+
+		// no face loaded
+		if( !face ) {
+			// make a new face
+			face = new CGUITTFace;
+
+			if( !face->load( filename_ ) ) {
+				face->drop();
+				return NULL;
+			}
+
+			mFaceMap[faceName] = face;
+		}
+
+		// access to the video driver in my application.
+		CGUIFreetypeFont * font = new CGUIFreetypeFont( driver );
+
+		font->attach( face, size_ );
+		font->AntiAlias = antiAlias_;
+		font->Transparency = transparency_;
+		mFontMap[fontString] = font;
+
+		return font;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in FontManager::GetTtFont(): " << e.what() << std::endl;
+		return NULL;
 	}
-
-	// access to the video driver in my application.
-	CGUIFreetypeFont * font = new CGUIFreetypeFont( driver );
-
-	font->attach( face, size_ );
-	font->AntiAlias = antiAlias_;
-	font->Transparency = transparency_;
-	mFontMap[fontString] = font;
-
-	return font;
 }
 
 // make a unique font name for different settings.
 irr::core::stringw FontManager::MakeFontIdentifier( irr::core::stringw filename_, unsigned int size_, bool antiAlias_, bool transparency_ ) {
-	/*std::ostringstream stream;
-	stream << filename_ << size_;
+	try {
+		/*std::ostringstream stream;
+		stream << filename_ << size_;
 
-	if( antiAlias_ )
-		stream << 'a';
+		if( antiAlias_ )
+			stream << 'a';
 
-	if( transparency_ )
-		stream << 't';
+		if( transparency_ )
+			stream << 't';
 
-	//fprintf(stderr, "font: %s", stream.str().c_str());
+		//fprintf(stderr, "font: %s", stream.str().c_str());
 
-	return stream.str();*/
-	irr::core::stringw result = filename_;
-	result.append( size_ );
-	if( antiAlias_ ) {
-		result.append( 'a' );
+		return stream.str();*/
+		irr::core::stringw result = filename_;
+		result.append( size_ );
+		if( antiAlias_ ) {
+			result.append( 'a' );
+		}
+		if( transparency_ ) {
+			result.append( 't' );
+		}
+		return result;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in FontManager::MakeFontIdentifier(): " << e.what() << std::endl;
+		irr::core::stringw s;
+		return s;
 	}
-	if( transparency_ ) {
-		result.append( 't' );
-	}
-	return result;
 }
 
