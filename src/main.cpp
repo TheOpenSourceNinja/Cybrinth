@@ -12,13 +12,13 @@
 
 int main() {
 	wcout << L"Now starting " << PACKAGE_STRING << L". Please report bugs to " << PACKAGE_BUGREPORT << L". Enjoy!" << endl;
-	try {
+	//try {
 		GameManager* gm = new GameManager();
 		int returnValue = gm->run();
 		delete gm;
 		return returnValue;
-	} catch ( exception e ) {
-		std::wcerr << e.what() << std::endl;
+	//} catch ( exception e ) {
+		//std::wcerr << e.what() << std::endl;
 		return -99;
-	}
+	//}
 }

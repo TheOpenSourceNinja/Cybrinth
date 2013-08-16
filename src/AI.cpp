@@ -68,12 +68,12 @@ void AI::allKeysFound() { //Makes the bot 'forget' that it has visited certain m
 
 		//Reduce memory usage: We're done with these now, so clear them.
 		pathsToLockedCells[ o ].clear();
-		pathsToLockedCells[ o ].shrink_to_fit(); //C++11 not GCC's default yet
+		pathsToLockedCells[ o ].shrink_to_fit(); //If your compilter doesn't support C++11 or later, comment this line and uncomment the next
 		//std::vector< core::position2d< uint_least8_t > >().swap( pathsToLockedCells[ o ] );
 	}
 	//Reduce memory usage: We're done with these now, so clear them.
 	pathsToLockedCells.clear();
-	pathsToLockedCells.shrink_to_fit(); //C++11 not GCC's default yet
+	pathsToLockedCells.shrink_to_fit(); //If your compilter doesn't support C++11 or later, comment this line and uncomment the next
 	//std::vector< std::vector< core::position2d< uint_least8_t > > >().swap( pathsToLockedCells );
 }
 
@@ -103,7 +103,7 @@ void AI::move() {
 		cellsVisited.push_back( currentPosition );
 	}
 
-	std::vector<char> possibleDirections;
+	std::vector< char > possibleDirections;
 	if( !( currentPosition.X == gm->getGoal().getX() && currentPosition.Y == gm->getGoal().getY() ) ) {
 
 		//Check for locks
@@ -111,12 +111,14 @@ void AI::move() {
 			pathsToLockedCells.push_back( vector< core::position2d< uint_least8_t > >() );
 			pathsToLockedCells.back().push_back( currentPosition );
 		}
-		if( currentPosition.X < ( cols - 1 ) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].hasLock() ) {
+		if( currentPosition.X < ( cols - 1 ) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].hasLeftLock() ) {
 			pathsToLockedCells.push_back( vector< core::position2d< uint_least8_t > >() );
+			pathsToLockedCells.back().push_back( currentPosition );
 			pathsToLockedCells.back().push_back( core::position2d< uint_least8_t >( currentPosition.X + 1, currentPosition.Y ) );
 		}
-		if( currentPosition.Y < ( rows - 1 ) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].hasLock() ) {
+		if( currentPosition.Y < ( rows - 1 ) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].hasTopLock() ) {
 			pathsToLockedCells.push_back( vector< core::position2d< uint_least8_t > >() );
+			pathsToLockedCells.back().push_back( currentPosition );
 			pathsToLockedCells.back().push_back( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y + 1 ) );
 		}
 

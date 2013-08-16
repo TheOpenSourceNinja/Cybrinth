@@ -368,9 +368,15 @@ GameManager::GameManager() {
 	if( !device ) {
 		wcerr << L"Error: Cannot create null device. Something is definitely wrong here!" << endl;
 		exit( -1 );
+	} else if ( debug ) {
+		wcout << L"Got the null device" << endl;
 	}
 
 	readPrefs();
+
+	if ( debug ) {
+		wcout << L"Read prefs, now setting controls" << endl;
+	}
 
 	setControls();
 
@@ -397,6 +403,8 @@ GameManager::GameManager() {
 			wcerr << L"Error: Even the software renderer didn't work. Exiting." << endl;
 			exit( -2 );
 		}
+	} else if ( debug ) {
+		wcout << L"Got the new device" << endl;
 	}
 
 	gui = device->getGUIEnvironment(); //Put this before drawLoadingScreen() because drawLoadingScreen() needs gui
@@ -404,6 +412,9 @@ GameManager::GameManager() {
 		wcerr << L"Error: Cannot get GUI environment" << endl;
 		exit( -2 );
 	} else {
+		if ( debug ) {
+			wcout << L"Got the gui environment" << endl;
+		}
 		for( uint_fast16_t i = 0; i < gui::EGDC_COUNT ; i++ ) {
 			video::SColor guiSkinColor = gui->getSkin()->getColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ) );
 			guiSkinColor.setAlpha( 255 );
@@ -428,6 +439,8 @@ GameManager::GameManager() {
 	driver = device->getVideoDriver(); //Not sure if this would be possible with a null device, which is why we don't exit
 	if( !driver ) {
 		wcerr << L"Error: Cannot get video driver" << endl;
+	} else if ( debug ) {
+		wcout << L"Got the video driver" << endl;
 	}
 
 	driver->setTextureCreationFlag( video::ETCF_NO_ALPHA_CHANNEL, false );
@@ -444,6 +457,8 @@ GameManager::GameManager() {
 	bgscene = device->getSceneManager(); //Not sure if this would be possible with a null device, which is why we don't exit
 	if( !bgscene ) {
 		wcerr << L"Error: Cannot get scene manager" << endl;
+	} else if ( debug ) {
+		wcout << L"Got the scene manager" << endl;
 	}
 
 
@@ -463,6 +478,8 @@ GameManager::GameManager() {
 		if( Mix_OpenAudio( audio_rate, audio_format, audio_channels, audio_buffers ) != 0 ) {
 			wcerr << L"Unable to initialize audio: " << Mix_GetError() << endl;
 			playMusic = false;
+		} else if ( debug ) {
+			wcout << L"Initilized audio" << endl;
 		}
 
 		if( debug ) {
@@ -517,10 +534,9 @@ GameManager::GameManager() {
 
 		if( playMusic ) { //No sense in making the music list if we've been unable to initialize the audio.
 			makeMusicList();
-		}
-
-		if( playMusic ) {  //playMusic may be set to false if makeMusicList() can't find any songs to play
-			loadNextSong();
+			if( playMusic ) {  //playMusic may be set to false if makeMusicList() can't find any songs to play
+				loadNextSong();
+			}
 		}
 	}
 
@@ -549,6 +565,10 @@ GameManager::GameManager() {
 	exitGame.setY( 3 * windowSize.Height / 5 );
 	backToGame.setY( 4 * windowSize.Height / 5 );
 
+	if ( debug ) {
+		wcout << L"Resizing player and playerStart vectors to " << numPlayers << endl;
+	}
+
 	player.resize( numPlayers );
 	playerStart.resize( numPlayers );
 
@@ -557,6 +577,10 @@ GameManager::GameManager() {
 	}
 
 	if( numBots <= numPlayers && numBots > 0 ) {
+		if ( debug ) {
+			wcout << L"Resizing numBots vector to " << numBots << endl;
+		}
+
 		bot.resize( numBots );
 
 		for( uint_fast8_t i = 0; i < numBots; i++ ) {
@@ -1109,6 +1133,20 @@ void GameManager::movePlayerOnY( uint_least8_t p, int_fast8_t direction ) {
 	}
 }
 
+void GameManager::newMaze() {
+	resetThings();
+	mazeManager.makeRandomLevel();
+	cellWidth = ( viewportSize.Width ) / mazeManager.cols;
+	cellHeight = ( viewportSize.Height ) / mazeManager.rows;
+}
+
+void GameManager::newMaze( boost::filesystem::path src ) {
+	resetThings();
+	mazeManager.loadFromFile( src );
+	cellWidth = ( viewportSize.Width ) / mazeManager.cols;
+	cellHeight = ( viewportSize.Height ) / mazeManager.rows;
+}
+
 bool GameManager::OnEvent( const SEvent& event ) {
 	switch( event.EventType ) {
 		case EET_KEY_INPUT_EVENT: {
@@ -1191,10 +1229,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							mazeManager.saveToFile();
 							return true;
 						} else if( newGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-							//randomSeed = time( NULL );
-							resetThings();
-							mazeManager.makeRandomLevel();
-
+							newMaze();
 							return true;
 						} else if( backToGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
 							showingMenu = false;
@@ -1342,7 +1377,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						wcout << L"Folder: " << core::stringw( fileChooser->getDirectoryName() ).c_str() << L"\tFile: " << core::stringw( fileChooser->getFileName() ).c_str() << endl;
 					}
 
-					mazeManager.loadFromFile( fileChooser->getFileName() );
+					newMaze( fileChooser->getFileName() );
 					return true;
 					break;
 				}
@@ -1890,10 +1925,7 @@ void GameManager::resetThings() {
 //Should only be called by main() in main.cpp
 int GameManager::run() {
 	while( device->run() && !donePlaying ) {
-		resetThings();
-		mazeManager.makeRandomLevel();
-		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
-		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
+		newMaze();
 
 		while( device->run() && !won && !donePlaying ) {
 
@@ -2054,7 +2086,10 @@ void GameManager::setControls() {
 	keyMap.resize( 4 * ( numPlayers - numBots ) + nonPlayerActions );
 
 	//set defaults
-	for( uint_fast8_t i = 0; i < 4 * ( numPlayers - numBots ); i += 4 ) {
+	for( uint_fast8_t i = 0; i < keyMap.size() - nonPlayerActions; i += 4 ) {
+		if ( debug ) {
+			wcout << L"keyMap.size(): " << keyMap.size() << "\ti: " << i << endl;
+		}
 		keyMap.at( i ).setAction( 'u' );
 		keyMap.at( i + 1 ).setAction( 'd' );
 		keyMap.at( i + 2 ).setAction( 'l' );
@@ -2068,10 +2103,16 @@ void GameManager::setControls() {
 		}
 	}
 
-	keyMap.at( 0 ).setKey( KEY_UP );
-	keyMap.at( 0 + 1 ).setKey( KEY_DOWN );
-	keyMap.at( 0 + 2 ).setKey( KEY_LEFT );
-	keyMap.at( 0 + 3 ).setKey( KEY_RIGHT );
+	if( numPlayers - numBots > 0 ) {
+		keyMap.at( 0 ).setKey( KEY_UP );
+		keyMap.at( 0 + 1 ).setKey( KEY_DOWN );
+		keyMap.at( 0 + 2 ).setKey( KEY_LEFT );
+		keyMap.at( 0 + 3 ).setKey( KEY_RIGHT );
+	}
+
+	if ( debug ) {
+		wcout << L"Set arrow keys for player 0, now setting snapshot, menu, and escape keys" << endl;
+	}
 
 	keyMap.at( 4 * ( numPlayers - numBots ) ).setAction( 's' );
 	keyMap.at( 4 * ( numPlayers - numBots ) ).setKey( KEY_SNAPSHOT );

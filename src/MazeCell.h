@@ -35,6 +35,8 @@ class MazeCell {
 		irr::video::SColor getVisitorColor();
 		void setVisitorColor( irr::video::SColor color );
 		bool hasLock();
+		bool hasLeftLock();
+		bool hasTopLock();
 		bool visible;
 	protected:
 	private:

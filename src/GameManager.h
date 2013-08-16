@@ -103,6 +103,9 @@ class GameManager : public IEventReceiver {
 
 		void makeMusicList();
 
+		void newMaze();
+		void newMaze( boost::filesystem::path src );
+
 		void readPrefs();
 
 		void setupBackground();
