@@ -13,7 +13,7 @@
 #define MENUOPTION_H
 
 #include <irrlicht.h>
-#include <cstdint>
+#include "Integers.h"
 
 
 

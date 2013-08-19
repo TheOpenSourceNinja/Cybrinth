@@ -140,11 +140,9 @@ bool MazeManager::loadFromFile() {
 bool MazeManager::loadFromFile( boost::filesystem::path src ) {
 	try {
 		if( !exists( src ) ) {
-			std::wcerr << L"Error: File not found: " << src << std::endl;
-			return false;
+			throw( std::wstring( L"File not found: " ) + src.wstring() );
 		} else if( is_directory( src ) ) {
-			std::wcerr << L"Error: Directory specified, file needed. " << src << std::endl;
-			return false;
+			throw( std::wstring( L"Directory specified, file needed: " ) + src.wstring() );
 		}
 
 		boost::filesystem::wifstream file; //Identical to a standard C++ fstream, except it takes Boost paths
@@ -158,14 +156,16 @@ bool MazeManager::loadFromFile( boost::filesystem::path src ) {
 			makeRandomLevel();
 			return true;
 		} else {
-			std::wcerr << L"Cannot open file " << src << std::endl;
-			return false;
+			throw( std::wstring( L"Cannot open file: " ) + src.wstring() );
 		}
 	} catch( const boost::filesystem::filesystem_error e ) {
 		std::wcerr << L"Boost Filesystem error in MazeManager::loadFromFile: " << e.what() << std::endl;
 		return false;
 	} catch( std::exception e ) {
 		std::wcerr << L"non-Boost-Filesystem error in MazeManager::loadFromFile: " << e.what() << std::endl;
+		return false;
+	} catch( std::wstring e ) {
+		std::wcerr << L"non-Boost-Filesystem error in MazeManager::loadFromFile: " << e << std::endl;
 		return false;
 	}
 }
@@ -553,8 +553,7 @@ bool MazeManager::saveToFile() {
 bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 	try {
 		if( is_directory( dest ) ) {
-			std::wcerr << L"Error: Directory specified, file needed. " << dest << std::endl;
-			return false;
+			throw( std::wstring( L"Directory specified, file needed: " ) + dest.wstring() );
 		}
 
 		boost::filesystem::wofstream file; //Identical to a standard C++ wofstream, except it takes Boost paths
@@ -563,12 +562,12 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 		if( file.is_open() ) {
 			file << gameManager->randomSeed;
 			irr::core::stringw message( L"This maze has been saved to the file " );
-			message += gameManager->stringConverter.convert( dest.wstring() );
+			message += gameManager->stringConverter.toIrrlichtStringW( dest.wstring() );
 			gameManager->gui->addMessageBox( L"Maze saved", message.c_str() );
 			file.close();
 		} else {
 			irr::core::stringw message( L"Cannot save to file " );
-			message += gameManager->stringConverter.convert( dest.wstring() );
+			message += gameManager->stringConverter.toIrrlichtStringW( dest.wstring() );
 			std::wcerr << message.c_str() << std::endl;
 			gameManager->gui->addMessageBox( L"Maze NOT saved", message.c_str() );
 		}
@@ -579,6 +578,9 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 		return false;
 	} catch( std::exception e ) {
 		std::wcerr << L"non-Boost-Filesystem error in MazeManager::saveToFile(): " << e.what() << std::endl;
+		return false;
+	} catch( std::wstring e ) {
+		std::wcerr << L"non-Boost-Filesystem error in MazeManager::saveToFile(): " << e << std::endl;
 		return false;
 	}
 }

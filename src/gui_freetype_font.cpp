@@ -15,7 +15,7 @@
 #if COMPILE_WITH_FREETYPE
 
 #include <cassert>
-#include <cstdint>
+#include "Integers.h"
 #include <iostream>
 
 using namespace irr;

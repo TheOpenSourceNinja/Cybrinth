@@ -79,6 +79,9 @@
 		<Unit filename="src/Goal.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="src/Integers.h">
+			<Option target="cybrinth" />
+		</Unit>
 		<Unit filename="src/KeyMapping.cpp">
 			<Option target="cybrinth" />
 		</Unit>

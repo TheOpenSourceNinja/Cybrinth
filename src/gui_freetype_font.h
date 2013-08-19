@@ -19,7 +19,7 @@
 
 #if COMPILE_WITH_FREETYPE
 
-#include <cstdint>
+#include "Integers.h"
 #include <ft2build.h>
 #include <freetype/freetype.h>
 #include <irrlicht.h>
@@ -135,4 +135,3 @@ class CGUIFreetypeFont : public irr::gui::IGUIFont {
 #endif // #if COMPILE_WITH_FREETYPE
 
 #endif	// _GUI_FREETYPE_FONT_H
-

@@ -12,6 +12,7 @@
 #include "GameManager.h"
 #include <algorithm/string.hpp>
 #include <iostream>
+#include <string>
 
 // get sockaddr, IPv4 or IPv6:
 void *NetworkManager::get_in_addr( struct sockaddr *sa ) {
@@ -90,36 +91,39 @@ uint_least16_t NetworkManager::getPort() {
 int NetworkManager::setup( bool isServer ) {
 	try {
 		memset( &hints, 0, sizeof hints );
-		hints.ai_family = AF_INET6; // AF_INET or AF_INET6 to force version, AF_UNSPEC otherwise
+		hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version, AF_UNSPEC otherwise
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_PASSIVE; //fill in my IP for me
 
 		rv = getaddrinfo( NULL, irr::core::stringc( port ).c_str(), &hints, &ai );
 
 		if( rv != 0 ) {
-			std::wcerr << L"getaddrinfo: " << gai_strerror( rv ) << std::endl;
-			return 2;
+			//throw( std::wstring( "getaddrinfo: " + std::string( gai_strerror( rv ) ) ) );
+			std::wcerr << gai_strerror( rv ) << std::endl;
 		}
 
 		for( p = ai; p != NULL; p = p->ai_next ) {
 			listener = socket( p->ai_family, p->ai_socktype, p->ai_protocol );
 
 			if( listener < 0 ) {
+				if( gm->getDebugStatus() ) {
+					std::wcerr << L"NetworkManager::setup(): listener is less than zero: " << listener << std::endl;
+				}
 				continue;
 			}
 
 			if (isServer) {
 				setsockopt( listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof( int ) );
 
-				/*if( bind( listener, p->ai_addr, p->ai_addrlen ) < 0 ) { //Commenting this out because I'm not focusing on networking right now,so don't want to debug
+				if( bind( listener, p->ai_addr, p->ai_addrlen ) < 0 ) { //Commenting this out because I'm not focusing on networking right now, so don't want to debug
 					std::wcerr << L"server bind() error: " << strerror( errno ) << std::endl;
 					close( listener );
 					continue;
-				}*/
+				}
 			} else { //client
-				if (connect(listener, p->ai_addr, p->ai_addrlen) < 0) {
-					close(listener);
-					std::wcerr << L"client connect() error: " << strerror(errno) << std::endl;
+				if ( connect( listener, p->ai_addr, p->ai_addrlen ) < 0) {
+					close( listener );
+					std::wcerr << L"client connect() error: " << strerror( errno ) << std::endl;
 					continue;
 				}
 			}
@@ -128,15 +132,15 @@ int NetworkManager::setup( bool isServer ) {
 		}
 
 		//Getting out of the loop means bind failed for some p.
-		if( p == NULL ) {
+		/*if( p == NULL ) {
 			if (isServer) {
 				std::wcerr << L"Server: Failed to bind" << std::endl;
 			} else { //client
 				std::wcerr << L"Client: Failed to connect" << std::endl;
 			}
-		}
+		}*/
 
-		if (!isServer) { //Client
+		if ( !isServer ) { //Client
 			inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), remoteIP, sizeof remoteIP);
 			std::wcout << L"client: connecting to " << remoteIP << std::endl;
 		}
@@ -145,10 +149,10 @@ int NetworkManager::setup( bool isServer ) {
 
 		backlog = 10;//Number of incoming connections listen() allows in its queue
 
-		if (isServer) {
+		if ( isServer ) {
 			if( listen( listener, backlog ) == -1 ) {
-				std::wcerr << L"listen() error: " << strerror( errno ) << std::endl;
-				return 3;
+				//throw( std::wstring( "listen() error: " + std::string( strerror( errno ) ) ) );
+				std::wcerr << "listen() error: " << strerror( errno ) << std::endl;
 			}
 
 			FD_ZERO( &master ); //Empty the two sets
@@ -164,6 +168,9 @@ int NetworkManager::setup( bool isServer ) {
 		return 0;
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in NetworkManager::setup(): " << e.what() << std::endl;
+		return -1;
+	} catch ( std::wstring e ) {
+		std::wcerr << L"Error in NetworkManager::setup(): " << e << std::endl;
 		return -1;
 	}
 }
@@ -190,14 +197,20 @@ int NetworkManager::checkForConnections() {
 	try {
 		read_fds = master;
 
-		if( select( fdmax + 1, &read_fds, NULL, NULL, &timeout ) < 0 ) {
-			std::wcerr << L"select() error: " << strerror( errno ) << std::endl;
-			return 4;
+		int result = select( fdmax + 1, &read_fds, NULL, NULL, &timeout );
+
+		if( result < 0 ) {
+			//throw( std::wstring( "select() error: " + strerror( errno ) ) ;
+			std::wcerr << "select() error: " << strerror( errno ) << std::endl;
+			return -1;
 		} else {
-			return 0;
+			return result;
 		}
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in NetworkManager::checkForConnections(): " << e.what() << std::endl;
+		return -1;
+	} catch ( std::wstring e ) {
+		std::wcerr << L"Error in NetworkManager::checkForConnections(): " << e << std::endl;
 		return -1;
 	}
 }
@@ -243,8 +256,8 @@ bool NetworkManager::hasNewPlayerConnected() {
 			int newfd = accept( listener, ( struct sockaddr * ) &remoteaddr, &addrlen );
 
 			if( newfd < 0 ) {
-				std::wcerr << L"accept() error: " << strerror( errno ) << std::endl;
-				return false;
+				//throw( std::wstring( "accept() error: " + strerror( errno ) ) ;
+				std::wcerr << "accept() error: " << strerror( errno ) << std::endl;
 			} else {
 				FD_SET( newfd, &master ); //add newfd to master set
 
@@ -262,6 +275,9 @@ bool NetworkManager::hasNewPlayerConnected() {
 		}
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in NetworkManager::hasNewPlayerConnected(): " << e.what() << std::endl;
+		return false;
+	} catch ( std::wstring e ) {
+		std::wcerr << L"Error in NetworkManager::hasNewPlayerConnected(): " << e << std::endl;
 		return false;
 	}
 }
@@ -534,7 +550,8 @@ bool NetworkManager::receiveData() {
 	try {
 		int numBytesReceived = recv(listener, receivedData, 50, 0); //See comment in networkManager.h next to receivedData. Subtract 1 from that.
 		if (numBytesReceived < 1) {
-			//std::wcerr << L"recv() error: " << strerror(errno) << std::endl;
+			//throw( std::wstring( "recv(): " + strerror(errno) ) );
+			//std::wcerr << "recv(): " << strerror(errno) << std::endl;
 			return false;
 		} else if (numBytesReceived == 0) {
 			return false;

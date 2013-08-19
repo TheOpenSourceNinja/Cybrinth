@@ -30,22 +30,16 @@ AC_ARG_WITH([boostsystem-lib-path], [AS_HELP_STRING([--with-boostsystem-lib-path
 AC_SUBST([BOOSTSYSTEM_LIBS])
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h unistd.h wchar.h cstdlib irrlicht/irrlicht.h])
+AC_CHECK_HEADERS([vector iostream string sstream map cassert])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 AC_TYPE_UINT8_T
 AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
-# AC_TYPE_UINT_FAST8_T
-# AC_TYPE_UINT_LEAST8_T
-# AC_TYPE_UINT_FAST16_T
-# AC_TYPE_UINT_LEAST16_T
-# AC_TYPE_UINT_FAST32_T
-# AC_TYPE_UINT_LEAST32_T
 
 # Checks for library functions.
-AC_CHECK_FUNCS([memset pow select socket sqrt strerror])
+# AC_CHECK_FUNCS([memset pow select socket sqrt strerror])
 
 # End
 AC_OUTPUT

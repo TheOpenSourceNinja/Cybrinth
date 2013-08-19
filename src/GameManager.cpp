@@ -20,12 +20,12 @@
 #include <taglib/tag.h>
 
 #if defined WINDOWS //Networking stuff
-#include <winsock.h>
+#include <winsock>
 #elif defined LINUX
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
+#include <sys/socket>
+#include <netinet/in>
+#include <arpa/inet>
+#include <netdb>
 #endif //What about other operating systems? I don't know what to include for BSD etc.
 
 //Custom user events for Irrlicht
@@ -391,8 +391,7 @@ GameManager::GameManager() {
 		device = createDevice( video::EDT_NULL ); //Must create a device before calling readPrefs();
 
 		if( !device ) {
-			std::wcerr << L"Error: Cannot create null device. Something is definitely wrong here!" << std::endl;
-			exit( -1 );
+			throw( std::wstring( L"Cannot create null device. Something is definitely wrong here!" ) );
 		} else if ( debug ) {
 			std::wcout << L"Got the null device" << std::endl;
 		}
@@ -425,8 +424,7 @@ GameManager::GameManager() {
 			device = createDevice( video::EDT_SOFTWARE, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
 
 			if( !device ) {
-				std::wcerr << L"Error: Even the software renderer didn't work. Exiting." << std::endl;
-				exit( -2 );
+				throw( std::wstring( L"Even the software renderer didn't work." ) );
 			}
 		} else if ( debug ) {
 			std::wcout << L"Got the new device" << std::endl;
@@ -434,8 +432,7 @@ GameManager::GameManager() {
 
 		gui = device->getGUIEnvironment(); //Put this before drawLoadingScreen() because drawLoadingScreen() needs gui
 		if( !gui ) {
-			std::wcerr << L"Error: Cannot get GUI environment" << std::endl;
-			exit( -2 );
+			throw( std::wstring( L"Cannot get GUI environment" ) );
 		} else {
 			if ( debug ) {
 				std::wcout << L"Got the gui environment" << std::endl;
@@ -463,7 +460,7 @@ GameManager::GameManager() {
 
 		driver = device->getVideoDriver(); //Not sure if this would be possible with a null device, which is why we don't exit
 		if( !driver ) {
-			std::wcerr << L"Error: Cannot get video driver" << std::endl;
+			throw( std::wstring( L"Cannot get video driver" ) );
 		} else if ( debug ) {
 			std::wcout << L"Got the video driver" << std::endl;
 		}
@@ -481,7 +478,7 @@ GameManager::GameManager() {
 
 		bgscene = device->getSceneManager(); //Not sure if this would be possible with a null device, which is why we don't exit
 		if( !bgscene ) {
-			std::wcerr << L"Error: Cannot get scene manager" << std::endl;
+			throw( std::wstring( L"Cannot get scene manager" ) );
 		} else if ( debug ) {
 			std::wcout << L"Got the scene manager" << std::endl;
 		}
@@ -626,9 +623,9 @@ GameManager::GameManager() {
 
 			for( uint_fast16_t joystick = 0; joystick < joystickInfo.size(); ++joystick ) {
 				std::wcout << L"Joystick " << joystick << L":" << std::endl;
-				std::wcout << L"\tName: '" << joystickInfo[joystick].Name.c_str() << L"'" << std::endl;
-				std::wcout << L"\tAxes: " << joystickInfo[joystick].Axes << std::endl;
-				std::wcout << L"\tButtons: " << joystickInfo[joystick].Buttons << std::endl;
+				std::wcout << L"\tName: '" << joystickInfo[ joystick ].Name.c_str() << L"'" << std::endl;
+				std::wcout << L"\tAxes: " << joystickInfo[ joystick ].Axes << std::endl;
+				std::wcout << L"\tButtons: " << joystickInfo[ joystick ].Buttons << std::endl;
 
 				std::wcout << L"\tHat is: ";
 
@@ -657,10 +654,12 @@ GameManager::GameManager() {
 		timer = device->getTimer();
 
 		if( debug ) {
-			std::wcout << L"end of GameManager construtor" << std::endl;
+			std::wcout << L"end of GameManager constructor" << std::endl;
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::GameManager(): " << e.what() << std::endl;
+	} catch( std::wstring e ) {
+		std::wcerr << L"Error in GameManager::GameManager(): " << e << std::endl;
 	}
 }
 
@@ -698,11 +697,14 @@ Player* GameManager::getPlayer( uint_least8_t p ) {
 		if( p < numPlayers ) {
 			return &player.at( p );
 		} else {
-			std::wcerr << "getPlayer() error: Request for player (" << p << ">= numPlayers (" << numPlayers << ")" << std::endl;
-			return NULL;
+			std::wstring e = L"Request for player (" + std::to_wstring( p ) + L">= numPlayers (" + std::to_wstring( numPlayers ) + L")";
+			throw( e );
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::getPlayer(): " << e.what() << std::endl;
+		return NULL;
+	} catch( std::wstring e ) {
+		std::wcerr << L"Error in GameManager::getPlayer(): " << e << std::endl;
 		return NULL;
 	}
 }
@@ -923,12 +925,16 @@ void GameManager::loadNextSong() {
 		music = Mix_LoadMUS( currentMusic.c_str() ); //SDL Mixer does not support wstrings
 
 		if( music == NULL ) {
-			std::wcerr << L"Unable to load music file: " << Mix_GetError() << std::endl;
+			std::wstring e = L"Unable to load music file: ";
+			e += stringConverter.toStdWString( std::string( Mix_GetError() ) );
+			throw( e );
 		} else {
 			int musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to play the music. -1 means infinite.
 
 			if( musicStatus == -1 ) {
-				std::wcerr << L"Unable to play music file: " << Mix_GetError() << std::endl;
+				std::wstring e = L"Unable to play music file: ";
+				e += stringConverter.toStdWString( Mix_GetError() );
+				throw( e );
 			} else {
 				if( debug ) {
 					switch( Mix_GetMusicType( NULL ) ) {
@@ -969,9 +975,9 @@ void GameManager::loadNextSong() {
 				TagLib::FileRef f( currentMusic.c_str() ); //TagLib doesn't accept wstrings as file names, but it apparently can read tags as wstrings
 
 				if( !f.isNull() && f.tag() ) {
-					musicTitle = stringConverter.convert( f.tag()->title().toWString() ); //toWString() alone doesn't work here even though these are wide character strings because Irrlicht doesn't like accepting TagLib's wstrings.
-					musicArtist = stringConverter.convert( f.tag()->artist().toWString() );
-					musicAlbum = stringConverter.convert( f.tag()->album().toWString() );
+					musicTitle = stringConverter.toIrrlichtStringW( f.tag()->title().toWString() ); //toWString() alone doesn't work here even though these are wide character strings because Irrlicht doesn't like accepting TagLib's wstrings.
+					musicArtist = stringConverter.toIrrlichtStringW( f.tag()->artist().toWString() );
+					musicAlbum = stringConverter.toIrrlichtStringW( f.tag()->album().toWString() );
 
 					if( musicTitle.size() == 0 ) {
 						musicTitle = L"Unknown Title";
@@ -997,6 +1003,8 @@ void GameManager::loadNextSong() {
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::loadNextSong(): " << e.what() << std::endl;
+	} catch( std::wstring e ) {
+		std::wcerr << L"Error in GameManager::loadNextSong(): " << e << std::endl;
 	}
 }
 
@@ -1023,7 +1031,7 @@ void GameManager::loadProTips() {
 						getline( proTipsFile, line );
 
 						if( !line.empty() ) {
-							proTips.push_back( stringConverter.convert( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
+							proTips.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
 
 							if( debug ) {
 								std::wcout << line << std::endl;
@@ -1036,16 +1044,18 @@ void GameManager::loadProTips() {
 					srand( time( NULL ) );
 					random_shuffle( proTips.begin(), proTips.end() );
 				} else {
-					std::wcerr << L"Error: Unable to open pro tips file even though it exists. Check its access permissions." << std::endl;
+					throw( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) );
 				}
 			} else {
-				std::wcerr << L"Error: Pro tips file is a directory. Cannot load pro tips." << std::endl;
+				throw( std::wstring( L"Pro tips file is a directory. Cannot load pro tips." ) );
 			}
 		} else {
-			std::wcerr << L"Error: Pro tips file does not exist. Cannot load pro tips." << std::endl;
+			throw( std::wstring( L"Pro tips file does not exist. Cannot load pro tips." ) );
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::loadProTips(): " << e.what() << std::endl;
+	} catch( std::wstring e ) {
+		std::wcerr << L"Error in GameManager::loadProTips(): " << e << std::endl;
 	}
 }
 
@@ -1528,7 +1538,7 @@ void GameManager::readPrefs() {
 
 				if( prefsFile.is_open() ) {
 					std::wstring line;
-					uint_fast16_t lineNum = 0;
+					uint_fast8_t lineNum = 0;
 
 					while( prefsFile.good() ) {
 						lineNum++;
@@ -1569,8 +1579,8 @@ void GameManager::readPrefs() {
 											Mix_VolumeMusic( MIX_MAX_VOLUME );
 											musicVolume = 100;
 										}
-									} catch( boost::bad_lexical_cast error ) {
-										std::wcerr << L"Error reading volume preference (is it not a number?) on line " << lineNum << L": " << error.what() << std::endl;
+									} catch( boost::bad_lexical_cast e ) {
+										std::wcerr << L"Error reading volume preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								} else if( preference == L"number of bots:" ) {
 									try {
@@ -1585,8 +1595,8 @@ void GameManager::readPrefs() {
 											std::wcerr << L"Warning: Number of bots not less than or equal to number of players (number of players may not have been read yet): " << choiceAsInt << std::endl;
 											numBots = choiceAsInt;
 										}
-									} catch( boost::bad_lexical_cast error ) {
-										std::wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << error.what() << std::endl;
+									} catch( boost::bad_lexical_cast e ) {
+										std::wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								} else if( preference == L"show background animations:" ) {
 									if( choice == L"true" ) {
@@ -1660,8 +1670,8 @@ void GameManager::readPrefs() {
 											std::wcerr << L"Warning: Bits per pixel not less than or equal to 16: " << choiceAsInt << std::endl;
 											bitsPerPixel = choiceAsInt;
 										}
-									} catch( boost::bad_lexical_cast error ) {
-										std::wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << error.what() << std::endl;
+									} catch( boost::bad_lexical_cast e ) {
+										std::wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 
 								} else if( preference == L"wait for vertical sync:" ) {
@@ -1753,8 +1763,8 @@ void GameManager::readPrefs() {
 										} else {
 											std::wcerr << L"Warning: Number of players is zero or not a number: " << choiceAsInt << L". Setting number of players to default." << std::endl;
 										}
-									} catch( boost::bad_lexical_cast error ) {
-										std::wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << error.what() << std::endl;
+									} catch( boost::bad_lexical_cast e ) {
+										std::wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 
 								} else if( preference == L"window size:" ) {
@@ -1800,8 +1810,8 @@ void GameManager::readPrefs() {
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 										network.setPort( choiceAsInt );
-									} catch( boost::bad_lexical_cast error ) {
-										std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << error.what() << std::endl;
+									} catch( boost::bad_lexical_cast e ) {
+										std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								} else if( preference == L"enable joystick:" ) {
 									if( choice == L"true" ) {
@@ -1824,8 +1834,8 @@ void GameManager::readPrefs() {
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 										joystickChosen = choiceAsInt;
-									} catch (boost::bad_lexical_cast error ) {
-										std::wcerr << L"Error reading joystick number (is it not a number?) on line " << lineNum << L": " << error.what() << std::endl;
+									} catch (boost::bad_lexical_cast e ) {
+										std::wcerr << L"Error reading joystick number (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								} else if( preference == L"always server:" ) {
 									if( choice == L"true" ) {
@@ -1847,14 +1857,15 @@ void GameManager::readPrefs() {
 							} catch ( std::exception e ) {
 								std::wcout << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << std::endl;
 							}
-						} else { //This line in the preferences file is empty, so do nothing
 						}
 					}
 
 					prefsFile.close();
+				} else {
+					throw( std::wstring( L"Cannot open prefs file." ) );
 				}
 			} else {
-				std::wcerr << L"Error: Prefs file is a directory. Cannot load prefs." << std::endl;
+				throw( std::wstring( L"Prefs file is a directory. Cannot load prefs." ) );
 			}
 		} else {
 			if( debug ) {
@@ -1972,6 +1983,8 @@ void GameManager::readPrefs() {
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::readPrefs(): " << e.what() << std::endl;
+	} catch( std::wstring e ) {
+		std::wcerr << L"Error in GameManager::readPrefs(): " << e << std::endl;
 	}
 }
 
@@ -2145,7 +2158,7 @@ int GameManager::run() {
 				}
 
 				//TODO: add networking stuff here
-				if( network.checkForConnections() != 0 ) {
+				if( network.checkForConnections() < 0 ) {
 					std::wcerr << L"Networking error." << std::endl;
 				} else {
 					if( network.receiveData() ) {
@@ -2153,9 +2166,9 @@ int GameManager::run() {
 							std::wcout << L"Received data" << std::endl;
 						}
 					} else {
-						/*if( debug ) {
-							std::wcout << L"Did not receive data" << std::endl;
-						}*/
+						if( debug ) {
+							//std::wcout << L"Did not receive data" << std::endl;
+						}
 					}
 				}
 			}
@@ -2185,8 +2198,8 @@ int GameManager::run() {
 
 void GameManager::setControls() {
 	try {
-		boost::filesystem::path prefsPath( L"./controls.cfg" );
-		uint_least8_t nonPlayerActions = 3; //The number of keys assigned to things other than controlling the player objects: screenshots, opening & closing the menu, etc.
+		boost::filesystem::path controlsPath( L"./controls.cfg" );
+		/*uint_least8_t nonPlayerActions = 3; //The number of keys assigned to things other than controlling the player objects: screenshots, opening & closing the menu, etc.
 		keyMap.resize( 4 * ( numPlayers - numBots ) + nonPlayerActions );
 
 		//set defaults
@@ -2224,9 +2237,66 @@ void GameManager::setControls() {
 		keyMap.at( 4 * ( numPlayers - numBots ) + 1 ).setAction( 'm' );
 		keyMap.at( 4 * ( numPlayers - numBots ) + 1 ).setKey( KEY_MENU );
 		keyMap.at( 4 * ( numPlayers - numBots ) + 2 ).setAction( 'm' );
-		keyMap.at( 4 * ( numPlayers - numBots ) + 2 ).setKey( KEY_ESCAPE );
+		keyMap.at( 4 * ( numPlayers - numBots ) + 2 ).setKey( KEY_ESCAPE );*/
+
+		if( exists( controlsPath ) ) {
+			if( !is_directory( controlsPath ) ) {
+				if( debug ) {
+					std::wcout << L"Loading controls from file " << controlsPath.wstring() << std::endl;
+				}
+				boost::filesystem::wifstream controlsFile;
+				controlsFile.open( controlsPath );
+
+				if( controlsFile.is_open() ) {
+					std::wstring line;
+					uint_fast8_t lineNum = 0;
+
+					while( controlsFile.good() ) {
+						lineNum++;
+						getline( controlsFile, line );
+						line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
+						boost::algorithm::trim( line ); //Removes trailing and leading spaces
+						boost::algorithm::to_lower( line );
+						if( debug ) {
+							std::wcout << L"Line " << lineNum << L": \"" << line << "\"" << std::endl;
+						}
+
+
+						if( !line.empty() ) {
+							try {
+								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
+								std::wstring choice = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
+								if( debug ) {
+									std::wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< std::endl;
+								}
+								if( preference == L"menu" ) {
+								} else if( preference == L"screenshot" ) {
+								} else {
+									std::wstring playerNumStr = boost::algorithm::trim_copy( preference.substr( 0, preference.find( L' ' ) ) );
+									std::wstring action = boost::algorithm::trim_copy( preference.substr( preference.find( L' ' ) ) );
+								}
+							} catch( std::exception e ) {
+								std::wcerr << L"Error in GameManager::setControls(): " << e.what() << std::endl;
+							} catch( std::wstring e ) {
+								std::wcerr << L"Error in GameManager::setControls(): " << e << std::endl;
+							}
+						}
+					}
+
+					controlsFile.close();
+				} else {
+					throw( std::wstring( L"controls.cfg cannot be opened." ) );
+				}
+			} else {
+				throw( std::wstring( L"controls.cfg is a directory, should be a file." ) );
+			}
+		} else {
+			throw( std::wstring( L"controls.cfg does not exist." ) );
+		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::setControls(): " << e.what() << std::endl;
+	} catch( std::wstring e ) {
+		std::wcerr << L"Error in GameManager::setControls(): " << e << std::endl;
 	}
 }
 
@@ -2311,14 +2381,14 @@ void GameManager::takeScreenShot() {
 			filename.append( L".png" );
 
 			if( !driver->writeImageToFile( image, filename ) ) {
-				std::wcerr << L"takeScreenShot(): Failed to save screen shot to file " << filename.c_str() << std::endl;
+				throw( std::wstring( L"Failed to save screen shot to file " + stringConverter.toStdWString( filename ) ) );
 			} else if( debug ) {
 				std::wcout << L"Screen shot saved as " << filename.c_str() << std::endl;
 			}
 
 			image->drop();
 		} else {
-			std::wcerr << L"takeScreenShot(): Failed to take screen shot" << std::endl;
+			throw( std::wstring( L"takeScreenShot(): Failed to take screen shot" ) );
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::takeScreenShot(): " << e.what() << std::endl;

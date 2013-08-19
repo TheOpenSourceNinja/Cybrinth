@@ -13,7 +13,7 @@
 #define MAZECELL_H
 
 #include <irrlicht.h>
-#include <cstdint>
+#include "Integers.h"
 
 class MazeCell {
 	public:

@@ -13,7 +13,7 @@
 #define OBJECT_H
 
 #include <irrlicht.h>
-#include <cstdint>
+#include "Integers.h"
 
 class Object {
 	public:

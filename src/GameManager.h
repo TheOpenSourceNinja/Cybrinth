@@ -27,10 +27,10 @@
 #include "PlayerStart.h"
 #include "StringConverter.h"
 
-#include <cstdint>
+#include "Integers.h"
 #include <irrlicht.h>
 #include <SDL_mixer.h>
-#include <string.h>
+#include <string>
 #include <vector>
 
 using namespace irr;

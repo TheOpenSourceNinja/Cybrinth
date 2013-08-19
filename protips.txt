@@ -7,3 +7,5 @@ Don't like the controls? Change them: Pry the keys off your keyboard and stick'e
 "All one has to do is hit the right keys at the right time and the [game] plays itself." -J. S. Bach
 To solve the maze, one must first press a button.
 To defeat the Cyberdemon, play DooM.
+To win the game: Type its name into DuckDuckGo followed by "walkthrough".
+Don't do stupid stuff. Let the AIs do it.
