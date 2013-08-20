@@ -46,8 +46,8 @@ class GameManager : public IEventReceiver {
 		GameManager();
 		virtual ~GameManager();
 		bool getDebugStatus();
-		MazeManager getMazeManager();
-		Goal getGoal();
+		MazeManager* getMazeManager();
+		Goal* getGoal();
 		Player* getPlayer( uint_least8_t p );
 
 		void movePlayerOnX( uint_least8_t p, int_fast8_t direction );

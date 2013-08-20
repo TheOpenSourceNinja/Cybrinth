@@ -2,12 +2,19 @@
  * Copyright © 2013 James Dearing.
  * This file is part of Cybrinth.
  *
- * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * Cybrinth is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+ * Cybrinth is distributed in the hope that it will be fun, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public
+ * License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * You should have received a copy of the GNU Affero General Public
+ * License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #define BOOST_FILESYSTEM_NO_DEPRECATED //Recommended by the Boost filesystem library documentation to prevent us from using functions which will be removed in later versions
 
@@ -52,9 +59,12 @@
 
 
 using namespace irr;
-//using boost::asio::ip::tcp;
 
-
+/**
+ * Figures out which players are human, then figures out whether they're all at the goal.
+ * Arguments: None.
+ * Returns: True if all humans are at the goal, false otherwise.
+ */
 bool GameManager::allHumansAtGoal() {
 	try {
 		std::vector< uint_least8_t > humanPlayers; //Get a list of players
@@ -93,6 +103,11 @@ bool GameManager::allHumansAtGoal() {
 	}
 }
 
+/**
+ * Draws everything onto the screen. Calls drawLoadingScreen(), drawBackground(), and the draw functions of objects.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::drawAll() {
 	try {
 		driver->beginScene();
@@ -283,6 +298,11 @@ void GameManager::drawAll() {
 	}
 }
 
+/**
+ * Draws background animations. Assumes that driver->beginScene() has already been called.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::drawBackground() {
 	try {
 		switch( backgroundChosen ) {
@@ -298,16 +318,21 @@ void GameManager::drawBackground() {
 	}
 }
 
+/**
+ * Draws the loading screen. Assumes that driver->beginScene() has already been called.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::drawLoadingScreen() {
 	try {
 		if( loadingFont == NULL ) {
 			loadingFont = gui->getBuiltInFont();
 		}
 
-		core::dimension2d< uint_fast16_t > loadingDimensions = loadingFont->getDimension( loading.c_str() );
+		core::dimension2d< unsigned int > loadingDimensions = loadingFont->getDimension( loading.c_str() );
 		int_fast16_t textY = 0;
 		int_fast16_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
-		core::rect< int_fast16_t > tempRectangle(textX, textY, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + textY );
+		core::rect< int > tempRectangle(textX, textY, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + textY );
 		loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 
@@ -317,14 +342,14 @@ void GameManager::drawLoadingScreen() {
 			}
 
 			textY = loadingDimensions.Height + textY + 1;
-			core::dimension2d< uint_fast16_t > proTipPrefixDimensions = tipFont->getDimension( proTipPrefix.c_str() );
-			core::dimension2d< uint_fast16_t > proTipDimensions = tipFont->getDimension( proTips.at( currentProTip ).c_str() );
+			core::dimension2d< unsigned int > proTipPrefixDimensions = tipFont->getDimension( proTipPrefix.c_str() );
+			core::dimension2d< unsigned int > proTipDimensions = tipFont->getDimension( proTips.at( currentProTip ).c_str() );
 			textX = ( windowSize.Width / 2 ) - ( ( proTipPrefixDimensions.Width + proTipDimensions.Width ) / 2 );
-			tempRectangle = core::rect< int_fast16_t >( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
+			tempRectangle = core::rect< int >( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
 			tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
 
 			textX += proTipPrefixDimensions.Width;
-			tempRectangle = core::rect< int_fast16_t >( textX, textY, proTipDimensions.Width + textX, proTipDimensions.Height + textY );
+			tempRectangle = core::rect< int >( textX, textY, proTipDimensions.Width + textX, proTipDimensions.Height + textY );
 			tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
 		}
 	} catch( std::exception e ) {
@@ -332,6 +357,11 @@ void GameManager::drawLoadingScreen() {
 	}
 }
 
+/**
+ * This object's destructor. Destroys stuff.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 //I... am... DESTRUCTOOOOOOORRRRR!!!!!!!!!
 GameManager::~GameManager() {
 	try {
@@ -358,6 +388,12 @@ GameManager::~GameManager() {
 	}
 }
 
+/**
+ * This object's constructor. Does lots of very important stuff.
+ * Arguments: None.
+ * Returns: Nothing.
+ * Since this constructor is so big, maybe some parts should be split off into separate functions.
+ */
 GameManager::GameManager() {
 	try {
 		//Just wanted to be totally sure that these point to NULL before being set otherwise
@@ -663,6 +699,11 @@ GameManager::GameManager() {
 	}
 }
 
+/**
+ * Lets other objects know whether we're in debug mode.
+ * Arguments: None.
+ * Returns: True if debug is true, false otherwise.
+ */
 bool GameManager::getDebugStatus() {
 	try {
 		return debug;
@@ -672,32 +713,46 @@ bool GameManager::getDebugStatus() {
 	}
 }
 
-Goal GameManager::getGoal() {
+/**
+ * Lets other objects get a pointer to the goal, perhaps to get its location.
+ * Arguments: None.
+ * Returns: A pointer to the goal object, or NULL if an exception is caught.
+ */
+Goal* GameManager::getGoal() {
 	try {
-		return goal;
+		return &goal;
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::getGoal(): " << e.what() << std::endl;
-		Goal g;
-		return g;
+		return NULL;
 	}
 }
 
-MazeManager GameManager::getMazeManager() {
+/**
+ * Lets other objects get a pointer to the maze manager, perhaps to get the maze.
+ * Arguments: None.
+ * Returns: A pointer to the mazeManager object, or NULL if an exception is caught.
+ */
+MazeManager* GameManager::getMazeManager() {
 	try {
-		return mazeManager;
+		return &mazeManager;
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::getMazeManager(): " << e.what() << std::endl;
-		MazeManager m;
-		return m;
+		return NULL;
 	}
 }
 
+/**
+ * Lets other objects get a pointer to a player object.
+ * Arguments:
+ * --- uint_least8_t p: the desired player
+ * Returns: A pointer to the desired player if that player exists and if no exception is caught, NULL otherwise.
+ */
 Player* GameManager::getPlayer( uint_least8_t p ) {
 	try {
 		if( p < numPlayers ) {
 			return &player.at( p );
 		} else {
-			std::wstring e = L"Request for player (" + std::to_wstring( p ) + L">= numPlayers (" + std::to_wstring( numPlayers ) + L")";
+			std::wstring e = L"Request for player (" + stringConverter.toStdWString( p ) + L") >= numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
 			throw( e );
 		}
 	} catch( std::exception e ) {
@@ -709,6 +764,11 @@ Player* GameManager::getPlayer( uint_least8_t p ) {
 	}
 }
 
+/**
+ * Loads fonts. Calls loadMusicFont() and loadTipFont().
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::loadFonts() {
 	try {
 		if( debug ) {
@@ -834,7 +894,12 @@ void GameManager::loadFonts() {
 	}
 }
 
-//Like loadTipFont() below, this guesses a good font size, then repeatedly adjusts the size and reloads the font until everything fits.
+/**
+ * Loads the music font.
+ * Arguments: None.
+ * Returns: Nothing.
+ * Like loadTipFont() below, this guesses a good font size, then repeatedly adjusts the size and reloads the font until everything fits.
+ */
 void GameManager::loadMusicFont() {
 	try {
 		if( debug ) {
@@ -900,6 +965,12 @@ void GameManager::loadMusicFont() {
 	}
 }
 
+/**
+ * Loads the music font.
+ * Arguments: None.
+ * Returns: Nothing.
+ * Like loadTipFont() below, this guesses a good font size, then repeatedly adjusts the size and reloads the font until everything fits.
+ */
 void GameManager::loadNextSong() {
 	try {
 		if( debug ) {
@@ -929,7 +1000,7 @@ void GameManager::loadNextSong() {
 			e += stringConverter.toStdWString( std::string( Mix_GetError() ) );
 			throw( e );
 		} else {
-			int musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to play the music. -1 means infinite.
+			int musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to *repeat* the music. -1 means infinite.
 
 			if( musicStatus == -1 ) {
 				std::wstring e = L"Unable to play music file: ";
@@ -1008,7 +1079,11 @@ void GameManager::loadNextSong() {
 	}
 }
 
-//Loads "pro tips" from file
+/**
+ * Loads "pro tips" from file proTips.txt if that file exists.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::loadProTips() {
 	try {
 		proTips.clear(); //This line is unnecessary because loadProTips() is only called once, but I just feel safer clearing this anyway.
@@ -1059,7 +1134,12 @@ void GameManager::loadProTips() {
 	}
 }
 
-//Guesses a size that will work for showing pro tips. Keeps adjusting the size and reloading the font until everything fits.
+/**
+ * Loads the tip font.
+ * Arguments: None.
+ * Returns: Nothing.
+ * Guesses a size that will work for showing pro tips. Keeps adjusting the size and reloading the font until everything fits.
+ */
 void GameManager::loadTipFont() {
 	try {
 		if( debug ) {
@@ -1105,7 +1185,11 @@ void GameManager::loadTipFont() {
 	}
 }
 
-//Finds all playable music files in the ./music folder and compiles them into a list
+/**
+ * Finds all playable music files in the ./music folder and compiles them into a list. If ./music does not exist or is not a folder, it uses the parent path instead.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::makeMusicList() {
 	try {
 		musicList.clear(); //The music list should be empty anyway, since makeMusicList() only gets called once, but just in case...
@@ -1171,6 +1255,13 @@ void GameManager::makeMusicList() {
 	}
 }
 
+/**
+ * If the maze allows it, moves a player one unit in the indicated direction along the X axis.
+ * Arguments:
+ * --- p: the player to move
+ * --- direction: a signed integer representing the direction to move.
+ * Returns: Nothing.
+ */
 void GameManager::movePlayerOnX( uint_least8_t p, int_fast8_t direction ) {
 	try {
 		if( numPlayers > p ) {
@@ -1190,12 +1281,22 @@ void GameManager::movePlayerOnX( uint_least8_t p, int_fast8_t direction ) {
 			} else {
 				mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorOne() );
 			}
+		} else {
+            std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
+            throw e;
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::movePlayerOnX(): " << e.what() << std::endl;
 	}
 }
 
+/**
+ * If the maze allows it, moves a player one unit in the indicated direction along the Y axis.
+ * Arguments:
+ * --- p: the player to move
+ * --- direction: a signed integer representing the direction to move.
+ * Returns: Nothing.
+ */
 void GameManager::movePlayerOnY( uint_least8_t p, int_fast8_t direction ) {
 	try {
 		if( numPlayers > p ) {
@@ -1215,12 +1316,20 @@ void GameManager::movePlayerOnY( uint_least8_t p, int_fast8_t direction ) {
 			} else {
 				mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorOne() );
 			}
+		} else {
+            std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
+            throw e;
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::movePlayerOnY(): " << e.what() << std::endl;
 	}
 }
 
+/**
+ * Calls resetThings(), makes the maze manager create a random level, then adjusts cellWidth and cellHeight.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::newMaze() {
 	try {
 		resetThings();
@@ -1232,6 +1341,12 @@ void GameManager::newMaze() {
 	}
 }
 
+/**
+ * Calls resetThings(), makes the maze manager load a maze from a file, then adjusts cellWidth and cellHeight.
+ * Arguments:
+ * --- boost::filesystem::path src: the file from which to load the maze.
+ * Returns: Nothing.
+ */
 void GameManager::newMaze( boost::filesystem::path src ) {
 	try {
 		resetThings();
@@ -1243,6 +1358,12 @@ void GameManager::newMaze( boost::filesystem::path src ) {
 	}
 }
 
+/**
+ * Called by Irrlicht every time an event (keyboard, mouse, joystick, etc.) occurs.
+ * Arguments:
+ * --- const SEvent& event: an object representing the event that happened.
+ * Returns: True if the event was handled by this function, false if Irrlicht should handle the event.
+ */
 bool GameManager::OnEvent( const SEvent& event ) {
 	try {
 		switch( event.EventType ) {
@@ -1500,6 +1621,11 @@ bool GameManager::OnEvent( const SEvent& event ) {
 	return false;
 }
 
+/**
+ * Reads preferences from prefs.cfg. Sets defaults for any preference not found in the file. If the file does not exist, creates it.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::readPrefs() {
 	try {
 		boost::filesystem::path prefsPath( L"./prefs.cfg" );
@@ -1988,7 +2114,11 @@ void GameManager::readPrefs() {
 	}
 }
 
-//Resets miscellaneous stuff between mazes
+/**
+ * Resets miscellaneous stuff between mazes.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::resetThings() {
 	try {
 		randomSeed = time( NULL );
@@ -2034,7 +2164,11 @@ void GameManager::resetThings() {
 	}
 }
 
-//Should only be called by main() in main.cpp
+/**
+ * The game's main loop. Should only be called by main() in main.cpp
+ * Arguments: None.
+ * Returns: 0 if the game exits normally, -1 if an exception is caught.
+ */
 int GameManager::run() {
 	try {
 		while( device->run() && !donePlaying ) {
@@ -2196,6 +2330,11 @@ int GameManager::run() {
 	return 0;
 }
 
+/**
+ * Loads control settings from controls.cfg.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::setControls() {
 	try {
 		boost::filesystem::path controlsPath( L"./controls.cfg" );
@@ -2300,6 +2439,11 @@ void GameManager::setControls() {
 	}
 }
 
+/**
+ * Randomly picks a background animation and does whatever it needs to do to set it up.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::setupBackground() {
 	try {
 		uint_least8_t availableBackgrounds = 1; //The number of different background animations to choose from
@@ -2356,6 +2500,11 @@ void GameManager::setupBackground() {
 	}
 }
 
+/**
+ * Sets showingLoadingScreen to true and timeStartedLoading to the current time, then calls drawLoadingScreen().
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::startLoadingScreen() {
 	try {
 		showingLoadingScreen = true;
@@ -2366,6 +2515,11 @@ void GameManager::startLoadingScreen() {
 	}
 }
 
+/**
+ * Takes a screenshot and saves it to a dated png file.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
 void GameManager::takeScreenShot() {
 	try {
 		irr::video::IImage* image = driver->createScreenShot();
@@ -2376,7 +2530,9 @@ void GameManager::takeScreenShot() {
 
 			time_t currentTime = time( NULL );
 			wchar_t clockTime[ 20 ];
-			wcsftime( clockTime, 20, L"%Y-%m-%d %H:%M:%S", localtime( &currentTime ) );
+			if( wcsftime( clockTime, 20, L"%FT%T", localtime( &currentTime ) ) == 0 ) {
+                throw( std::wstring( L"Could not convert the time to ISO 8601 format.") );
+			}
 			filename.append( clockTime );
 			filename.append( L".png" );
 

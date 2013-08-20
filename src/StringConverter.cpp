@@ -155,6 +155,96 @@ std::wstring StringConverter::toStdWString( const wchar_t* input ) {
 	}
 }
 
+std::wstring StringConverter::toStdWString( int input ) {
+	try {
+		return std::to_wstring( input );
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
+		std::wstring w;
+		return w;
+	}
+}
+
+std::wstring StringConverter::toStdWString( long input ) {
+	try {
+		return std::to_wstring( input );
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
+		std::wstring w;
+		return w;
+	}
+}
+
+std::wstring StringConverter::toStdWString( long long input ) {
+	try {
+		return std::to_wstring( input );
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
+		std::wstring w;
+		return w;
+	}
+}
+
+std::wstring StringConverter::toStdWString( unsigned input ) {
+	try {
+		return std::to_wstring( input );
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
+		std::wstring w;
+		return w;
+	}
+}
+
+std::wstring StringConverter::toStdWString( unsigned long input ) {
+	try {
+		return std::to_wstring( input );
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
+		std::wstring w;
+		return w;
+	}
+}
+
+std::wstring StringConverter::toStdWString( unsigned long long input ) {
+	try {
+		return std::to_wstring( input );
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
+		std::wstring w;
+		return w;
+	}
+}
+
+std::wstring StringConverter::toStdWString( float input ) {
+	try {
+		return std::to_wstring( input );
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
+		std::wstring w;
+		return w;
+	}
+}
+
+std::wstring StringConverter::toStdWString( double input ) {
+	try {
+		return std::to_wstring( input );
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
+		std::wstring w;
+		return w;
+	}
+}
+
+std::wstring StringConverter::toStdWString( long double input ) {
+	try {
+		return std::to_wstring( input );
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
+		std::wstring w;
+		return w;
+	}
+}
+
 StringConverter::~StringConverter() {
 	try {
 	} catch ( std::exception e ) {

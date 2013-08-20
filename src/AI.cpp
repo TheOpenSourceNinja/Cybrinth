@@ -130,7 +130,7 @@ void AI::move() {
 		}
 
 		std::vector< char > possibleDirections;
-		if( !( currentPosition.X == gm->getGoal().getX() && currentPosition.Y == gm->getGoal().getY() ) ) {
+		if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
 
 			//Check for locks
 			if( maze[ currentPosition.X ][ currentPosition.Y ].hasLock() ) {
@@ -164,7 +164,7 @@ void AI::move() {
 		}
 
 		//If we can't go anywhere new, go back to previous position
-		if( possibleDirections.size() == 0 && pathTaken.size() != 0 && !( currentPosition.X == gm->getGoal().getX() && currentPosition.Y == gm->getGoal().getY() ) ) {
+		if( possibleDirections.size() == 0 && pathTaken.size() != 0 && !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
 			pathTaken.pop_back();
 			core::position2d< uint_least8_t > oldPosition = pathTaken.back();
 			for( std::vector< std::vector< core::dimension2d< uint_least8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
@@ -181,7 +181,7 @@ void AI::move() {
 			} else { //if( oldPosition.Y > currentPosition.Y ) {
 				gm->movePlayerOnY( controlsPlayer, 1 );
 			}
-		} else if ( !( currentPosition.X == gm->getGoal().getX() && currentPosition.Y == gm->getGoal().getY() ) ) { //Go to next position
+		} else if ( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) { //Go to next position
 			//uint_fast8_t choiceNum = rand() % possibleDirections.size();
 			char choice = possibleDirections.at( rand() % possibleDirections.size() );
 			switch( choice ) {
