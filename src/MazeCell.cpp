@@ -53,7 +53,7 @@ MazeCell::~MazeCell() {
 	}
 }
 
-char MazeCell::getTop() {
+wchar_t MazeCell::getTop() {
 	try {
 		return top;
 	} catch ( std::exception e ) {
@@ -62,7 +62,7 @@ char MazeCell::getTop() {
 	}
 }
 
-void MazeCell::setTop( char val )  {
+void MazeCell::setTop( wchar_t val )  {
 	try {
 		top = val;
 	} catch ( std::exception e ) {
@@ -70,7 +70,7 @@ void MazeCell::setTop( char val )  {
 	}
 }
 
-char MazeCell::getLeft() {
+wchar_t MazeCell::getLeft() {
 	try {
 		return left;
 	} catch ( std::exception e ) {
@@ -79,7 +79,7 @@ char MazeCell::getLeft() {
 	}
 }
 
-void MazeCell::setLeft( char val ) {
+void MazeCell::setLeft( wchar_t val ) {
 	try {
 		left = val;
 	} catch ( std::exception e ) {
@@ -87,7 +87,7 @@ void MazeCell::setLeft( char val ) {
 	}
 }
 
-char MazeCell::getBottom() {
+wchar_t MazeCell::getBottom() {
 	try {
 		return bottom;
 	} catch ( std::exception e ) {
@@ -96,7 +96,7 @@ char MazeCell::getBottom() {
 	}
 }
 
-void MazeCell::setBottom( char val ) {
+void MazeCell::setBottom( wchar_t val ) {
 	try {
 		bottom = val;
 	} catch ( std::exception e ) {
@@ -104,7 +104,7 @@ void MazeCell::setBottom( char val ) {
 	}
 }
 
-char MazeCell::getRight() {
+wchar_t MazeCell::getRight() {
 	try {
 		return right;
 	} catch ( std::exception e ) {
@@ -113,7 +113,7 @@ char MazeCell::getRight() {
 	}
 }
 
-void MazeCell::setRight( char val ) {
+void MazeCell::setRight( wchar_t val ) {
 	try {
 		right = val;
 	} catch ( std::exception e ) {

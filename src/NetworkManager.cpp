@@ -177,7 +177,7 @@ int NetworkManager::setup( bool isServer ) {
 
 NetworkManager::~NetworkManager() {
 	try {
-		for( int i = 0; i < fdmax; i++ ) {
+		for( int i = 0; i < fdmax; ++i ) {
 			#if defined WINDOWS
 			closesocket( i );
 			#else
@@ -316,7 +316,7 @@ void NetworkManager::sendMaze( MazeCell ** maze, uint_least8_t cols, uint_least8
 		toSend.push_back( 'Z' );
 		toSend.push_back( 'E' );
 
-		for( int i = 0; i <= fdmax; i++ ) {
+		for( int i = 0; i <= fdmax; ++i ) {
 			//send to everyone! except the listener
 			if( FD_ISSET( i, &master ) && i != listener ) {
 				size_t size = toSend.size();
@@ -425,7 +425,7 @@ void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 		toSend.push_back( 'S' );
 		toSend.push_back( starts.size() );
 
-		for( uint_fast8_t i = 0; i < starts.size(); i++ ) {
+		for( uint_fast8_t i = 0; i < starts.size(); ++i ) {
 			toSend.push_back( i );
 			toSend.push_back( starts.at( i ).getX() );
 			toSend.push_back( starts.at( i ).getY() );
@@ -470,7 +470,7 @@ void NetworkManager::sendU8( uint_least8_t num, std::wstring desc ) {
 		toSend.push_back( 'T' );
 		boost::algorithm::to_upper( desc );
 
-		for( uint_fast8_t i = 0; i < desc.size(); i++ ) {
+		for( uint_fast8_t i = 0; i < desc.size(); ++i ) {
 			toSend.push_back( desc[i] );
 		}
 
@@ -480,7 +480,7 @@ void NetworkManager::sendU8( uint_least8_t num, std::wstring desc ) {
 		toSend.push_back( 'N' );
 		toSend.push_back( 'D' );
 
-		for( uint_fast8_t i = 0; i < desc.size(); i++ ) {
+		for( uint_fast8_t i = 0; i < desc.size(); ++i ) {
 			toSend.push_back( desc[i] );
 		}
 
@@ -514,7 +514,7 @@ void NetworkManager::sendCollectables( std::vector<Collectable> stuff ) {
 		toSend.push_back( 'T' );
 		toSend.push_back( 'C' );
 
-		for( uint_fast8_t i = 0; i < stuff.size(); i++ ) {
+		for( uint_fast8_t i = 0; i < stuff.size(); ++i ) {
 			toSend.push_back( i );
 			toSend.push_back( stuff[i].getType() );
 			toSend.push_back( stuff[i].getX() );

@@ -132,7 +132,7 @@ class GameManager : public IEventReceiver {
 
 		bool playMusic;
 
-        bool showBackgrounds;
+		bool showBackgrounds;
 		bool showingLoadingScreen;
 		bool showingMenu;
 

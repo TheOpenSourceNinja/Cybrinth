@@ -50,7 +50,7 @@ void AI::setup( MazeCell ** newMaze, uint_least8_t newCols, uint_least8_t newRow
 		pathTaken.clear();
 		cellsVisited.clear();
 
-		for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.size(); i++ ) {
+		for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.size(); ++i ) {
 			pathsToLockedCells.at( i ).clear();
 		}
 		pathsToLockedCells.clear();
@@ -71,7 +71,7 @@ void AI::allKeysFound() { //Makes the bot 'forget' that it has visited certain m
 
 		for( std::vector< std::vector< core::position2d< uint_least8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
 
-			for( std::vector< core::position2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); i++ ) {
+			for( std::vector< core::position2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 
 				std::vector< core::position2d< uint_least8_t > >::size_type j = 0;
 				while( j < cellsVisited.size() ) {
@@ -107,7 +107,7 @@ bool AI::alreadyVisited( core::position2d< uint_least8_t > position ) {
 			if( cellsVisited.at( i ).X == position.X && cellsVisited.at( i ).Y == position.Y ) {
 				result = true;
 			}
-			i++;
+			++i;
 		}
 		return result;
 	} catch( std::exception e ) {
@@ -129,7 +129,7 @@ void AI::move() {
 			cellsVisited.push_back( currentPosition );
 		}
 
-		std::vector< char > possibleDirections;
+		std::vector< wchar_t > possibleDirections;
 		if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
 
 			//Check for locks
@@ -183,13 +183,13 @@ void AI::move() {
 			}
 		} else if ( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) { //Go to next position
 			//uint_fast8_t choiceNum = rand() % possibleDirections.size();
-			char choice = possibleDirections.at( rand() % possibleDirections.size() );
+			wchar_t choice = possibleDirections.at( rand() % possibleDirections.size() );
 			switch( choice ) {
 				case 'u': {
 					core::position2d< uint_least8_t > position( currentPosition.X, currentPosition.Y - 1 );
 					pathTaken.push_back( position );
 					for( std::vector< std::vector< core::dimension2d< uint_least8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
-						//for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); i++ ) {
+						//for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 							pathsToLockedCells.at( o ).push_back( position );
 						//}
 					}
@@ -199,7 +199,7 @@ void AI::move() {
 					core::position2d< uint_least8_t > position( currentPosition.X, currentPosition.Y + 1 );
 					pathTaken.push_back( position );
 					for( std::vector< std::vector< core::dimension2d< uint_least8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
-						//for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); i++ ) {
+						//for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 							pathsToLockedCells.at( o ).push_back( position );
 						//}
 					}
@@ -209,7 +209,7 @@ void AI::move() {
 					core::position2d< uint_least8_t > position( currentPosition.X - 1, currentPosition.Y );
 					pathTaken.push_back( position );
 					for( std::vector< std::vector< core::dimension2d< uint_least8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
-						//for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); i++ ) {
+						//for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 							pathsToLockedCells.at( o ).push_back( position );
 						//}
 					}
@@ -219,7 +219,7 @@ void AI::move() {
 					core::position2d< uint_least8_t > position( currentPosition.X + 1, currentPosition.Y );
 					pathTaken.push_back( position );
 					for( std::vector< std::vector< core::dimension2d< uint_least8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); o++ ) {
-						//for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); i++ ) {
+						//for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 							pathsToLockedCells.at( o ).push_back( position );
 						//}
 					}

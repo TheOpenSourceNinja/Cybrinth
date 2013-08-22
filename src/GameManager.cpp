@@ -69,7 +69,7 @@ bool GameManager::allHumansAtGoal() {
 	try {
 		std::vector< uint_least8_t > humanPlayers; //Get a list of players
 
-		for( uint_fast8_t p = 0; p < numPlayers; p++ ) {
+		for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
 			humanPlayers.push_back( p );
 		}
 
@@ -78,7 +78,7 @@ bool GameManager::allHumansAtGoal() {
 		for( uint_fast8_t b = 0; b < numBots; b++ ) { //Remove bots from the list
 			uint_least8_t botPlayer = bot.at( b ).getPlayer();
 
-			for( uint_fast8_t p = 0; p < humanPlayers.size(); p++ ) {
+			for( uint_fast8_t p = 0; p < humanPlayers.size(); ++p ) {
 				if( humanPlayers.at( p ) == botPlayer ) {
 					humanPlayers.erase( humanPlayers.begin() + p );
 				}
@@ -88,7 +88,7 @@ bool GameManager::allHumansAtGoal() {
 		if( humanPlayers.size() > 0 ) {
 			result = true;
 
-			for( uint_fast8_t p = 0; ( p < humanPlayers.size() && result == true ); p++ ) {
+			for( uint_fast8_t p = 0; ( p < humanPlayers.size() && result == true ); ++p ) {
 				if( !( player.at( humanPlayers.at( p ) ).getX() == goal.getX() && player.at( humanPlayers.at( p ) ).getY() == goal.getY() ) ) {
 					result = false;
 				}
@@ -120,7 +120,7 @@ void GameManager::drawAll() {
 			//Draws player trails ("footprints")
 			if( markTrails ) {
 				for( uint_fast8_t x = 0; x < mazeManager.cols; x++ ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
-					for( uint_fast8_t y = 0; y < mazeManager.rows; y++ ) {
+					for( uint_fast8_t y = 0; y < mazeManager.rows; ++y ) {
 						if( mazeManager.maze[ x ][ y ].visited ) {
 							int_fast16_t dotSize = cellWidth / 5;
 
@@ -139,16 +139,16 @@ void GameManager::drawAll() {
 			}
 
 			//Because of a texture resizing bug in Irrlicht's software renderers, we draw the items (currently all keys, which use a large png as a texture) before the players (which generate their own texture at the correct size) and the maze walls.
-			for( uint_fast16_t i = 0; i < stuff.size(); i++ ) {
+			for( uint_fast16_t i = 0; i < stuff.size(); ++i ) {
 				stuff.at( i ).draw( driver, cellWidth, cellHeight );
 			}
 
 			//Drawing bots before human players makes it easier to play against large numbers of bots
-			for( uint_fast8_t i = 0; i < numBots; i++ ) {
+			for( uint_fast8_t i = 0; i < numBots; ++i ) {
 				player.at( bot.at( i ).getPlayer() ).draw( driver, cellWidth, cellHeight );
 			}
 
-			for( uint_fast8_t p = 0; p < numPlayers; p++ ) {
+			for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
 				if( player.at( p ).isHuman ) {
 					player.at( p ).draw( driver, cellWidth, cellHeight );
 				}
@@ -417,7 +417,7 @@ GameManager::GameManager() {
 
 		fontFile = "";
 		boost::filesystem::recursive_directory_iterator end;
-		for( boost::filesystem::recursive_directory_iterator i(L"./"); i != end; i++ ) {
+		for( boost::filesystem::recursive_directory_iterator i(L"./"); i != end; ++i ) {
 			if( !is_directory( i->path() ) && boost::iequals( i->path().extension().generic_wstring(), L".ttf" ) ) { //Can we use formats other than TTF? What about identifying files without the use of extensions?
 				fontFile = i->path().c_str();
 				break;
@@ -473,7 +473,7 @@ GameManager::GameManager() {
 			if ( debug ) {
 				std::wcout << L"Got the gui environment" << std::endl;
 			}
-			for( uint_fast16_t i = 0; i < gui::EGDC_COUNT ; i++ ) {
+			for( uint_fast16_t i = 0; i < gui::EGDC_COUNT ; ++i ) {
 				video::SColor guiSkinColor = gui->getSkin()->getColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ) );
 				guiSkinColor.setAlpha( 255 );
 				gui->getSkin()->setColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ), guiSkinColor );
@@ -641,13 +641,13 @@ GameManager::GameManager() {
 
 			bot.resize( numBots );
 
-			for( uint_fast8_t i = 0; i < numBots; i++ ) {
+			for( uint_fast8_t i = 0; i < numBots; ++i ) {
 				bot.at( i ).setPlayer( numPlayers - ( i + 1 ) ) ;
 				player.at( bot.at( i ).getPlayer() ).isHuman = false;
 			}
 		}
 
-		for( uint_fast8_t p = 0; p < numPlayers; p++ ) {
+		for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
 			player.at( p ).setColorBasedOnNum( p );
 			player.at( p ).loadTexture( driver );
 		}
@@ -979,7 +979,7 @@ void GameManager::loadNextSong() {
 
 		//Figure out where we are in the music list
 		std::vector<boost::filesystem::path>::size_type positionInList = 0;
-		for( std::vector<boost::filesystem::path>::size_type i = 0; i < musicList.size(); i++ ) {
+		for( std::vector<boost::filesystem::path>::size_type i = 0; i < musicList.size(); ++i ) {
 			if( musicList.at( i ) == currentMusic ) {
 				positionInList = i;
 				break;
@@ -1225,7 +1225,7 @@ void GameManager::makeMusicList() {
 		if( exists( musicPath ) ) {
 			boost::filesystem::recursive_directory_iterator end;
 
-			for( boost::filesystem::recursive_directory_iterator i( musicPath ); i != end; i++ ) {
+			for( boost::filesystem::recursive_directory_iterator i( musicPath ); i != end; ++i ) {
 				if( !is_directory( i->path() ) ) { //We've found a file
 					//Attempts to load a file as music. If successful, unload the file and add it to musicList.
 					//This way the game is certain to accept any file formats the music library can use.
@@ -1282,8 +1282,8 @@ void GameManager::movePlayerOnX( uint_least8_t p, int_fast8_t direction ) {
 				mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorOne() );
 			}
 		} else {
-            std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
-            throw e;
+			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
+			throw e;
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::movePlayerOnX(): " << e.what() << std::endl;
@@ -1317,8 +1317,8 @@ void GameManager::movePlayerOnY( uint_least8_t p, int_fast8_t direction ) {
 				mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorOne() );
 			}
 		} else {
-            std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
-            throw e;
+			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
+			throw e;
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::movePlayerOnY(): " << e.what() << std::endl;
@@ -1370,7 +1370,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			case EET_KEY_INPUT_EVENT: {
 				if( event.KeyInput.PressedDown ) {
 					if( !( showingMenu || showingLoadingScreen ) ) {
-						for( std::vector< KeyMapping >::size_type k = 0; k < keyMap.size(); k++ ) {
+						for( std::vector< KeyMapping >::size_type k = 0; k < keyMap.size(); ++k ) {
 							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
 								switch( keyMap.at( k ).getAction() ) {
 									case 'm': {
@@ -1408,7 +1408,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							}
 						}
 					} else if( showingMenu ) {
-						for( std::vector< KeyMapping >::size_type k = 0; k < keyMap.size(); k++ ) {
+						for( std::vector< KeyMapping >::size_type k = 0; k < keyMap.size(); ++k ) {
 							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
 								switch( keyMap.at( k ).getAction() ) {
 									case 'm': {
@@ -1557,7 +1557,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 					bool joystickMovedRight = false;
 					bool joystickMovedLeft = false;
 
-					for( uint_fast16_t i = 0; i < verticalAxes.size(); i++ ) {
+					for( uint_fast16_t i = 0; i < verticalAxes.size(); ++i ) {
 						if( event.JoystickEvent.Axis[i] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
 							if( debug ) {
 								std::wcout << L"Axis value: " << event.JoystickEvent.Axis[i] << std::endl;
@@ -2131,17 +2131,17 @@ void GameManager::resetThings() {
 		numLocks = 0;
 		donePlaying = false;
 
-		for( uint_fast8_t p = 0; p < numPlayers; p++ ) {
+		for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
 			playerStart.at( p ).reset();
 			player.at( p ).stepsTaken = 0;
 		}
 
-		for( uint_fast16_t i = 0; i < stuff.size(); i++ ) {
+		for( uint_fast16_t i = 0; i < stuff.size(); ++i ) {
 			stuff.at( i ).loadTexture( driver );
 		}
 
 		for( uint_fast8_t x = 0; x < mazeManager.cols; x++ ) {
-			for( uint_fast8_t y = 0; y < mazeManager.rows; y++ ) {
+			for( uint_fast8_t y = 0; y < mazeManager.rows; ++y ) {
 				mazeManager.maze[ x ][ y ].visited = false;
 			}
 		}
@@ -2203,7 +2203,7 @@ int GameManager::run() {
 				if(( !showingLoadingScreen && device->isWindowActive() ) || debug ) {
 					//It's the bots' turn to move now.
 					if( !( showingMenu || showingLoadingScreen ) && numBots > 0 ) {
-						for( uint_fast8_t i = 0; i < numBots; i++ ) {
+						for( uint_fast8_t i = 0; i < numBots; ++i ) {
 							if( debug || allHumansAtGoal() || bot.at( i ).lastTimeMoved < timer->getRealTime() - bot.at( i ).movementDelay ) {
 								bot.at( i ).move();
 							}
@@ -2214,7 +2214,7 @@ int GameManager::run() {
 					drawAll();
 
 					//Check if any of the players have landed on a collectable item
-					for( uint_fast8_t p = 0; p < numPlayers; p++ ) {
+					for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
 						for( uint_fast16_t s = 0; s < stuff.size(); s++ ) {
 							if( player.at( p ).getX() == stuff.at( s ).getX() && player.at( p ).getY() == stuff.at( s ).getY() ) {
 								switch( stuff.at( s ).getType() ) {
@@ -2244,11 +2244,11 @@ int GameManager::run() {
 					}
 
 
-					for( uint_fast8_t p = 0; p < numPlayers; p++ ) {
+					for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
 						if( ( player.at( p ).getX() == goal.getX() ) && player.at( p ).getY() == goal.getY() ) { //Make a list of who finished in what order
 							bool alreadyFinished = false; //Indicates whether the player is already on the winners list
 
-							for( uint_fast8_t i = 0; i < winners.size() && !alreadyFinished; i++ ) {
+							for( uint_fast8_t i = 0; i < winners.size() && !alreadyFinished; ++i ) {
 								if( p == winners.at( i ) ) {
 									alreadyFinished = true;
 								}
@@ -2314,7 +2314,7 @@ int GameManager::run() {
 					std::wcout << L"On to the next level!" << std::endl;
 					std::wcout << L"Winners:";
 
-					for( uint_fast8_t i = 0; i < winners.size(); i++ ) {
+					for( uint_fast8_t i = 0; i < winners.size(); ++i ) {
 						std::wcout << L" " << winners.at( i );
 					}
 
@@ -2400,19 +2400,348 @@ void GameManager::setControls() {
 							std::wcout << L"Line " << lineNum << L": \"" << line << "\"" << std::endl;
 						}
 
-
 						if( !line.empty() ) {
 							try {
 								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
-								std::wstring choice = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
+								std::wstring choiceStr = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
 								if( debug ) {
-									std::wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< std::endl;
+									std::wcout << L"Preference \"" << preference << L"\" choiceStr \"" << choiceStr << L"\""<< std::endl;
 								}
-								if( preference == L"menu" ) {
-								} else if( preference == L"screenshot" ) {
+
+								irr::EKEY_CODE choice;
+								//Is there some other way to do the following? Perhaps using a for loop?
+								if( choiceStr == L"lbutton" ) {
+									choice = KEY_LBUTTON;
+								} else if( choiceStr == L"rbutton" ) {
+									choice = KEY_RBUTTON;
+								} else if( choiceStr == L"cancel" ) {
+									choice = KEY_CANCEL;
+								} else if( choiceStr == L"mbutton" ) {
+									choice = KEY_MBUTTON;
+								} else if( choiceStr == L"xbutton1" ) {
+									choice = KEY_XBUTTON1;
+								} else if( choiceStr == L"xbutton2" ) {
+									choice = KEY_XBUTTON2;
+								} else if( choiceStr == L"back" ) {
+									choice = KEY_BACK;
+								} else if( choiceStr == L"tab" ) {
+									choice = KEY_TAB;
+								} else if( choiceStr == L"clear" ) {
+									choice = KEY_CLEAR;
+								} else if( choiceStr == L"return" ) {
+									choice = KEY_RETURN;
+								} else if( choiceStr == L"shift" ) {
+									choice = KEY_SHIFT;
+								} else if( choiceStr == L"control" ) {
+									choice = KEY_CONTROL;
+								} else if( choiceStr == L"menu" ) {
+									choice = KEY_MENU;
+								} else if( choiceStr == L"pause" ) {
+									choice = KEY_PAUSE;
+								} else if( choiceStr == L"capital" ) {
+									choice = KEY_CAPITAL;
+								} else if( choiceStr == L"kana" ) {
+									choice = KEY_KANA;
+								} else if( choiceStr == L"hanguel" ) {
+									choice = KEY_HANGUEL;
+								} else if( choiceStr == L"hangul" ) {
+									choice = KEY_HANGUL;
+								} else if( choiceStr == L"junja" ) {
+									choice = KEY_JUNJA;
+								} else if( choiceStr == L"final" ) {
+									choice = KEY_FINAL;
+								} else if( choiceStr == L"hanja" ) {
+									choice = KEY_HANJA;
+								} else if( choiceStr == L"kanji" ) {
+									choice = KEY_KANJI;
+								} else if( choiceStr == L"escape" ) {
+									choice = KEY_ESCAPE;
+								} else if( choiceStr == L"convert" ) {
+									choice = KEY_CONVERT;
+								} else if( choiceStr == L"nonconvert" ) {
+									choice = KEY_NONCONVERT;
+								} else if( choiceStr == L"accept" ) {
+									choice = KEY_ACCEPT;
+								} else if( choiceStr == L"modechange" ) {
+									choice = KEY_MODECHANGE;
+								} else if( choiceStr == L"space" ) {
+									choice = KEY_SPACE;
+								} else if( choiceStr == L"prior" ) {
+									choice = KEY_PRIOR;
+								} else if( choiceStr == L"next" ) {
+									choice = KEY_NEXT;
+								} else if( choiceStr == L"end" ) {
+									choice = KEY_END;
+								} else if( choiceStr == L"home" ) {
+									choice = KEY_HOME;
+								} else if( choiceStr == L"left" ) {
+									choice = KEY_LEFT;
+								} else if( choiceStr == L"up" ) {
+									choice = KEY_UP;
+								} else if( choiceStr == L"right" ) {
+									choice = KEY_RIGHT;
+								} else if( choiceStr == L"down" ) {
+									choice = KEY_DOWN;
+								} else if( choiceStr == L"select" ) {
+									choice = KEY_SELECT;
+								} else if( choiceStr == L"print" ) {
+									choice = KEY_PRINT;
+								} else if( choiceStr == L"execut" ) {
+									choice = KEY_EXECUT;
+								} else if( choiceStr == L"snapshot" ) {
+									choice = KEY_SNAPSHOT;
+								} else if( choiceStr == L"insert" ) {
+									choice = KEY_INSERT;
+								} else if( choiceStr == L"delete" ) {
+									choice = KEY_DELETE;
+								} else if( choiceStr == L"help" ) {
+									choice = KEY_HELP;
+								} else if( choiceStr == L"key_0" ) {
+									choice = KEY_KEY_0;
+								} else if( choiceStr == L"key_1" ) {
+									choice = KEY_KEY_1;
+								} else if( choiceStr == L"key_2" ) {
+									choice = KEY_KEY_2;
+								} else if( choiceStr == L"key_3" ) {
+									choice = KEY_KEY_3;
+								} else if( choiceStr == L"key_4" ) {
+									choice = KEY_KEY_4;
+								} else if( choiceStr == L"key_5" ) {
+									choice = KEY_KEY_5;
+								} else if( choiceStr == L"key_6" ) {
+									choice = KEY_KEY_6;
+								} else if( choiceStr == L"key_7" ) {
+									choice = KEY_KEY_7;
+								} else if( choiceStr == L"key_8" ) {
+									choice = KEY_KEY_8;
+								} else if( choiceStr == L"key_9" ) {
+									choice = KEY_KEY_9;
+								} else if( choiceStr == L"key_a" ) {
+									choice = KEY_KEY_A;
+								} else if( choiceStr == L"key_b" ) {
+									choice = KEY_KEY_B;
+								} else if( choiceStr == L"key_c" ) {
+									choice = KEY_KEY_C;
+								} else if( choiceStr == L"key_d" ) {
+									choice = KEY_KEY_D;
+								} else if( choiceStr == L"key_e" ) {
+									choice = KEY_KEY_E;
+								} else if( choiceStr == L"key_f" ) {
+									choice = KEY_KEY_F;
+								} else if( choiceStr == L"key_g" ) {
+									choice = KEY_KEY_G;
+								} else if( choiceStr == L"key_h" ) {
+									choice = KEY_KEY_H;
+								} else if( choiceStr == L"key_i" ) {
+									choice = KEY_KEY_I;
+								} else if( choiceStr == L"key_j" ) {
+									choice = KEY_KEY_J;
+								} else if( choiceStr == L"key_k" ) {
+									choice = KEY_KEY_K;
+								} else if( choiceStr == L"key_l" ) {
+									choice = KEY_KEY_L;
+								} else if( choiceStr == L"key_m" ) {
+									choice = KEY_KEY_M;
+								} else if( choiceStr == L"key_n" ) {
+									choice = KEY_KEY_N;
+								} else if( choiceStr == L"key_o" ) {
+									choice = KEY_KEY_O;
+								} else if( choiceStr == L"key_p" ) {
+									choice = KEY_KEY_P;
+								} else if( choiceStr == L"key_q" ) {
+									choice = KEY_KEY_Q;
+								} else if( choiceStr == L"key_r" ) {
+									choice = KEY_KEY_R;
+								} else if( choiceStr == L"key_s" ) {
+									choice = KEY_KEY_S;
+								} else if( choiceStr == L"key_t" ) {
+									choice = KEY_KEY_T;
+								} else if( choiceStr == L"key_u" ) {
+									choice = KEY_KEY_U;
+								} else if( choiceStr == L"key_v" ) {
+									choice = KEY_KEY_V;
+								} else if( choiceStr == L"key_w" ) {
+									choice = KEY_KEY_W;
+								} else if( choiceStr == L"key_x" ) {
+									choice = KEY_KEY_X;
+								} else if( choiceStr == L"key_y" ) {
+									choice = KEY_KEY_Y;
+								} else if( choiceStr == L"key_z" ) {
+									choice = KEY_KEY_Z;
+								} else if( choiceStr == L"lwin" ) {
+									choice = KEY_LWIN;
+								} else if( choiceStr == L"rwin" ) {
+									choice = KEY_RWIN;
+								} else if( choiceStr == L"apps" ) {
+									choice = KEY_APPS;
+								} else if( choiceStr == L"sleep" ) {
+									choice = KEY_SLEEP;
+								} else if( choiceStr == L"numpad0" ) {
+									choice = KEY_NUMPAD0;
+								} else if( choiceStr == L"numpad1" ) {
+									choice = KEY_NUMPAD1;
+								} else if( choiceStr == L"numpad2" ) {
+									choice = KEY_NUMPAD2;
+								} else if( choiceStr == L"numpad3" ) {
+									choice = KEY_NUMPAD3;
+								} else if( choiceStr == L"numpad4" ) {
+									choice = KEY_NUMPAD4;
+								} else if( choiceStr == L"numpad5" ) {
+									choice = KEY_NUMPAD5;
+								} else if( choiceStr == L"numpad6" ) {
+									choice = KEY_NUMPAD6;
+								} else if( choiceStr == L"numpad7" ) {
+									choice = KEY_NUMPAD7;
+								} else if( choiceStr == L"numpad8" ) {
+									choice = KEY_NUMPAD8;
+								} else if( choiceStr == L"numpad9" ) {
+									choice = KEY_NUMPAD9;
+								} else if( choiceStr == L"multiply" ) {
+									choice = KEY_MULTIPLY;
+								} else if( choiceStr == L"add" ) {
+									choice = KEY_ADD;
+								} else if( choiceStr == L"separator" ) {
+									choice = KEY_SEPARATOR;
+								} else if( choiceStr == L"subtract" ) {
+									choice = KEY_SUBTRACT;
+								} else if( choiceStr == L"decimal" ) {
+									choice = KEY_DECIMAL;
+								} else if( choiceStr == L"divide" ) {
+									choice = KEY_DIVIDE;
+								} else if( choiceStr == L"f1" ) {
+									choice = KEY_F1;
+								} else if( choiceStr == L"f2" ) {
+									choice = KEY_F2;
+								} else if( choiceStr == L"f3" ) {
+									choice = KEY_F3;
+								} else if( choiceStr == L"f4" ) {
+									choice = KEY_F4;
+								} else if( choiceStr == L"f5" ) {
+									choice = KEY_F5;
+								} else if( choiceStr == L"f6" ) {
+									choice = KEY_F6;
+								} else if( choiceStr == L"f7" ) {
+									choice = KEY_F7;
+								} else if( choiceStr == L"f8" ) {
+									choice = KEY_F8;
+								} else if( choiceStr == L"f9" ) {
+									choice = KEY_F9;
+								} else if( choiceStr == L"f10" ) {
+									choice = KEY_F10;
+								} else if( choiceStr == L"f11" ) {
+									choice = KEY_F11;
+								} else if( choiceStr == L"f12" ) {
+									choice = KEY_F12;
+								} else if( choiceStr == L"f13" ) {
+									choice = KEY_F13;
+								} else if( choiceStr == L"f14" ) {
+									choice = KEY_F14;
+								} else if( choiceStr == L"f15" ) {
+									choice = KEY_F15;
+								} else if( choiceStr == L"f16" ) {
+									choice = KEY_F16;
+								} else if( choiceStr == L"f17" ) {
+									choice = KEY_F17;
+								} else if( choiceStr == L"f18" ) {
+									choice = KEY_F18;
+								} else if( choiceStr == L"f19" ) {
+									choice = KEY_F19;
+								} else if( choiceStr == L"f20" ) {
+									choice = KEY_F20;
+								} else if( choiceStr == L"f21" ) {
+									choice = KEY_F21;
+								} else if( choiceStr == L"f22" ) {
+									choice = KEY_F22;
+								} else if( choiceStr == L"f23" ) {
+									choice = KEY_F23;
+								} else if( choiceStr == L"f24" ) {
+									choice = KEY_F24;
+								} else if( choiceStr == L"numlock" ) {
+									choice = KEY_NUMLOCK;
+								} else if( choiceStr == L"scroll" ) {
+									choice = KEY_SCROLL;
+								} else if( choiceStr == L"lshift" ) {
+									choice = KEY_LSHIFT;
+								} else if( choiceStr == L"rshift" ) {
+									choice = KEY_RSHIFT;
+								} else if( choiceStr == L"lcontrol" ) {
+									choice = KEY_LCONTROL;
+								} else if( choiceStr == L"rcontrol" ) {
+									choice = KEY_RCONTROL;
+								} else if( choiceStr == L"lmenu" ) {
+									choice = KEY_LMENU;
+								} else if( choiceStr == L"rmenu" ) {
+									choice = KEY_RMENU;
+								} else if( choiceStr == L"plus" ) {
+									choice = KEY_PLUS;
+								} else if( choiceStr == L"comma" ) {
+									choice = KEY_COMMA;
+								} else if( choiceStr == L"minus" ) {
+									choice = KEY_MINUS;
+								} else if( choiceStr == L"period" ) {
+									choice = KEY_PERIOD;
+								} else if( choiceStr == L"oem_1" ) {
+									choice = KEY_OEM_1;
+								} else if( choiceStr == L"oem_2" ) {
+									choice = KEY_OEM_2;
+								} else if( choiceStr == L"oem_3" ) {
+									choice = KEY_OEM_3;
+								} else if( choiceStr == L"oem_4" ) {
+									choice = KEY_OEM_4;
+								} else if( choiceStr == L"oem_5" ) {
+									choice = KEY_OEM_5;
+								} else if( choiceStr == L"oem_6" ) {
+									choice = KEY_OEM_6;
+								} else if( choiceStr == L"oem_7" ) {
+									choice = KEY_OEM_7;
+								} else if( choiceStr == L"oem_8" ) {
+									choice = KEY_OEM_8;
+								} else if( choiceStr == L"oem_ax" ) {
+									choice = KEY_OEM_AX;
+								} else if( choiceStr == L"oem_102" ) {
+									choice = KEY_OEM_102;
+								} else if( choiceStr == L"oem_clear" ) {
+									choice = KEY_OEM_CLEAR;
+								} else if( choiceStr == L"attn" ) {
+									choice = KEY_ATTN;
+								} else if( choiceStr == L"crsel" ) {
+									choice = KEY_CRSEL;
+								} else if( choiceStr == L"exsel" ) {
+									choice = KEY_EXSEL;
+								} else if( choiceStr == L"ereof" ) {
+									choice = KEY_EREOF;
+								} else if( choiceStr == L"play" ) {
+									choice = KEY_PLAY;
+								} else if( choiceStr == L"zoom" ) {
+									choice = KEY_ZOOM;
+								} else if( choiceStr == L"pa1" ) {
+									choice = KEY_PA1;
 								} else {
+									std::wcerr << L"Unrecognized key " << choiceStr << L". Using space bar instead." << std::endl;
+									choice = KEY_SPACE;
+								}
+
+								KeyMapping temp;
+								keyMap.push_back( temp );
+								keyMap.back().setKey( choice );
+
+								if( preference == L"menu" ) {
+									keyMap.back().setAction('m');
+								} else if( preference == L"screenshot" ) {
+									keyMap.back().setAction('s');
+								} else if( preference.substr( 0, 6 ) == L"player" ) {
+									preference = preference.substr( 7 );
 									std::wstring playerNumStr = boost::algorithm::trim_copy( preference.substr( 0, preference.find( L' ' ) ) );
-									std::wstring action = boost::algorithm::trim_copy( preference.substr( preference.find( L' ' ) ) );
+									std::wstring actionStr = boost::algorithm::trim_copy( preference.substr( preference.find( L' ' ) ) );
+									uint_fast8_t playerNum = boost::lexical_cast< uint_fast16_t >( playerNumStr );
+
+									if( playerNum < numPlayers ) {
+										keyMap.back().setPlayer( playerNum );
+										wchar_t action = actionStr[ 0 ];
+										keyMap.back().setAction( action );
+									} else {
+										keyMap.pop_back();
+									}
 								}
 							} catch( std::exception e ) {
 								std::wcerr << L"Error in GameManager::setControls(): " << e.what() << std::endl;
@@ -2463,12 +2792,12 @@ void GameManager::setupBackground() {
 				scene::IParticleEmitter* em = ps->createBoxEmitter(
 												  camera->getViewFrustum()->getBoundingBox(), //core::aabbox3d< float >(-7,-7,-7,7,7,7), // emitter size
 												  core::vector3df( 0.0f, 0.0f, -0.1f ), // initial direction
-												  100, 500,                            // Min & max emit rate
-												  CYAN,       // darkest color
-												  WHITE,       // brightest color
-												  2000, 20000, 0,                       // min and max age, angle
-												  core::dimension2df( 1.f, 1.f ),      // min size
-												  core::dimension2df( 20.f, 20.f ) );    // max size
+												  100, 500,							// Min & max emit rate
+												  CYAN,	   // darkest color
+												  WHITE,	   // brightest color
+												  2000, 20000, 0,					   // min and max age, angle
+												  core::dimension2df( 1.f, 1.f ),	  // min size
+												  core::dimension2df( 20.f, 20.f ) );	// max size
 
 				ps->setEmitter( em ); // this grabs the emitter
 				em->drop(); // so we can drop it here without deleting it
@@ -2531,7 +2860,7 @@ void GameManager::takeScreenShot() {
 			time_t currentTime = time( NULL );
 			wchar_t clockTime[ 20 ];
 			if( wcsftime( clockTime, 20, L"%FT%T", localtime( &currentTime ) ) == 0 ) {
-                throw( std::wstring( L"Could not convert the time to ISO 8601 format.") );
+				throw( std::wstring( L"Could not convert the time to ISO 8601 format.") );
 			}
 			filename.append( clockTime );
 			filename.append( L".png" );

@@ -31,11 +31,11 @@ class CGUITTFace : public irr::IReferenceCounted {
 
 		bool load( const irr::io::path& filename );
 
-		FT_Face		face;               // handle to face
+		FT_Face		face;			   // handle to face
 
 	private:
 		static int			countClassObjects;
-		static FT_Library	library;    // handle to library
+		static FT_Library	library;	// handle to library
 };
 
 class CGUIFreetypeFont;

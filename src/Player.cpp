@@ -49,7 +49,7 @@ void Player::loadTexture( irr::video::IVideoDriver* driver ) {
 //Draws a filled circle. Somebody please implement a faster algorithm.
 void Player::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size ) {
 	try {
-		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( size, size ) );
+		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) ); //Colorspace should be irr::video::A1R5G5B5 but that causes a bug on my current laptop.
 		tempImage->fill( irr::video::SColor( 0, 0, 0, 0 ) ); //Fills the image with invisibility!
 		tempImage->setPixel( size - 1, size - 1, irr::video::SColor( 0, 0, 0, 0 ) ); //Workaround for a bug in Irrlicht's software renderer
 
@@ -58,7 +58,7 @@ void Player::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size 
 		float rSquared = pow( radius, 2 );
 		for( int_fast16_t x = -radius; x <= 0; x++ ) {
 			int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
-			for( int_fast16_t y = -height; y <= 0; y++ ) {
+			for( int_fast16_t y = -height; y <= 0; ++y ) {
 				tempImage->setPixel( x + origin.X, y + origin.Y, colorOne );
 				tempImage->setPixel( x + origin.X, -y + origin.Y, colorOne );
 				tempImage->setPixel( -x + origin.X, y + origin.Y, colorOne );
@@ -72,7 +72,7 @@ void Player::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size 
 		rSquared = pow( radius, 2 );
 		for( int_fast16_t x = -radius; x <= 0; x++ ) {
 			int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
-			for( int_fast16_t y = -height; y <= 0; y++ ) {
+			for( int_fast16_t y = -height; y <= 0; ++y ) {
 				tempImage->setPixel( x + origin.X, y + origin.Y, colorTwo );
 				tempImage->setPixel( x + origin.X, -y + origin.Y, colorTwo );
 				tempImage->setPixel( -x + origin.X, y + origin.Y, colorTwo );

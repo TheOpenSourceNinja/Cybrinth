@@ -1,7 +1,7 @@
 #include "KeyMapping.h"
 #include <iostream>
 
-char KeyMapping::getAction() {
+wchar_t KeyMapping::getAction() {
 	try {
 		return action;
 	} catch ( std::exception e ) {
@@ -28,7 +28,7 @@ uint_least8_t KeyMapping::getPlayer() {
 	}
 }
 
-void KeyMapping::setAction( char val ) {
+void KeyMapping::setAction( wchar_t val ) {
 	try {
 		action = val;
 	} catch ( std::exception e ) {

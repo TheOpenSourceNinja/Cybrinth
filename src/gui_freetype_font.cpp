@@ -125,7 +125,7 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 					u32 *texp = texd;
 					bool cflag = ( freetypeFont->Driver->getDriverType() == video::EDT_DIRECT3D8 );
 
-					for( int i = 0; i < bits.rows; i++ ) {
+					for( int i = 0; i < bits.rows; ++i ) {
 						u32 *rowp = texp;
 
 						for( int j = 0; j < bits.width; j++ ) {
@@ -142,7 +142,7 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 							}
 
 							pt++;
-							rowp++;
+							++rowp;
 						}
 
 						texp += imgw;
@@ -208,7 +208,7 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 			memset( texd16, 0, imgw16 * imgh16 * sizeof( u16 ) );
 			u16 *texp16 = texd16;
 
-			for( int y = 0; y < bits.rows; y++ ) {
+			for( int y = 0; y < bits.rows; ++y ) {
 				u16 *rowp = texp16;
 
 				for( int x = 0; x < bits.width; x++ ) {
@@ -216,7 +216,7 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 						*rowp = 0xffff;
 					}
 
-					rowp++;
+					++rowp;
 				}
 
 				texp16 += imgw16;
@@ -372,7 +372,7 @@ bool CGUIFreetypeFont::attach( CGUITTFace *Face, u32 size ) {
 		Glyphs.reallocate( TrueTypeFace->face->num_glyphs );
 		Glyphs.set_used( TrueTypeFace->face->num_glyphs );
 
-		for( int i = 0; i < TrueTypeFace->face->num_glyphs; i++ ) {
+		for( int i = 0; i < TrueTypeFace->face->num_glyphs; ++i ) {
 			CGUITTGlyph * glyph = new CGUITTGlyph();
 
 			glyph->size = size;
@@ -478,7 +478,7 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 		core::position2d< irr::s32 > offset = position.UpperLeftCorner;
 		video::SColor colors[4];
 
-		for( int i = 0; i < 4; i++ ) {
+		for( int i = 0; i < 4; ++i ) {
 			colors[i] = color;
 		}
 
@@ -522,7 +522,7 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 
 						if( !Transparency )	a = 255;
 
-						for( int y = 0; y < texh; y++ ) {
+						for( int y = 0; y < texh; ++y ) {
 							for( int x = 0; x < texw; x++ ) {
 								if( !clip || clip->isPointInside( core::position2d< irr::s32 >( offset.X + x + offx, offset.Y + y + offy ) ) ) {
 									if( *pt ) {
