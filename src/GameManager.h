@@ -90,8 +90,10 @@ class GameManager : public IEventReceiver {
 	protected:
 	private:
 		//Functions----------------------------------
+		void adjustMenu();
 		bool allHumansAtGoal();
 
+		bool doEventActions( std::vector< KeyMapping >::size_type k, const SEvent& event );
 		void drawBackground();
 
 		void loadFonts();

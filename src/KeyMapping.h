@@ -27,6 +27,14 @@ class KeyMapping
 		 * \param val New value to set
 		 */
 		void setAction( wchar_t val );
+		/** Access mouseEvent
+		 * \return The current value of mouseEvent
+		 */
+		irr::EMOUSE_INPUT_EVENT getMouseEvent();
+		/** Access mouseWheelUp
+		 * \return The current value of mouseWheelUp
+		 */
+		bool getMouseWheelUp();
 		/** Access player
 		 * \return The current value of player
 		 */
@@ -35,10 +43,20 @@ class KeyMapping
 		 * \param val New value to set
 		 */
 		void setPlayer( uint_least8_t val );
+		/** Set mouse event
+		 * \param val New value to set
+		 */
+		void setMouseEvent( irr::EMOUSE_INPUT_EVENT val );
+		/** Set mouseWheelUp
+		 * \param val New value to set
+		 */
+		void setMouseWheelUp( bool val );
 	protected:
 	private:
-		irr::EKEY_CODE key; //!< Member variable "key"
-		wchar_t action; //!< Member variable "action"
+		irr::EKEY_CODE key;
+		irr::EMOUSE_INPUT_EVENT mouseEvent;
+		bool mouseWheelUp;
+		wchar_t action;
 		uint_least8_t player;
 };
 

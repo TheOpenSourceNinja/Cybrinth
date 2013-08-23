@@ -19,6 +19,20 @@ irr::EKEY_CODE KeyMapping::getKey() {
 	}
 }
 
+/** Access mouseWheelUp
+* \return The current value of mouseWheelUp
+*/
+bool KeyMapping::getMouseWheelUp() {
+	return mouseWheelUp;
+}
+
+/** Access mouseEvent
+* \return The current value of mouseEvent
+*/
+irr::EMOUSE_INPUT_EVENT KeyMapping::getMouseEvent() {
+	return mouseEvent;
+}
+
 uint_least8_t KeyMapping::getPlayer() {
 	try {
 		return player;
@@ -44,6 +58,20 @@ void KeyMapping::setKey( irr::EKEY_CODE val ) {
 	}
 }
 
+/** Set mouse event
+* \param val New value to set
+*/
+void KeyMapping::setMouseEvent( irr::EMOUSE_INPUT_EVENT val ) {
+	mouseEvent = val;
+}
+
+/** Set mouseWheelUp
+* \param val New value to set
+*/
+void KeyMapping::setMouseWheelUp( bool val ) {
+	mouseWheelUp = val;
+}
+
 void KeyMapping::setPlayer( uint_least8_t val ) {
 	try {
 		player = val;
@@ -54,6 +82,9 @@ void KeyMapping::setPlayer( uint_least8_t val ) {
 
 KeyMapping::KeyMapping() {
 	try {
+		mouseWheelUp = false;
+		mouseEvent = irr::EMIE_COUNT;
+		key = irr::KEY_KEY_CODES_COUNT;
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in KeyMapping::KeyMapping(): " << e.what() << std::endl;
 	}

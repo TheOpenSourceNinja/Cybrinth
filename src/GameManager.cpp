@@ -61,6 +61,20 @@
 using namespace irr;
 
 /**
+ * Places the menu options at the correct locations on screen.
+ * Arguments: None.
+ * Returns: Nothing.
+ */
+void GameManager::adjustMenu() {
+	uint_fast8_t numMenuOptions = 5;
+	newGame.setY( 0 );
+	loadMaze.setY( 1 * windowSize.Height / numMenuOptions );
+	saveMaze.setY( 2 * windowSize.Height / numMenuOptions );
+	exitGame.setY( 3 * windowSize.Height / numMenuOptions );
+	backToGame.setY( 4 * windowSize.Height / numMenuOptions );
+}
+
+/**
  * Figures out which players are human, then figures out whether they're all at the goal.
  * Arguments: None.
  * Returns: True if all humans are at the goal, false otherwise.
@@ -114,6 +128,92 @@ bool GameManager::allHumansAtGoal() {
 }
 
 /**
+* Should be called only by OnEvent().
+* Arguments:
+* --- std::vector< KeyMapping >::size_type k: which key in keyMap to use.
+* Returns: Whether or not the event was handled.
+*/
+bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const SEvent& event ) {
+	switch( keyMap.at( k ).getAction() ) {
+		case L'm': {
+			showingMenu = true;
+			return true;
+			break;
+		}
+		case L's': {
+			takeScreenShot();
+			return true;
+			break;
+		}
+		case L'^': {
+			if( event.MouseInput.Wheel > 0 ) {
+				musicVolume += 5;
+
+				if( musicVolume > 100 ) {
+					musicVolume = 100;
+				}
+
+				Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+				return true;
+			}
+			break;
+		}
+		case L'v': {
+			if( event.MouseInput.Wheel <= 0 ) {
+				if( musicVolume >= 5 ) {
+					musicVolume -= 5;
+				} else {
+					musicVolume = 0;
+				}
+
+				Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+				return true;
+			}
+			break;
+		}
+		default: {
+			bool ignoreKey = false;
+			for( uint_fast8_t b = 0; !ignoreKey && b < numBots; b++ ) { //Ignore controls that affect bots
+				if( keyMap.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
+					ignoreKey = true;
+				}
+			}
+
+			if( !ignoreKey ) {
+				switch( keyMap.at( k ).getAction() ) {
+					case L'u': {
+						movePlayerOnY( keyMap.at( k ).getPlayer(), -1);
+						return true;
+						break;
+					}
+					case L'd': {
+						movePlayerOnY( keyMap.at( k ).getPlayer(), 1);
+						return true;
+						break;
+					}
+					case L'r': {
+						movePlayerOnX( keyMap.at( k ).getPlayer(), 1);
+						return true;
+						break;
+					}
+					case L'l': {
+						movePlayerOnX( keyMap.at( k ).getPlayer(), -1);
+						return true;
+						break;
+					}
+					default: {
+						throw std::wstring( L"Unrecognized key action: " ) + keyMap.at( k ).getAction();
+					}
+				}
+			}
+			break;
+		}
+	}
+
+	return false;
+}
+
+/**
  * Draws everything onto the screen. Calls drawLoadingScreen(), drawBackground(), and the draw functions of objects.
  * Arguments: None.
  * Returns: Nothing.
@@ -148,7 +248,7 @@ void GameManager::drawAll() {
 				playerStart.at( ps ).draw( driver, cellWidth, cellHeight );
 			}
 
-			//Because of a texture resizing bug in Irrlicht's software renderers, we draw the items (currently all keys, which use a large png as a texture) before the players (which generate their own texture at the correct size) and the maze walls.
+			//Because of a texture resizing bug in Irrlicht's software renderers, we draw the items (currently all keys, which use a large png as a texture) before the players (which generate their own texture at the correct size) and the maze walls. Otherwise the items could cover the players or maze walls.
 			for( uint_fast16_t i = 0; i < stuff.size(); ++i ) {
 				stuff.at( i ).draw( driver, cellWidth, cellHeight );
 			}
@@ -617,21 +717,11 @@ GameManager::GameManager() {
 		}
 
 		newGame.setText( L"New maze" );
-		newGame.setFont( clockFont );
 		loadMaze.setText( L"Load maze" );
-		loadMaze.setFont( clockFont );
 		saveMaze.setText( L"Save maze" );
-		saveMaze.setFont( clockFont );
 		exitGame.setText( L"Exit game" );
-		exitGame.setFont( clockFont );
 		backToGame.setText( L"Back to game" );
-		backToGame.setFont( clockFont );
-
-		newGame.setY( 0 );
-		loadMaze.setY( 1 * windowSize.Height / 5 );
-		saveMaze.setY( 2 * windowSize.Height / 5 );
-		exitGame.setY( 3 * windowSize.Height / 5 );
-		backToGame.setY( 4 * windowSize.Height / 5 );
+		adjustMenu();
 
 		if ( debug ) {
 			std::wcout << L"Resizing player and playerStart vectors to " << numPlayers << std::endl;
@@ -900,6 +990,12 @@ void GameManager::loadFonts() {
 		if( debug ) {
 			std::wcout << L"clockFont is loaded" << std::endl;
 		}
+
+		newGame.setFont( clockFont );
+		loadMaze.setFont( clockFont );
+		saveMaze.setFont( clockFont );
+		exitGame.setFont( clockFont );
+		backToGame.setFont( clockFont );
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::loadFonts(): " << e.what() << std::endl;
 	}
@@ -1388,37 +1484,8 @@ bool GameManager::OnEvent( const SEvent& event ) {
 					if( !( showingMenu || showingLoadingScreen ) ) {
 						for( std::vector< KeyMapping >::size_type k = 0; k < keyMap.size(); ++k ) {
 							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
-								switch( keyMap.at( k ).getAction() ) {
-									case 'm': {
-										showingMenu = true;
-										return true;
-										break;
-									}
-									case 'd': {
-										movePlayerOnY( keyMap.at( k ).getPlayer(), 1 );
-										return true;
-										break;
-									}
-									case 'u': {
-										movePlayerOnY( keyMap.at( k ).getPlayer(), -1 );
-										return true;
-										break;
-									}
-									case 'r': {
-										movePlayerOnX( keyMap.at( k ).getPlayer(), 1 );
-										return true;
-										break;
-									}
-									case 'l': {
-										movePlayerOnX( keyMap.at( k ).getPlayer(), -1 );
-										return true;
-										break;
-									}
-									case 's': {
-										takeScreenShot();
-										return true;
-										break;
-									}
+								if( doEventActions( k, event ) ) {
+									return true;
 								}
 								break;
 							}
@@ -1427,12 +1494,12 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						for( std::vector< KeyMapping >::size_type k = 0; k < keyMap.size(); ++k ) {
 							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
 								switch( keyMap.at( k ).getAction() ) {
-									case 'm': {
+									case L'm': {
 										showingMenu = false;
 										return true;
 										break;
 									}
-									case 's': {
+									case L's': {
 										takeScreenShot();
 										return true;
 										break;
@@ -1447,68 +1514,37 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			break;
 
 			case EET_MOUSE_INPUT_EVENT: {
-				switch( event.MouseInput.Event ) {
-					case EMIE_LMOUSE_PRESSED_DOWN: {
-						if( showingMenu ) {
-							if( exitGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-								device->closeDevice();
-								donePlaying = true;
-								return true;
-							} else if( loadMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-								fileChooser = gui->addFileOpenDialog( L"Select a Maze", true, 0, -1 );
-								//std::wcout << L"Directory: " << fileChooser->getDirectoryName().c_str() << std::endl;
-								//loadFromFile();
-								return true;
-							} else if( saveMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-								mazeManager.saveToFile();
-								return true;
-							} else if( newGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-								newMaze();
-								return true;
-							} else if( backToGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-								showingMenu = false;
-								return true;
-							}
+				if( showingMenu && event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN ) {
+						if( exitGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
+							device->closeDevice();
+							donePlaying = true;
+							return true;
+						} else if( loadMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
+							fileChooser = gui->addFileOpenDialog( L"Select a Maze", true, 0, -1 );
+							//std::wcout << L"Directory: " << fileChooser->getDirectoryName().c_str() << std::endl;
+							//loadFromFile();
+							return true;
+						} else if( saveMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
+							mazeManager.saveToFile();
+							return true;
+						} else if( newGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
+							newMaze();
+							return true;
+						} else if( backToGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
+							showingMenu = false;
+							return true;
 						}
-
-						break;
-					}
-					case EMIE_MOUSE_WHEEL: {
-						if( debug ) {
-							std::wcout << L"Mouse wheel moved ";
-						}
-
-						if( event.MouseInput.Wheel > 0 ) {
-							if( debug ) {
-								std::wcout << "up" << std::endl;
-							}
-
-							musicVolume += 5;
-
-							if( musicVolume > 100 ) {
-								musicVolume = 100;
-							}
-						} else {
-							if( debug ) {
-								std::wcout << "down" << std::endl;
-							}
-
-							if( musicVolume >= 5 ) {
-								musicVolume -= 5;
-							} else {
-								musicVolume = 0;
-							}
-						}
-
-						Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
-
-						break;
-					}
-					default:
-						break;
 				}
-			}
+
+				for( std::vector< KeyMapping >::size_type k = 0; k < keyMap.size(); ++k ) {
+					if( event.MouseInput.Event == keyMap.at( k ).getMouseEvent() ) {
+						if( doEventActions( k, event ) ) {
+							return true;
+						}
+					}
+				}
 			break;
+			}
 
 			case EET_USER_EVENT: {
 				switch( event.UserEvent.UserData1 ) {
@@ -1539,6 +1575,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 						cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 						loadFonts();
+						adjustMenu();
 						return true;
 					}
 					break;
@@ -2424,322 +2461,367 @@ void GameManager::setControls() {
 									std::wcout << L"Preference \"" << preference << L"\" choiceStr \"" << choiceStr << L"\""<< std::endl;
 								}
 
-								irr::EKEY_CODE choice;
-								//Is there some other way to do the following? Perhaps using a for loop?
-								if( choiceStr == L"lbutton" ) {
-									choice = KEY_LBUTTON;
-								} else if( choiceStr == L"rbutton" ) {
-									choice = KEY_RBUTTON;
-								} else if( choiceStr == L"cancel" ) {
-									choice = KEY_CANCEL;
-								} else if( choiceStr == L"mbutton" ) {
-									choice = KEY_MBUTTON;
-								} else if( choiceStr == L"xbutton1" ) {
-									choice = KEY_XBUTTON1;
-								} else if( choiceStr == L"xbutton2" ) {
-									choice = KEY_XBUTTON2;
-								} else if( choiceStr == L"back" ) {
-									choice = KEY_BACK;
-								} else if( choiceStr == L"tab" ) {
-									choice = KEY_TAB;
-								} else if( choiceStr == L"clear" ) {
-									choice = KEY_CLEAR;
-								} else if( choiceStr == L"return" ) {
-									choice = KEY_RETURN;
-								} else if( choiceStr == L"shift" ) {
-									choice = KEY_SHIFT;
-								} else if( choiceStr == L"control" ) {
-									choice = KEY_CONTROL;
-								} else if( choiceStr == L"menu" ) {
-									choice = KEY_MENU;
-								} else if( choiceStr == L"pause" ) {
-									choice = KEY_PAUSE;
-								} else if( choiceStr == L"capital" ) {
-									choice = KEY_CAPITAL;
-								} else if( choiceStr == L"kana" ) {
-									choice = KEY_KANA;
-								} else if( choiceStr == L"hanguel" ) {
-									choice = KEY_HANGUEL;
-								} else if( choiceStr == L"hangul" ) {
-									choice = KEY_HANGUL;
-								} else if( choiceStr == L"junja" ) {
-									choice = KEY_JUNJA;
-								} else if( choiceStr == L"final" ) {
-									choice = KEY_FINAL;
-								} else if( choiceStr == L"hanja" ) {
-									choice = KEY_HANJA;
-								} else if( choiceStr == L"kanji" ) {
-									choice = KEY_KANJI;
-								} else if( choiceStr == L"escape" ) {
-									choice = KEY_ESCAPE;
-								} else if( choiceStr == L"convert" ) {
-									choice = KEY_CONVERT;
-								} else if( choiceStr == L"nonconvert" ) {
-									choice = KEY_NONCONVERT;
-								} else if( choiceStr == L"accept" ) {
-									choice = KEY_ACCEPT;
-								} else if( choiceStr == L"modechange" ) {
-									choice = KEY_MODECHANGE;
-								} else if( choiceStr == L"space" ) {
-									choice = KEY_SPACE;
-								} else if( choiceStr == L"prior" ) {
-									choice = KEY_PRIOR;
-								} else if( choiceStr == L"next" ) {
-									choice = KEY_NEXT;
-								} else if( choiceStr == L"end" ) {
-									choice = KEY_END;
-								} else if( choiceStr == L"home" ) {
-									choice = KEY_HOME;
-								} else if( choiceStr == L"left" ) {
-									choice = KEY_LEFT;
-								} else if( choiceStr == L"up" ) {
-									choice = KEY_UP;
-								} else if( choiceStr == L"right" ) {
-									choice = KEY_RIGHT;
-								} else if( choiceStr == L"down" ) {
-									choice = KEY_DOWN;
-								} else if( choiceStr == L"select" ) {
-									choice = KEY_SELECT;
-								} else if( choiceStr == L"print" ) {
-									choice = KEY_PRINT;
-								} else if( choiceStr == L"execut" ) {
-									choice = KEY_EXECUT;
-								} else if( choiceStr == L"snapshot" ) {
-									choice = KEY_SNAPSHOT;
-								} else if( choiceStr == L"insert" ) {
-									choice = KEY_INSERT;
-								} else if( choiceStr == L"delete" ) {
-									choice = KEY_DELETE;
-								} else if( choiceStr == L"help" ) {
-									choice = KEY_HELP;
-								} else if( choiceStr == L"key_0" ) {
-									choice = KEY_KEY_0;
-								} else if( choiceStr == L"key_1" ) {
-									choice = KEY_KEY_1;
-								} else if( choiceStr == L"key_2" ) {
-									choice = KEY_KEY_2;
-								} else if( choiceStr == L"key_3" ) {
-									choice = KEY_KEY_3;
-								} else if( choiceStr == L"key_4" ) {
-									choice = KEY_KEY_4;
-								} else if( choiceStr == L"key_5" ) {
-									choice = KEY_KEY_5;
-								} else if( choiceStr == L"key_6" ) {
-									choice = KEY_KEY_6;
-								} else if( choiceStr == L"key_7" ) {
-									choice = KEY_KEY_7;
-								} else if( choiceStr == L"key_8" ) {
-									choice = KEY_KEY_8;
-								} else if( choiceStr == L"key_9" ) {
-									choice = KEY_KEY_9;
-								} else if( choiceStr == L"key_a" ) {
-									choice = KEY_KEY_A;
-								} else if( choiceStr == L"key_b" ) {
-									choice = KEY_KEY_B;
-								} else if( choiceStr == L"key_c" ) {
-									choice = KEY_KEY_C;
-								} else if( choiceStr == L"key_d" ) {
-									choice = KEY_KEY_D;
-								} else if( choiceStr == L"key_e" ) {
-									choice = KEY_KEY_E;
-								} else if( choiceStr == L"key_f" ) {
-									choice = KEY_KEY_F;
-								} else if( choiceStr == L"key_g" ) {
-									choice = KEY_KEY_G;
-								} else if( choiceStr == L"key_h" ) {
-									choice = KEY_KEY_H;
-								} else if( choiceStr == L"key_i" ) {
-									choice = KEY_KEY_I;
-								} else if( choiceStr == L"key_j" ) {
-									choice = KEY_KEY_J;
-								} else if( choiceStr == L"key_k" ) {
-									choice = KEY_KEY_K;
-								} else if( choiceStr == L"key_l" ) {
-									choice = KEY_KEY_L;
-								} else if( choiceStr == L"key_m" ) {
-									choice = KEY_KEY_M;
-								} else if( choiceStr == L"key_n" ) {
-									choice = KEY_KEY_N;
-								} else if( choiceStr == L"key_o" ) {
-									choice = KEY_KEY_O;
-								} else if( choiceStr == L"key_p" ) {
-									choice = KEY_KEY_P;
-								} else if( choiceStr == L"key_q" ) {
-									choice = KEY_KEY_Q;
-								} else if( choiceStr == L"key_r" ) {
-									choice = KEY_KEY_R;
-								} else if( choiceStr == L"key_s" ) {
-									choice = KEY_KEY_S;
-								} else if( choiceStr == L"key_t" ) {
-									choice = KEY_KEY_T;
-								} else if( choiceStr == L"key_u" ) {
-									choice = KEY_KEY_U;
-								} else if( choiceStr == L"key_v" ) {
-									choice = KEY_KEY_V;
-								} else if( choiceStr == L"key_w" ) {
-									choice = KEY_KEY_W;
-								} else if( choiceStr == L"key_x" ) {
-									choice = KEY_KEY_X;
-								} else if( choiceStr == L"key_y" ) {
-									choice = KEY_KEY_Y;
-								} else if( choiceStr == L"key_z" ) {
-									choice = KEY_KEY_Z;
-								} else if( choiceStr == L"lwin" ) {
-									choice = KEY_LWIN;
-								} else if( choiceStr == L"rwin" ) {
-									choice = KEY_RWIN;
-								} else if( choiceStr == L"apps" ) {
-									choice = KEY_APPS;
-								} else if( choiceStr == L"sleep" ) {
-									choice = KEY_SLEEP;
-								} else if( choiceStr == L"numpad0" ) {
-									choice = KEY_NUMPAD0;
-								} else if( choiceStr == L"numpad1" ) {
-									choice = KEY_NUMPAD1;
-								} else if( choiceStr == L"numpad2" ) {
-									choice = KEY_NUMPAD2;
-								} else if( choiceStr == L"numpad3" ) {
-									choice = KEY_NUMPAD3;
-								} else if( choiceStr == L"numpad4" ) {
-									choice = KEY_NUMPAD4;
-								} else if( choiceStr == L"numpad5" ) {
-									choice = KEY_NUMPAD5;
-								} else if( choiceStr == L"numpad6" ) {
-									choice = KEY_NUMPAD6;
-								} else if( choiceStr == L"numpad7" ) {
-									choice = KEY_NUMPAD7;
-								} else if( choiceStr == L"numpad8" ) {
-									choice = KEY_NUMPAD8;
-								} else if( choiceStr == L"numpad9" ) {
-									choice = KEY_NUMPAD9;
-								} else if( choiceStr == L"multiply" ) {
-									choice = KEY_MULTIPLY;
-								} else if( choiceStr == L"add" ) {
-									choice = KEY_ADD;
-								} else if( choiceStr == L"separator" ) {
-									choice = KEY_SEPARATOR;
-								} else if( choiceStr == L"subtract" ) {
-									choice = KEY_SUBTRACT;
-								} else if( choiceStr == L"decimal" ) {
-									choice = KEY_DECIMAL;
-								} else if( choiceStr == L"divide" ) {
-									choice = KEY_DIVIDE;
-								} else if( choiceStr == L"f1" ) {
-									choice = KEY_F1;
-								} else if( choiceStr == L"f2" ) {
-									choice = KEY_F2;
-								} else if( choiceStr == L"f3" ) {
-									choice = KEY_F3;
-								} else if( choiceStr == L"f4" ) {
-									choice = KEY_F4;
-								} else if( choiceStr == L"f5" ) {
-									choice = KEY_F5;
-								} else if( choiceStr == L"f6" ) {
-									choice = KEY_F6;
-								} else if( choiceStr == L"f7" ) {
-									choice = KEY_F7;
-								} else if( choiceStr == L"f8" ) {
-									choice = KEY_F8;
-								} else if( choiceStr == L"f9" ) {
-									choice = KEY_F9;
-								} else if( choiceStr == L"f10" ) {
-									choice = KEY_F10;
-								} else if( choiceStr == L"f11" ) {
-									choice = KEY_F11;
-								} else if( choiceStr == L"f12" ) {
-									choice = KEY_F12;
-								} else if( choiceStr == L"f13" ) {
-									choice = KEY_F13;
-								} else if( choiceStr == L"f14" ) {
-									choice = KEY_F14;
-								} else if( choiceStr == L"f15" ) {
-									choice = KEY_F15;
-								} else if( choiceStr == L"f16" ) {
-									choice = KEY_F16;
-								} else if( choiceStr == L"f17" ) {
-									choice = KEY_F17;
-								} else if( choiceStr == L"f18" ) {
-									choice = KEY_F18;
-								} else if( choiceStr == L"f19" ) {
-									choice = KEY_F19;
-								} else if( choiceStr == L"f20" ) {
-									choice = KEY_F20;
-								} else if( choiceStr == L"f21" ) {
-									choice = KEY_F21;
-								} else if( choiceStr == L"f22" ) {
-									choice = KEY_F22;
-								} else if( choiceStr == L"f23" ) {
-									choice = KEY_F23;
-								} else if( choiceStr == L"f24" ) {
-									choice = KEY_F24;
-								} else if( choiceStr == L"numlock" ) {
-									choice = KEY_NUMLOCK;
-								} else if( choiceStr == L"scroll" ) {
-									choice = KEY_SCROLL;
-								} else if( choiceStr == L"lshift" ) {
-									choice = KEY_LSHIFT;
-								} else if( choiceStr == L"rshift" ) {
-									choice = KEY_RSHIFT;
-								} else if( choiceStr == L"lcontrol" ) {
-									choice = KEY_LCONTROL;
-								} else if( choiceStr == L"rcontrol" ) {
-									choice = KEY_RCONTROL;
-								} else if( choiceStr == L"lmenu" ) {
-									choice = KEY_LMENU;
-								} else if( choiceStr == L"rmenu" ) {
-									choice = KEY_RMENU;
-								} else if( choiceStr == L"plus" ) {
-									choice = KEY_PLUS;
-								} else if( choiceStr == L"comma" ) {
-									choice = KEY_COMMA;
-								} else if( choiceStr == L"minus" ) {
-									choice = KEY_MINUS;
-								} else if( choiceStr == L"period" ) {
-									choice = KEY_PERIOD;
-								} else if( choiceStr == L"oem_1" ) {
-									choice = KEY_OEM_1;
-								} else if( choiceStr == L"oem_2" ) {
-									choice = KEY_OEM_2;
-								} else if( choiceStr == L"oem_3" ) {
-									choice = KEY_OEM_3;
-								} else if( choiceStr == L"oem_4" ) {
-									choice = KEY_OEM_4;
-								} else if( choiceStr == L"oem_5" ) {
-									choice = KEY_OEM_5;
-								} else if( choiceStr == L"oem_6" ) {
-									choice = KEY_OEM_6;
-								} else if( choiceStr == L"oem_7" ) {
-									choice = KEY_OEM_7;
-								} else if( choiceStr == L"oem_8" ) {
-									choice = KEY_OEM_8;
-								} else if( choiceStr == L"oem_ax" ) {
-									choice = KEY_OEM_AX;
-								} else if( choiceStr == L"oem_102" ) {
-									choice = KEY_OEM_102;
-								} else if( choiceStr == L"oem_clear" ) {
-									choice = KEY_OEM_CLEAR;
-								} else if( choiceStr == L"attn" ) {
-									choice = KEY_ATTN;
-								} else if( choiceStr == L"crsel" ) {
-									choice = KEY_CRSEL;
-								} else if( choiceStr == L"exsel" ) {
-									choice = KEY_EXSEL;
-								} else if( choiceStr == L"ereof" ) {
-									choice = KEY_EREOF;
-								} else if( choiceStr == L"play" ) {
-									choice = KEY_PLAY;
-								} else if( choiceStr == L"zoom" ) {
-									choice = KEY_ZOOM;
-								} else if( choiceStr == L"pa1" ) {
-									choice = KEY_PA1;
-								} else {
-									std::wcerr << L"Unrecognized key " << choiceStr << L". Using space bar instead." << std::endl;
-									choice = KEY_SPACE;
-								}
-
 								KeyMapping temp;
 								keyMap.push_back( temp );
-								keyMap.back().setKey( choice );
+
+								if( choiceStr.substr( 0, 5 ) != L"mouse" ) {
+									irr::EKEY_CODE choice;
+									//Is there some other way to do the following? Perhaps using a for loop?
+									if( choiceStr == L"lbutton" ) {
+										choice = KEY_LBUTTON;
+									} else if( choiceStr == L"rbutton" ) {
+										choice = KEY_RBUTTON;
+									} else if( choiceStr == L"cancel" ) {
+										choice = KEY_CANCEL;
+									} else if( choiceStr == L"mbutton" ) {
+										choice = KEY_MBUTTON;
+									} else if( choiceStr == L"xbutton1" ) {
+										choice = KEY_XBUTTON1;
+									} else if( choiceStr == L"xbutton2" ) {
+										choice = KEY_XBUTTON2;
+									} else if( choiceStr == L"back" ) {
+										choice = KEY_BACK;
+									} else if( choiceStr == L"tab" ) {
+										choice = KEY_TAB;
+									} else if( choiceStr == L"clear" ) {
+										choice = KEY_CLEAR;
+									} else if( choiceStr == L"return" ) {
+										choice = KEY_RETURN;
+									} else if( choiceStr == L"shift" ) {
+										choice = KEY_SHIFT;
+									} else if( choiceStr == L"control" ) {
+										choice = KEY_CONTROL;
+									} else if( choiceStr == L"menu" ) {
+										choice = KEY_MENU;
+									} else if( choiceStr == L"pause" ) {
+										choice = KEY_PAUSE;
+									} else if( choiceStr == L"capital" ) {
+										choice = KEY_CAPITAL;
+									} else if( choiceStr == L"kana" ) {
+										choice = KEY_KANA;
+									} else if( choiceStr == L"hanguel" ) {
+										choice = KEY_HANGUEL;
+									} else if( choiceStr == L"hangul" ) {
+										choice = KEY_HANGUL;
+									} else if( choiceStr == L"junja" ) {
+										choice = KEY_JUNJA;
+									} else if( choiceStr == L"final" ) {
+										choice = KEY_FINAL;
+									} else if( choiceStr == L"hanja" ) {
+										choice = KEY_HANJA;
+									} else if( choiceStr == L"kanji" ) {
+										choice = KEY_KANJI;
+									} else if( choiceStr == L"escape" ) {
+										choice = KEY_ESCAPE;
+									} else if( choiceStr == L"convert" ) {
+										choice = KEY_CONVERT;
+									} else if( choiceStr == L"nonconvert" ) {
+										choice = KEY_NONCONVERT;
+									} else if( choiceStr == L"accept" ) {
+										choice = KEY_ACCEPT;
+									} else if( choiceStr == L"modechange" ) {
+										choice = KEY_MODECHANGE;
+									} else if( choiceStr == L"space" ) {
+										choice = KEY_SPACE;
+									} else if( choiceStr == L"prior" ) {
+										choice = KEY_PRIOR;
+									} else if( choiceStr == L"next" ) {
+										choice = KEY_NEXT;
+									} else if( choiceStr == L"end" ) {
+										choice = KEY_END;
+									} else if( choiceStr == L"home" ) {
+										choice = KEY_HOME;
+									} else if( choiceStr == L"left" ) {
+										choice = KEY_LEFT;
+									} else if( choiceStr == L"up" ) {
+										choice = KEY_UP;
+									} else if( choiceStr == L"right" ) {
+										choice = KEY_RIGHT;
+									} else if( choiceStr == L"down" ) {
+										choice = KEY_DOWN;
+									} else if( choiceStr == L"select" ) {
+										choice = KEY_SELECT;
+									} else if( choiceStr == L"print" ) {
+										choice = KEY_PRINT;
+									} else if( choiceStr == L"execut" ) {
+										choice = KEY_EXECUT;
+									} else if( choiceStr == L"snapshot" ) {
+										choice = KEY_SNAPSHOT;
+									} else if( choiceStr == L"insert" ) {
+										choice = KEY_INSERT;
+									} else if( choiceStr == L"delete" ) {
+										choice = KEY_DELETE;
+									} else if( choiceStr == L"help" ) {
+										choice = KEY_HELP;
+									} else if( choiceStr == L"key_0" ) {
+										choice = KEY_KEY_0;
+									} else if( choiceStr == L"key_1" ) {
+										choice = KEY_KEY_1;
+									} else if( choiceStr == L"key_2" ) {
+										choice = KEY_KEY_2;
+									} else if( choiceStr == L"key_3" ) {
+										choice = KEY_KEY_3;
+									} else if( choiceStr == L"key_4" ) {
+										choice = KEY_KEY_4;
+									} else if( choiceStr == L"key_5" ) {
+										choice = KEY_KEY_5;
+									} else if( choiceStr == L"key_6" ) {
+										choice = KEY_KEY_6;
+									} else if( choiceStr == L"key_7" ) {
+										choice = KEY_KEY_7;
+									} else if( choiceStr == L"key_8" ) {
+										choice = KEY_KEY_8;
+									} else if( choiceStr == L"key_9" ) {
+										choice = KEY_KEY_9;
+									} else if( choiceStr == L"key_a" ) {
+										choice = KEY_KEY_A;
+									} else if( choiceStr == L"key_b" ) {
+										choice = KEY_KEY_B;
+									} else if( choiceStr == L"key_c" ) {
+										choice = KEY_KEY_C;
+									} else if( choiceStr == L"key_d" ) {
+										choice = KEY_KEY_D;
+									} else if( choiceStr == L"key_e" ) {
+										choice = KEY_KEY_E;
+									} else if( choiceStr == L"key_f" ) {
+										choice = KEY_KEY_F;
+									} else if( choiceStr == L"key_g" ) {
+										choice = KEY_KEY_G;
+									} else if( choiceStr == L"key_h" ) {
+										choice = KEY_KEY_H;
+									} else if( choiceStr == L"key_i" ) {
+										choice = KEY_KEY_I;
+									} else if( choiceStr == L"key_j" ) {
+										choice = KEY_KEY_J;
+									} else if( choiceStr == L"key_k" ) {
+										choice = KEY_KEY_K;
+									} else if( choiceStr == L"key_l" ) {
+										choice = KEY_KEY_L;
+									} else if( choiceStr == L"key_m" ) {
+										choice = KEY_KEY_M;
+									} else if( choiceStr == L"key_n" ) {
+										choice = KEY_KEY_N;
+									} else if( choiceStr == L"key_o" ) {
+										choice = KEY_KEY_O;
+									} else if( choiceStr == L"key_p" ) {
+										choice = KEY_KEY_P;
+									} else if( choiceStr == L"key_q" ) {
+										choice = KEY_KEY_Q;
+									} else if( choiceStr == L"key_r" ) {
+										choice = KEY_KEY_R;
+									} else if( choiceStr == L"key_s" ) {
+										choice = KEY_KEY_S;
+									} else if( choiceStr == L"key_t" ) {
+										choice = KEY_KEY_T;
+									} else if( choiceStr == L"key_u" ) {
+										choice = KEY_KEY_U;
+									} else if( choiceStr == L"key_v" ) {
+										choice = KEY_KEY_V;
+									} else if( choiceStr == L"key_w" ) {
+										choice = KEY_KEY_W;
+									} else if( choiceStr == L"key_x" ) {
+										choice = KEY_KEY_X;
+									} else if( choiceStr == L"key_y" ) {
+										choice = KEY_KEY_Y;
+									} else if( choiceStr == L"key_z" ) {
+										choice = KEY_KEY_Z;
+									} else if( choiceStr == L"lwin" ) {
+										choice = KEY_LWIN;
+									} else if( choiceStr == L"rwin" ) {
+										choice = KEY_RWIN;
+									} else if( choiceStr == L"apps" ) {
+										choice = KEY_APPS;
+									} else if( choiceStr == L"sleep" ) {
+										choice = KEY_SLEEP;
+									} else if( choiceStr == L"numpad0" ) {
+										choice = KEY_NUMPAD0;
+									} else if( choiceStr == L"numpad1" ) {
+										choice = KEY_NUMPAD1;
+									} else if( choiceStr == L"numpad2" ) {
+										choice = KEY_NUMPAD2;
+									} else if( choiceStr == L"numpad3" ) {
+										choice = KEY_NUMPAD3;
+									} else if( choiceStr == L"numpad4" ) {
+										choice = KEY_NUMPAD4;
+									} else if( choiceStr == L"numpad5" ) {
+										choice = KEY_NUMPAD5;
+									} else if( choiceStr == L"numpad6" ) {
+										choice = KEY_NUMPAD6;
+									} else if( choiceStr == L"numpad7" ) {
+										choice = KEY_NUMPAD7;
+									} else if( choiceStr == L"numpad8" ) {
+										choice = KEY_NUMPAD8;
+									} else if( choiceStr == L"numpad9" ) {
+										choice = KEY_NUMPAD9;
+									} else if( choiceStr == L"multiply" ) {
+										choice = KEY_MULTIPLY;
+									} else if( choiceStr == L"add" ) {
+										choice = KEY_ADD;
+									} else if( choiceStr == L"separator" ) {
+										choice = KEY_SEPARATOR;
+									} else if( choiceStr == L"subtract" ) {
+										choice = KEY_SUBTRACT;
+									} else if( choiceStr == L"decimal" ) {
+										choice = KEY_DECIMAL;
+									} else if( choiceStr == L"divide" ) {
+										choice = KEY_DIVIDE;
+									} else if( choiceStr == L"f1" ) {
+										choice = KEY_F1;
+									} else if( choiceStr == L"f2" ) {
+										choice = KEY_F2;
+									} else if( choiceStr == L"f3" ) {
+										choice = KEY_F3;
+									} else if( choiceStr == L"f4" ) {
+										choice = KEY_F4;
+									} else if( choiceStr == L"f5" ) {
+										choice = KEY_F5;
+									} else if( choiceStr == L"f6" ) {
+										choice = KEY_F6;
+									} else if( choiceStr == L"f7" ) {
+										choice = KEY_F7;
+									} else if( choiceStr == L"f8" ) {
+										choice = KEY_F8;
+									} else if( choiceStr == L"f9" ) {
+										choice = KEY_F9;
+									} else if( choiceStr == L"f10" ) {
+										choice = KEY_F10;
+									} else if( choiceStr == L"f11" ) {
+										choice = KEY_F11;
+									} else if( choiceStr == L"f12" ) {
+										choice = KEY_F12;
+									} else if( choiceStr == L"f13" ) {
+										choice = KEY_F13;
+									} else if( choiceStr == L"f14" ) {
+										choice = KEY_F14;
+									} else if( choiceStr == L"f15" ) {
+										choice = KEY_F15;
+									} else if( choiceStr == L"f16" ) {
+										choice = KEY_F16;
+									} else if( choiceStr == L"f17" ) {
+										choice = KEY_F17;
+									} else if( choiceStr == L"f18" ) {
+										choice = KEY_F18;
+									} else if( choiceStr == L"f19" ) {
+										choice = KEY_F19;
+									} else if( choiceStr == L"f20" ) {
+										choice = KEY_F20;
+									} else if( choiceStr == L"f21" ) {
+										choice = KEY_F21;
+									} else if( choiceStr == L"f22" ) {
+										choice = KEY_F22;
+									} else if( choiceStr == L"f23" ) {
+										choice = KEY_F23;
+									} else if( choiceStr == L"f24" ) {
+										choice = KEY_F24;
+									} else if( choiceStr == L"numlock" ) {
+										choice = KEY_NUMLOCK;
+									} else if( choiceStr == L"scroll" ) {
+										choice = KEY_SCROLL;
+									} else if( choiceStr == L"lshift" ) {
+										choice = KEY_LSHIFT;
+									} else if( choiceStr == L"rshift" ) {
+										choice = KEY_RSHIFT;
+									} else if( choiceStr == L"lcontrol" ) {
+										choice = KEY_LCONTROL;
+									} else if( choiceStr == L"rcontrol" ) {
+										choice = KEY_RCONTROL;
+									} else if( choiceStr == L"lmenu" ) {
+										choice = KEY_LMENU;
+									} else if( choiceStr == L"rmenu" ) {
+										choice = KEY_RMENU;
+									} else if( choiceStr == L"plus" ) {
+										choice = KEY_PLUS;
+									} else if( choiceStr == L"comma" ) {
+										choice = KEY_COMMA;
+									} else if( choiceStr == L"minus" ) {
+										choice = KEY_MINUS;
+									} else if( choiceStr == L"period" ) {
+										choice = KEY_PERIOD;
+									} else if( choiceStr == L"oem_1" ) {
+										choice = KEY_OEM_1;
+									} else if( choiceStr == L"oem_2" ) {
+										choice = KEY_OEM_2;
+									} else if( choiceStr == L"oem_3" ) {
+										choice = KEY_OEM_3;
+									} else if( choiceStr == L"oem_4" ) {
+										choice = KEY_OEM_4;
+									} else if( choiceStr == L"oem_5" ) {
+										choice = KEY_OEM_5;
+									} else if( choiceStr == L"oem_6" ) {
+										choice = KEY_OEM_6;
+									} else if( choiceStr == L"oem_7" ) {
+										choice = KEY_OEM_7;
+									} else if( choiceStr == L"oem_8" ) {
+										choice = KEY_OEM_8;
+									} else if( choiceStr == L"oem_ax" ) {
+										choice = KEY_OEM_AX;
+									} else if( choiceStr == L"oem_102" ) {
+										choice = KEY_OEM_102;
+									} else if( choiceStr == L"oem_clear" ) {
+										choice = KEY_OEM_CLEAR;
+									} else if( choiceStr == L"attn" ) {
+										choice = KEY_ATTN;
+									} else if( choiceStr == L"crsel" ) {
+										choice = KEY_CRSEL;
+									} else if( choiceStr == L"exsel" ) {
+										choice = KEY_EXSEL;
+									} else if( choiceStr == L"ereof" ) {
+										choice = KEY_EREOF;
+									} else if( choiceStr == L"play" ) {
+										choice = KEY_PLAY;
+									} else if( choiceStr == L"zoom" ) {
+										choice = KEY_ZOOM;
+									} else if( choiceStr == L"pa1" ) {
+										choice = KEY_PA1;
+									} else {
+										std::wcerr << L"Unrecognized key " << choiceStr << L". Using space bar instead." << std::endl;
+										choice = KEY_SPACE;
+									}
+
+									keyMap.back().setKey( choice );
+								} else {
+									if( debug ) {
+										std::wcout << L"choiceStr before: " << choiceStr;
+									}
+									choiceStr = choiceStr.substr( 5, choiceStr.length() - 5 );
+									if( debug ) {
+										std::wcout << L" and after: " << choiceStr << std::endl;
+									}
+
+									if( choiceStr == L"wheelup" ) {
+										keyMap.back().setMouseWheelUp( true );
+										keyMap.back().setMouseEvent( EMIE_MOUSE_WHEEL );
+									} else if( choiceStr == L"wheeldown" ) {
+										keyMap.back().setMouseWheelUp( false );
+										keyMap.back().setMouseEvent( EMIE_MOUSE_WHEEL );
+									} else if( choiceStr == L"leftdown" ) {
+										keyMap.back().setMouseEvent( EMIE_LMOUSE_PRESSED_DOWN );
+									} else if( choiceStr == L"rightdown" ) {
+										keyMap.back().setMouseEvent( EMIE_RMOUSE_PRESSED_DOWN );
+									} else if( choiceStr == L"middledown" ) {
+										keyMap.back().setMouseEvent( EMIE_MMOUSE_PRESSED_DOWN );
+									} else if( choiceStr == L"leftup" ) {
+										keyMap.back().setMouseEvent( EMIE_LMOUSE_LEFT_UP );
+									} else if( choiceStr == L"rightup" ) {
+										keyMap.back().setMouseEvent( EMIE_RMOUSE_LEFT_UP );
+									} else if( choiceStr == L"middleup" ) {
+										keyMap.back().setMouseEvent( EMIE_MMOUSE_LEFT_UP );
+									} else if( choiceStr == L"moved" ) {
+										keyMap.back().setMouseEvent( EMIE_MOUSE_MOVED );
+									} else if( choiceStr == L"leftdoubleclick" ) {
+										keyMap.back().setMouseEvent( EMIE_LMOUSE_DOUBLE_CLICK );
+									} else if( choiceStr == L"rightdoubleclick" ) {
+										keyMap.back().setMouseEvent( EMIE_RMOUSE_DOUBLE_CLICK );
+									} else if( choiceStr == L"middledoubleclick" ) {
+										keyMap.back().setMouseEvent( EMIE_MMOUSE_DOUBLE_CLICK );
+									} else if( choiceStr == L"lefttripleclick" ) {
+										keyMap.back().setMouseEvent( EMIE_LMOUSE_TRIPLE_CLICK );
+									} else if( choiceStr == L"righttripleclick" ) {
+										keyMap.back().setMouseEvent( EMIE_RMOUSE_TRIPLE_CLICK );
+									} else if( choiceStr == L"middletripleclick" ) {
+										keyMap.back().setMouseEvent( EMIE_MMOUSE_TRIPLE_CLICK );
+									}
+								}
 
 								if( preference == L"menu" ) {
 									keyMap.back().setAction(L'm');
@@ -2758,6 +2840,10 @@ void GameManager::setControls() {
 									} else {
 										keyMap.pop_back();
 									}
+								} else if( preference == L"volumeup" ) {
+									keyMap.back().setAction(L'^');
+								} else if( preference == L"volumedown" ) {
+									keyMap.back().setAction(L'v');
 								}
 							} catch( std::exception e ) {
 								std::wcerr << L"Error in GameManager::setControls(): " << e.what() << std::endl;
