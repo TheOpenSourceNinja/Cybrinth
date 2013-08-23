@@ -96,6 +96,16 @@ bool GameManager::allHumansAtGoal() {
 
 		}
 
+		if( debug ) {
+			std::wcout << L"allHumansAtGoal(): returning ";
+			if( result ) {
+				std::wcout << L"true";
+			} else {
+				std::wcout << L"false";
+			}
+			std::wcout << std::endl;
+		}
+
 		return result;
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::allHumansAtGoal(): " << e.what() << std::endl;
@@ -644,6 +654,7 @@ GameManager::GameManager() {
 			for( uint_fast8_t i = 0; i < numBots; ++i ) {
 				bot.at( i ).setPlayer( numPlayers - ( i + 1 ) ) ;
 				player.at( bot.at( i ).getPlayer() ).isHuman = false;
+				bot.at( i ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this );
 			}
 		}
 
@@ -966,10 +977,9 @@ void GameManager::loadMusicFont() {
 }
 
 /**
- * Loads the music font.
+ * Loads the next song on the list.
  * Arguments: None.
  * Returns: Nothing.
- * Like loadTipFont() below, this guesses a good font size, then repeatedly adjusts the size and reloads the font until everything fits.
  */
 void GameManager::loadNextSong() {
 	try {
@@ -1336,6 +1346,9 @@ void GameManager::newMaze() {
 		mazeManager.makeRandomLevel();
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
+		for( uint_least8_t b = 0; b < numBots; ++b ) {
+			bot.at( b ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this );
+		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::newMaze(): " << e.what() << std::endl;
 	}
@@ -1353,6 +1366,9 @@ void GameManager::newMaze( boost::filesystem::path src ) {
 		mazeManager.loadFromFile( src );
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
+		for( uint_least8_t b = 0; b < numBots; ++b ) {
+			bot.at( b ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this );
+		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::newMaze(): " << e.what() << std::endl;
 	}
@@ -2204,7 +2220,7 @@ int GameManager::run() {
 					//It's the bots' turn to move now.
 					if( !( showingMenu || showingLoadingScreen ) && numBots > 0 ) {
 						for( uint_fast8_t i = 0; i < numBots; ++i ) {
-							if( debug || allHumansAtGoal() || bot.at( i ).lastTimeMoved < timer->getRealTime() - bot.at( i ).movementDelay ) {
+							if( !bot.at( i ).atGoal() && ( allHumansAtGoal() || bot.at( i ).doneWaiting() || debug ) ) {
 								bot.at( i ).move();
 							}
 						}
@@ -2726,9 +2742,9 @@ void GameManager::setControls() {
 								keyMap.back().setKey( choice );
 
 								if( preference == L"menu" ) {
-									keyMap.back().setAction('m');
+									keyMap.back().setAction(L'm');
 								} else if( preference == L"screenshot" ) {
-									keyMap.back().setAction('s');
+									keyMap.back().setAction(L's');
 								} else if( preference.substr( 0, 6 ) == L"player" ) {
 									preference = preference.substr( 7 );
 									std::wstring playerNumStr = boost::algorithm::trim_copy( preference.substr( 0, preference.find( L' ' ) ) );
@@ -2737,7 +2753,7 @@ void GameManager::setControls() {
 
 									if( playerNum < numPlayers ) {
 										keyMap.back().setPlayer( playerNum );
-										wchar_t action = actionStr[ 0 ];
+										wchar_t action = actionStr.at( 0 );
 										keyMap.back().setAction( action );
 									} else {
 										keyMap.pop_back();

@@ -25,6 +25,21 @@ AI::AI() {
 	}
 }
 
+bool AI::atGoal() {
+	try {
+		core::position2d< uint_least8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
+		Goal* goal = gm->getGoal();
+		if( currentPosition.X == goal->getX() && currentPosition.Y == goal->getY() ) {
+			return true;
+		} else {
+			return false;
+		}
+	} catch( std::exception e ) {
+		std::wcout << "Error in AI::atGoal(): " << e.what() << std::endl;
+		return true;
+	}
+}
+
 void AI::setPlayer( uint_least8_t newPlayer ) {
 	try {
 		controlsPlayer = newPlayer;
@@ -112,6 +127,19 @@ bool AI::alreadyVisited( core::position2d< uint_least8_t > position ) {
 		return result;
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in AI::alreadyVisited(): " << e.what() << std::endl;
+		return false;
+	}
+}
+
+bool AI::doneWaiting() {
+	try {
+		if( lastTimeMoved < gm->timer->getRealTime() - movementDelay ) {
+			return true;
+		} else {
+			return false;
+		}
+	} catch( std::exception e ) {
+		std::wcout << L"Error in AI::doneWaiting(): " << e.what() << std::endl;
 		return false;
 	}
 }

@@ -46,6 +46,9 @@
 		<Linker>
 			<Add directory="$(Boost)/lib" />
 		</Linker>
+		<Unit filename="controls.cfg">
+			<Option target="non-building files" />
+		</Unit>
 		<Unit filename="credits.txt">
 			<Option target="non-building files" />
 		</Unit>

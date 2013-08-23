@@ -28,8 +28,10 @@ class AI {
 		void setPlayer( uint_least8_t newPlayer );
 		void setup( MazeCell ** newMaze, uint_least8_t newCols, uint_least8_t newRows,  GameManager * newGM ); //Provides the AI with whatever info it needs to work.
 		void move(); //Needs to call GameManager's movePlayerOnX and movePlayerOnY functions.
+		bool doneWaiting();
 		void allKeysFound();
-		uint_least16_t lastTimeMoved;
+		bool atGoal();
+		uint_least32_t lastTimeMoved;
 		uint_least8_t getPlayer();
 		uint_least16_t movementDelay; //How long to delay between movements
 	protected:
