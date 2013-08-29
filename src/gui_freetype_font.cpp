@@ -12,7 +12,7 @@
 
 #include "gui_freetype_font.h"
 
-#if COMPILE_WITH_FREETYPE
+#if COMPILE_WITH_FREETYPE //TODO: Uncomment this before compiling!
 
 #include <cassert>
 #include "Integers.h"

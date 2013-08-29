@@ -21,7 +21,7 @@
 
 #include "Integers.h"
 #include <ft2build.h>
-#include <freetype/freetype.h>
+#include FT_FREETYPE_H
 #include <irrlicht.h>
 
 class CGUITTFace : public irr::IReferenceCounted {

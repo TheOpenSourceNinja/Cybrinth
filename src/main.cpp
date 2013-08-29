@@ -15,11 +15,12 @@ int main() {
 	std::wcout << L"Now starting " << PACKAGE_STRING << L". Please report bugs to " << PACKAGE_BUGREPORT << L". Enjoy!" << std::endl;
 	try {
 		GameManager* gm = new GameManager();
-		int returnValue = gm->run();
+		int exitValue = gm->run();
 		delete gm;
-		return returnValue;
+		exit( exitValue );
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error caught by main(): " << e.what() << std::endl;
-		return -99;
+		exit( EXIT_FAILURE );
 	}
+	return EXIT_FAILURE;
 }

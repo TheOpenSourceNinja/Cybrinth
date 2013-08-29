@@ -44,26 +44,19 @@
 
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
 //TODO: Find or record clock ticking sound for use with various items
-//TODO: Send on connect: random seed, keys and locations, locks and locations
 //TODO: Get multiplayer working online
 //TODO: Add AI. Two difficulty settings ('already knows the solution' and 'finds the solution as it plays') and any solving algorithms I can think of (depth-first and breadth-first search)
 //TODO: Possible idea: Hide parts of the maze that are inaccessible due to locks.
 //TODO: Possible idea: Hide parts of the maze not seen yet (seen means line-of-sight to any visited cell)
 //TODO: Add shader to simulate old monitor?
 //TODO: Add more backgrounds.
-//TODO: Consider adding stats (estimated difficulty of maze, number of steps taken, number of cells backtracked, etc)
-//TODO: Add a loading screen between maps. Display pro tips on loading screen. Possibly display player stats too.
-//TODO: Add try/catch blocks around each function
-//TODO: See if there's a way to tell if types are defined. We want to be able to compile on systems that don't have optional types.
-//TODO: Throw errors.
+//TODO: Add stats (estimated difficulty of maze, number of steps taken, number of cells backtracked, etc) to loading screen.
 
 
 using namespace irr;
 
 /**
  * Places the menu options at the correct locations on screen.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::adjustMenu() {
 	uint_fast8_t numMenuOptions = 5;
@@ -76,7 +69,6 @@ void GameManager::adjustMenu() {
 
 /**
  * Figures out which players are human, then figures out whether they're all at the goal.
- * Arguments: None.
  * Returns: True if all humans are at the goal, false otherwise.
  */
 bool GameManager::allHumansAtGoal() {
@@ -110,16 +102,6 @@ bool GameManager::allHumansAtGoal() {
 
 		}
 
-		if( debug ) {
-			std::wcout << L"allHumansAtGoal(): returning ";
-			if( result ) {
-				std::wcout << L"true";
-			} else {
-				std::wcout << L"false";
-			}
-			std::wcout << std::endl;
-		}
-
 		return result;
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::allHumansAtGoal(): " << e.what() << std::endl;
@@ -134,80 +116,84 @@ bool GameManager::allHumansAtGoal() {
 * Returns: Whether or not the event was handled.
 */
 bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const SEvent& event ) {
-	switch( keyMap.at( k ).getAction() ) {
-		case L'm': {
-			showingMenu = true;
-			return true;
-			break;
-		}
-		case L's': {
-			takeScreenShot();
-			return true;
-			break;
-		}
-		case L'^': {
-			if( event.MouseInput.Wheel > 0 ) {
-				musicVolume += 5;
-
-				if( musicVolume > 100 ) {
-					musicVolume = 100;
-				}
-
-				Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+	try {
+		switch( keyMap.at( k ).getAction() ) {
+			case L'm': {
+				showingMenu = true;
 				return true;
+				break;
 			}
-			break;
-		}
-		case L'v': {
-			if( event.MouseInput.Wheel <= 0 ) {
-				if( musicVolume >= 5 ) {
-					musicVolume -= 5;
-				} else {
-					musicVolume = 0;
-				}
-
-				Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+			case L's': {
+				takeScreenShot();
 				return true;
+				break;
 			}
-			break;
-		}
-		default: {
-			bool ignoreKey = false;
-			for( uint_fast8_t b = 0; !ignoreKey && b < numBots; b++ ) { //Ignore controls that affect bots
-				if( keyMap.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
-					ignoreKey = true;
-				}
-			}
+			case L'^': {
+				if( event.MouseInput.Wheel > 0 ) {
+					musicVolume += 5;
 
-			if( !ignoreKey ) {
-				switch( keyMap.at( k ).getAction() ) {
-					case L'u': {
-						movePlayerOnY( keyMap.at( k ).getPlayer(), -1);
-						return true;
-						break;
+					if( musicVolume > 100 ) {
+						musicVolume = 100;
 					}
-					case L'd': {
-						movePlayerOnY( keyMap.at( k ).getPlayer(), 1);
-						return true;
-						break;
+
+					Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+					return true;
+				}
+				break;
+			}
+			case L'v': {
+				if( event.MouseInput.Wheel <= 0 ) {
+					if( musicVolume >= 5 ) {
+						musicVolume -= 5;
+					} else {
+						musicVolume = 0;
 					}
-					case L'r': {
-						movePlayerOnX( keyMap.at( k ).getPlayer(), 1);
-						return true;
-						break;
-					}
-					case L'l': {
-						movePlayerOnX( keyMap.at( k ).getPlayer(), -1);
-						return true;
-						break;
-					}
-					default: {
-						throw std::wstring( L"Unrecognized key action: " ) + keyMap.at( k ).getAction();
+
+					Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+					return true;
+				}
+				break;
+			}
+			default: {
+				bool ignoreKey = false;
+				for( uint_fast8_t b = 0; !ignoreKey && b < numBots; b++ ) { //Ignore controls that affect bots
+					if( keyMap.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
+						ignoreKey = true;
 					}
 				}
+
+				if( !ignoreKey ) {
+					switch( keyMap.at( k ).getAction() ) {
+						case L'u': {
+							movePlayerOnY( keyMap.at( k ).getPlayer(), -1);
+							return true;
+							break;
+						}
+						case L'd': {
+							movePlayerOnY( keyMap.at( k ).getPlayer(), 1);
+							return true;
+							break;
+						}
+						case L'r': {
+							movePlayerOnX( keyMap.at( k ).getPlayer(), 1);
+							return true;
+							break;
+						}
+						case L'l': {
+							movePlayerOnX( keyMap.at( k ).getPlayer(), -1);
+							return true;
+							break;
+						}
+						default: {
+							throw std::wstring( L"Unrecognized key action: " ) + keyMap.at( k ).getAction();
+						}
+					}
+				}
+				break;
 			}
-			break;
 		}
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in GameManager::doEventActions(): " << e.what() << std::endl;
 	}
 
 	return false;
@@ -215,8 +201,6 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 
 /**
  * Draws everything onto the screen. Calls drawLoadingScreen(), drawBackground(), and the draw functions of objects.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::drawAll() {
 	try {
@@ -410,8 +394,6 @@ void GameManager::drawAll() {
 
 /**
  * Draws background animations. Assumes that driver->beginScene() has already been called.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::drawBackground() {
 	try {
@@ -430,8 +412,6 @@ void GameManager::drawBackground() {
 
 /**
  * Draws the loading screen. Assumes that driver->beginScene() has already been called.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::drawLoadingScreen() {
 	try {
@@ -469,10 +449,8 @@ void GameManager::drawLoadingScreen() {
 
 /**
  * This object's destructor. Destroys stuff.
- * Arguments: None.
- * Returns: Nothing.
+ * I... am... DESTRUCTOOOOOOORRRRR!!!!!!!!!
  */
-//I... am... DESTRUCTOOOOOOORRRRR!!!!!!!!!
 GameManager::~GameManager() {
 	try {
 		driver->removeAllHardwareBuffers();
@@ -500,9 +478,7 @@ GameManager::~GameManager() {
 
 /**
  * This object's constructor. Does lots of very important stuff.
- * Arguments: None.
- * Returns: Nothing.
- * Since this constructor is so big, maybe some parts should be split off into separate functions.
+ * Since this constructor is so big, maybe some parts should be split off into separate functions for readability.
  */
 GameManager::GameManager() {
 	try {
@@ -524,6 +500,8 @@ GameManager::GameManager() {
 		antiAliasFonts = true;
 		currentProTip = 0;
 		sideDisplaySizeDenominator = 6; //What fraction of the screen's width is set aside for displaying text, statistics, etc. during play.
+		minWidth = 640;
+		minHeight = 480;
 
 		fontFile = "";
 		boost::filesystem::recursive_directory_iterator end;
@@ -550,8 +528,13 @@ GameManager::GameManager() {
 
 		setControls();
 
-		if( fullscreen && !allowSmallSize ) {
-			windowSize = device->getVideoModeList()->getDesktopResolution();
+		if( fullscreen ) {
+			video::IVideoModeList* vmList = device->getVideoModeList();
+			if( allowSmallSize ) {
+				windowSize = vmList->getVideoModeResolution( core::dimension2d< u32 >( 1, 1 ), device->getVideoModeList()->getDesktopResolution() );
+			} else {
+				windowSize = vmList->getVideoModeResolution( core::dimension2d< u32 >( minWidth, minHeight ), device->getVideoModeList()->getDesktopResolution() );
+			}
 		}
 
 		viewportSize.set( windowSize.Width - ( windowSize.Width / sideDisplaySizeDenominator ), windowSize.Height - 1 );
@@ -802,7 +785,6 @@ GameManager::GameManager() {
 
 /**
  * Lets other objects know whether we're in debug mode.
- * Arguments: None.
  * Returns: True if debug is true, false otherwise.
  */
 bool GameManager::getDebugStatus() {
@@ -816,7 +798,6 @@ bool GameManager::getDebugStatus() {
 
 /**
  * Lets other objects get a pointer to the goal, perhaps to get its location.
- * Arguments: None.
  * Returns: A pointer to the goal object, or NULL if an exception is caught.
  */
 Goal* GameManager::getGoal() {
@@ -830,7 +811,6 @@ Goal* GameManager::getGoal() {
 
 /**
  * Lets other objects get a pointer to the maze manager, perhaps to get the maze.
- * Arguments: None.
  * Returns: A pointer to the mazeManager object, or NULL if an exception is caught.
  */
 MazeManager* GameManager::getMazeManager() {
@@ -853,8 +833,7 @@ Player* GameManager::getPlayer( uint_least8_t p ) {
 		if( p < numPlayers ) {
 			return &player.at( p );
 		} else {
-			std::wstring e = L"Request for player (" + stringConverter.toStdWString( p ) + L") >= numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
-			throw( e );
+			throw( std::wstring( L"Request for player (" ) + stringConverter.toStdWString( p ) + L") >= numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")" );
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::getPlayer(): " << e.what() << std::endl;
@@ -867,8 +846,6 @@ Player* GameManager::getPlayer( uint_least8_t p ) {
 
 /**
  * Loads fonts. Calls loadMusicFont() and loadTipFont().
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::loadFonts() {
 	try {
@@ -1002,10 +979,7 @@ void GameManager::loadFonts() {
 }
 
 /**
- * Loads the music font.
- * Arguments: None.
- * Returns: Nothing.
- * Like loadTipFont() below, this guesses a good font size, then repeatedly adjusts the size and reloads the font until everything fits.
+ * Loads the music font. Like loadTipFont() below, this guesses a good font size, then repeatedly adjusts the size and reloads the font until everything fits.
  */
 void GameManager::loadMusicFont() {
 	try {
@@ -1074,8 +1048,6 @@ void GameManager::loadMusicFont() {
 
 /**
  * Loads the next song on the list.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::loadNextSong() {
 	try {
@@ -1102,16 +1074,12 @@ void GameManager::loadNextSong() {
 		music = Mix_LoadMUS( currentMusic.c_str() ); //SDL Mixer does not support wstrings
 
 		if( music == NULL ) {
-			std::wstring e = L"Unable to load music file: ";
-			e += stringConverter.toStdWString( std::string( Mix_GetError() ) );
-			throw( e );
+			throw( std::wstring( L"Unable to load music file: " ) + stringConverter.toStdWString( Mix_GetError() ) );
 		} else {
 			int musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to *repeat* the music. -1 means infinite.
 
 			if( musicStatus == -1 ) {
-				std::wstring e = L"Unable to play music file: ";
-				e += stringConverter.toStdWString( Mix_GetError() );
-				throw( e );
+				throw( std::wstring( L"Unable to play music file: " ) + stringConverter.toStdWString( Mix_GetError() ) );
 			} else {
 				if( debug ) {
 					switch( Mix_GetMusicType( NULL ) ) {
@@ -1187,8 +1155,6 @@ void GameManager::loadNextSong() {
 
 /**
  * Loads "pro tips" from file proTips.txt if that file exists.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::loadProTips() {
 	try {
@@ -1241,10 +1207,7 @@ void GameManager::loadProTips() {
 }
 
 /**
- * Loads the tip font.
- * Arguments: None.
- * Returns: Nothing.
- * Guesses a size that will work for showing pro tips. Keeps adjusting the size and reloading the font until everything fits.
+ * Loads the tip font. Guesses a size that will work, keeps adjusting the size and reloading the font until everything fits.
  */
 void GameManager::loadTipFont() {
 	try {
@@ -1293,8 +1256,6 @@ void GameManager::loadTipFont() {
 
 /**
  * Finds all playable music files in the ./music folder and compiles them into a list. If ./music does not exist or is not a folder, it uses the parent path instead.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::makeMusicList() {
 	try {
@@ -1366,11 +1327,10 @@ void GameManager::makeMusicList() {
  * Arguments:
  * --- p: the player to move
  * --- direction: a signed integer representing the direction to move.
- * Returns: Nothing.
  */
 void GameManager::movePlayerOnX( uint_least8_t p, int_fast8_t direction ) {
 	try {
-		if( numPlayers > p ) {
+		if( numPlayers > p && mazeManager.cols > 0 ) {
 			if( direction < 0 ) {
 				if( player.at( p ).getX() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() == 'n' ) {
 					player.at( p ).moveX( -1 );
@@ -1380,6 +1340,11 @@ void GameManager::movePlayerOnX( uint_least8_t p, int_fast8_t direction ) {
 			}
 
 			network.sendPlayerPos( p, player.at( p ).getX(), player.at( p ).getY() );
+			if( player.at( p ).getX() >= mazeManager.cols ) {
+				throw L"Player "+ stringConverter.toStdWString( p ) + L"'s X (" + stringConverter.toStdWString( player.at( p ).getX() ) + L") is outside mazeManager's cols (" + stringConverter.toStdWString( mazeManager.cols ) + L").";
+			} else if( player.at( p ).getY() >= mazeManager.rows ) {
+				throw L"Player "+ stringConverter.toStdWString( p ) + L"'s Y (" + stringConverter.toStdWString( player.at( p ).getY() ) + L") is outside mazeManager's rows (" + stringConverter.toStdWString( mazeManager.rows ) + L").";
+			}
 			mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].visited = true;
 
 			if( player.at( p ).stepsTaken % 2 == 0 ) {
@@ -1393,6 +1358,8 @@ void GameManager::movePlayerOnX( uint_least8_t p, int_fast8_t direction ) {
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::movePlayerOnX(): " << e.what() << std::endl;
+	} catch( std::wstring e ) {
+		std::wcerr << L"Error in GameManager::movePlayerOnX(): " << e << std::endl;
 	}
 }
 
@@ -1401,11 +1368,10 @@ void GameManager::movePlayerOnX( uint_least8_t p, int_fast8_t direction ) {
  * Arguments:
  * --- p: the player to move
  * --- direction: a signed integer representing the direction to move.
- * Returns: Nothing.
  */
 void GameManager::movePlayerOnY( uint_least8_t p, int_fast8_t direction ) {
 	try {
-		if( numPlayers > p ) {
+		if( numPlayers > p && mazeManager.rows > 0 ) {
 			if( direction < 0 ) {
 				if( player.at( p ).getY() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() == 'n' ) {
 					player.at( p ).moveY( -1 );
@@ -1416,6 +1382,11 @@ void GameManager::movePlayerOnY( uint_least8_t p, int_fast8_t direction ) {
 
 			network.sendPlayerPos( p, player.at( p ).getX(), player.at( p ).getY() );
 			mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].visited = true;
+			if( player.at( p ).getX() >= mazeManager.cols ) {
+				throw L"Player "+ stringConverter.toStdWString( p ) + L"'s X (" + stringConverter.toStdWString( player.at( p ).getX() ) + L") is outside mazeManager's cols (" + stringConverter.toStdWString( mazeManager.cols ) + L").";
+			} else if( player.at( p ).getY() >= mazeManager.rows ) {
+				throw L"Player "+ stringConverter.toStdWString( p ) + L"'s Y (" + stringConverter.toStdWString( player.at( p ).getY() ) + L") is outside mazeManager's rows (" + stringConverter.toStdWString( mazeManager.rows ) + L").";
+			}
 
 			if( player.at( p ).stepsTaken % 2 == 0 ) {
 				mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorTwo() );
@@ -1433,8 +1404,6 @@ void GameManager::movePlayerOnY( uint_least8_t p, int_fast8_t direction ) {
 
 /**
  * Calls resetThings(), makes the maze manager create a random level, then adjusts cellWidth and cellHeight.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::newMaze() {
 	try {
@@ -1454,7 +1423,6 @@ void GameManager::newMaze() {
  * Calls resetThings(), makes the maze manager load a maze from a file, then adjusts cellWidth and cellHeight.
  * Arguments:
  * --- boost::filesystem::path src: the file from which to load the maze.
- * Returns: Nothing.
  */
 void GameManager::newMaze( boost::filesystem::path src ) {
 	try {
@@ -1551,18 +1519,17 @@ bool GameManager::OnEvent( const SEvent& event ) {
 					case USER_EVENT_WINDOW_RESIZE: {
 						windowSize.set( driver->getScreenSize().Width, driver->getScreenSize().Height );
 
-						///EXPERIMENTAL!
-						//TODO: Remove or finish experimental code
+						//TODO: Find a way to resize the window or set a minimum size
 						/*if (!allowSmallSize) {
 							bool sizeChanged = false;
 
-							if (windowSize.Height < 480) {
-								windowSize.Height = 480;
+							if (windowSize.Height < minHeight) {
+								windowSize.Height = minHeight;
 								sizeChanged = true;
 							}
 
-							if (windowSize.Width < 640) {
-								windowSize.Width = 640;
+							if (windowSize.Width < minWidth) {
+								windowSize.Width = minWidth;
 								sizeChanged = true;
 							}
 
@@ -1676,8 +1643,6 @@ bool GameManager::OnEvent( const SEvent& event ) {
 
 /**
  * Reads preferences from prefs.cfg. Sets defaults for any preference not found in the file. If the file does not exist, creates it.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::readPrefs() {
 	try {
@@ -1689,7 +1654,7 @@ void GameManager::readPrefs() {
 		bitsPerPixel = 8;
 		vsync = true;
 		driverType = video::EDT_OPENGL;
-		windowSize = core::dimension2d< uint_least16_t >( 640, 480 );
+		windowSize = core::dimension2d< uint_least16_t >( minWidth, minHeight );
 		allowSmallSize = false;
 		playMusic = true;
 		enableJoystick = false;
@@ -2169,8 +2134,6 @@ void GameManager::readPrefs() {
 
 /**
  * Resets miscellaneous stuff between mazes.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::resetThings() {
 	try {
@@ -2219,8 +2182,7 @@ void GameManager::resetThings() {
 
 /**
  * The game's main loop. Should only be called by main() in main.cpp
- * Arguments: None.
- * Returns: 0 if the game exits normally, -1 if an exception is caught.
+ * Returns: EXIT_SUCCESS if the game exits normally, EXIT_FAILURE if an exception is caught.
  */
 int GameManager::run() {
 	try {
@@ -2378,15 +2340,13 @@ int GameManager::run() {
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::run(): " << e.what() << std::endl;
-		return -1;
+		return EXIT_FAILURE;
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /**
  * Loads control settings from controls.cfg.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::setControls() {
 	try {
@@ -2464,6 +2424,7 @@ void GameManager::setControls() {
 								KeyMapping temp;
 								keyMap.push_back( temp );
 
+								//TODO: Possibly use Damerau–Levenshtein distances to account for spelling errors.
 								if( choiceStr.substr( 0, 5 ) != L"mouse" ) {
 									irr::EKEY_CODE choice;
 									//Is there some other way to do the following? Perhaps using a for loop?
@@ -2486,6 +2447,8 @@ void GameManager::setControls() {
 									} else if( choiceStr == L"clear" ) {
 										choice = KEY_CLEAR;
 									} else if( choiceStr == L"return" ) {
+										choice = KEY_RETURN;
+									} else if( choiceStr == L"enter" ) {
 										choice = KEY_RETURN;
 									} else if( choiceStr == L"shift" ) {
 										choice = KEY_SHIFT;
@@ -2872,8 +2835,6 @@ void GameManager::setControls() {
 
 /**
  * Randomly picks a background animation and does whatever it needs to do to set it up.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::setupBackground() {
 	try {
@@ -2933,8 +2894,6 @@ void GameManager::setupBackground() {
 
 /**
  * Sets showingLoadingScreen to true and timeStartedLoading to the current time, then calls drawLoadingScreen().
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::startLoadingScreen() {
 	try {
@@ -2948,8 +2907,6 @@ void GameManager::startLoadingScreen() {
 
 /**
  * Takes a screenshot and saves it to a dated png file.
- * Arguments: None.
- * Returns: Nothing.
  */
 void GameManager::takeScreenShot() {
 	try {

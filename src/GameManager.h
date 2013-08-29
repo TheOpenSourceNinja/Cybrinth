@@ -156,16 +156,19 @@ class GameManager : public IEventReceiver {
 
 
 		//unsigned 16-bit integers----------------------------------
-		uint_least16_t musicVolume;
-
-
-		//unsigned 16-bit integers----------------------------------
 		uint_least16_t bitsPerPixel;
 
 		uint_least16_t cellWidth;
 		uint_least16_t cellHeight;
 
 		uint_least16_t joystickChosen;
+
+		uint_least16_t musicVolume;
+
+
+		//unsigned 32-bit integers----------------------------------
+		uint_least32_t minWidth;
+		uint_least32_t minHeight;
 
 
 		//wide character strings----------------------------------
