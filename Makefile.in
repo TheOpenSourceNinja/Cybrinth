@@ -70,8 +70,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_cybrinth_OBJECTS = src/AI.$(OBJEXT) src/Collectable.$(OBJEXT) \
-	src/font_manager.$(OBJEXT) src/GameManager.$(OBJEXT) \
-	src/Goal.$(OBJEXT) src/gui_freetype_font.$(OBJEXT) \
+	src/FontManager.$(OBJEXT) src/GameManager.$(OBJEXT) \
+	src/Goal.$(OBJEXT) src/GUIFreetypeFont.$(OBJEXT) \
 	src/KeyMapping.$(OBJEXT) src/main.$(OBJEXT) \
 	src/MazeCell.$(OBJEXT) src/MazeManager.$(OBJEXT) \
 	src/MenuOption.$(OBJEXT) src/NetworkManager.$(OBJEXT) \
@@ -216,7 +216,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -std=c++0x $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS)
-cybrinth_SOURCES = src/AI.h src/AI.cpp src/Collectable.h src/Collectable.cpp src/colors.h src/font_manager.h src/font_manager.cpp src/GameManager.h src/GameManager.cpp src/Goal.h src/Goal.cpp src/gui_freetype_font.h src/gui_freetype_font.cpp src/KeyMapping.h src/KeyMapping.cpp src/main.cpp src/MazeCell.h src/MazeCell.cpp src/MazeManager.h src/MazeManager.cpp src/MenuOption.h src/MenuOption.cpp src/NetworkManager.h src/NetworkManager.cpp src/Object.h src/Object.cpp src/Player.h src/Player.cpp src/PlayerStart.h src/PlayerStart.cpp src/StringConverter.h src/StringConverter.cpp
+cybrinth_SOURCES = src/AI.h src/AI.cpp src/Collectable.h src/Collectable.cpp src/colors.h src/FontManager.h src/FontManager.cpp src/GameManager.h src/GameManager.cpp src/Goal.h src/Goal.cpp src/GUIFreetypeFont.h src/GUIFreetypeFont.cpp src/KeyMapping.h src/KeyMapping.cpp src/main.cpp src/MazeCell.h src/MazeCell.cpp src/MazeManager.h src/MazeManager.cpp src/MenuOption.h src/MenuOption.cpp src/NetworkManager.h src/NetworkManager.cpp src/Object.h src/Object.cpp src/Player.h src/Player.cpp src/PlayerStart.h src/PlayerStart.cpp src/StringConverter.h src/StringConverter.cpp
 cybrinth_LDADD = $(IRRLICHT_LIBS) $(BOOSTFILESYSTEM_LIBS) $(BOOSTSYSTEM_LIBS) $(DEPS_LIBS)
 all: all-am
 
@@ -305,12 +305,12 @@ src/$(DEPDIR)/$(am__dirstamp):
 src/AI.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/Collectable.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
-src/font_manager.$(OBJEXT): src/$(am__dirstamp) \
+src/FontManager.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/GameManager.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/Goal.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
-src/gui_freetype_font.$(OBJEXT): src/$(am__dirstamp) \
+src/GUIFreetypeFont.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/KeyMapping.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
@@ -339,6 +339,8 @@ mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f src/AI.$(OBJEXT)
 	-rm -f src/Collectable.$(OBJEXT)
+	-rm -f src/FontManager.$(OBJEXT)
+	-rm -f src/GUIFreetypeFont.$(OBJEXT)
 	-rm -f src/GameManager.$(OBJEXT)
 	-rm -f src/Goal.$(OBJEXT)
 	-rm -f src/KeyMapping.$(OBJEXT)
@@ -350,8 +352,6 @@ mostlyclean-compile:
 	-rm -f src/Player.$(OBJEXT)
 	-rm -f src/PlayerStart.$(OBJEXT)
 	-rm -f src/StringConverter.$(OBJEXT)
-	-rm -f src/font_manager.$(OBJEXT)
-	-rm -f src/gui_freetype_font.$(OBJEXT)
 	-rm -f src/main.$(OBJEXT)
 
 distclean-compile:
@@ -359,6 +359,8 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/AI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/Collectable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/FontManager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/GUIFreetypeFont.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/GameManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/Goal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/KeyMapping.Po@am__quote@
@@ -370,8 +372,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/Player.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/PlayerStart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/StringConverter.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/font_manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/gui_freetype_font.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/main.Po@am__quote@
 
 .cpp.o:
