@@ -70,6 +70,18 @@
 		<Unit filename="src/Collectable.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="src/FontManager.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/FontManager.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/GUIFreetypeFont.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/GUIFreetypeFont.h">
+			<Option target="cybrinth" />
+		</Unit>
 		<Unit filename="src/GameManager.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
@@ -140,18 +152,6 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/colors.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="src/font_manager.cpp">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="src/font_manager.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="src/gui_freetype_font.cpp">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="src/gui_freetype_font.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/main.cpp">

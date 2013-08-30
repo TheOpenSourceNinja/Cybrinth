@@ -10,10 +10,14 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "font_manager.h"
-#include "gui_freetype_font.h"
+#include "FontManager.h"
+#include "GUIFreetypeFont.h"
+#include "StringConverter.h"
+
 #include <irrlicht.h>
 #include <iostream>
+#include <algorithm/string.hpp>
+#include <filesystem/operations.hpp>
 
 FontManager::FontManager() {
 	try {
@@ -38,6 +42,34 @@ FontManager::~FontManager() {
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in FontManager::~FontManager(): " << e.what() << std::endl;
 	}
+}
+
+bool FontManager::canLoadFont( irr::core::stringw filename_ ) {
+	try {
+		CGUITTFace * face = new CGUITTFace;
+		if( face->load( filename_ ) ) {
+			face->drop();
+			return true;
+		} else {
+			face->drop();
+			return false;
+		}
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in FontManager::canLoadFont(): " << e.what() << std::endl;
+		return false;
+	}
+}
+
+bool FontManager::canLoadFont( boost::filesystem::path filename_ ) {
+	try {
+		if ( !is_directory( filename_ ) ) {
+			StringConverter sc;
+			return canLoadFont( sc.toIrrlichtStringW( filename_.wstring() ) );
+		}
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in FontManager::canLoadFont(): " << e.what() << std::endl;
+	}
+	return false;
 }
 
 irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, irr::core::stringw filename_, unsigned int size_, bool antiAlias_, bool transparency_ ) {
@@ -123,4 +155,3 @@ irr::core::stringw FontManager::MakeFontIdentifier( irr::core::stringw filename_
 		return s;
 	}
 }
-

@@ -23,7 +23,7 @@ StringConverter::StringConverter() {
 	}
 }
 
-irr::core::stringw StringConverter::toIrrlichtStringW( TagLib::wstring input ) {
+/*irr::core::stringw StringConverter::toIrrlichtStringW( TagLib::wstring input ) {
 	try {
 		TagLib::wstring::iterator it;
 		irr::core::stringw result;
@@ -37,9 +37,9 @@ irr::core::stringw StringConverter::toIrrlichtStringW( TagLib::wstring input ) {
 		irr::core::stringw s;
 		return s;
 	}
-}
+}*/
 
-/*irr::core::stringw StringConverter::toIrrlichtStringW( std::wstring input ) {
+irr::core::stringw StringConverter::toIrrlichtStringW( std::wstring input ) {
 	try {
 		std::wstring::iterator it;
 		irr::core::stringw result;
@@ -53,7 +53,7 @@ irr::core::stringw StringConverter::toIrrlichtStringW( TagLib::wstring input ) {
 		irr::core::stringw s;
 		return s;
 	}
-}*/
+}
 
 TagLib::wstring StringConverter::toTaglibWString ( irr::core::stringw input ) {
 	try {

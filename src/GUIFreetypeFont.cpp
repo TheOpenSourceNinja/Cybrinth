@@ -10,9 +10,9 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "gui_freetype_font.h"
+#include "GUIFreetypeFont.h"
 
-#if COMPILE_WITH_FREETYPE //TODO: Uncomment this before compiling!
+#if COMPILE_WITH_FREETYPE
 
 #include <cassert>
 #include "Integers.h"
@@ -66,12 +66,14 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 
 		FT_Face face = freetypeFont->TrueTypeFace->face;
 
-		FT_Set_Pixel_Sizes( face, 0, size );
+		if( FT_Set_Pixel_Sizes( face, 0, size ) ) {
+			throw( std::wstring( L"Cannot set pixel size to " + std::to_wstring( size ) ) );
+		}
 
 		if( size > freetypeFont->LargestGlyph.Height )
 			freetypeFont->LargestGlyph.Height = size;
 
-		if( !FT_Load_Glyph( face, idx_, FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP ) ) {
+		if( !FT_Load_Glyph( face, idx_, FT_LOAD_DEFAULT ) ) { //FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP ) ) {
 			FT_GlyphSlot glyph = face->glyph;
 			FT_Bitmap  bits;
 
@@ -161,7 +163,7 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 			}
 		}
 
-		if( !FT_Load_Glyph( face, idx_, FT_LOAD_NO_HINTING | FT_LOAD_RENDER | FT_LOAD_MONOCHROME ) ) {
+		if( !FT_Load_Glyph( face, idx_, FT_LOAD_DEFAULT | FT_LOAD_RENDER ) ) { //FT_LOAD_NO_HINTING | FT_LOAD_RENDER | FT_LOAD_MONOCHROME ) ) {
 			FT_GlyphSlot glyph = face->glyph;
 			FT_Bitmap bits = glyph->bitmap;
 			u8 *pt = bits.buffer;
@@ -232,8 +234,10 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 	//		freetypeFont->Driver->makeColorKeyTexture(tex16,video::SColor(0,0,0,0));
 			delete[] texd16;
 		}
-	} catch ( std::exception e ) {
+	} catch( std::exception e ) {
 		std::wcerr << L"Error in CGUITTGlyph::cache(): " << e.what() << std::endl;
+	} catch( std::wstring e ) {
+		std::wcerr << L"Error in CGUITTGlyph::cache(): " << e << std::endl;
 	}
 }
 
@@ -299,14 +303,14 @@ bool CGUITTFace::load( const irr::io::path& filename ) {
 	try {
 		if( !library ) {
 			if( FT_Init_FreeType( &library ) ) {
-				return	false;
+				return false;
 			}
 		}
 
-		core::stringc ansiFilename( filename ); // path can be anything but freetype can only work with ansi-filenames
+		core::stringc ansiFilename( filename ); // path can be anything but freetype can only work with ANSI filenames
 
 		if( FT_New_Face( library, ansiFilename.c_str(), 0, &face ) ) {
-			return	false;
+			return false;
 		}
 
 		return true;
@@ -381,11 +385,24 @@ bool CGUIFreetypeFont::attach( CGUITTFace *Face, u32 size ) {
 			Glyphs[i] = glyph;
 		}
 
-		// TODO: this is a workaround to get a probably ok height for getDimensions. So we check a few extreme characters which usually make trouble.
-		getGlyphByChar( L'A' );
+		// This is a workaround to get a probably ok height for getDimension. So we check a few extreme characters which usually make trouble.
+		// Workaround appears unneeded: getDimension calls getGlyphByChar on every character of its input string anyway.
+		/*getGlyphByChar( L'A' );
 		getGlyphByChar( L'g' );
 		getGlyphByChar( L'.' );
-		getGlyphByChar( L'(' );
+		getGlyphByChar( L'(' );*/
+
+		//A more thorough workaround than above, this checks the height of every character the font has.
+		/*FT_UInt index;
+		FT_ULong code;
+		FT_Get_First_Char( TrueTypeFace->face, &index );
+		while( index != 0 )
+		{
+			getGlyphByIndex( index );
+
+			// fetch next character from font face
+			code = FT_Get_Next_Char( TrueTypeFace->face, code, &index );
+		}*/
 
 		return	true;
 	} catch ( std::exception e ) {
@@ -422,6 +439,20 @@ u32 CGUIFreetypeFont::getGlyphByChar( wchar_t c ) const {
 	}
 }
 
+u32 CGUIFreetypeFont::getGlyphByIndex( u32 idx ) const {
+	try {
+		//u32 idx = FT_Get_Char_Index( TrueTypeFace->face, c );
+
+		if( idx < Glyphs.size() && !Glyphs[idx - 1]->cached )
+			Glyphs[idx - 1]->cache( idx, this );
+
+		return	idx;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in CGUIFreetypeFont::getGlyphByChar(): " << e.what() << std::endl;
+		return 0;
+	}
+}
+
 //! returns the dimension of a text
 core::dimension2d< u32 > CGUIFreetypeFont::getDimension( const wchar_t* text ) const {
 	try {
@@ -431,8 +462,9 @@ core::dimension2d< u32 > CGUIFreetypeFont::getDimension( const wchar_t* text ) c
 			dim.Width += getWidthFromCharacter( *p );
 		}
 
-		// TODO: The correct solution might be working with TrueTypeFace->height but I can't figure out how to use units_per_EM
+		// The correct solution might be working with TrueTypeFace->height but I can't figure out how to use units_per_EM
 		// even if I know which FT_Render_Mode I used. I'm sure there is some way to figure that out, but I have to give up for now.
+		// This works well enough as it is.
 		if( TrueTypeFace && LargestGlyph.Height > dim.Height )
 			dim.Height = LargestGlyph.Height;
 

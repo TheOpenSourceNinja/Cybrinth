@@ -506,7 +506,7 @@ GameManager::GameManager() {
 		fontFile = "";
 		boost::filesystem::recursive_directory_iterator end;
 		for( boost::filesystem::recursive_directory_iterator i(L"./"); i != end; ++i ) {
-			if( !is_directory( i->path() ) && boost::iequals( i->path().extension().generic_wstring(), L".ttf" ) ) { //Can we use formats other than TTF? What about identifying files without the use of extensions?
+			if( fontManager.canLoadFont( i->path() ) ) {
 				fontFile = i->path().c_str();
 				break;
 			}
@@ -863,7 +863,7 @@ void GameManager::loadFonts() {
 		uint_least32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
 
 		do { //Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
-			loadingFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+			loadingFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 			if( loadingFont != NULL ) {
 				fontDimensions = loadingFont->getDimension( loading.c_str() );
 				size -= 2;
@@ -873,7 +873,7 @@ void GameManager::loadFonts() {
 		size += 3;
 
 		do {
-			loadingFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+			loadingFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 			if( loadingFont != NULL ) {
 				fontDimensions = loadingFont->getDimension( loading.c_str() );
 				size -= 1;
@@ -894,7 +894,7 @@ void GameManager::loadFonts() {
 			if( debug ) {
 				std::wcout << L"About to load textFont in loop (size " << size << L")" << std::endl;
 			}
-			textFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+			textFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 			if( debug ) {
 				std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
 			}
@@ -916,7 +916,7 @@ void GameManager::loadFonts() {
 			if( debug ) {
 				std::wcout << L"About to load textFont in loop (size " << size << L")" << std::endl;
 			}
-			textFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+			textFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 			if( debug ) {
 				std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
 			}
@@ -943,7 +943,7 @@ void GameManager::loadFonts() {
 		size = ( windowSize.Width / sideDisplaySizeDenominator );
 
 		do {
-			clockFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+			clockFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 			if( clockFont != NULL ) {
 				fontDimensions = clockFont->getDimension( L"00:00:00" );
 				size -= 2;
@@ -953,7 +953,7 @@ void GameManager::loadFonts() {
 		size += 3;
 
 		do {
-			clockFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+			clockFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 			if( clockFont != NULL ) {
 				fontDimensions = clockFont->getDimension( L"00:00:00" );
 				size -= 1;
@@ -1016,7 +1016,7 @@ void GameManager::loadMusicFont() {
 			core::dimension2d< uint_fast32_t > titleDimensions;
 
 			do {
-				musicTagFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+				musicTagFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 				if( musicTagFont != NULL ) {
 					artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
 					albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
@@ -1028,7 +1028,7 @@ void GameManager::loadMusicFont() {
 			size += 3;
 
 			do {
-				musicTagFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+				musicTagFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 				if( musicTagFont != NULL ) {
 					artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
 					albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
@@ -1229,7 +1229,7 @@ void GameManager::loadTipFont() {
 		core::dimension2d<uint_fast32_t> tipDimensions;
 
 		do {
-			tipFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+			tipFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 			if( tipFont != NULL ) {
 				tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
 				size -= 2;
@@ -1239,7 +1239,7 @@ void GameManager::loadTipFont() {
 		size += 3;
 
 		do {
-			tipFont = fm.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+			tipFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 			if( tipFont != NULL ) {
 				tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
 				size -= 1;

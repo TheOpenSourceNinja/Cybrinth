@@ -16,9 +16,9 @@
 
 #include "AI.h"
 #include "Collectable.h"
-#include "font_manager.h"
+#include "FontManager.h"
 #include "Goal.h"
-#include "gui_freetype_font.h"
+#include "GUIFreetypeFont.h"
 #include "KeyMapping.h"
 #include "MazeManager.h"
 #include "MenuOption.h"
@@ -191,7 +191,7 @@ class GameManager : public IEventReceiver {
 
 		MenuOption exitGame;
 
-		FontManager fm;
+		FontManager fontManager;
 
 		std::vector< KeyMapping > keyMap;
 

@@ -1,4 +1,4 @@
-//This file downloaded from http://www.michaelzeilfelder.de/irrlicht.htm#TrueType. The copyright statement and license below do not apply to that original version, only to the modified version contained here.
+//This file originally downloaded from http://www.michaelzeilfelder.de/irrlicht.htm#TrueType. The copyright statement and license below do not apply to that original version, only to the modified version contained here.
 /**
  * Copyright © 2013 James Dearing.
  * This file is part of Cybrinth.
@@ -48,7 +48,7 @@ class CGUITTGlyph : public irr::IReferenceCounted {
 		bool cached;
 		void cache( irr::u32 idx_, const CGUIFreetypeFont * freetypeFont );
 
-		irr::u32 size;
+		irr::u32 size; //Character size in pixels
 		irr::u32 top;
 		irr::u32 left;
 		irr::u32 texw;
@@ -126,6 +126,7 @@ class CGUIFreetypeFont : public irr::gui::IGUIFont {
 	private:
 		irr::u32 getWidthFromCharacter( wchar_t c ) const;
 		irr::u32 getGlyphByChar( wchar_t c ) const;
+		irr::u32 getGlyphByIndex( irr::u32 idx ) const;
 		irr::video::IVideoDriver* Driver;
 		irr::core::array< CGUITTGlyph* > Glyphs;
 		CGUITTFace * TrueTypeFace;
