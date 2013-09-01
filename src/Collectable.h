@@ -22,10 +22,12 @@ class Collectable : public Object {
 	public:
 		Collectable();
 		virtual ~Collectable();
-		void setType( uint_least8_t );
+
+		void draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height );
 		uint_least8_t getType();
 		void loadTexture( irr::video::IVideoDriver* driver );
-		void draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height );
+		void reset();
+		void setType( uint_least8_t );
 	protected:
 	private:
 		uint_least8_t type;

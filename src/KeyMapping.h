@@ -22,7 +22,7 @@ class KeyMapping
 		/** Access action
 		 * \return The current value of action
 		 */
-		wchar_t getAction();
+		wchar_t getAction(); //TODO: Is there any way to use an enumerated type here rather than a character?
 		/** Set action
 		 * \param val New value to set
 		 */

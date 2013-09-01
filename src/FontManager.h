@@ -15,6 +15,8 @@
 
 #include "Integers.h"
 
+#define BOOST_FILESYSTEM_NO_DEPRECATED //Recommended by the Boost filesystem library documentation to prevent us from using functions which will be removed in later versions
+
 #include <map>
 #include <irrlicht.h>
 #include <filesystem/path.hpp>

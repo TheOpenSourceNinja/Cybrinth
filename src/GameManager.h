@@ -40,14 +40,18 @@ using namespace irr;
 class GameManager : public IEventReceiver {
 	public:
 		//Functions----------------------------------
+		GameManager();
+		virtual ~GameManager();
+
 		void drawAll();
 		void drawLoadingScreen();
 
-		GameManager();
-		virtual ~GameManager();
+		Collectable* getCollectable( uint_least8_t collectable );
 		bool getDebugStatus();
-		MazeManager* getMazeManager();
 		Goal* getGoal();
+		Collectable* getKey( uint_least8_t key );
+		MazeManager* getMazeManager();
+		uint_least8_t getNumLocks();
 		Player* getPlayer( uint_least8_t p );
 
 		void movePlayerOnX( uint_least8_t p, int_fast8_t direction );
@@ -76,13 +80,13 @@ class GameManager : public IEventReceiver {
 		uint_least8_t numLocks;
 		uint_least8_t numPlayers;
 
-		std::vector<Player> player;
-		std::vector<PlayerStart> playerStart;
+		std::vector< Player > player;
+		std::vector< PlayerStart > playerStart;
 
 		uint_least16_t randomSeed;
 
 		StringConverter stringConverter;
-		std::vector<Collectable> stuff;
+		std::vector< Collectable > stuff;
 
 		ITimer* timer;
 		uint_least16_t timeStartedLoading;

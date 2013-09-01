@@ -130,7 +130,7 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 					for( int i = 0; i < bits.rows; ++i ) {
 						u32 *rowp = texp;
 
-						for( int j = 0; j < bits.width; j++ ) {
+						for( int j = 0; j < bits.width; ++j ) {
 							if( *pt ) {
 								if( cflag ) {
 									*rowp = *pt;
@@ -143,7 +143,7 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 								*rowp = 0;
 							}
 
-							pt++;
+							++pt;
 							++rowp;
 						}
 
@@ -213,7 +213,7 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 			for( int y = 0; y < bits.rows; ++y ) {
 				u16 *rowp = texp16;
 
-				for( int x = 0; x < bits.width; x++ ) {
+				for( int x = 0; x < bits.width; ++x ) {
 					if( pt[y * bits.pitch + ( x / 8 )] & ( 0x80 >> ( x % 8 ) ) ) {
 						*rowp = 0xffff;
 					}
@@ -555,13 +555,13 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 						if( !Transparency )	a = 255;
 
 						for( int y = 0; y < texh; ++y ) {
-							for( int x = 0; x < texw; x++ ) {
+							for( int x = 0; x < texw; ++x ) {
 								if( !clip || clip->isPointInside( core::position2d< irr::s32 >( offset.X + x + offx, offset.Y + y + offy ) ) ) {
 									if( *pt ) {
 										Driver->draw2DRectangle( video::SColor(( a * *pt ) / 255, r, g, b ), core::rect< irr::s32 >( offset.X + x + offx, offset.Y + y + offy, offset.X + x + offx + 1, offset.Y + y + offy + 1 ) );
 									}
 
-									pt++;
+									++pt;
 								}
 							}
 						}

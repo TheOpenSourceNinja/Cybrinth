@@ -299,8 +299,8 @@ void NetworkManager::sendMaze( MazeCell ** maze, uint_least8_t cols, uint_least8
 		toSend.push_back( cols );
 		toSend.push_back( rows );
 
-		for( uint_fast8_t c = 0; c < cols; c++ ) {
-			for( uint_fast8_t r = 0; r < rows; r++ ) {
+		for( uint_fast8_t c = 0; c < cols; ++c ) {
+			for( uint_fast8_t r = 0; r < rows; ++r ) {
 				toSend.push_back( maze[c][r].getTop() );
 				toSend.push_back( maze[c][r].getLeft() );
 				toSend.push_back( maze[c][r].getBottom() );
@@ -355,7 +355,7 @@ void NetworkManager::sendPlayerPos( uint_least8_t player, uint_least8_t x, uint_
 		toSend.push_back( 'D' );
 		toSend.push_back( 'P' );
 
-		for( int j = 0; j <= fdmax; j++ ) {
+		for( int j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
 			if( FD_ISSET( j, &master ) && j != listener ) {
 				size_t size = toSend.size();
@@ -393,7 +393,7 @@ void NetworkManager::sendGoal( Goal goal ) {
 
 		std::wcout << L"Sending goal at " << goal.getX() << L"," << goal.getY() << std::endl;
 
-		for( int j = 0; j <= fdmax; j++ ) {
+		for( int j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
 			if( FD_ISSET( j, &master ) && j != listener ) {
 				size_t size = toSend.size();
@@ -438,7 +438,7 @@ void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 		toSend.push_back( 'P' );
 		toSend.push_back( 'S' );
 
-		for( int j = 0; j <= fdmax; j++ ) {
+		for( int j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
 			if( FD_ISSET( j, &master ) && j != listener ) {
 				size_t size = toSend.size();
@@ -484,7 +484,7 @@ void NetworkManager::sendU8( uint_least8_t num, std::wstring desc ) {
 			toSend.push_back( desc[i] );
 		}
 
-		for( int j = 0; j <= fdmax; j++ ) {
+		for( int j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
 			if( FD_ISSET( j, &master ) && j != listener ) {
 				size_t size = toSend.size();
@@ -527,7 +527,7 @@ void NetworkManager::sendCollectables( std::vector<Collectable> stuff ) {
 		toSend.push_back( 'D' );
 		toSend.push_back( 'C' );
 
-		for( int j = 0; j <= fdmax; j++ ) {
+		for( int j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
 			if( FD_ISSET( j, &master ) && j != listener ) {
 				size_t size = toSend.size();

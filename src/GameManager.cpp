@@ -81,7 +81,7 @@ bool GameManager::allHumansAtGoal() {
 
 		bool result = false;
 
-		for( uint_fast8_t b = 0; b < numBots; b++ ) { //Remove bots from the list
+		for( uint_fast8_t b = 0; b < numBots; ++b ) { //Remove bots from the list
 			uint_least8_t botPlayer = bot.at( b ).getPlayer();
 
 			for( uint_fast8_t p = 0; p < humanPlayers.size(); ++p ) {
@@ -156,7 +156,7 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 			}
 			default: {
 				bool ignoreKey = false;
-				for( uint_fast8_t b = 0; !ignoreKey && b < numBots; b++ ) { //Ignore controls that affect bots
+				for( uint_fast8_t b = 0; !ignoreKey && b < numBots; ++b ) { //Ignore controls that affect bots
 					if( keyMap.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
 						ignoreKey = true;
 					}
@@ -213,7 +213,7 @@ void GameManager::drawAll() {
 
 			//Draws player trails ("footprints")
 			if( markTrails ) {
-				for( uint_fast8_t x = 0; x < mazeManager.cols; x++ ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
+				for( uint_fast8_t x = 0; x < mazeManager.cols; ++x ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
 					for( uint_fast8_t y = 0; y < mazeManager.rows; ++y ) {
 						if( mazeManager.maze[ x ][ y ].visited ) {
 							int_fast16_t dotSize = cellWidth / 5;
@@ -228,7 +228,7 @@ void GameManager::drawAll() {
 				}
 			}
 
-			for( uint_fast8_t ps = 0; ps < playerStart.size(); ps++ ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts.
+			for( uint_fast8_t ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts.
 				playerStart.at( ps ).draw( driver, cellWidth, cellHeight );
 			}
 
@@ -784,6 +784,20 @@ GameManager::GameManager() {
 }
 
 /**
+ * Lets other objects get a pointer to one of the collectables, probably to see if a player has touched one.
+ * Arguments:
+ * --uint_least8_t collectable: The item desired.
+ * Returns: A pointer to a Collectable.
+ */
+Collectable* GameManager::getCollectable( uint_least8_t collectable ) {
+	try {
+		return &stuff.at( collectable );
+	} catch( std::exception e ) {
+		std::wcout << L"Error in GameManager::getCollectable(): " << e.what() << std::endl;
+	}
+}
+
+/**
  * Lets other objects know whether we're in debug mode.
  * Returns: True if debug is true, false otherwise.
  */
@@ -810,6 +824,21 @@ Goal* GameManager::getGoal() {
 }
 
 /**
+ * Lets other objects get a pointer to one of the keys, probably to see if a player has touched one.
+ * Arguments:
+ * --uint_least8_t key: The key desired.
+ * Returns: A pointer to a key.
+ */
+Collectable* GameManager::getKey( uint_least8_t key ) {
+	try {
+		//TODO: Update this function if/when we implement Collectables other than keys
+		return getCollectable( key );
+	} catch( std::exception e ) {
+		std::wcout << L"Error in GameManager::getKey(): " << e.what() << std::endl;
+	}
+}
+
+/**
  * Lets other objects get a pointer to the maze manager, perhaps to get the maze.
  * Returns: A pointer to the mazeManager object, or NULL if an exception is caught.
  */
@@ -819,6 +848,19 @@ MazeManager* GameManager::getMazeManager() {
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::getMazeManager(): " << e.what() << std::endl;
 		return NULL;
+	}
+}
+
+/**
+ * Lets other objects know how many locks there are.
+ * Returns: numLocks.
+ */
+uint_least8_t GameManager::getNumLocks() {
+	try {
+		return numLocks;
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in GameManager::getNumLocks(): " << e.what() << std::endl;
+		return 0;
 	}
 }
 
@@ -1174,7 +1216,7 @@ void GameManager::loadProTips() {
 					uint_fast16_t lineNum = 0;
 
 					while( proTipsFile.good() ) {
-						lineNum++;
+						++lineNum;
 						getline( proTipsFile, line );
 
 						if( !line.empty() ) {
@@ -1266,7 +1308,7 @@ void GameManager::makeMusicList() {
 			uint_least8_t numMusicDecoders = Mix_GetNumMusicDecoders();
 			std::wcout << L"There are " << numMusicDecoders << L" music decoders available. They are:" << std::endl;
 
-			for( uint_fast8_t decoder = 0; decoder < numMusicDecoders; decoder++ ) {
+			for( uint_fast8_t decoder = 0; decoder < numMusicDecoders; ++decoder ) {
 				std::wcout << decoder << L": " << Mix_GetMusicDecoder( decoder ) << std::endl;
 			}
 		}
@@ -1685,7 +1727,7 @@ void GameManager::readPrefs() {
 					uint_fast8_t lineNum = 0;
 
 					while( prefsFile.good() ) {
-						lineNum++;
+						++lineNum;
 						getline( prefsFile, line );
 						line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
 						boost::algorithm::trim( line ); //Removes trailing and leading spaces
@@ -2149,14 +2191,18 @@ void GameManager::resetThings() {
 
 		for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
 			playerStart.at( p ).reset();
-			player.at( p ).stepsTaken = 0;
+			player.at( p ).reset();//stepsTaken = 0;
+		}
+
+		for( uint_fast8_t b = 0; b < numBots; ++b ) {
+			bot.at( b ).reset();
 		}
 
 		for( uint_fast16_t i = 0; i < stuff.size(); ++i ) {
 			stuff.at( i ).loadTexture( driver );
 		}
 
-		for( uint_fast8_t x = 0; x < mazeManager.cols; x++ ) {
+		for( uint_fast8_t x = 0; x < mazeManager.cols; ++x ) {
 			for( uint_fast8_t y = 0; y < mazeManager.rows; ++y ) {
 				mazeManager.maze[ x ][ y ].visited = false;
 			}
@@ -2230,21 +2276,21 @@ int GameManager::run() {
 
 					//Check if any of the players have landed on a collectable item
 					for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
-						for( uint_fast16_t s = 0; s < stuff.size(); s++ ) {
+						for( uint_fast16_t s = 0; s < stuff.size(); ++s ) {
 							if( player.at( p ).getX() == stuff.at( s ).getX() && player.at( p ).getY() == stuff.at( s ).getY() ) {
 								switch( stuff.at( s ).getType() ) {
 									case COLLECTABLE_KEY: {
-										numKeysFound++;
+										++numKeysFound;
 										stuff.erase( stuff.begin() + s );
 
 										if( numKeysFound >= numLocks ) {
-											for( uint_fast8_t c = 0; c < mazeManager.cols; c++ ) {
-												for( uint_fast8_t r = 0; r < mazeManager.rows; r++ ) {
+											for( uint_fast8_t c = 0; c < mazeManager.cols; ++c ) {
+												for( uint_fast8_t r = 0; r < mazeManager.rows; ++r ) {
 													mazeManager.maze[c][r].removeLocks();
 												}
 											}
 
-											for( uint_fast8_t b = 0; b < numBots; b++ ) {
+											for( uint_fast8_t b = 0; b < numBots; ++b ) {
 												bot.at( b ).allKeysFound();
 											}
 										}
@@ -2404,7 +2450,7 @@ void GameManager::setControls() {
 					uint_fast8_t lineNum = 0;
 
 					while( controlsFile.good() ) {
-						lineNum++;
+						++lineNum;
 						getline( controlsFile, line );
 						line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
 						boost::algorithm::trim( line ); //Removes trailing and leading spaces
@@ -2425,6 +2471,50 @@ void GameManager::setControls() {
 								keyMap.push_back( temp );
 
 								//TODO: Possibly use Damerau–Levenshtein distances to account for spelling errors.
+								std::wstring possibleChoicesArray[] = {
+									L"mousewheelup", L"mousewheeldown",
+									L"mouseleftdown", L"mouserightdown", L"mousemiddledown",
+									L"mouseleftup", L"mouserightup", L"mousemiddleup",
+									L"mousemoved",
+									L"mouseleftdoubleclick", L"mouserightdoubleclick", L"mousemiddledoubleclick",
+									L"moustlefttripleclick", L"mouserighttripleclick", L"mousemiddletripleclick",
+									L"lbutton", L"rbutton", L"mbutton",
+									L"cancel", L"xbutton1", L"xbutton2",
+									L"back", L"tab", L"clear",
+									L"return", L"enter",
+									L"shift", L"lshift", L"rshift",
+									L"menu", L"pause", L"escape", L"lmenu", L"rmenu",
+									L"capital",
+									L"kana", L"hanguel", L"hangul",
+									L"junja",
+									L"final",
+									L"hanja", L"kanji",
+									L"convert", L"nonconvert",
+									L"accept", L"modechange", L"space",
+									L"prior", L"next", L"end", L"home",
+									L"left", L"up", L"right", L"down",
+									L"select", L"print", L"screenshot",
+									L"execut", L"insert", L"delete", L"help",
+									L"key_0", L"key_1", L"key_2", L"key_3", L"key_4", L"key_5", L"key_6", L"key_7", L"key_8", L"key_9",
+									L"key_a", L"key_b", L"key_c", L"key_d", L"key_e", L"key_f", L"key_g",
+									L"key_h", L"key_i", L"key_j", L"key_k", L"key_l", L"key_m", L"key_n", L"key_o", L"key_p",
+									L"key_q", L"key_r", L"key_s", L"key_t", L"key_u", L"key_v", L"key_w", L"key_y", L"key_x", L"key_z",
+									L"numpad0", L"numpad1", L"numpad2", L"numpad3", L"numpad4", L"numpad5", L"numpad6", L"numpad7", L"numpad8", L"numpad9",
+									L"lwin", L"rwin", L"apps", L"sleep",
+									L"multiply", L"add", L"subtract", L"divide",
+									L"separator", L"decimal",
+									L"f1", L"f2", L"f3", L"f4", L"f5", L"f6", L"f7", L"f8", L"f9", L"f10", L"f11", L"f12", L"f13", L"f14", L"f15", L"f16", L"f17", L"f18", L"f19", L"f20", L"f21", L"f22", L"f23", L"f24",
+									L"numlock", L"scroll",
+									L"control", L"lcontrol", L"rcontrol",
+									L"plus", L"minus",
+									L"comma", L"period",
+									L"oem_1", L"oem_2", L"oem_3", L"oem_4", L"oem_5", L"oem_6", L"oem_7", L"oem_8", L"oem_ax", L"oem_102", L"oem_clear",
+									L"attn", L"crsel", L"exsel", L"ereof",
+									L"play", L"zoom", L"pa1" };
+
+								std::vector< std::wstring > possibleChoicesVector;
+								//possibleChoicesVector.assign( possibleChoicesArray, possibleChoicesArray + sizeof( possibleChoicesArray ) );
+
 								if( choiceStr.substr( 0, 5 ) != L"mouse" ) {
 									irr::EKEY_CODE choice;
 									//Is there some other way to do the following? Perhaps using a for loop?

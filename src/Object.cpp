@@ -35,83 +35,6 @@ Object::~Object() {
 	}
 }
 
-void Object::setPos( uint_least8_t newX, uint_least8_t newY ) {
-	try {
-		setX( newX );
-		setY( newY );
-	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Object::setPos(): " << e.what() << std::endl;
-	}
-}
-
-uint_least8_t Object::getY() {
-	try {
-		return y;
-	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Object::getY(): " << e.what() << std::endl;
-		return UINT_LEAST8_MAX;
-	}
-}
-
-uint_least8_t Object::getX() {
-	try {
-		return x;
-	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Object::getX(): " << e.what() << std::endl;
-		return UINT_LEAST8_MAX;
-	}
-}
-
-void Object::moveY( int_fast8_t val ) {
-	try {
-		if( !moving ) {
-			y += val;
-			moving = true;
-		} else {
-			yInterp = y;
-			xInterp = x;
-			y += val;
-			moving = true;
-		}
-	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Object::moveY(): " << e.what() << std::endl;
-	}
-}
-
-void Object::moveX( int_fast8_t val ) {
-	try {
-		if( !moving ) {
-			x += val;
-			moving = true;
-		} else {
-			xInterp = x;
-			yInterp = y;
-			x += val;
-			moving = true;
-		}
-	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Object::moveX(): " << e.what() << std::endl;
-	}
-}
-
-void Object::setX( uint_least8_t val ) {
-	try {
-		x = val;
-		xInterp = x;
-	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Object::setX(): " << e.what() << std::endl;
-	}
-}
-
-void Object::setY( uint_least8_t val ) {
-	try {
-		y = val;
-		yInterp = y;
-	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Object::setY(): " << e.what() << std::endl;
-	}
-}
-
 void Object::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
 	try {
 		if( moving ) {
@@ -160,6 +83,86 @@ void Object::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_
 		}
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in Object::draw(): " << e.what() << std::endl;
+	}
+}
+
+irr::video::SColor Object::getColor() {
+	try {
+		return getColorOne();
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Object::getColor(): " << e.what() << std::endl;
+		irr::video::SColor c;
+		return c;
+	}
+}
+
+irr::video::SColor Object::getColorOne() {
+	try {
+		return colorOne;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Object::getColorOne(): " << e.what() << std::endl;
+		irr::video::SColor c;
+		return c;
+	}
+}
+
+irr::video::SColor Object::getColorTwo() {
+	try {
+		return colorTwo;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Object::getColorTwo(): " << e.what() << std::endl;
+		irr::video::SColor c;
+		return c;
+	}
+}
+
+uint_least8_t Object::getX() {
+	try {
+		return x;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Object::getX(): " << e.what() << std::endl;
+		return UINT_LEAST8_MAX;
+	}
+}
+
+uint_least8_t Object::getY() {
+	try {
+		return y;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Object::getY(): " << e.what() << std::endl;
+		return UINT_LEAST8_MAX;
+	}
+}
+
+void Object::moveX( int_fast8_t val ) {
+	try {
+		if( !moving ) {
+			x += val;
+			moving = true;
+		} else {
+			xInterp = x;
+			yInterp = y;
+			x += val;
+			moving = true;
+		}
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Object::moveX(): " << e.what() << std::endl;
+	}
+}
+
+void Object::moveY( int_fast8_t val ) {
+	try {
+		if( !moving ) {
+			y += val;
+			moving = true;
+		} else {
+			yInterp = y;
+			xInterp = x;
+			y += val;
+			moving = true;
+		}
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Object::moveY(): " << e.what() << std::endl;
 	}
 }
 
@@ -222,36 +225,6 @@ void Object::setColor( irr::video::SColor newColor ) {
 	}
 }
 
-irr::video::SColor Object::getColorOne() {
-	try {
-		return colorOne;
-	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Object::getColorOne(): " << e.what() << std::endl;
-		irr::video::SColor c;
-		return c;
-	}
-}
-
-irr::video::SColor Object::getColorTwo() {
-	try {
-		return colorTwo;
-	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Object::getColorTwo(): " << e.what() << std::endl;
-		irr::video::SColor c;
-		return c;
-	}
-}
-
-irr::video::SColor Object::getColor() {
-	try {
-		return getColorOne();
-	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Object::getColor(): " << e.what() << std::endl;
-		irr::video::SColor c;
-		return c;
-	}
-}
-
 void Object::setColorBasedOnNum( uint_least8_t num ) {
 	try {
 		switch( num % 13 ) {
@@ -311,5 +284,32 @@ void Object::setColorBasedOnNum( uint_least8_t num ) {
 		}
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in Object::setColorBasedOnNum(): " << e.what() << std::endl;
+	}
+}
+
+void Object::setPos( uint_least8_t newX, uint_least8_t newY ) {
+	try {
+		setX( newX );
+		setY( newY );
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Object::setPos(): " << e.what() << std::endl;
+	}
+}
+
+void Object::setX( uint_least8_t val ) {
+	try {
+		x = val;
+		xInterp = x;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Object::setX(): " << e.what() << std::endl;
+	}
+}
+
+void Object::setY( uint_least8_t val ) {
+	try {
+		y = val;
+		yInterp = y;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Object::setY(): " << e.what() << std::endl;
 	}
 }

@@ -25,6 +25,7 @@ class Player : public Object {
 		void loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size );
 		void moveX( int_fast8_t val );
 		void moveY( int_fast8_t val );
+		void reset();
 		uint_least16_t stepsTaken;
 		bool isHuman;
 	protected:

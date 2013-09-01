@@ -145,6 +145,12 @@
 		<Unit filename="src/PlayerStart.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="src/SpellChecker.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/SpellChecker.h">
+			<Option target="cybrinth" />
+		</Unit>
 		<Unit filename="src/StringConverter.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

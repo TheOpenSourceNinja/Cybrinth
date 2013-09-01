@@ -32,19 +32,22 @@ Collectable::~Collectable() {
 	}
 }
 
-void Collectable::setType( uint_least8_t newType ) {
+void Collectable::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
 	try {
-		type = newType;
-
-		switch( type ) {
-			case COLLECTABLE_KEY: {
-					setColor( YELLOW );
-					break;
-				}
-			default: break;
+		uint_least16_t smaller = height;
+		if( smaller > width ) {
+			smaller = width;
 		}
+
+		//wcout << L"desired size: " << smaller << std::endl;
+
+		if( texture->getSize() != irr::core::dimension2d< irr::u32 >( smaller, smaller ) ) {
+			resizeImage( driver, smaller, smaller );
+		}
+
+		Object::draw( driver, width, height );
 	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Collectable::setType(): " << e.what() << std::endl;
+		std::wcerr << L"Error in Collectable::draw(): " << e.what() << std::endl;
 	}
 }
 
@@ -53,6 +56,17 @@ uint_least8_t Collectable::getType() {
 		return type;
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in Collectable::getType(): " << e.what() << std::endl;
+	}
+}
+
+irr::video::ITexture* Collectable::imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* oldImage, irr::core::stringw name ) {
+	try {
+		irr::video::ITexture* texture = driver->addTexture( name.c_str(), oldImage );
+		texture->grab();
+		return texture;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Collectable::imageToTexture(): " << e.what() << std::endl;
+		return NULL;
 	}
 }
 
@@ -77,30 +91,25 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 	}
 }
 
-irr::video::IImage* Collectable::textureToImage( irr::video::IVideoDriver* driver, irr::video::ITexture* texture ) {
-	try {
-		irr::video::IImage* newImage = driver->createImageFromData( texture->getColorFormat(), texture->getSize(), texture->lock(), false );
-		texture->unlock();
-		return newImage;
-	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Collectable::textureToImage(): " << e.what() << std::endl;
-		return NULL;
-	}
-}
-
-irr::video::ITexture* Collectable::imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* oldImage, irr::core::stringw name ) {
-	try {
-		irr::video::ITexture* texture = driver->addTexture( name.c_str(), oldImage );
-		texture->grab();
-		return texture;
-	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Collectable::imageToTexture(): " << e.what() << std::endl;
-		return NULL;
-	}
+void Collectable::reset() {
 }
 
 void Collectable::resizeImage( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
 	try {
+		if( texture == NULL || texture->getOriginalSize().Width < width || texture->getOriginalSize().Height < height ) {
+			switch( type ) {
+				case COLLECTABLE_KEY: { //COLLECTABLE_KEY loads the texture from an image, so load the image before resizing
+						loadTexture( driver );
+						break;
+					}
+				default: {
+					if( texture == NULL ) {
+						loadTexture( driver );
+					}
+					break;
+				}
+			}
+		}
 		irr::video::IImage* tempImage = textureToImage( driver, texture );
 		//driver->removeTexture( texture );
 		//texture->drop();
@@ -114,21 +123,29 @@ void Collectable::resizeImage( irr::video::IVideoDriver* driver, uint_least16_t 
 	}
 }
 
-void Collectable::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
+void Collectable::setType( uint_least8_t newType ) {
 	try {
-		uint_least16_t smaller = height;
-		if( smaller > width ) {
-			smaller = width;
+		type = newType;
+
+		switch( type ) {
+			case COLLECTABLE_KEY: {
+					setColor( YELLOW );
+					break;
+				}
+			default: break;
 		}
-
-		//wcout << L"desired size: " << smaller << std::endl;
-
-		if( texture->getSize() != irr::core::dimension2d< irr::u32 >( smaller, smaller ) ) {
-			resizeImage( driver, smaller, smaller );
-		}
-
-		Object::draw( driver, width, height );
 	} catch ( std::exception e ) {
-		std::wcerr << L"Error in Collectable::draw(): " << e.what() << std::endl;
+		std::wcerr << L"Error in Collectable::setType(): " << e.what() << std::endl;
+	}
+}
+
+irr::video::IImage* Collectable::textureToImage( irr::video::IVideoDriver* driver, irr::video::ITexture* texture ) {
+	try {
+		irr::video::IImage* newImage = driver->createImageFromData( texture->getColorFormat(), texture->getSize(), texture->lock(), false );
+		texture->unlock();
+		return newImage;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in Collectable::textureToImage(): " << e.what() << std::endl;
+		return NULL;
 	}
 }

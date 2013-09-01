@@ -13,6 +13,7 @@
 #define AI_H
 
 #include <irrlicht.h>
+#include <string>
 #include <vector>
 #include "MazeCell.h"
 
@@ -25,26 +26,41 @@ class AI {
 		AI();
 		/** Default destructor */
 		virtual ~AI();
-		void setPlayer( uint_least8_t newPlayer );
-		void setup( MazeCell ** newMaze, uint_least8_t newCols, uint_least8_t newRows,  GameManager * newGM ); //Provides the AI with whatever info it needs to work.
-		void move(); //Needs to call GameManager's movePlayerOnX and movePlayerOnY functions.
-		bool doneWaiting();
+
 		void allKeysFound();
 		bool atGoal();
-		uint_least32_t lastTimeMoved;
+		bool doneWaiting();
 		uint_least8_t getPlayer();
-		uint_least16_t movementDelay; //How long to delay between movements
+		void move(); //Needs to call GameManager's movePlayerOnX and movePlayerOnY functions.
+		void reset();
+		void setPlayer( uint_least8_t newPlayer );
+		void setup( MazeCell ** newMaze, uint_least8_t newCols, uint_least8_t newRows,  GameManager * newGM ); //Provides the AI with whatever info it needs to work.
 	protected:
 	private:
-		GameManager * gm;
-		uint_least8_t controlsPlayer;
-		std::vector< irr::core::position2d< uint_least8_t > > cellsVisited;
-		std::vector< irr::core::position2d< uint_least8_t > > pathTaken;
-		std::vector< std::vector< irr::core::position2d< uint_least8_t > > > pathsToLockedCells;
 		bool alreadyVisited( irr::core::position2d< uint_least8_t > position );
+		bool alreadyVisitedDFS( irr::core::position2d< uint_least8_t > position );
+		void findSolution();
+		void findSolutionDFS( irr::core::position2d< uint_least8_t > currentPosition );
+		void findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > partialSolution, irr::core::position2d< uint_least8_t > currentPosition );
+
+		enum algorithm_t{ DEPTH_FIRST_SEARCH };
+		algorithm_t algorithm;
+		std::vector< irr::core::position2d< uint_least8_t > > cellsVisited;
 		uint_least8_t cols;
-		uint_least8_t rows;
+		uint_least8_t controlsPlayer;
+		enum direction_t{ UP, DOWN, LEFT, RIGHT };
+		std::vector< irr::core::position2d< uint_least8_t > > DFSCellsVisited;
+		GameManager * gm;
+		uint_least32_t lastTimeMoved;
 		MazeCell ** maze;
+		uint_least16_t movementDelay; //How long to delay between movements
+		uint_least8_t numKeysInSolution;
+		std::vector< std::vector< irr::core::position2d< uint_least8_t > > > pathsToLockedCells;
+		std::vector< irr::core::position2d< uint_least8_t > > pathTaken;
+		uint_least8_t rows;
+		std::vector< irr::core::position2d< uint_least8_t > > solution;
+		bool solved;
+		bool startSolved;
 };
 
 #endif // AI_H

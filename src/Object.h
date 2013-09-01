@@ -28,6 +28,7 @@ class Object {
 		void moveX( int_fast8_t val );
 		void draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height );
 		virtual void loadTexture( irr::video::IVideoDriver* driver ) = 0;
+		virtual void reset() = 0;
 		void setColorBasedOnNum( uint_least8_t num );
 		void setColor( irr::video::SColor newColor );
 		irr::video::SColor getColorOne();

@@ -24,16 +24,16 @@ Player::Player() {
 		moving = false;
 		setColor( RED );
 		texture = NULL;
-		stepsTaken = 0;
 		isHuman = true;
-	} catch ( std::exception e ) {
+		reset();
+	} catch( std::exception e ) {
 		std::wcerr << L"Error in Player::Player(): " << e.what() << std::endl;
 	}
 }
 
 Player::~Player() {
 	try {
-	} catch ( std::exception e ) {
+	} catch( std::exception e ) {
 		std::wcerr << L"Error in Player::~Player(): " << e.what() << std::endl;
 	}
 }
@@ -41,7 +41,7 @@ Player::~Player() {
 void Player::loadTexture( irr::video::IVideoDriver* driver ) {
 	try {
 		loadTexture( driver, 1 );
-	} catch ( std::exception e ) {
+	} catch( std::exception e ) {
 		std::wcerr << L"Error in Player::loadTexture(): " << e.what() << std::endl;
 	}
 }
@@ -56,7 +56,7 @@ void Player::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size 
 		int_fast16_t radius = size / 2;
 		irr::core::position2d< int_fast16_t > origin( radius, radius );
 		float rSquared = pow( radius, 2 );
-		for( int_fast16_t x = -radius; x <= 0; x++ ) {
+		for( int_fast16_t x = -radius; x <= 0; ++x ) {
 			int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
 			for( int_fast16_t y = -height; y <= 0; ++y ) {
 				tempImage->setPixel( x + origin.X, y + origin.Y, colorOne );
@@ -70,7 +70,7 @@ void Player::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size 
 
 		radius = size / 2;
 		rSquared = pow( radius, 2 );
-		for( int_fast16_t x = -radius; x <= 0; x++ ) {
+		for( int_fast16_t x = -radius; x <= 0; ++x ) {
 			int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
 			for( int_fast16_t y = -height; y <= 0; ++y ) {
 				tempImage->setPixel( x + origin.X, y + origin.Y, colorTwo );
@@ -83,7 +83,7 @@ void Player::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size 
 
 		driver->removeTexture( texture );
 		texture = driver->addTexture( L"playerCircle", tempImage );
-	} catch ( std::exception e ) {
+	} catch( std::exception e ) {
 		std::wcerr << L"Error in Player::loadTexture(): " << e.what() << std::endl;
 	}
 }
@@ -103,7 +103,7 @@ void Player::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_
 		}
 
 		Object::draw( driver, width, height );
-	} catch ( std::exception e ) {
+	} catch( std::exception e ) {
 		std::wcerr << L"Error in Player::draw(): " << e.what() << std::endl;
 	}
 }
@@ -112,7 +112,7 @@ void Player::moveX( int_fast8_t val ) {
 	try {
 		Object::moveX( val );
 		stepsTaken += 1;
-	} catch ( std::exception e ) {
+	} catch( std::exception e ) {
 		std::wcerr << L"Error in Player::moveX(): " << e.what() << std::endl;
 	}
 }
@@ -121,7 +121,15 @@ void Player::moveY( int_fast8_t val ) {
 	try {
 		Object::moveY( val );
 		stepsTaken += 1;
-	} catch ( std::exception e ) {
+	} catch( std::exception e ) {
 		std::wcerr << L"Error in Player::moveY(): " << e.what() << std::endl;
+	}
+}
+
+void Player::reset() {
+	try {
+		stepsTaken = 0;
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in Player::reset(): " << e.what() << std::endl;
 	}
 }
