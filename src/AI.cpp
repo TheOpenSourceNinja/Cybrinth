@@ -18,11 +18,10 @@
 AI::AI() {
 	try {
 		setPlayer( 0 );
-		setup( NULL, 0, 0, NULL );
 		movementDelay = 300; //TODO: Allow custom AI movement delays for increased/decreased challenge
 		algorithm = DEPTH_FIRST_SEARCH;
 		startSolved = true;
-		reset();
+		setup( NULL, 0, 0, NULL );
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in AI::AI(): " << e.what() << std::endl;
 	}
@@ -45,9 +44,9 @@ void AI::allKeysFound() { //Makes the bot 'forget' that it has visited certain m
 		}
 		core::position2d< uint_least8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 
-		for( std::vector< std::vector< core::position2d< uint_least8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); ++o ) {
+		for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
 
-			for( std::vector< core::position2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
+			for( auto i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 
 				std::vector< core::position2d< uint_least8_t > >::size_type j = 0;
 				while( j < cellsVisited.size() ) {
@@ -140,6 +139,7 @@ bool AI::doneWaiting() {
 
 void AI::findSolution() {
 	solved = false;
+	numKeysInSolution = 0;
 	try {
 		solution.clear();
 		switch( algorithm ) {
@@ -166,13 +166,14 @@ void AI::findSolution() {
 void AI::findSolutionDFS( irr::core::position2d< uint_least8_t > currentPosition ) {
 	std::vector< irr::core::position2d< uint_least8_t > > partialSolution;
 	findSolutionDFS( partialSolution, currentPosition );
+
+	//Reverses the order of the solution, so we don't start and the wrong end
 	std::vector< irr::core::position2d< uint_least8_t > > tempSolution;
 	while( !solution.empty() ) {
 		tempSolution.push_back( solution.back() );
 		solution.pop_back();
 	}
 	while( !tempSolution.empty() ) {
-		//solution.push_back( tempSolution.back() );
 		solution.insert( solution.begin(), tempSolution.back() );
 		tempSolution.pop_back();
 	}
@@ -189,16 +190,16 @@ void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > 
 		partialSolution.push_back( currentPosition );
 		std::vector< direction_t > possibleDirections;
 		if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
-			bool ignoreLocks = ( numKeysInSolution >= gm->getNumLocks() );
+			bool ignoreLocks = ( numKeysInSolution >= gm->getNumKeys() );
 
-			for( uint_fast8_t k = 0; !ignoreLocks && k < gm->getNumLocks(); ++k ) {
+			for( uint_fast8_t k = 0; !ignoreLocks && k < gm->getNumKeys(); ++k ) {
 				if( ( currentPosition.X == gm->getKey( k )->getX() && currentPosition.Y == gm->getKey( k )->getY() ) ) {
 					DFSCellsVisited.clear(); //Clear places visited so we can continue searching for the next key or the goal
 					DFSCellsVisited.push_back( currentPosition );
 					solution = partialSolution;
-					//++numKeysInSolution;
+					++numKeysInSolution;
 
-					//ignoreLocks = ( numKeysInSolution >= gm->getNumLocks() );
+					ignoreLocks = ( numKeysInSolution >= gm->getNumKeys() );
 				}
 			}
 
@@ -218,16 +219,16 @@ void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > 
 
 			if( ignoreLocks ) {
 				//See which direction(s) the bot can move
-				if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == 'l' && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+				if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].hasTopLock() && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 					possibleDirections.push_back( UP );
 				}
-				if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == 'l' && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+				if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].hasLeftLock() && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 					possibleDirections.push_back( LEFT );
 				}
-				if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == 'l' && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+				if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].hasTopLock() && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 					possibleDirections.push_back( DOWN );
 				}
-				if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == 'l' && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+				if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].hasTopLock() && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 					possibleDirections.push_back( RIGHT );
 				}
 			}
@@ -235,7 +236,8 @@ void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > 
 			if( possibleDirections.size() == 0 && partialSolution.size() != 0 ) {
 				partialSolution.pop_back();
 			} else {
-				for( std::vector< direction_t >::size_type i = 0; ( i < possibleDirections.size() && solution.empty() ); ++i ) {
+				random_shuffle( possibleDirections.begin(), possibleDirections.end() ); //Ensures that different bots will choose different directions
+				for( auto i = 0; ( i < possibleDirections.size() && solution.empty() ); ++i ) {
 					direction_t choice = possibleDirections.at( i );
 					switch( choice ) {
 						case UP: {
@@ -302,7 +304,7 @@ void AI::move() {
 			}
 
 			/*std::vector< irr::core::position2d< uint_least8_t > >::size_type currentPlaceInSolution;
-			for( std::vector< irr::core::position2d< uint_least8_t > >::size_type i = 0; i < solution.size(); ++i) {
+			for( auto i = 0; i < solution.size(); ++i) {
 				if( currentPosition == solution.at( i ) ) {
 					currentPlaceInSolution = i;
 					break;
@@ -310,6 +312,7 @@ void AI::move() {
 			}*/
 
 			//if( currentPlaceInSolution > 0 ) {//< solution.size() - 1 ) {
+			if( !solution.empty() ) {
 				if( solution.back().X > currentPosition.X ) {
 					if( gm->getDebugStatus() ) {
 						std::wcout << L"Moving right" << std::endl;
@@ -332,6 +335,10 @@ void AI::move() {
 					gm->movePlayerOnY( controlsPlayer, -1 );
 				}
 				solution.pop_back();
+			} else {
+				solved = false;
+				//throw( std::wstring( L"Error in AI::move(): Solution is empty, but I'm not at the goal and startSolved is true. Setting solved to false so a solution will be found." ) );
+			}
 			//}
 
 		} else {
@@ -384,7 +391,7 @@ void AI::move() {
 				if( possibleDirections.size() == 0 && pathTaken.size() != 0 && !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
 					pathTaken.pop_back();
 					core::position2d< uint_least8_t > oldPosition = pathTaken.back();
-					for( std::vector< std::vector< core::dimension2d< uint_least8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); ++o ) {
+					for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
 						if( pathsToLockedCells.at( o ).back() != oldPosition ) {
 							pathsToLockedCells.at( o ).push_back( oldPosition );
 						}
@@ -405,7 +412,7 @@ void AI::move() {
 						case UP: {
 							core::position2d< uint_least8_t > position( currentPosition.X, currentPosition.Y - 1 );
 							pathTaken.push_back( position );
-							for( std::vector< std::vector< core::dimension2d< uint_least8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); ++o ) {
+							for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
 								//for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 									pathsToLockedCells.at( o ).push_back( position );
 								//}
@@ -415,7 +422,7 @@ void AI::move() {
 						case DOWN: {
 							core::position2d< uint_least8_t > position( currentPosition.X, currentPosition.Y + 1 );
 							pathTaken.push_back( position );
-							for( std::vector< std::vector< core::dimension2d< uint_least8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); ++o ) {
+							for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
 								//for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 									pathsToLockedCells.at( o ).push_back( position );
 								//}
@@ -425,7 +432,7 @@ void AI::move() {
 						case LEFT: {
 							core::position2d< uint_least8_t > position( currentPosition.X - 1, currentPosition.Y );
 							pathTaken.push_back( position );
-							for( std::vector< std::vector< core::dimension2d< uint_least8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); ++o ) {
+							for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
 								//for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 									pathsToLockedCells.at( o ).push_back( position );
 								//}
@@ -435,7 +442,7 @@ void AI::move() {
 						case RIGHT: {
 							core::position2d< uint_least8_t > position( currentPosition.X + 1, currentPosition.Y );
 							pathTaken.push_back( position );
-							for( std::vector< std::vector< core::dimension2d< uint_least8_t > > >::size_type o = 0; o < pathsToLockedCells.size(); ++o ) {
+							for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
 								//for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 									pathsToLockedCells.at( o ).push_back( position );
 								//}
@@ -456,6 +463,16 @@ void AI::reset() {
 	solution.clear();
 	solved = false;
 	DFSCellsVisited.clear();
+	for( auto i = 0; i < pathsToLockedCells.size(); ++i ) {
+		pathsToLockedCells.at( i ).clear();
+	}
+	pathsToLockedCells.clear();
+	pathTaken.clear();
+	cellsVisited.clear();
+
+	if( startSolved && gm != NULL ) {
+		findSolution();
+	}
 }
 
 void AI::setPlayer( uint_least8_t newPlayer ) {
@@ -471,14 +488,8 @@ void AI::setup( MazeCell ** newMaze, uint_least8_t newCols, uint_least8_t newRow
 		maze = newMaze;
 		cols = newCols;
 		rows = newRows;
-		pathTaken.clear();
-		cellsVisited.clear();
-
-		for( std::vector< core::dimension2d< uint_least8_t > >::size_type i = 0; i < pathsToLockedCells.size(); ++i ) {
-			pathsToLockedCells.at( i ).clear();
-		}
-		pathsToLockedCells.clear();
 		gm = newGM;
+		reset();
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in AI::setup(): " << e.what() << std::endl;
 	}

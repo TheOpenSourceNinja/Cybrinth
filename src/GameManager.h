@@ -51,7 +51,7 @@ class GameManager : public IEventReceiver {
 		Goal* getGoal();
 		Collectable* getKey( uint_least8_t key );
 		MazeManager* getMazeManager();
-		uint_least8_t getNumLocks();
+		uint_least8_t getNumKeys();
 		Player* getPlayer( uint_least8_t p );
 
 		void movePlayerOnX( uint_least8_t p, int_fast8_t direction );

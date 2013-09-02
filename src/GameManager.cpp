@@ -853,13 +853,17 @@ MazeManager* GameManager::getMazeManager() {
 
 /**
  * Lets other objects know how many locks there are.
- * Returns: numLocks.
+ * Returns: the number of keys (currently stuff.size()).
  */
-uint_least8_t GameManager::getNumLocks() {
-	try {
-		return numLocks;
+uint_least8_t GameManager::getNumKeys() {
+	try { //TODO: Update this function if/when we implement Collectables other than keys
+		if( numLocks < stuff.size() ) {
+			return numLocks;
+		} else {
+			return stuff.size();
+		}
 	} catch( std::exception e ) {
-		std::wcerr << L"Error in GameManager::getNumLocks(): " << e.what() << std::endl;
+		std::wcerr << L"Error in GameManager::getNumKeys(): " << e.what() << std::endl;
 		return 0;
 	}
 }
@@ -1099,7 +1103,7 @@ void GameManager::loadNextSong() {
 
 		//Figure out where we are in the music list
 		std::vector<boost::filesystem::path>::size_type positionInList = 0;
-		for( std::vector<boost::filesystem::path>::size_type i = 0; i < musicList.size(); ++i ) {
+		for( auto i = 0; i < musicList.size(); ++i ) {
 			if( musicList.at( i ) == currentMusic ) {
 				positionInList = i;
 				break;
@@ -1492,7 +1496,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			case EET_KEY_INPUT_EVENT: {
 				if( event.KeyInput.PressedDown ) {
 					if( !( showingMenu || showingLoadingScreen ) ) {
-						for( std::vector< KeyMapping >::size_type k = 0; k < keyMap.size(); ++k ) {
+						for( auto k = 0; k < keyMap.size(); ++k ) {
 							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
 								if( doEventActions( k, event ) ) {
 									return true;
@@ -1501,7 +1505,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							}
 						}
 					} else if( showingMenu ) {
-						for( std::vector< KeyMapping >::size_type k = 0; k < keyMap.size(); ++k ) {
+						for( auto k = 0; k < keyMap.size(); ++k ) {
 							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
 								switch( keyMap.at( k ).getAction() ) {
 									case L'm': {
@@ -1546,7 +1550,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						}
 				}
 
-				for( std::vector< KeyMapping >::size_type k = 0; k < keyMap.size(); ++k ) {
+				for( auto k = 0; k < keyMap.size(); ++k ) {
 					if( event.MouseInput.Event == keyMap.at( k ).getMouseEvent() ) {
 						if( doEventActions( k, event ) ) {
 							return true;

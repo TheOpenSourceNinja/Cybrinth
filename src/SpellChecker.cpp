@@ -28,27 +28,27 @@ std::wstring::size_type SpellChecker::DamerauLevenshteinDistance( std::wstring s
 		std::wstring::size_type INF = source.size() + target.size();
 		score[ 0 ][ 0 ] = INF;
 
-		for (std::wstring::size_type i = 0; i <= source.size(); ++i) {
+		for ( auto i = 0; i <= source.size(); ++i ) {
 			score[ i + 1 ][ 1 ] = i;
 			score[ i + 1 ][ 0 ] = INF;
 		}
 
-		for (std::wstring::size_type j = 0; j <= target.size(); ++j) {
+		for ( auto j = 0; j <= target.size(); ++j ) {
 			score[ 1 ][ j + 1 ] = j;
 			score[ 0 ][ j + 1 ] = INF;
 		}
 
 		std::map< std::wstring::value_type, std::wstring::size_type > sd;
 		std::wstring temp = source + target;
-		for( std::wstring::iterator i = temp.begin(); i != temp.end(); ++i ) {
+		for( auto i = temp.begin(); i != temp.end(); ++i ) {
 			sd[ *i ] = 0;
 		}
 
-		for (std::wstring::size_type i = 1; i <= source.size(); ++i) {
+		for ( auto i = 1; i <= source.size(); ++i ) {
 			std::wstring::size_type DB = 0;
-			for (std::wstring::size_type j = 1; j <= target.size(); ++j) {
-				std::wstring::size_type i1 = sd[ target[ j - 1 ] ];
-				std::wstring::size_type j1 = DB;
+			for ( auto j = 1; j <= target.size(); ++j ) {
+				auto i1 = sd[ target[ j - 1 ] ];
+				auto j1 = DB;
 
 				if ( source[ i - 1 ] == target[ j - 1 ] ) {
 					score[ i + 1 ][ j + 1 ] = score[ i ][ j ];
@@ -75,8 +75,8 @@ std::vector< std::wstring >::size_type SpellChecker::indexOfClosestString( std::
 		std::vector< std::wstring >::size_type indexOfMinDistance = -1;
 		std::wstring::size_type minDistance = -1;
 
-		for( std::vector< std::wstring >::size_type i = 0; i < targets.size(); ++i ) {
-			std::wstring::size_type distance = DamerauLevenshteinDistance( source, targets.at( i ) );
+		for( auto i = 0; i < targets.size(); ++i ) {
+			auto distance = DamerauLevenshteinDistance( source, targets.at( i ) );
 			if( distance < minDistance ) {
 				minDistance = distance;
 				indexOfMinDistance = i;
