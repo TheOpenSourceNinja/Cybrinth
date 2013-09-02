@@ -19,19 +19,19 @@ bool MazeManager::canGetTo( uint_least8_t startX, uint_least8_t startY, uint_lea
 		if( startX == goalX && startY == goalY ) {
 			found = true;
 		} else {
-			if( startY > 0 && maze[startX][startY].getTop() == 'n' && maze[startX][startY - 1].visited == false ) {
+			if( startY > 0 && maze[startX][startY].getTop() == MazeCell::NONE && maze[startX][startY - 1].visited == false ) {
 				found = canGetTo( startX, startY - 1, goalX, goalY );
 			}
 
-			if( found == false && startY < ( rows - 1 ) && maze[startX][startY + 1].getTop() == 'n' && maze[startX][startY + 1].visited == false ) {
+			if( found == false && startY < ( rows - 1 ) && maze[startX][startY + 1].getTop() == MazeCell::NONE && maze[startX][startY + 1].visited == false ) {
 				found = canGetTo( startX, startY + 1, goalX, goalY );
 			}
 
-			if( found == false && startX < ( cols - 1 ) && maze[startX + 1][startY].getLeft() == 'n' && maze[startX + 1][startY].visited == false ) {
+			if( found == false && startX < ( cols - 1 ) && maze[startX + 1][startY].getLeft() == MazeCell::NONE && maze[startX + 1][startY].visited == false ) {
 				found = canGetTo( startX + 1, startY, goalX, goalY );
 			}
 
-			if( found == false && startX > 0 && maze[startX][startY].getLeft() == 'n' && maze[startX - 1][startY].visited == false ) {
+			if( found == false && startX > 0 && maze[startX][startY].getLeft() == MazeCell::NONE && maze[startX - 1][startY].visited == false ) {
 				found = canGetTo( startX - 1, startY, goalX, goalY );
 			}
 		}
@@ -79,24 +79,24 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_least16_t cellWidth, u
 		for( uint_fast8_t x = 0; x < cols; ++x ) {
 			for( uint_fast8_t y = 0; y < rows; ++y ) {
 				if( maze[x][y].visible ) {
-					if( maze[x][y].getTop() == 'w' ) {
+					if( maze[x][y].getTop() == MazeCell::WALL ) {
 						driver->draw2DLine( core::position2d< irr::s32 >( cellWidth * x, cellHeight * y ), core::position2d< irr::s32 >(cellWidth * ( x + 1 ), cellHeight * y ), wallColor );
-					} else if( maze[x][y].getTop() == 'l' ) {
+					} else if( maze[x][y].getTop() == MazeCell::LOCK ) {
 						driver->draw2DLine( core::position2d< irr::s32 >( cellWidth * x, cellHeight * y ), core::position2d< irr::s32 >(cellWidth * ( x + 1 ), cellHeight * y ), lockColor );
 					}
 
-					if( maze[x][y].getLeft() == 'w' ) {
+					if( maze[x][y].getLeft() == MazeCell::WALL ) {
 						driver->draw2DLine( core::position2d< irr::s32 >( cellWidth * x, cellHeight * y ), core::position2d< irr::s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), wallColor );
-					} else if( maze[x][y].getLeft() == 'l' ) {
+					} else if( maze[x][y].getLeft() == MazeCell::LOCK ) {
 						driver->draw2DLine( core::position2d< irr::s32 >( cellWidth * x, cellHeight * y ), core::position2d< irr::s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), lockColor );
 					}
 
-					//Only cells on the right or bottom edge of the maze should have anything other than 'n' as right or bottom, and then it should only be a solid 'w'
-					if( maze[x][y].getRight() == 'w' ) {
+					//Only cells on the right or bottom edge of the maze should have anything other than NONE as right or bottom, and then it should only be a solid WALL
+					if( maze[x][y].getRight() == MazeCell::WALL ) {
 						driver->draw2DLine( core::position2d< irr::s32 >( cellWidth * ( x + 1 ), cellHeight * y ), core::position2d< irr::s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallColor );
 					}
 
-					if( maze[x][y].getBottom() == 'w' ) {
+					if( maze[x][y].getBottom() == MazeCell::WALL ) {
 						driver->draw2DLine( core::position2d< irr::s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), core::position2d< irr::s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallColor );
 					}
 				}
@@ -182,10 +182,10 @@ void MazeManager::makeRandomLevel() {
 
 		for( uint_fast8_t x = 0; x < cols; ++x ) {
 			for( uint_fast8_t y = 0; y < rows; ++y ) {
-				maze[x][y].setTop( 'w' );
-				maze[x][y].setLeft( 'w' );
-				maze[x][y].setRight( 'n' );
-				maze[x][y].setBottom( 'n' );
+				maze[x][y].setTop( MazeCell::WALL );
+				maze[x][y].setLeft( MazeCell::WALL );
+				maze[x][y].setRight( MazeCell::NONE );
+				maze[x][y].setBottom( MazeCell::NONE );
 				maze[x][y].visited = false;
 			}
 		}
@@ -208,13 +208,13 @@ void MazeManager::makeRandomLevel() {
 
 		//Add walls at maze borders
 		for( uint_fast8_t x = 0; x < cols; ++x ) {
-			maze[x][0].setTop( 'w' );
-			maze[x][rows-1].setBottom( 'w' );
+			maze[x][0].setTop( MazeCell::WALL );
+			maze[x][rows-1].setBottom( MazeCell::WALL );
 		}
 
 		for( uint_fast8_t y = 0; y < rows; ++y ) {
-			maze[0][y].setLeft( 'w' );
-			maze[cols-1][y].setRight( 'w' );
+			maze[0][y].setLeft( MazeCell::WALL );
+			maze[cols-1][y].setRight( MazeCell::WALL );
 		}
 
 		for( uint_fast8_t x = 1; x < cols; ++x ) {
@@ -300,14 +300,14 @@ void MazeManager::makeRandomLevel() {
 		if( gameManager->numLocks > 0 ) {
 			//Place locks
 			//Place first lock at the gameManager->goal
-			if( maze[gameManager->goal.getX()][gameManager->goal.getY()].getTop() == 'n' ) {
-				maze[gameManager->goal.getX()][gameManager->goal.getY()].setTop( 'l' );
-			} else if( maze[gameManager->goal.getX()][gameManager->goal.getY()].getLeft() == 'n' ) {
-				maze[gameManager->goal.getX()][gameManager->goal.getY()].setLeft( 'l' );
-			} else if( maze[gameManager->goal.getX()][gameManager->goal.getY() + 1].getTop() == 'n' ) {
-				maze[gameManager->goal.getX()][gameManager->goal.getY() + 1].setTop( 'l' );
-			} else if( maze[gameManager->goal.getX() + 1][gameManager->goal.getY()].getLeft() == 'n' ) {
-				maze[gameManager->goal.getX() + 1][gameManager->goal.getY()].setLeft( 'l' );
+			if( maze[gameManager->goal.getX()][gameManager->goal.getY()].getTop() == MazeCell::NONE ) {
+				maze[gameManager->goal.getX()][gameManager->goal.getY()].setTop( MazeCell::LOCK );
+			} else if( maze[gameManager->goal.getX()][gameManager->goal.getY()].getLeft() == MazeCell::NONE ) {
+				maze[gameManager->goal.getX()][gameManager->goal.getY()].setLeft( MazeCell::LOCK );
+			} else if( maze[gameManager->goal.getX()][gameManager->goal.getY() + 1].getTop() == MazeCell::NONE ) {
+				maze[gameManager->goal.getX()][gameManager->goal.getY() + 1].setTop( MazeCell::LOCK );
+			} else if( maze[gameManager->goal.getX() + 1][gameManager->goal.getY()].getLeft() == MazeCell::NONE ) {
+				maze[gameManager->goal.getX() + 1][gameManager->goal.getY()].setLeft( MazeCell::LOCK );
 			}
 
 			uint_fast8_t numLocksPlaced = 1;
@@ -316,8 +316,8 @@ void MazeManager::makeRandomLevel() {
 				uint_least8_t tempX = rand() % cols;
 				uint_least8_t tempY = rand() % rows;
 
-				if( maze[tempX][tempY].getTop() == 'n' ) {
-					maze[tempX][tempY].setTop( 'l' );
+				if( maze[tempX][tempY].getTop() == MazeCell::NONE ) {
+					maze[tempX][tempY].setTop( MazeCell::LOCK );
 
 					if( canGetToAllCollectables( gameManager->playerStart[0].getX(), gameManager->playerStart[0].getY() ) ) {
 						numLocksPlaced += 1;
@@ -325,10 +325,10 @@ void MazeManager::makeRandomLevel() {
 							std::wcout << L"Placed lock " << static_cast<unsigned int>( numLocksPlaced ) << L" at " << static_cast<unsigned int>( tempX ) << L"x" << static_cast<unsigned int>( tempY ) << std::endl;
 						}
 					} else {
-						maze[tempX][tempY].setTop( 'n' );
+						maze[tempX][tempY].setTop( MazeCell::NONE );
 					}
-				} else if( maze[tempX][tempY].getLeft() == 'n' ) {
-					maze[tempX][tempY].setLeft( 'l' );
+				} else if( maze[tempX][tempY].getLeft() == MazeCell::NONE ) {
+					maze[tempX][tempY].setLeft( MazeCell::LOCK );
 
 					if( canGetToAllCollectables( gameManager->playerStart[0].getX(), gameManager->playerStart[0].getY() ) ) {
 						numLocksPlaced += 1;
@@ -336,7 +336,7 @@ void MazeManager::makeRandomLevel() {
 							std::wcout << L"Placed lock " << static_cast<unsigned int>( numLocksPlaced ) << L" at " << static_cast<unsigned int>( tempX ) << L"x" << static_cast<unsigned int>( tempY ) << std::endl;
 						}
 					} else {
-						maze[tempX][tempY].setLeft( 'n' );
+						maze[tempX][tempY].setLeft( MazeCell::NONE );
 					}
 				}
 			}
@@ -435,7 +435,7 @@ void MazeManager::recurseRandom( uint_least8_t x, uint_least8_t y, uint_least16_
 				case 0: //Left
 
 					if( x > 0 && maze[x-1][y].visited == false ) {
-						maze[x][y].setLeft( 'n' );
+						maze[x][y].setLeft( MazeCell::NONE );
 
 						recurseRandom( x - 1, y, depth + 1, numSoFar );
 					}
@@ -445,7 +445,7 @@ void MazeManager::recurseRandom( uint_least8_t x, uint_least8_t y, uint_least16_
 				case 1: //Right
 
 					if( x < cols - 1 && maze[x+1][y].visited == false ) {
-						maze[x+1][y].setLeft( 'n' );
+						maze[x+1][y].setLeft( MazeCell::NONE );
 
 						recurseRandom( x + 1, y, depth + 1, numSoFar );
 					}
@@ -455,7 +455,7 @@ void MazeManager::recurseRandom( uint_least8_t x, uint_least8_t y, uint_least16_
 				case 2: //Up
 
 					if( y > 0 && maze[x][y-1].visited == false ) {
-						maze[x][y].setTop( 'n' );
+						maze[x][y].setTop( MazeCell::NONE );
 
 						recurseRandom( x, y - 1, depth + 1, numSoFar );
 					}
@@ -465,7 +465,7 @@ void MazeManager::recurseRandom( uint_least8_t x, uint_least8_t y, uint_least16_
 				case 3: //Down
 
 					if( y < rows - 1 && maze[x][y+1].visited == false ) {
-						maze[x][y+1].setTop( 'n' );
+						maze[x][y+1].setTop( MazeCell::NONE );
 
 						recurseRandom( x, y + 1, depth + 1, numSoFar );
 					}

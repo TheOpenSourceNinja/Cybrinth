@@ -118,17 +118,17 @@ bool GameManager::allHumansAtGoal() {
 bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const SEvent& event ) {
 	try {
 		switch( keyMap.at( k ).getAction() ) {
-			case L'm': {
+			case KeyMapping::MENU: {
 				showingMenu = true;
 				return true;
 				break;
 			}
-			case L's': {
+			case KeyMapping::SCREENSHOT: {
 				takeScreenShot();
 				return true;
 				break;
 			}
-			case L'^': {
+			case KeyMapping::VOLUME_UP: {
 				if( event.MouseInput.Wheel > 0 ) {
 					musicVolume += 5;
 
@@ -141,7 +141,7 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 				}
 				break;
 			}
-			case L'v': {
+			case KeyMapping::VOLUME_DOWN: {
 				if( event.MouseInput.Wheel <= 0 ) {
 					if( musicVolume >= 5 ) {
 						musicVolume -= 5;
@@ -164,28 +164,28 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 
 				if( !ignoreKey ) {
 					switch( keyMap.at( k ).getAction() ) {
-						case L'u': {
+						case KeyMapping::UP: {
 							movePlayerOnY( keyMap.at( k ).getPlayer(), -1);
 							return true;
 							break;
 						}
-						case L'd': {
+						case KeyMapping::DOWN: {
 							movePlayerOnY( keyMap.at( k ).getPlayer(), 1);
 							return true;
 							break;
 						}
-						case L'r': {
+						case KeyMapping::RIGHT: {
 							movePlayerOnX( keyMap.at( k ).getPlayer(), 1);
 							return true;
 							break;
 						}
-						case L'l': {
+						case KeyMapping::LEFT: {
 							movePlayerOnX( keyMap.at( k ).getPlayer(), -1);
 							return true;
 							break;
 						}
 						default: {
-							throw std::wstring( L"Unrecognized key action: " ) + keyMap.at( k ).getAction();
+							throw std::wstring( L"Unrecognized key action: " ) + keyMap.at( k ).getActionAsString();
 						}
 					}
 				}
@@ -1378,10 +1378,10 @@ void GameManager::movePlayerOnX( uint_least8_t p, int_fast8_t direction ) {
 	try {
 		if( numPlayers > p && mazeManager.cols > 0 ) {
 			if( direction < 0 ) {
-				if( player.at( p ).getX() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() == 'n' ) {
+				if( player.at( p ).getX() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() == MazeCell::NONE ) {
 					player.at( p ).moveX( -1 );
 				}
-			} else if( player.at( p ).getX() < ( mazeManager.cols - 1 ) && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() == 'n' ) {
+			} else if( player.at( p ).getX() < ( mazeManager.cols - 1 ) && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() == MazeCell::NONE ) {
 				player.at( p ).moveX( 1 );
 			}
 
@@ -1419,10 +1419,10 @@ void GameManager::movePlayerOnY( uint_least8_t p, int_fast8_t direction ) {
 	try {
 		if( numPlayers > p && mazeManager.rows > 0 ) {
 			if( direction < 0 ) {
-				if( player.at( p ).getY() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() == 'n' ) {
+				if( player.at( p ).getY() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() == MazeCell::NONE ) {
 					player.at( p ).moveY( -1 );
 				}
-			} else if( player.at( p ).getY() < ( mazeManager.rows - 1 ) && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() == 'n' ) {
+			} else if( player.at( p ).getY() < ( mazeManager.rows - 1 ) && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() == MazeCell::NONE ) {
 				player.at( p ).moveY( 1 );
 			}
 
@@ -1508,12 +1508,12 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						for( auto k = 0; k < keyMap.size(); ++k ) {
 							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
 								switch( keyMap.at( k ).getAction() ) {
-									case L'm': {
+									case KeyMapping::MENU: {
 										showingMenu = false;
 										return true;
 										break;
 									}
-									case L's': {
+									case KeyMapping::SCREENSHOT: {
 										takeScreenShot();
 										return true;
 										break;
@@ -2880,11 +2880,7 @@ void GameManager::setControls() {
 									}
 								}
 
-								if( preference == L"menu" ) {
-									keyMap.back().setAction(L'm');
-								} else if( preference == L"screenshot" ) {
-									keyMap.back().setAction(L's');
-								} else if( preference.substr( 0, 6 ) == L"player" ) {
+								if( preference.substr( 0, 6 ) == L"player" ) {
 									preference = preference.substr( 7 );
 									std::wstring playerNumStr = boost::algorithm::trim_copy( preference.substr( 0, preference.find( L' ' ) ) );
 									std::wstring actionStr = boost::algorithm::trim_copy( preference.substr( preference.find( L' ' ) ) );
@@ -2892,16 +2888,24 @@ void GameManager::setControls() {
 
 									if( playerNum < numPlayers ) {
 										keyMap.back().setPlayer( playerNum );
-										wchar_t action = actionStr.at( 0 );
-										keyMap.back().setAction( action );
+										//wchar_t action = actionStr.at( 0 );
+										keyMap.back().setActionFromString( actionStr );
 									} else {
 										keyMap.pop_back();
 									}
-								} else if( preference == L"volumeup" ) {
+								} else {
+									keyMap.back().setActionFromString( preference );
+								}
+
+								/*if( preference == L"menu" ) {
+									keyMap.back().setAction(L'm');
+								} else if( preference == L"screenshot" ) {
+									keyMap.back().setAction(L's');
+								} else  else if( preference == L"volumeup" ) {
 									keyMap.back().setAction(L'^');
 								} else if( preference == L"volumedown" ) {
 									keyMap.back().setAction(L'v');
-								}
+								}*/
 							} catch( std::exception e ) {
 								std::wcerr << L"Error in GameManager::setControls(): " << e.what() << std::endl;
 							} catch( std::wstring e ) {

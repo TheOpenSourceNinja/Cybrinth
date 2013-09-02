@@ -15,10 +15,10 @@
 
 MazeCell::MazeCell() {
 	try {
-		top = 'n';
-		left = 'n';
-		bottom = 'n';
-		right = 'n';
+		top = NONE;
+		left = NONE;
+		bottom = NONE;
+		right = NONE;
 		visited = false;
 		distanceFromStart = 999;
 		id = 0;
@@ -53,16 +53,16 @@ MazeCell::~MazeCell() {
 	}
 }
 
-wchar_t MazeCell::getTop() {
+MazeCell::border_t MazeCell::getTop() {
 	try {
 		return top;
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in MazeCell::getTop(): " << e.what() << std::endl;
-		return 'n';
+		return NONE;
 	}
 }
 
-void MazeCell::setTop( wchar_t val )  {
+void MazeCell::setTop( border_t val )  {
 	try {
 		top = val;
 	} catch ( std::exception e ) {
@@ -70,16 +70,16 @@ void MazeCell::setTop( wchar_t val )  {
 	}
 }
 
-wchar_t MazeCell::getLeft() {
+MazeCell::border_t MazeCell::getLeft() {
 	try {
 		return left;
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in MazeCell::getLeft(): " << e.what() << std::endl;
-		return 'n';
+		return NONE;
 	}
 }
 
-void MazeCell::setLeft( wchar_t val ) {
+void MazeCell::setLeft( border_t val ) {
 	try {
 		left = val;
 	} catch ( std::exception e ) {
@@ -87,16 +87,16 @@ void MazeCell::setLeft( wchar_t val ) {
 	}
 }
 
-wchar_t MazeCell::getBottom() {
+MazeCell::border_t MazeCell::getBottom() {
 	try {
 		return bottom;
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in MazeCell::getBottom(): " << e.what() << std::endl;
-		return 'n';
+		return NONE;
 	}
 }
 
-void MazeCell::setBottom( wchar_t val ) {
+void MazeCell::setBottom( border_t val ) {
 	try {
 		bottom = val;
 	} catch ( std::exception e ) {
@@ -104,16 +104,16 @@ void MazeCell::setBottom( wchar_t val ) {
 	}
 }
 
-wchar_t MazeCell::getRight() {
+MazeCell::border_t MazeCell::getRight() {
 	try {
 		return right;
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in MazeCell::getRight(): " << e.what() << std::endl;
-		return 'n';
+		return NONE;
 	}
 }
 
-void MazeCell::setRight( wchar_t val ) {
+void MazeCell::setRight( border_t val ) {
 	try {
 		right = val;
 	} catch ( std::exception e ) {
@@ -123,20 +123,20 @@ void MazeCell::setRight( wchar_t val ) {
 
 void MazeCell::removeLocks() {
 	try {
-		if( top == 'l' ) {
-			top = 'n';
+		if( top == LOCK ) {
+			top = NONE;
 		}
 
-		if( left == 'l' ) {
-			left = 'n';
+		if( left == LOCK ) {
+			left = NONE;
 		}
 
-		if( bottom == 'l' ) {
-			bottom = 'n';
+		if( bottom == LOCK ) {
+			bottom = NONE;
 		}
 
-		if( right == 'l' ) {
-			right = 'n';
+		if( right == LOCK ) {
+			right = NONE;
 		}
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in MazeCell::removeLocks(): " << e.what() << std::endl;
@@ -158,7 +158,7 @@ bool MazeCell::hasLock() {
 
 bool MazeCell::hasLeftLock() {
 	try {
-		if( left == 'l' ) {
+		if( left == LOCK ) {
 			return true;
 		} else {
 			return false;
@@ -171,7 +171,7 @@ bool MazeCell::hasLeftLock() {
 
 bool MazeCell::hasTopLock() {
 	try {
-		if( top == 'l' ) {
+		if( top == LOCK ) {
 			return true;
 		} else {
 			return false;
@@ -185,16 +185,16 @@ bool MazeCell::hasTopLock() {
 bool MazeCell::isDeadEnd() {
 	try {
 		bool result = false;
-		if ( top == 'n' && left != 'n' && bottom != 'n' && right != 'n' ) {
+		if ( top == NONE && left != NONE && bottom != NONE && right != NONE ) {
 			//wcout << L"Dead end (top)" << std::endl;
 			result = true;
-		} else if ( top != 'n' && left == 'n' && bottom != 'n' && right != 'n' ) {
+		} else if ( top != NONE && left == NONE && bottom != NONE && right != NONE ) {
 			//wcout << L"Dead end (left)" << std::endl;
 			result = true;
-		} else if ( top != 'n' && left != 'n' && bottom == 'n' && right != 'n' ) {
+		} else if ( top != NONE && left != NONE && bottom == NONE && right != NONE ) {
 			//wcout << L"Dead end (bottom)" << std::endl;
 			result = true;
-		} else if ( top != 'n' && left != 'n' && bottom != 'n' && right == 'n' ) {
+		} else if ( top != NONE && left != NONE && bottom != NONE && right == NONE ) {
 			//wcout << L"Dead end (right)" << std::endl;
 			result = true;
 		} else {

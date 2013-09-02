@@ -204,16 +204,16 @@ void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > 
 			}
 
 			//See which direction(s) the bot can move
-			if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == 'n' && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+			if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 				possibleDirections.push_back( UP );
 			}
-			if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == 'n' && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+			if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 				possibleDirections.push_back( LEFT );
 			}
-			if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == 'n' && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+			if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 				possibleDirections.push_back( DOWN );
 			}
-			if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == 'n' && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+			if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 				possibleDirections.push_back( RIGHT );
 			}
 
@@ -373,16 +373,16 @@ void AI::move() {
 					}
 
 					//See which direction(s) the bot can move
-					if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == 'n' && !alreadyVisited( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+					if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 						possibleDirections.push_back( UP );
 					}
-					if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == 'n' && !alreadyVisited( core::position2d< uint_least8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+					if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_least8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 						possibleDirections.push_back( LEFT );
 					}
-					if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == 'n' && !alreadyVisited( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+					if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 						possibleDirections.push_back( DOWN );
 					}
-					if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == 'n' && !alreadyVisited( core::position2d< uint_least8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+					if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_least8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 						possibleDirections.push_back( RIGHT );
 					}
 				}

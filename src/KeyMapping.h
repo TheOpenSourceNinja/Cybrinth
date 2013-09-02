@@ -2,11 +2,13 @@
 #define KEYMAPPING_H
 
 #include <irrlicht.h>
+#include <string>
 #include "Integers.h"
 
 class KeyMapping
 {
 	public:
+		enum action_t { MENU, SCREENSHOT, VOLUME_UP, VOLUME_DOWN, UP, DOWN, RIGHT, LEFT, ERROR_DO_NOT_USE };
 		/** Default constructor */
 		KeyMapping();
 		/** Default destructor */
@@ -22,11 +24,20 @@ class KeyMapping
 		/** Access action
 		 * \return The current value of action
 		 */
-		wchar_t getAction(); //TODO: Is there any way to use an enumerated type here rather than a character?
+		action_t getAction();
+		/** Convert action to string
+		 * \return A string representing the action.
+		 */
+		std::wstring getActionAsString();
 		/** Set action
 		 * \param val New value to set
 		 */
-		void setAction( wchar_t val );
+		void setAction( action_t val );
+		/** Set action based on string input
+		 * \param val A string representing the action to use
+		 */
+		void setActionFromString( std::wstring val );
+
 		/** Access mouseEvent
 		 * \return The current value of mouseEvent
 		 */
@@ -56,7 +67,7 @@ class KeyMapping
 		irr::EKEY_CODE key;
 		irr::EMOUSE_INPUT_EVENT mouseEvent;
 		bool mouseWheelUp;
-		wchar_t action;
+		action_t action;
 		uint_least8_t player;
 };
 

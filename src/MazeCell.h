@@ -17,16 +17,17 @@
 
 class MazeCell {
 	public:
+		enum border_t { LOCK, WALL, NONE };
 		MazeCell();
 		virtual ~MazeCell();
-		wchar_t getTop();
-		void setTop( wchar_t val );
-		wchar_t getLeft();
-		void setLeft( wchar_t val );
-		wchar_t getBottom();
-		void setBottom( wchar_t val );
-		wchar_t getRight();
-		void setRight( wchar_t val );
+		border_t getTop();
+		void setTop( border_t val );
+		border_t getLeft();
+		void setLeft( border_t val );
+		border_t getBottom();
+		void setBottom( border_t val );
+		border_t getRight();
+		void setRight( border_t val );
 		void removeLocks();
 		bool visited; //Used by the maze generation algorithm to ensure there are no loops, by canGetTo() to indicate which cells it's already look at, and during play for the players' own use.
 		uint_least16_t distanceFromStart;
@@ -40,10 +41,10 @@ class MazeCell {
 		bool visible;
 	protected:
 	private:
-		wchar_t top;
-		wchar_t left;
-		wchar_t bottom; //Useless except on maze borders and when checking if it's a dead end. Do not rely on this to be accurate.
-		wchar_t right; //Ditto.
+		border_t top;
+		border_t left;
+		border_t bottom; //Useless except on maze borders and when checking if it's a dead end. Do not rely on this to be accurate.
+		border_t right; //Ditto.
 		irr::video::SColor visitorColor;
 };
 
