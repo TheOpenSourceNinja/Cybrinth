@@ -73,7 +73,7 @@ void Object::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_
 		if( texture != NULL ) {
 			int_least16_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
 			int_least16_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
-			irr::video::SColor colorArray[] = {colorTwo, colorTwo, colorTwo, colorTwo};
+			irr::video::SColor colorArray[ ] = {colorTwo, colorTwo, colorTwo, colorTwo};
 			driver->draw2DImage( texture,
 								 irr::core::rect< irr::s32 >( cornerX, cornerY, cornerX + size, cornerY + size ),
 								 irr::core::rect< irr::s32 >( irr::core::position2d< irr::s32 >( 0, 0 ), texture->getSize() ),

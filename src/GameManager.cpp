@@ -45,7 +45,7 @@
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
 //TODO: Find or record clock ticking sound for use with various items
 //TODO: Get multiplayer working online
-//TODO: Add AI. Two difficulty settings ('already knows the solution' and 'finds the solution as it plays') and any solving algorithms I can think of (depth-first and breadth-first search)
+//TODO: Improve AI. Two difficulty settings ('already knows the solution' and 'finds the solution as it plays') and any solving algorithms I can think of (depth-first and breadth-first search)
 //TODO: Possible idea: Hide parts of the maze that are inaccessible due to locks.
 //TODO: Possible idea: Hide parts of the maze not seen yet (seen means line-of-sight to any visited cell)
 //TODO: Add shader to simulate old monitor?
@@ -233,7 +233,7 @@ void GameManager::drawAll() {
 			}
 
 			//Because of a texture resizing bug in Irrlicht's software renderers, we draw the items (currently all keys, which use a large png as a texture) before the players (which generate their own texture at the correct size) and the maze walls. Otherwise the items could cover the players or maze walls.
-			for( uint_fast16_t i = 0; i < stuff.size(); ++i ) {
+			for( uint_fast8_t i = 0; i < stuff.size(); ++i ) {
 				stuff.at( i ).draw( driver, cellWidth, cellHeight );
 			}
 
@@ -265,7 +265,7 @@ void GameManager::drawAll() {
 			uint_least32_t textY = spaceBetween;
 
 			time_t currentTime = time( NULL );
-			wchar_t clockTime[9];
+			wchar_t clockTime[9 ];
 			wcsftime( clockTime, 9, L"%H:%M:%S", localtime( &currentTime ) );
 			core::dimension2d<uint_least32_t> tempDimensions = clockFont->getDimension( core::stringw( clockTime ).c_str() );
 			core::rect<int_least32_t> tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
@@ -749,7 +749,7 @@ GameManager::GameManager() {
 
 				std::wcout << L"\tHat is: ";
 
-				switch( joystickInfo[joystick].PovHat ) {
+				switch( joystickInfo[joystick ].PovHat ) {
 					case SJoystickInfo::POV_HAT_PRESENT:
 						std::wcout << L"present" << std::endl;
 						break;
@@ -1116,7 +1116,7 @@ void GameManager::loadNextSong() {
 			positionInList -= musicList.size();
 		}
 
-		currentMusic = musicList[positionInList];
+		currentMusic = musicList[positionInList ];
 		music = Mix_LoadMUS( currentMusic.c_str() ); //SDL Mixer does not support wstrings
 
 		if( music == NULL ) {
@@ -1624,14 +1624,14 @@ bool GameManager::OnEvent( const SEvent& event ) {
 					bool joystickMovedLeft = false;
 
 					for( uint_fast16_t i = 0; i < verticalAxes.size(); ++i ) {
-						if( event.JoystickEvent.Axis[i] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
+						if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
 							if( debug ) {
-								std::wcout << L"Axis value: " << event.JoystickEvent.Axis[i] << std::endl;
+								std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
 							}
 							joystickMovedUp = true;
-						} else if( event.JoystickEvent.Axis[i] <= ( SHRT_MIN / 2 ) ) {
+						} else if( event.JoystickEvent.Axis[ i ] <= ( SHRT_MIN / 2 ) ) {
 							if( debug ) {
-								std::wcout << L"Axis value: " << event.JoystickEvent.Axis[i] << std::endl;
+								std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
 							}
 							joystickMovedDown = true;
 						}
@@ -1743,8 +1743,8 @@ void GameManager::readPrefs() {
 
 						if( !line.empty() ) {
 							try {
-								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( '\t' ) ) );
-								std::wstring choice = boost::algorithm::trim_copy( line.substr( line.find( '\t' ) ) );
+								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
+								std::wstring choice = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
 								if( debug ) {
 									std::wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< std::endl;
 								}
@@ -2202,7 +2202,7 @@ void GameManager::resetThings() {
 			bot.at( b ).reset();
 		}
 
-		for( uint_fast16_t i = 0; i < stuff.size(); ++i ) {
+		for( uint_fast8_t i = 0; i < stuff.size(); ++i ) {
 			stuff.at( i ).loadTexture( driver );
 		}
 
@@ -2280,17 +2280,21 @@ int GameManager::run() {
 
 					//Check if any of the players have landed on a collectable item
 					for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
-						for( uint_fast16_t s = 0; s < stuff.size(); ++s ) {
+						for( uint_fast8_t s = 0; s < stuff.size(); ++s ) {
 							if( player.at( p ).getX() == stuff.at( s ).getX() && player.at( p ).getY() == stuff.at( s ).getY() ) {
 								switch( stuff.at( s ).getType() ) {
-									case COLLECTABLE_KEY: {
+									case Collectable::KEY: {
 										++numKeysFound;
 										stuff.erase( stuff.begin() + s );
+
+										for( uint_fast8_t b = 0; b < numBots; ++b ) {
+											bot.at( b ).keyFound( s );
+										}
 
 										if( numKeysFound >= numLocks ) {
 											for( uint_fast8_t c = 0; c < mazeManager.cols; ++c ) {
 												for( uint_fast8_t r = 0; r < mazeManager.rows; ++r ) {
-													mazeManager.maze[c][r].removeLocks();
+													mazeManager.maze[ c ][ r ].removeLocks();
 												}
 											}
 
@@ -2475,7 +2479,7 @@ void GameManager::setControls() {
 								keyMap.push_back( temp );
 
 								//TODO: Possibly use Damerau–Levenshtein distances to account for spelling errors.
-								std::wstring possibleChoicesArray[] = {
+								std::wstring possibleChoicesArray[ ] = {
 									L"mousewheelup", L"mousewheeldown",
 									L"mouseleftdown", L"mouserightdown", L"mousemiddledown",
 									L"mouseleftup", L"mouserightup", L"mousemiddleup",

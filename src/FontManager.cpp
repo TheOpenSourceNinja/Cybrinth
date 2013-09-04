@@ -107,7 +107,7 @@ irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, ir
 				return NULL;
 			}
 
-			mFaceMap[faceName] = face;
+			mFaceMap[ faceName ] = face;
 		}
 
 		// access to the video driver in my application.
@@ -116,7 +116,7 @@ irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, ir
 		font->attach( face, size_ );
 		font->AntiAlias = antiAlias_;
 		font->Transparency = transparency_;
-		mFontMap[fontString] = font;
+		mFontMap[ fontString ] = font;
 
 		return font;
 	} catch ( std::exception e ) {

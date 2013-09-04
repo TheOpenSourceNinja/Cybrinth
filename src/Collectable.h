@@ -16,21 +16,21 @@
 
 #include <irrlicht.h>
 
-#define COLLECTABLE_KEY 1
-
 class Collectable : public Object {
 	public:
+		enum type_t { KEY };
+
 		Collectable();
 		virtual ~Collectable();
 
 		void draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height );
-		uint_least8_t getType();
+		type_t getType();
 		void loadTexture( irr::video::IVideoDriver* driver );
 		void reset();
-		void setType( uint_least8_t );
+		void setType( type_t newType );
 	protected:
 	private:
-		uint_least8_t type;
+		type_t type;
 		void resizeImage( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height );
 		irr::video::IImage* textureToImage( irr::video::IVideoDriver* driver, irr::video::ITexture* texture );
 		irr::video::ITexture* imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* texture, irr::core::stringw name );

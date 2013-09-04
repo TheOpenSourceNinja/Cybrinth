@@ -92,7 +92,7 @@ class CGUIFreetypeFont : public irr::gui::IGUIFont {
 		virtual void draw( const irr::core::stringw& text, const irr::core::rect<irr::s32>& position, irr::video::SColor color, bool hcenter = false, bool vcenter = false, const irr::core::rect<irr::s32>* clip = 0 );
 
 		//! returns the dimension of a text
-		virtual irr::core::dimension2d<irr::u32> getDimension( const wchar_t* text ) const;
+		virtual irr::core::dimension2d< irr::u32 > getDimension( const wchar_t* text ) const;
 
 		//! Calculates the index of the character in the text which is on a specific position.
 		virtual irr::s32 getCharacterFromPos( const wchar_t* text, irr::s32 pixel_x ) const;

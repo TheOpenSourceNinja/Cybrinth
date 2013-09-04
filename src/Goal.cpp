@@ -65,7 +65,10 @@ void Goal::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size ) 
 		tempImage->fill( irr::video::SColor( 0, 0, 0, 0) ); //Fills the image with invisibility!
 
 		for( uint_fast16_t x = 0; x <= ( size / 2 ); ++x ) {
-			for( uint_fast16_t y = 0; y <= x; ++y ) {
+			tempImage->setPixel( x, ( size / 2 ), colorOne );
+			tempImage->setPixel( size - x, ( size / 2 ), colorOne );
+
+			for( uint_fast16_t y = 1; y <= x; ++y ) {
 				tempImage->setPixel( x, y + ( size / 2 ), colorOne );
 				tempImage->setPixel( size - x, y + ( size / 2 ), colorOne );
 				tempImage->setPixel( x, size - ( y + ( size / 2 ) ), colorOne );

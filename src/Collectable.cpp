@@ -19,7 +19,7 @@ Collectable::Collectable() {
 	try {
 		x = 0;
 		y = 0;
-		type = COLLECTABLE_KEY;
+		setType( KEY );
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in Collectable::Collectable(): " << e.what() << std::endl;
 	}
@@ -51,7 +51,7 @@ void Collectable::draw( irr::video::IVideoDriver* driver, uint_least16_t width, 
 	}
 }
 
-uint_least8_t Collectable::getType() {
+Collectable::type_t Collectable::getType() {
 	try {
 		return type;
 	} catch ( std::exception e ) {
@@ -73,7 +73,7 @@ irr::video::ITexture* Collectable::imageToTexture( irr::video::IVideoDriver* dri
 void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 	try {
 		switch( type ) {
-			case COLLECTABLE_KEY: {
+			case KEY: {
 					texture = driver->getTexture( L"key.png" );
 
 					break;
@@ -98,7 +98,7 @@ void Collectable::resizeImage( irr::video::IVideoDriver* driver, uint_least16_t 
 	try {
 		if( texture == NULL || texture->getOriginalSize().Width < width || texture->getOriginalSize().Height < height ) {
 			switch( type ) {
-				case COLLECTABLE_KEY: { //COLLECTABLE_KEY loads the texture from an image, so load the image before resizing
+				case KEY: { //COLLECTABLE_KEY loads the texture from an image, so load the image before resizing
 						loadTexture( driver );
 						break;
 					}
@@ -123,12 +123,12 @@ void Collectable::resizeImage( irr::video::IVideoDriver* driver, uint_least16_t 
 	}
 }
 
-void Collectable::setType( uint_least8_t newType ) {
+void Collectable::setType( type_t newType ) {
 	try {
 		type = newType;
 
 		switch( type ) {
-			case COLLECTABLE_KEY: {
+			case KEY: {
 					setColor( YELLOW );
 					break;
 				}

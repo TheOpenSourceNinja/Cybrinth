@@ -138,13 +138,14 @@ bool AI::doneWaiting() {
 }
 
 void AI::findSolution() {
-	solved = false;
-	numKeysInSolution = 0;
 	try {
+		solved = false;
+		//numKeysInSolution = 0;
+		keyImSeeking = 0;
 		solution.clear();
+		irr::core::position2d< uint_least8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 		switch( algorithm ) {
 			case DEPTH_FIRST_SEARCH: {
-				irr::core::position2d< uint_least8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 				DFSCellsVisited.clear();
 				findSolutionDFS( currentPosition );
 				solved = true;
@@ -156,6 +157,13 @@ void AI::findSolution() {
 				break;
 			}
 		}
+
+		if( !solution.empty() ) {
+			//while( solution.back().X == currentPosition.X && solution.back().Y == currentPosition.Y ) {
+			while( solution.back() == currentPosition ) {
+				solution.pop_back();
+			}
+		}
 	} catch( std::exception e ) {
 		std::wcout << L"Error in AI::findSolution(): " << e.what() << std::endl;
 	} catch( std::wstring e ) {
@@ -164,20 +172,24 @@ void AI::findSolution() {
 }
 
 void AI::findSolutionDFS( irr::core::position2d< uint_least8_t > currentPosition ) {
-	std::vector< irr::core::position2d< uint_least8_t > > partialSolution;
-	findSolutionDFS( partialSolution, currentPosition );
+	try {
+		std::vector< irr::core::position2d< uint_least8_t > > partialSolution;
+		findSolutionDFS( partialSolution, currentPosition );
 
-	//Reverses the order of the solution, so we don't start and the wrong end
-	std::vector< irr::core::position2d< uint_least8_t > > tempSolution;
-	while( !solution.empty() ) {
-		tempSolution.push_back( solution.back() );
-		solution.pop_back();
+		//Reverses the order of the solution, so we don't start and the wrong end
+		std::vector< irr::core::position2d< uint_least8_t > > tempSolution;
+		while( !solution.empty() ) {
+			tempSolution.push_back( solution.back() );
+			solution.pop_back();
+		}
+		while( !tempSolution.empty() ) {
+			solution.insert( solution.begin(), tempSolution.back() );
+			tempSolution.pop_back();
+		}
+		solution.push_back( currentPosition );
+	} catch( std::exception e ) {
+		std::wcout << L"Error in AI::findSolutionDFS(): " << e.what() << std::endl;
 	}
-	while( !tempSolution.empty() ) {
-		solution.insert( solution.begin(), tempSolution.back() );
-		tempSolution.pop_back();
-	}
-	solution.push_back( currentPosition );
 }
 
 void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > partialSolution, irr::core::position2d< uint_least8_t > currentPosition ) {
@@ -190,16 +202,17 @@ void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > 
 		partialSolution.push_back( currentPosition );
 		std::vector< direction_t > possibleDirections;
 		if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
-			bool ignoreLocks = ( numKeysInSolution >= gm->getNumKeys() );
+			//bool ignoreLocks = ( numKeysInSolution >= gm->getNumKeys() );
 
-			for( uint_fast8_t k = 0; !ignoreLocks && k < gm->getNumKeys(); ++k ) {
+			for( uint_fast8_t k = 0; k < gm->getNumKeys(); ++k ) {
 				if( ( currentPosition.X == gm->getKey( k )->getX() && currentPosition.Y == gm->getKey( k )->getY() ) ) {
-					DFSCellsVisited.clear(); //Clear places visited so we can continue searching for the next key or the goal
-					DFSCellsVisited.push_back( currentPosition );
+					//DFSCellsVisited.clear(); //Clear places visited so we can continue searching for the next key or the goal
+					//DFSCellsVisited.push_back( currentPosition );
 					solution = partialSolution;
-					++numKeysInSolution;
+					//++numKeysInSolution;
 
-					ignoreLocks = ( numKeysInSolution >= gm->getNumKeys() );
+					//ignoreLocks = ( numKeysInSolution >= gm->getNumKeys() );
+					keyImSeeking = k;
 				}
 			}
 
@@ -217,7 +230,7 @@ void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > 
 				possibleDirections.push_back( RIGHT );
 			}
 
-			if( ignoreLocks ) {
+			/*if( ignoreLocks ) {
 				//See which direction(s) the bot can move
 				if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].hasTopLock() && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 					possibleDirections.push_back( UP );
@@ -231,7 +244,7 @@ void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > 
 				if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].hasTopLock() && !alreadyVisitedDFS( core::position2d< uint_least8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 					possibleDirections.push_back( RIGHT );
 				}
-			}
+			}*/
 
 			if( possibleDirections.size() == 0 && partialSolution.size() != 0 ) {
 				partialSolution.pop_back();
@@ -285,6 +298,16 @@ uint_least8_t AI::getPlayer() {
 	}
 }
 
+void AI::keyFound( uint_fast8_t key ) {
+	try {
+		if( startSolved && key == keyImSeeking ) {
+			findSolution();
+		}
+	} catch( std::exception e ) {
+		std::wcout << L"Error in AI::keyFound(): " << e.what() << std::endl;
+	}
+}
+
 void AI::move() {
 	try {
 		lastTimeMoved = gm->timer->getRealTime();
@@ -300,7 +323,6 @@ void AI::move() {
 					irr::core::position2d< uint_least8_t > p = *rit;
 					std::wcout << sc.toStdWString( p.X ) << L"x" << sc.toStdWString( p.Y ) << std::endl;
 				}
-				//getchar();
 			}
 
 			/*std::vector< irr::core::position2d< uint_least8_t > >::size_type currentPlaceInSolution;
@@ -312,6 +334,7 @@ void AI::move() {
 			}*/
 
 			//if( currentPlaceInSolution > 0 ) {//< solution.size() - 1 ) {
+
 			if( !solution.empty() ) {
 				if( solution.back().X > currentPosition.X ) {
 					if( gm->getDebugStatus() ) {
@@ -333,10 +356,13 @@ void AI::move() {
 						std::wcout << L"Moving up" << std::endl;
 					}
 					gm->movePlayerOnY( controlsPlayer, -1 );
+				} else {
+					std::wcout << L"test" << std::endl;
 				}
 				solution.pop_back();
 			} else {
 				solved = false;
+				findSolution();
 				//throw( std::wstring( L"Error in AI::move(): Solution is empty, but I'm not at the goal and startSolved is true. Setting solved to false so a solution will be found." ) );
 			}
 			//}
@@ -459,19 +485,23 @@ void AI::move() {
 }
 
 void AI::reset() {
-	lastTimeMoved = 0;
-	solution.clear();
-	solved = false;
-	DFSCellsVisited.clear();
-	for( auto i = 0; i < pathsToLockedCells.size(); ++i ) {
-		pathsToLockedCells.at( i ).clear();
-	}
-	pathsToLockedCells.clear();
-	pathTaken.clear();
-	cellsVisited.clear();
+	try {
+		lastTimeMoved = 0;
+		solution.clear();
+		solved = false;
+		DFSCellsVisited.clear();
+		for( auto i = 0; i < pathsToLockedCells.size(); ++i ) {
+			pathsToLockedCells.at( i ).clear();
+		}
+		pathsToLockedCells.clear();
+		pathTaken.clear();
+		cellsVisited.clear();
 
-	if( startSolved && gm != NULL ) {
-		findSolution();
+		if( startSolved && gm != NULL ) {
+			findSolution();
+		}
+	} catch( std::exception e ) {
+		std::wcout << L"Error in AI::reset(): " << e.what() << std::endl;
 	}
 }
 

@@ -284,7 +284,7 @@ bool NetworkManager::hasNewPlayerConnected() {
 
 void NetworkManager::sendMaze( MazeCell ** maze, uint_least8_t cols, uint_least8_t rows ) {
 	try {
-		//char buffer[sizeof(cols) + sizeof(rows) + (cols * rows)];
+		//char buffer[sizeof(cols) + sizeof(rows) + (cols * rows) ];
 		std::vector<uint_least8_t> toSend;
 		toSend.reserve( 9 + 7 + 2 + ( cols * rows * 4 ) );
 		toSend.push_back( 'S' );
@@ -301,10 +301,10 @@ void NetworkManager::sendMaze( MazeCell ** maze, uint_least8_t cols, uint_least8
 
 		for( uint_fast8_t c = 0; c < cols; ++c ) {
 			for( uint_fast8_t r = 0; r < rows; ++r ) {
-				toSend.push_back( maze[c][r].getTop() );
-				toSend.push_back( maze[c][r].getLeft() );
-				toSend.push_back( maze[c][r].getBottom() );
-				toSend.push_back( maze[c][r].getRight() );
+				toSend.push_back( maze[c ][r ].getTop() );
+				toSend.push_back( maze[c ][r ].getLeft() );
+				toSend.push_back( maze[c ][r ].getBottom() );
+				toSend.push_back( maze[c ][r ].getRight() );
 			}
 		}
 
@@ -471,7 +471,7 @@ void NetworkManager::sendU8( uint_least8_t num, std::wstring desc ) {
 		boost::algorithm::to_upper( desc );
 
 		for( uint_fast8_t i = 0; i < desc.size(); ++i ) {
-			toSend.push_back( desc[i] );
+			toSend.push_back( desc[i ] );
 		}
 
 		toSend.push_back( num );
@@ -481,7 +481,7 @@ void NetworkManager::sendU8( uint_least8_t num, std::wstring desc ) {
 		toSend.push_back( 'D' );
 
 		for( uint_fast8_t i = 0; i < desc.size(); ++i ) {
-			toSend.push_back( desc[i] );
+			toSend.push_back( desc[i ] );
 		}
 
 		for( int j = 0; j <= fdmax; ++j ) {
@@ -516,10 +516,10 @@ void NetworkManager::sendCollectables( std::vector<Collectable> stuff ) {
 
 		for( uint_fast8_t i = 0; i < stuff.size(); ++i ) {
 			toSend.push_back( i );
-			toSend.push_back( stuff[i].getType() );
-			toSend.push_back( stuff[i].getX() );
-			toSend.push_back( stuff[i].getY() );
-			std::wcout << L"Sending collectable #" << i << L" of type " << stuff[i].getType() << L" at " << stuff[i].getX() << L"," << stuff[i].getY() << std::endl;
+			toSend.push_back( stuff.at( i ).getType() ); //Will this work? GetType() returns an enum, not a char or int.
+			toSend.push_back( stuff.at( i ).getX() );
+			toSend.push_back( stuff.at( i ).getY() );
+			std::wcout << L"Sending collectable #" << i << L" of type " << stuff.at( i ).getType() << L" at " << stuff.at( i ).getX() << L"," << stuff.at( i ).getY() << std::endl;
 		}
 
 		toSend.push_back( 'E' );
@@ -532,7 +532,7 @@ void NetworkManager::sendCollectables( std::vector<Collectable> stuff ) {
 			if( FD_ISSET( j, &master ) && j != listener ) {
 				size_t size = toSend.size();
 
-				if( sendData( j, &toSend[0], &size ) < 0 ) {
+				if( sendData( j, &toSend[0 ], &size ) < 0 ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 

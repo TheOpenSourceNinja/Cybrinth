@@ -66,12 +66,12 @@ class NetworkManager {
 		int fdmax;
 		fd_set master; //Lists all the socket descriptors currently connected, as well as listener
 		fd_set read_fds; //temporary file descriptor list for select(); select() modifies this to indicate which are ready to read
-		char remoteIP[INET6_ADDRSTRLEN];
+		char remoteIP[INET6_ADDRSTRLEN ];
 		struct sockaddr_storage remoteaddr; // client address
 		struct timeval timeout;
 		void *get_in_addr( struct sockaddr *sa );
 		int sendData( int sockfd, unsigned char *buf, size_t *len );
-		uint_least8_t receivedData[51]; //51 is the maximum possible size of a maze plus "STARTMAZE" and "ENDMAZE"
+		uint_least8_t receivedData[51 ]; //51 is the maximum possible size of a maze plus "STARTMAZE" and "ENDMAZE"
 
 		#if defined WINDOWS
 		WSADATA wsaData;   // if this doesn't work

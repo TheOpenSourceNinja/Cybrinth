@@ -31,6 +31,7 @@ class AI {
 		bool atGoal();
 		bool doneWaiting();
 		uint_least8_t getPlayer();
+		void keyFound( uint_fast8_t s );
 		void move(); //Needs to call GameManager's movePlayerOnX and movePlayerOnY functions.
 		void reset();
 		void setPlayer( uint_least8_t newPlayer );
@@ -51,10 +52,11 @@ class AI {
 		enum direction_t{ UP, DOWN, LEFT, RIGHT };
 		std::vector< irr::core::position2d< uint_least8_t > > DFSCellsVisited;
 		GameManager * gm;
+		uint_least8_t keyImSeeking;
 		uint_least32_t lastTimeMoved;
 		MazeCell ** maze;
 		uint_least16_t movementDelay; //How long to delay between movements
-		uint_least8_t numKeysInSolution;
+		//uint_least8_t numKeysInSolution;
 		std::vector< std::vector< irr::core::position2d< uint_least8_t > > > pathsToLockedCells;
 		std::vector< irr::core::position2d< uint_least8_t > > pathTaken;
 		uint_least8_t rows;
