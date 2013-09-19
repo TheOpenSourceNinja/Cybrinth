@@ -77,7 +77,8 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 					texture = driver->getTexture( L"key.png" );
 
 					if( texture == NULL ) {
-						irr::video::IImage* temp = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( width, height ) );
+						//Uncomment the following if using key.h instead of key.c:
+						/*irr::video::IImage* temp = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( width, height ) );
 						temp->fill( INVISIBLE );
 
 						char* data = header_data;
@@ -101,6 +102,45 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 							}
 						}
 
+						texture = imageToTexture( driver, temp, "key" );*/
+						
+						//Key.c:
+						irr::video::ECOLOR_FORMAT format;
+						switch( gimp_image.bytes_per_pixel ) {
+							case 2: {
+								format = irr::video::ECF_R5G6B5;
+								break;
+							}
+							case 3: {
+								format = irr::video::ECF_R8G8B8;
+								break;
+							}
+							case 4: {
+								format = irr::video::ECF_A8R8G8B8;
+							}
+						}
+						//The following line works but produces the wrong colors, since GIMP outputs in RGBA and Irrlicht apparently expects ARGB
+						//irr::video::IImage* temp = driver->createImageFromData( format, irr::core::dimension2d< irr::u32 >( gimp_image.width, gimp_image.height ), const_cast< unsigned char* >( gimp_image.pixel_data ), false, false );
+						
+						irr::video::IImage* temp = driver->createImage( format, irr::core::dimension2d< irr::u32 >( gimp_image.width, gimp_image.height ) );
+						
+						for( unsigned int y = 0; y < gimp_image.height; ++y ) {
+							for( unsigned int x = 0; x < gimp_image.width; ++x ) {
+								unsigned char pixel[ 4 ];
+								pixel[ 0 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 0 ];
+								pixel[ 1 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 1 ];
+								pixel[ 2 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 2 ];
+								
+								if( gimp_image.bytes_per_pixel == 4 ) {
+									pixel[ 3 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 3 ];
+								} else {
+									pixel[ 3 ] = 255;
+								}
+								
+								temp->setPixel( x, y, irr::video::SColor( pixel[ 3 ], pixel[ 0 ], pixel[ 1 ], pixel[ 2 ] ) );
+							}
+						}
+						
 						texture = imageToTexture( driver, temp, "key" );
 					}
 

@@ -46,6 +46,10 @@
 		<Linker>
 			<Add directory="$(Boost)/lib" />
 		</Linker>
+		<Unit filename="compiled-images/key.c">
+			<Option compilerVar="CC" />
+			<Option target="cybrinth" />
+		</Unit>
 		<Unit filename="controls.cfg">
 			<Option target="non-building files" />
 		</Unit>
@@ -159,9 +163,6 @@
 		</Unit>
 		<Unit filename="src/colors.h">
 			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="src/compiled-images/key.h">
-			<Option target="cybrinth" />
 		</Unit>
 		<Unit filename="src/main.cpp">
 			<Option target="&lt;{~None~}&gt;" />

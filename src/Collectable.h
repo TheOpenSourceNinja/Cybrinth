@@ -13,7 +13,7 @@
 #define COLLECTABLE_H
 
 #include "Object.h"
-#include "compiled-images/key.h"
+#include "compiled-images/key.c"
 
 #include <irrlicht.h>
 
