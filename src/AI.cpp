@@ -40,7 +40,7 @@ void AI::allKeysFound() { //Makes the bot 'forget' that it has visited certain m
 		//pathTaken.clear();
 		//cellsVisited.clear();
 		if( gm->getDebugStatus() ) {
-			std::wcout << L"Bot " << controlsPlayer << L" acknowledging all keys found" << std::endl;
+			//std::wcout << L"Bot " << controlsPlayer << L" acknowledging all keys found" << std::endl;
 		}
 		core::position2d< uint_least8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 
@@ -195,7 +195,7 @@ void AI::findSolutionDFS( irr::core::position2d< uint_least8_t > currentPosition
 void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > partialSolution, irr::core::position2d< uint_least8_t > currentPosition ) {
 	try {
 		if( gm->getDebugStatus() ) {
-			std::wcout << L"findSolutionDFS: currentPosition: " << currentPosition.X << L"x" << currentPosition.Y << L" goal: " << gm->getGoal()->getX() << L"x" << gm->getGoal()->getY() << std::endl;
+			//std::wcout << L"findSolutionDFS: currentPosition: " << currentPosition.X << L"x" << currentPosition.Y << L" goal: " << gm->getGoal()->getX() << L"x" << gm->getGoal()->getY() << std::endl;
 		}
 
 		DFSCellsVisited.push_back( currentPosition );
@@ -316,14 +316,14 @@ void AI::move() {
 		if( startSolved ) {
 			if( !solved ) {
 				findSolution();
-			} else if( gm->getDebugStatus() ) {
+			}/* else if( gm->getDebugStatus() ) {
 				std::wcout << L"Solution: " << std::endl;
 				StringConverter sc;
 				for( auto rit = solution.rbegin(); !solution.empty() && rit != solution.rend(); ++rit ) {
 					irr::core::position2d< uint_least8_t > p = *rit;
 					std::wcout << sc.toStdWString( p.X ) << L"x" << sc.toStdWString( p.Y ) << std::endl;
 				}
-			}
+			}*/
 
 			/*std::vector< irr::core::position2d< uint_least8_t > >::size_type currentPlaceInSolution;
 			for( auto i = 0; i < solution.size(); ++i) {
@@ -338,26 +338,25 @@ void AI::move() {
 			if( !solution.empty() ) {
 				if( solution.back().X > currentPosition.X ) {
 					if( gm->getDebugStatus() ) {
-						std::wcout << L"Moving right" << std::endl;
+						//std::wcout << L"Moving right" << std::endl;
 					}
 					gm->movePlayerOnX( controlsPlayer, 1 );
 				} else if( solution.back().X < currentPosition.X ) {
 					if( gm->getDebugStatus() ) {
-						std::wcout << L"Moving left" << std::endl;
+						//std::wcout << L"Moving left" << std::endl;
 					}
 					gm->movePlayerOnX( controlsPlayer, -1 );
 				} else if( solution.back().Y > currentPosition.Y ) {
 					if( gm->getDebugStatus() ) {
-						std::wcout << L"Moving down" << std::endl;
+						//std::wcout << L"Moving down" << std::endl;
 					}
 					gm->movePlayerOnY( controlsPlayer, 1 );
 				} else if( solution.back().Y < currentPosition.Y ) {
 					if( gm->getDebugStatus() ) {
-						std::wcout << L"Moving up" << std::endl;
+						//std::wcout << L"Moving up" << std::endl;
 					}
 					gm->movePlayerOnY( controlsPlayer, -1 );
 				} else {
-					std::wcout << L"test" << std::endl;
 				}
 				solution.pop_back();
 			} else {

@@ -76,6 +76,34 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 			case KEY: {
 					texture = driver->getTexture( L"key.png" );
 
+					if( texture == NULL ) {
+						irr::video::IImage* temp = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( width, height ) );
+						temp->fill( INVISIBLE );
+
+						char* data = header_data;
+						char topLeftPixel[ 3 ]; //Assume that the top left pixel is supposed to be invisible
+						for( unsigned int y = 0; y < height; ++y ) {
+							for( unsigned int x = 0; x < width; ++x ) {
+								char pixel[ 3 ];
+								HEADER_PIXEL( data, pixel );
+								if( y == 0 && x == 0 ) {
+									topLeftPixel[ 0 ] = pixel[ 0 ];
+									topLeftPixel[ 1 ] = pixel[ 1 ];
+									topLeftPixel[ 2 ] = pixel[ 2 ];
+								}
+
+								//std::wcout << "Pixel: " << static_cast< uint8_t >( pixel[ 0 ] ) << L'\t' << static_cast< uint8_t >( pixel[ 1 ] ) << L'\t' <<  static_cast< uint8_t >( pixel[ 2 ] ) << std::endl;
+								if( pixel[ 0 ] == topLeftPixel[ 0 ] && pixel[ 1 ] == topLeftPixel[ 1 ] && pixel[ 2 ] == topLeftPixel[ 2 ] ) {
+									temp->setPixel( x, y, irr::video::SColor( 0, 0, 0, 0 ) );
+								} else {
+									temp->setPixel( x, y, irr::video::SColor( 255, pixel[ 0 ], pixel[ 1 ], pixel[ 2 ] ) );
+								}
+							}
+						}
+
+						texture = imageToTexture( driver, temp, "key" );
+					}
+
 					break;
 				}
 			default: break;

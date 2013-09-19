@@ -160,6 +160,9 @@
 		<Unit filename="src/colors.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="src/compiled-images/key.h">
+			<Option target="cybrinth" />
+		</Unit>
 		<Unit filename="src/main.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

@@ -36,11 +36,7 @@
 #endif //What about other operating systems? I don't know what to include for BSD etc.
 
 //Custom user events for Irrlicht
-#define USER_EVENT_WINDOW_RESIZE 1
-#define USER_EVENT_JOYSTICK_UP 2
-#define USER_EVENT_JOYSTICK_LEFT 3
-#define USER_EVENT_JOYSTICK_DOWN 4
-#define USER_EVENT_JOYSTICK_RIGHT 5
+enum user_event_t { USER_EVENT_WINDOW_RESIZE, USER_EVENT_JOYSTICK_UP, USER_EVENT_JOYSTICK_LEFT, USER_EVENT_JOYSTICK_DOWN, USER_EVENT_JOYSTICK_RIGHT };
 
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
 //TODO: Find or record clock ticking sound for use with various items
@@ -1580,7 +1576,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							}
 
 							if (sizeChanged) {
-								driver->OnResize(windowSize);
+								driver->OnResize( windowSize );
 							}
 						}*/
 
@@ -1589,6 +1585,9 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 						loadFonts();
 						adjustMenu();
+						if( showBackgrounds ) {
+							bgscene->getActiveCamera()->setAspectRatio( static_cast< float >( windowSize.Width ) / windowSize.Height );
+						}
 						return true;
 					}
 					break;
