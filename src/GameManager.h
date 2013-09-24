@@ -60,7 +60,7 @@ class GameManager : public IEventReceiver {
 		bool OnEvent( const SEvent& );
 
 		void resetThings();
-		int run();
+		uint_fast8_t run();
 
 		void setControls();
 

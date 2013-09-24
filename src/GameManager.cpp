@@ -617,12 +617,12 @@ GameManager::GameManager() {
 			}
 
 			//Set the audio properties we hope to get: sample rate, channels, etc.
-			int audio_rate = 44100; //44.1 KHz is the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
-			Uint16 audio_format = AUDIO_S16SYS; //CDs use signed 16-bit audio. SYS means use the system's native endianness.
-			int audio_channels = 2; //Almost everything uses stereo. I wish surround sound were more common.
-			int audio_buffers = 4096; //Magic number! Change it if you dare, and see what happeens.
+			int audioRate = 44100; //44.1 KHz is the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
+			Uint16 audioFormat = AUDIO_S16SYS; //CDs use signed 16-bit audio. SYS means use the system's native endianness.
+			int audioChannels = 2; //Almost everything uses stereo. I wish surround sound were more common.
+			int audioBuffers = 4096; //Magic number! Change it if you dare, and see what happens.
 
-			if( Mix_OpenAudio( audio_rate, audio_format, audio_channels, audio_buffers ) != 0 ) {
+			if( Mix_OpenAudio( audioRate, audioFormat, audioChannels, audioBuffers ) != 0 ) {
 				std::wcerr << L"Unable to initialize audio: " << Mix_GetError() << std::endl;
 				playMusic = false;
 			} else if ( debug ) {
@@ -630,9 +630,9 @@ GameManager::GameManager() {
 			}
 
 			if( debug ) {
-				Mix_QuerySpec( &audio_rate, &audio_format, &audio_channels );//Don't assume we got everything we asked for above
-				std::wcout << L"Audio sample rate: " << audio_rate << L" Hertz format: ";
-				if( audio_format == AUDIO_U16SYS ) {
+				Mix_QuerySpec( &audioRate, &audioFormat, &audioChannels );//Don't assume we got everything we asked for above
+				std::wcout << L"Audio sample rate: " << audioRate << L" Hertz format: ";
+				if( audioFormat == AUDIO_U16SYS ) {
 					std::wcout << L"AUDIO_U16SYS (equivalent to ";
 					if( AUDIO_U16SYS == AUDIO_U16LSB ) {
 						std::wcout << L"AUDIO_U16LSB)";
@@ -643,7 +643,7 @@ GameManager::GameManager() {
 					} else {
 						std::wcout << L"unknown)";
 					}
-				} else if( audio_format == AUDIO_S16SYS ) {
+				} else if( audioFormat == AUDIO_S16SYS ) {
 					std::wcout << L"AUDIO_S16SYS (equivalent to ";
 					if( AUDIO_S16SYS == AUDIO_S16LSB ) {
 						std::wcout << L"AUDIO_S16LSB)";
@@ -654,27 +654,27 @@ GameManager::GameManager() {
 					} else {
 						std::wcout << L"unknown)";
 					}
-				} else if( audio_format == AUDIO_U8 ) {
+				} else if( audioFormat == AUDIO_U8 ) {
 					std::wcout << L"AUDIO_U8";
-				} else if( audio_format == AUDIO_S8 ) {
+				} else if( audioFormat == AUDIO_S8 ) {
 					std::wcout << L"AUDIO_S8";
-				} else if( audio_format == AUDIO_U16LSB ) {
+				} else if( audioFormat == AUDIO_U16LSB ) {
 					std::wcout << L"AUDIO_U16LSB";
-				} else if( audio_format == AUDIO_S16LSB ) {
+				} else if( audioFormat == AUDIO_S16LSB ) {
 					std::wcout << L"AUDIO_S16LSB";
-				} else if( audio_format == AUDIO_U16MSB ) {
+				} else if( audioFormat == AUDIO_U16MSB ) {
 					std::wcout << L"AUDIO_U16MSB";
-				} else if( audio_format == AUDIO_S16MSB ) {
+				} else if( audioFormat == AUDIO_S16MSB ) {
 					std::wcout << L"AUDIO_S16MSB";
-				} else if( audio_format == AUDIO_U16 ) {
+				} else if( audioFormat == AUDIO_U16 ) {
 					std::wcout << L"AUDIO_U16";
-				} else if( audio_format == AUDIO_S16 ) {
+				} else if( audioFormat == AUDIO_S16 ) {
 					std::wcout << L"AUDIO_S16";
 				} else {
 					std::wcout << L"unknown";
 				}
 
-				std::wcout << " channels: " << audio_channels  << L" buffers: " << audio_buffers << std::endl;
+				std::wcout << " channels: " << audioChannels  << L" buffers: " << audioBuffers << std::endl;
 			}
 
 			music = NULL;
@@ -2233,7 +2233,7 @@ void GameManager::resetThings() {
  * The game's main loop. Should only be called by main() in main.cpp
  * Returns: EXIT_SUCCESS if the game exits normally, EXIT_FAILURE if an exception is caught.
  */
-int GameManager::run() {
+uint_fast8_t GameManager::run() {
 	try {
 		while( device->run() && !donePlaying ) {
 			newMaze();

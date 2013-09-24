@@ -78,14 +78,15 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 
 					if( texture == NULL ) {
 						//Uncomment the following if using key.h instead of key.c:
-						/*irr::video::IImage* temp = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( width, height ) );
+						/*#include "compiled-images/key.h"
+						irr::video::IImage* temp = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( width, height ) );
 						temp->fill( INVISIBLE );
 
-						char* data = header_data;
-						char topLeftPixel[ 3 ]; //Assume that the top left pixel is supposed to be invisible
-						for( unsigned int y = 0; y < height; ++y ) {
-							for( unsigned int x = 0; x < width; ++x ) {
-								char pixel[ 3 ];
+						auto* data = header_data;
+						auto topLeftPixel[ 3 ]; //Assume that the top left pixel is supposed to be invisible
+						for( auto y = 0; y < height; ++y ) {
+							for( auto x = 0; x < width; ++x ) {
+								auto pixel[ 3 ];
 								HEADER_PIXEL( data, pixel );
 								if( y == 0 && x == 0 ) {
 									topLeftPixel[ 0 ] = pixel[ 0 ];
@@ -105,7 +106,9 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 						texture = imageToTexture( driver, temp, "key" );*/
 						
 						//Key.c:
-						irr::video::ECOLOR_FORMAT format;
+						#include "compiled-images/key.c"
+						
+						irr::video::ECOLOR_FORMAT format = irr::video::ECF_UNKNOWN;
 						switch( gimp_image.bytes_per_pixel ) {
 							case 2: {
 								format = irr::video::ECF_R5G6B5;
@@ -124,13 +127,14 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 						
 						irr::video::IImage* temp = driver->createImage( format, irr::core::dimension2d< irr::u32 >( gimp_image.width, gimp_image.height ) );
 						
-						for( unsigned int y = 0; y < gimp_image.height; ++y ) {
-							for( unsigned int x = 0; x < gimp_image.width; ++x ) {
-								unsigned char pixel[ 4 ];
-								pixel[ 0 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 0 ];
-								pixel[ 1 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 1 ];
-								pixel[ 2 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 2 ];
+						for( auto y = 0; y < gimp_image.height; ++y ) {
+							for( auto x = 0; x < gimp_image.width; ++x ) {
+								char pixel[ 4 ];
+								pixel[ 0 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 0 ]; //Red
+								pixel[ 1 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 1 ]; //Green
+								pixel[ 2 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 2 ]; //Blue
 								
+								//Alpha
 								if( gimp_image.bytes_per_pixel == 4 ) {
 									pixel[ 3 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 3 ];
 								} else {

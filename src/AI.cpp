@@ -15,13 +15,10 @@
 #include "Player.h"
 #include "StringConverter.h"
 
-AI::AI() {
+AI::AI() : algorithm( DEPTH_FIRST_SEARCH ), cols(0), controlsPlayer(0), gm(NULL), keyImSeeking(0), lastTimeMoved(0), maze(NULL), movementDelay(300), rows(0), solved(false), startSolved(true) {
 	try {
-		setPlayer( 0 );
-		movementDelay = 300; //TODO: Allow custom AI movement delays for increased/decreased challenge
-		algorithm = DEPTH_FIRST_SEARCH;
-		startSolved = true;
-		setup( NULL, 0, 0, NULL );
+		//TODO: Allow custom AI movement delays for increased/decreased challenge
+		//setup( NULL, 0, 0, NULL );
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in AI::AI(): " << e.what() << std::endl;
 	}
