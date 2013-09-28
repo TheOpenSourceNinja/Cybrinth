@@ -11,9 +11,7 @@
 bool MazeManager::canGetTo( uint_least8_t startX, uint_least8_t startY, uint_least8_t goalX, uint_least8_t goalY ) {
 	try {
 		bool found = false;
-		if( gameManager->getDebugStatus() ) {
-			std::wcout << L"Searching for a way from " << static_cast<unsigned int>( startX ) << L"x" << static_cast<unsigned int>( startY ) << L" to " << static_cast<unsigned int>( goalX ) << L"x" << static_cast<unsigned int>( goalY ) << std::endl;
-		}
+
 		maze[ startX ][ startY ].visited = true;
 
 		if( startX == goalX && startY == goalY ) {
@@ -377,12 +375,12 @@ void MazeManager::makeRandomLevel() {
 			maze[ gameManager->playerStart[ p ].getX() ][ gameManager->playerStart[ p ].getY() ].setVisitorColor( gameManager->player[ p ].getColorTwo() );
 		}
 
-		//Set up bots;
-		if( gameManager->numBots > 0 ) {
+		//Set up bots; Not necessary here since the GameManager does this too
+		/*if( gameManager->numBots > 0 ) {
 			for( uint_fast8_t i = 0; i < gameManager->numBots; ++i ) {
 				gameManager->bot[ i ].setup( maze, cols, rows, gameManager );
 			}
-		}
+		}*/
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in MazeManager::makeRandomLevel(): " << e.what() << std::endl;
 	}

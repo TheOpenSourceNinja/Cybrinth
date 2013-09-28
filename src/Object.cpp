@@ -22,7 +22,7 @@ Object::Object() {
 		yInterp = 0;
 		moving = false;
 		distanceFromExit = 0;
-		texture = NULL;
+		texture = nullptr;
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in Object::Object(): " << e.what() << std::endl;
 	}
@@ -70,7 +70,7 @@ void Object::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_
 			size = height;
 		}
 
-		if( texture != NULL ) {
+		if( texture != nullptr ) {
 			int_least16_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
 			int_least16_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
 			irr::video::SColor colorArray[ ] = {colorTwo, colorTwo, colorTwo, colorTwo};

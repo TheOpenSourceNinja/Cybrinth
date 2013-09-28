@@ -24,7 +24,7 @@ void *NetworkManager::get_in_addr( struct sockaddr *sa ) {
 		return &((( struct sockaddr_in6* )sa )->sin6_addr );
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in NetworkManager::get_in_addr(): " << e.what() << std::endl;
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -34,13 +34,13 @@ NetworkManager::NetworkManager() {
 		port = 61187; //I use this port a lot: it's my birthday.
 		newPlayer = 0;
 		rv = 0;
-		ai = NULL;
+		ai = nullptr;
 		listener = 0;
-		p = NULL;
+		p = nullptr;
 		yes = 1;
 		backlog = 0;
 		fdmax = 0;
-		setGameManager( NULL );
+		setGameManager( nullptr );
 
 		#if defined WINDOWS
 		if (WSAStartup(MAKEWORD(1,1), &wsaData) != 0) {
@@ -68,7 +68,7 @@ void NetworkManager::setPort( uint_least16_t newPort ) {
 		} else if( newPort <= 49151 ) {
 			std::wcerr << L"Warning: Port " << newPort << L" is in the \"registered ports\" range (1024-49151). This may not work. Recommend using ports above 49151." << std::endl;
 		} else {
-			if( gm != NULL && gm->getDebugStatus() ) {
+			if( gm != nullptr && gm->getDebugStatus() ) {
 				std::wcout << L"Setting port to " << newPort << L"." << std::endl;
 			}
 		}
@@ -95,14 +95,14 @@ int NetworkManager::setup( bool isServer ) {
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_PASSIVE; //fill in my IP for me
 
-		rv = getaddrinfo( NULL, irr::core::stringc( port ).c_str(), &hints, &ai );
+		rv = getaddrinfo( nullptr, irr::core::stringc( port ).c_str(), &hints, &ai );
 
 		if( rv != 0 ) {
 			//throw( std::wstring( "getaddrinfo: " + std::string( gai_strerror( rv ) ) ) );
 			std::wcerr << gai_strerror( rv ) << std::endl;
 		}
 
-		for( p = ai; p != NULL; p = p->ai_next ) {
+		for( p = ai; p != nullptr; p = p->ai_next ) {
 			listener = socket( p->ai_family, p->ai_socktype, p->ai_protocol );
 
 			if( listener < 0 ) {
@@ -132,7 +132,7 @@ int NetworkManager::setup( bool isServer ) {
 		}
 
 		//Getting out of the loop means bind failed for some p.
-		/*if( p == NULL ) {
+		/*if( p == nullptr ) {
 			if (isServer) {
 				std::wcerr << L"Server: Failed to bind" << std::endl;
 			} else { //client
@@ -197,7 +197,7 @@ int NetworkManager::checkForConnections() {
 	try {
 		read_fds = master;
 
-		int result = select( fdmax + 1, &read_fds, NULL, NULL, &timeout );
+		int result = select( fdmax + 1, &read_fds, nullptr, nullptr, &timeout );
 
 		if( result < 0 ) {
 			//throw( std::wstring( "select() error: " + strerror( errno ) ) ;

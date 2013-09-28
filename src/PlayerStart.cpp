@@ -29,7 +29,7 @@ PlayerStart::~PlayerStart() {
 
 void PlayerStart::reset() {
 	try {
-		texture = NULL;
+		texture = nullptr;
 		x = 0;
 		y = 0;
 		distanceFromExit = 0;
@@ -69,7 +69,7 @@ void PlayerStart::draw( irr::video::IVideoDriver* driver, uint_least16_t width, 
 			size = height;
 		}
 
-		if( texture == NULL || ( texture != NULL && texture->getSize().Width != size ) ) {
+		if( texture == nullptr || ( texture != nullptr && texture->getSize().Width != size ) ) {
 			loadTexture( driver, size );
 		}
 

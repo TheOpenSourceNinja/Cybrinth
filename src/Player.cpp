@@ -23,7 +23,7 @@ Player::Player() {
 		yInterp = 0;
 		moving = false;
 		setColor( RED );
-		texture = NULL;
+		texture = nullptr;
 		isHuman = true;
 		reset();
 	} catch( std::exception e ) {

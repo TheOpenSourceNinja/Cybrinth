@@ -66,7 +66,7 @@ irr::video::ITexture* Collectable::imageToTexture( irr::video::IVideoDriver* dri
 		return texture;
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in Collectable::imageToTexture(): " << e.what() << std::endl;
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -76,7 +76,7 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 			case KEY: {
 					texture = driver->getTexture( L"key.png" );
 
-					if( texture == NULL ) {
+					if( texture == nullptr ) {
 						//Uncomment the following if using key.h instead of key.c:
 						/*#include "compiled-images/key.h"
 						irr::video::IImage* temp = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( width, height ) );
@@ -153,7 +153,7 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 			default: break;
 		}
 
-		if( texture == NULL ) {
+		if( texture == nullptr ) {
 			irr::video::IImage* temp = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( 2, 2 ) );
 			temp->fill( WHITE );
 			texture = imageToTexture( driver, temp, "generic collectable" );
@@ -168,14 +168,14 @@ void Collectable::reset() {
 
 void Collectable::resizeImage( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
 	try {
-		if( texture == NULL || texture->getOriginalSize().Width < width || texture->getOriginalSize().Height < height ) {
+		if( texture == nullptr || texture->getOriginalSize().Width < width || texture->getOriginalSize().Height < height ) {
 			switch( type ) {
 				case KEY: { //COLLECTABLE_KEY loads the texture from an image, so load the image before resizing
 						loadTexture( driver );
 						break;
 					}
 				default: {
-					if( texture == NULL ) {
+					if( texture == nullptr ) {
 						loadTexture( driver );
 					}
 					break;
@@ -218,6 +218,6 @@ irr::video::IImage* Collectable::textureToImage( irr::video::IVideoDriver* drive
 		return newImage;
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in Collectable::textureToImage(): " << e.what() << std::endl;
-		return NULL;
+		return nullptr;
 	}
 }

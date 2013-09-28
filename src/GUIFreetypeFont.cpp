@@ -37,15 +37,15 @@ CGUITTGlyph::CGUITTGlyph()
 	, texh( 0 )
 	, imgw( 0 )
 	, imgh( 0 )
-	, tex( NULL )
+	, tex( nullptr )
 	, top16( 0 )
 	, left16( 0 )
 	, texw16( 0 )
 	, texh16( 0 )
 	, imgw16( 0 )
 	, imgh16( 0 )
-	, tex16( NULL )
-	, image( NULL ) {
+	, tex16( nullptr )
+	, image( nullptr ) {
 	try {
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in CGUITTGlyph::CGUITTGlyph(): " << e.what() << std::endl;

@@ -27,6 +27,7 @@ class AI {
 		/** Default destructor */
 		virtual ~AI();
 
+		enum algorithm_t{ DEPTH_FIRST_SEARCH };
 		void allKeysFound();
 		bool atGoal();
 		bool doneWaiting();
@@ -35,7 +36,7 @@ class AI {
 		void move(); //Needs to call GameManager's movePlayerOnX and movePlayerOnY functions.
 		void reset();
 		void setPlayer( uint_least8_t newPlayer );
-		void setup( MazeCell ** newMaze, uint_least8_t newCols, uint_least8_t newRows,  GameManager * newGM ); //Provides the AI with whatever info it needs to work.
+		void setup( MazeCell ** newMaze, uint_least8_t newCols, uint_least8_t newRows,  GameManager * newGM, bool newStartSolved, algorithm_t newAlgorithm ); //Provides the AI with whatever info it needs to work.
 	protected:
 	private:
 		bool alreadyVisited( irr::core::position2d< uint_least8_t > position );
@@ -44,7 +45,6 @@ class AI {
 		void findSolutionDFS( irr::core::position2d< uint_least8_t > currentPosition );
 		void findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > partialSolution, irr::core::position2d< uint_least8_t > currentPosition );
 
-		enum algorithm_t{ DEPTH_FIRST_SEARCH };
 		algorithm_t algorithm;
 		std::vector< irr::core::position2d< uint_least8_t > > cellsVisited;
 		uint_least8_t cols;

@@ -15,10 +15,10 @@
 #include "Player.h"
 #include "StringConverter.h"
 
-AI::AI() : algorithm( DEPTH_FIRST_SEARCH ), cols(0), controlsPlayer(0), gm(NULL), keyImSeeking(0), lastTimeMoved(0), maze(NULL), movementDelay(300), rows(0), solved(false), startSolved(true) {
+AI::AI() : algorithm( DEPTH_FIRST_SEARCH ), cols(0), controlsPlayer(0), gm(nullptr), keyImSeeking(0), lastTimeMoved(0), maze(nullptr), movementDelay(300), rows(0), solved(false), startSolved(true) {
 	try {
 		//TODO: Allow custom AI movement delays for increased/decreased challenge
-		//setup( NULL, 0, 0, NULL );
+		//setup( nullptr, 0, 0, nullptr );
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in AI::AI(): " << e.what() << std::endl;
 	}
@@ -493,7 +493,7 @@ void AI::reset() {
 		pathTaken.clear();
 		cellsVisited.clear();
 
-		if( startSolved && gm != NULL ) {
+		if( startSolved && gm != nullptr ) {
 			findSolution();
 		}
 	} catch( std::exception e ) {
@@ -509,12 +509,14 @@ void AI::setPlayer( uint_least8_t newPlayer ) {
 	}
 }
 
-void AI::setup( MazeCell ** newMaze, uint_least8_t newCols, uint_least8_t newRows, GameManager *newGM ) {
+void AI::setup( MazeCell ** newMaze, uint_least8_t newCols, uint_least8_t newRows, GameManager *newGM, bool newStartSolved, algorithm_t newAlgorithm ) {
 	try {
 		maze = newMaze;
 		cols = newCols;
 		rows = newRows;
 		gm = newGM;
+		startSolved = newStartSolved;
+		algorithm = newAlgorithm;
 		reset();
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in AI::setup(): " << e.what() << std::endl;

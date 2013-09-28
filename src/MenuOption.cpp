@@ -19,7 +19,7 @@ MenuOption::MenuOption() {
 		x = 0;
 		y = 0;
 		setText( "" );
-		font = NULL;
+		font = nullptr;
 		setDimension();
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in MenuOption::MenuOption(): " << e.what() << std::endl;
@@ -53,7 +53,7 @@ void MenuOption::setFont( irr::gui::IGUIFont* newFont ) {
 
 void MenuOption::setDimension() {
 	try {
-		if( font != NULL ) {
+		if( font != nullptr ) {
 			dimension = font->getDimension( text.c_str() );
 		} else {
 			dimension = irr::core::dimension2d<uint_least16_t>( 0, 0 );
@@ -66,7 +66,7 @@ void MenuOption::setDimension() {
 void MenuOption::draw( irr::video::IVideoDriver* driver ) {
 	try {
 		//driver->draw2DImage( texture, core::position2d<int_least16_t>( x, y ) );
-		if( font != NULL ) {
+		if( font != nullptr ) {
 			font->draw( text, irr::core::rect< irr::s32 >( x, y, dimension.Width, dimension.Height ), LIGHTCYAN );
 		}
 	} catch ( std::exception e ) {

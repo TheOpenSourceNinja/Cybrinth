@@ -46,10 +46,18 @@ std::wstring KeyMapping::getActionAsString() {
 				return L"left";
 				break;
 			}
+			case ERROR_DO_NOT_USE: {
+				return L"ERROR DO NOT USE";
+				break;
+			}
+			default: {
+				return L"ERROR DO NOT USE";
+				break;
+			}
 		}
 	} catch( std::exception e ) {
 		std::wcout << L"Error in KeyMapping::getActionAsString(): " << e.what() << std::endl;
-		return L"";
+		return L"ERROR";
 	}
 }
 
@@ -63,19 +71,23 @@ void KeyMapping::setActionFromString( std::wstring val ) {
 			action = VOLUME_UP;
 		} else if( boost::iequals( val, L"volumedown" ) ) {
 			action = VOLUME_DOWN;
-		} else if( boost::iequals( val, L"up" ) ) {
+		} else if( boost::iequals( val, L"u" ) or boost::iequals( val, L"up" ) ) {
 			action = UP;
-		} else if( boost::iequals( val, L"down" ) ) {
+		} else if( boost::iequals( val, L"d" ) or boost::iequals( val, L"down" ) ) {
 			action = DOWN;
-		} else if( boost::iequals( val, L"right" ) ) {
+		} else if( boost::iequals( val, L"r" ) or boost::iequals( val, L"right" ) ) {
 			action = RIGHT;
-		} else if( boost::iequals( val, L"left" ) ) {
+		} else if( boost::iequals( val, L"l" ) or boost::iequals( val, L"left" ) ) {
 			action = LEFT;
 		} else {
-			action = ERROR_DO_NOT_USE;
+			std::wstring error = L"Action string not recognized: " + val;
+			throw error;
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in KeyMapping::setActionFromString(): " << e.what() << std::endl;
+		action = ERROR_DO_NOT_USE;
+	} catch( std::wstring e ) {
+		std::wcerr << L"Error in KeyMapping::setActionFromString(): " << e << std::endl;
 		action = ERROR_DO_NOT_USE;
 	}
 }

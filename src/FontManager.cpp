@@ -75,9 +75,9 @@ bool FontManager::canLoadFont( boost::filesystem::path filename_ ) {
 irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, irr::core::stringw filename_, unsigned int size_, bool antiAlias_, bool transparency_ ) {
 	try {
 		/*if( !filename_ || !strlen( filename_ ) )
-			return NULL;*/
+			return nullptr;*/
 		if( filename_.size() <= 0 ) {
-			return NULL;
+			return nullptr;
 		}
 
 		// Make a unique font name for the given settings.
@@ -90,7 +90,7 @@ irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, ir
 
 		// check if the face is already loaded
 		irr::core::stringw faceName( filename_ );
-		CGUITTFace * face = NULL;
+		CGUITTFace * face = nullptr;
 		FaceMap::iterator itFace = mFaceMap.find( faceName );
 
 		if( itFace != mFaceMap.end() ) {
@@ -104,7 +104,7 @@ irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, ir
 
 			if( !face->load( filename_ ) ) {
 				face->drop();
-				return NULL;
+				return nullptr;
 			}
 
 			mFaceMap[ faceName ] = face;
@@ -121,7 +121,7 @@ irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, ir
 		return font;
 	} catch ( std::exception e ) {
 		std::wcerr << L"Error in FontManager::GetTtFont(): " << e.what() << std::endl;
-		return NULL;
+		return nullptr;
 	}
 }
 

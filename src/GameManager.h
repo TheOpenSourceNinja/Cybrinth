@@ -123,6 +123,8 @@ class GameManager : public IEventReceiver {
 		//Booleans----------------------------------
 		bool allowSmallSize;
 		bool antiAliasFonts;
+		
+		bool botsKnowSolution;
 
 		bool debug;
 		bool donePlaying;
@@ -191,6 +193,8 @@ class GameManager : public IEventReceiver {
 
 
 		//Our own types----------------------------------
+		AI::algorithm_t botAlgorithm;
+		
 		MenuOption backToGame;
 
 		MenuOption exitGame;

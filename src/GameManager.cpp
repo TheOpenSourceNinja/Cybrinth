@@ -181,7 +181,11 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 							break;
 						}
 						default: {
-							throw std::wstring( L"Unrecognized key action: " ) + keyMap.at( k ).getActionAsString();
+							std::wcerr << "k is " << k << std::endl;
+							std::wcerr << "keyMap size is " << keyMap.size() << std::endl;
+							std::wstring actionStr = keyMap.at( k ).getActionAsString();
+							std::wcerr << actionStr << std::endl;
+							//throw std::wstring( L"Unrecognized key action: " ) + actionStr;
 						}
 					}
 				}
@@ -260,7 +264,7 @@ void GameManager::drawAll() {
 			uint_least32_t spaceBetween = windowSize.Height / 30;
 			uint_least32_t textY = spaceBetween;
 
-			time_t currentTime = time( NULL );
+			time_t currentTime = time( nullptr );
 			wchar_t clockTime[9 ];
 			wcsftime( clockTime, 9, L"%H:%M:%S", localtime( &currentTime ) );
 			core::dimension2d<uint_least32_t> tempDimensions = clockFont->getDimension( core::stringw( clockTime ).c_str() );
@@ -411,7 +415,7 @@ void GameManager::drawBackground() {
  */
 void GameManager::drawLoadingScreen() {
 	try {
-		if( loadingFont == NULL ) {
+		if( loadingFont == nullptr ) {
 			loadingFont = gui->getBuiltInFont();
 		}
 
@@ -423,7 +427,7 @@ void GameManager::drawLoadingScreen() {
 
 
 		if( proTips.size() > 0 ) {
-			if( tipFont == NULL ) {
+			if( tipFont == nullptr ) {
 				tipFont = gui->getBuiltInFont();
 			}
 
@@ -478,13 +482,13 @@ GameManager::~GameManager() {
  */
 GameManager::GameManager() {
 	try {
-		//Just wanted to be totally sure that these point to NULL before being set otherwise
-		clockFont = NULL;
-		loadingFont = NULL;
-		musicTagFont = NULL;
-		statsFont = NULL;
-		textFont = NULL;
-		tipFont = NULL;
+		//Just wanted to be totally sure that these point to nullptr before being set otherwise
+		clockFont = nullptr;
+		loadingFont = nullptr;
+		musicTagFont = nullptr;
+		statsFont = nullptr;
+		textFont = nullptr;
+		tipFont = nullptr;
 
 		loading = L"Loading...";
 		proTipPrefix = L"Pro tip: ";
@@ -501,7 +505,7 @@ GameManager::GameManager() {
 
 		fontFile = "";
 		boost::filesystem::recursive_directory_iterator end;
-		for( boost::filesystem::recursive_directory_iterator i(L"./"); i != end; ++i ) {
+		for( boost::filesystem::recursive_directory_iterator i( boost::filesystem::current_path() ); i != end; ++i ) {
 			if( fontManager.canLoadFont( i->path() ) ) {
 				fontFile = i->path().c_str();
 				break;
@@ -677,7 +681,7 @@ GameManager::GameManager() {
 				std::wcout << " channels: " << audioChannels  << L" buffers: " << audioBuffers << std::endl;
 			}
 
-			music = NULL;
+			music = nullptr;
 
 			if( playMusic ) { //No sense in making the music list if we've been unable to initialize the audio.
 				makeMusicList();
@@ -687,9 +691,6 @@ GameManager::GameManager() {
 			}
 		}
 
-		if( debug ) {
-			std::wcout << L"About to call loadFonts()" << std::endl;
-		}
 		loadFonts();
 		if( debug ) {
 			std::wcout << L"Returned from loadFonts()" << std::endl;
@@ -723,7 +724,7 @@ GameManager::GameManager() {
 			for( uint_fast8_t i = 0; i < numBots; ++i ) {
 				bot.at( i ).setPlayer( numPlayers - ( i + 1 ) ) ;
 				player.at( bot.at( i ).getPlayer() ).isHuman = false;
-				bot.at( i ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this );
+				bot.at( i ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm );
 			}
 		}
 
@@ -808,14 +809,14 @@ bool GameManager::getDebugStatus() {
 
 /**
  * Lets other objects get a pointer to the goal, perhaps to get its location.
- * Returns: A pointer to the goal object, or NULL if an exception is caught.
+ * Returns: A pointer to the goal object, or nullptr if an exception is caught.
  */
 Goal* GameManager::getGoal() {
 	try {
 		return &goal;
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::getGoal(): " << e.what() << std::endl;
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -836,14 +837,14 @@ Collectable* GameManager::getKey( uint_least8_t key ) {
 
 /**
  * Lets other objects get a pointer to the maze manager, perhaps to get the maze.
- * Returns: A pointer to the mazeManager object, or NULL if an exception is caught.
+ * Returns: A pointer to the mazeManager object, or nullptr if an exception is caught.
  */
 MazeManager* GameManager::getMazeManager() {
 	try {
 		return &mazeManager;
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::getMazeManager(): " << e.what() << std::endl;
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -868,7 +869,7 @@ uint_least8_t GameManager::getNumKeys() {
  * Lets other objects get a pointer to a player object.
  * Arguments:
  * --- uint_least8_t p: the desired player
- * Returns: A pointer to the desired player if that player exists and if no exception is caught, NULL otherwise.
+ * Returns: A pointer to the desired player if that player exists and if no exception is caught, nullptr otherwise.
  */
 Player* GameManager::getPlayer( uint_least8_t p ) {
 	try {
@@ -879,10 +880,10 @@ Player* GameManager::getPlayer( uint_least8_t p ) {
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::getPlayer(): " << e.what() << std::endl;
-		return NULL;
+		return nullptr;
 	} catch( std::wstring e ) {
 		std::wcerr << L"Error in GameManager::getPlayer(): " << e << std::endl;
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -906,23 +907,23 @@ void GameManager::loadFonts() {
 
 		do { //Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
 			loadingFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( loadingFont != NULL ) {
+			if( loadingFont != nullptr ) {
 				fontDimensions = loadingFont->getDimension( loading.c_str() );
 				size -= 2;
 			}
-		} while( loadingFont != NULL && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+		} while( loadingFont != nullptr && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
 		size += 3;
 
 		do {
 			loadingFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( loadingFont != NULL ) {
+			if( loadingFont != nullptr ) {
 				fontDimensions = loadingFont->getDimension( loading.c_str() );
 				size -= 1;
 			}
-		} while( loadingFont != NULL && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+		} while( loadingFont != nullptr && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
-		if( loadingFont == NULL ) {
+		if( loadingFont == nullptr ) {
 			loadingFont = gui->getBuiltInFont();
 		}
 
@@ -933,16 +934,11 @@ void GameManager::loadFonts() {
 		size = ( windowSize.Width / sideDisplaySizeDenominator ) / 6; //found through experimentation, adjust it however you like and see how many times the font gets loaded
 
 		do {
-			if( debug ) {
-				std::wcout << L"About to load textFont in loop (size " << size << L")" << std::endl;
-			}
 			textFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( debug ) {
-				std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
-			}
-			if( textFont != NULL ) {
+
+			if( textFont != nullptr ) {
 				if( debug ) {
-					std::wcout << L"textFont is not null" << std::endl;
+					std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
 				}
 				fontDimensions = textFont->getDimension( L"Random seed: " );
 				if( debug ) {
@@ -950,21 +946,16 @@ void GameManager::loadFonts() {
 				}
 				size -= 2;
 			}
-		} while( textFont != NULL && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
+		} while( textFont != nullptr && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
 
 		size += 3;
 
 		do {
-			if( debug ) {
-				std::wcout << L"About to load textFont in loop (size " << size << L")" << std::endl;
-			}
 			textFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( debug ) {
-				std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
-			}
-			if( textFont != NULL ) {
+
+			if( textFont != nullptr ) {
 				if( debug ) {
-					std::wcout << L"textFont is not null" << std::endl;
+					std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
 				}
 				fontDimensions = textFont->getDimension( L"Random seed: " );
 				if( debug ) {
@@ -972,9 +963,9 @@ void GameManager::loadFonts() {
 				}
 				size -= 1;
 			}
-		} while( textFont != NULL && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
+		} while( textFont != nullptr && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
 
-		if( textFont == NULL ) {
+		if( textFont == nullptr ) {
 			textFont = gui->getBuiltInFont();
 		}
 
@@ -986,23 +977,23 @@ void GameManager::loadFonts() {
 
 		do {
 			clockFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( clockFont != NULL ) {
+			if( clockFont != nullptr ) {
 				fontDimensions = clockFont->getDimension( L"00:00:00" );
 				size -= 2;
 			}
-		} while( clockFont != NULL && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+		} while( clockFont != nullptr && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
 		size += 3;
 
 		do {
 			clockFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( clockFont != NULL ) {
+			if( clockFont != nullptr ) {
 				fontDimensions = clockFont->getDimension( L"00:00:00" );
 				size -= 1;
 			}
-		} while( clockFont != NULL && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+		} while( clockFont != nullptr && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
-		if( clockFont == NULL ) {
+		if( clockFont == nullptr ) {
 			clockFont = gui->getBuiltInFont();
 		}
 
@@ -1059,27 +1050,27 @@ void GameManager::loadMusicFont() {
 
 			do {
 				musicTagFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-				if( musicTagFont != NULL ) {
+				if( musicTagFont != nullptr ) {
 					artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
 					albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
 					titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
 					size -= 2;
 				}
-			} while( musicTagFont != NULL && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
+			} while( musicTagFont != nullptr && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
 
 			size += 3;
 
 			do {
 				musicTagFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-				if( musicTagFont != NULL ) {
+				if( musicTagFont != nullptr ) {
 					artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
 					albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
 					titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
 					size -= 1;
 				}
-			} while( musicTagFont != NULL && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
+			} while( musicTagFont != nullptr && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
 
-			if( musicTagFont == NULL ) {
+			if( musicTagFont == nullptr ) {
 				musicTagFont = gui->getBuiltInFont();
 			}
 		}
@@ -1115,7 +1106,7 @@ void GameManager::loadNextSong() {
 		currentMusic = musicList[positionInList ];
 		music = Mix_LoadMUS( currentMusic.c_str() ); //SDL Mixer does not support wstrings
 
-		if( music == NULL ) {
+		if( music == nullptr ) {
 			throw( std::wstring( L"Unable to load music file: " ) + stringConverter.toStdWString( Mix_GetError() ) );
 		} else {
 			int musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to *repeat* the music. -1 means infinite.
@@ -1124,7 +1115,7 @@ void GameManager::loadNextSong() {
 				throw( std::wstring( L"Unable to play music file: " ) + stringConverter.toStdWString( Mix_GetError() ) );
 			} else {
 				if( debug ) {
-					switch( Mix_GetMusicType( NULL ) ) {
+					switch( Mix_GetMusicType( nullptr ) ) {
 						case MUS_CMD:
 							std::wcout << L"Command based";
 							break;
@@ -1201,7 +1192,7 @@ void GameManager::loadNextSong() {
 void GameManager::loadProTips() {
 	try {
 		proTips.clear(); //This line is unnecessary because loadProTips() is only called once, but I just feel safer clearing this anyway.
-		boost::filesystem::path proTipsPath( L"./protips.txt" );
+		boost::filesystem::path proTipsPath( boost::filesystem::current_path()/L"protips.txt" );
 
 		if( exists( proTipsPath ) ) {
 			if( !is_directory( proTipsPath ) ) {
@@ -1230,7 +1221,7 @@ void GameManager::loadProTips() {
 
 					proTipsFile.close();
 
-					srand( time( NULL ) );
+					srand( time( nullptr ) );
 					random_shuffle( proTips.begin(), proTips.end() );
 				} else {
 					throw( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) );
@@ -1272,23 +1263,23 @@ void GameManager::loadTipFont() {
 
 		do {
 			tipFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( tipFont != NULL ) {
+			if( tipFont != nullptr ) {
 				tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
 				size -= 2;
 			}
-		} while( tipFont != NULL && ( tipDimensions.Width > maxWidth ) );
+		} while( tipFont != nullptr && ( tipDimensions.Width > maxWidth ) );
 
 		size += 3;
 
 		do {
 			tipFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( tipFont != NULL ) {
+			if( tipFont != nullptr ) {
 				tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
 				size -= 1;
 			}
-		} while( tipFont != NULL && ( tipDimensions.Width > maxWidth ) );
+		} while( tipFont != nullptr && ( tipDimensions.Width > maxWidth ) );
 
-		if( tipFont == NULL ) {
+		if( tipFont == nullptr ) {
 			tipFont = gui->getBuiltInFont();
 		}
 	} catch( std::exception e ) {
@@ -1313,7 +1304,7 @@ void GameManager::makeMusicList() {
 			}
 		}
 
-		boost::filesystem::path musicPath( L"./music" );
+		boost::filesystem::path musicPath( boost::filesystem::current_path()/L"music" );
 
 		//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
 		musicPath = system_complete( musicPath );
@@ -1340,7 +1331,7 @@ void GameManager::makeMusicList() {
 					//This way the game is certain to accept any file formats the music library can use.
 					Mix_Music* temp = Mix_LoadMUS( i->path().c_str() );
 
-					if( temp != NULL ) {
+					if( temp != nullptr ) {
 						musicList.push_back( i->path() );
 						Mix_FreeMusic( temp );
 					}
@@ -1351,7 +1342,7 @@ void GameManager::makeMusicList() {
 		if( musicList.size() > 0 ) {
 			//Do we want music sorted or random?
 			//sort( musicList.begin(), musicList.end() );
-			srand( time( NULL ) );
+			srand( time( nullptr ) );
 			random_shuffle( musicList.begin(), musicList.end() );
 
 			currentMusic = musicList.back();
@@ -1454,7 +1445,7 @@ void GameManager::newMaze() {
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 		for( uint_least8_t b = 0; b < numBots; ++b ) {
-			bot.at( b ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this );
+			bot.at( b ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm );
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::newMaze(): " << e.what() << std::endl;
@@ -1473,7 +1464,7 @@ void GameManager::newMaze( boost::filesystem::path src ) {
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 		for( uint_least8_t b = 0; b < numBots; ++b ) {
-			bot.at( b ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this );
+			bot.at( b ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm );
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::newMaze(): " << e.what() << std::endl;
@@ -1691,7 +1682,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
  */
 void GameManager::readPrefs() {
 	try {
-		boost::filesystem::path prefsPath( L"./prefs.cfg" );
+		boost::filesystem::path prefsPath( boost::filesystem::current_path()/L"prefs.cfg" );
 
 		//Set default prefs, in case we can't get them from the file
 		showBackgrounds = true;
@@ -1710,6 +1701,8 @@ void GameManager::readPrefs() {
 		musicVolume = 100;
 		network.setPort( 61187 );
 		isServer = false;
+		botsKnowSolution = false;
+		botAlgorithm = AI::DEPTH_FIRST_SEARCH;
 
 	#ifdef DEBUG
 		debug = true;
@@ -1748,7 +1741,32 @@ void GameManager::readPrefs() {
 									std::wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< std::endl;
 								}
 
-								if( preference == L"volume:" ) {
+								if( preference == L"bots' solving algorithm:" ) {
+
+									if( choice == L"depth-first search" ) {
+										if( debug ) {
+											std::wcout << L"Bots will use Depth-First Search" << std::endl;
+										}
+										botAlgorithm = AI::DEPTH_FIRST_SEARCH;
+									} else {
+										std::wcerr << L"Error reading \'bots know the solution\' preference on line " << lineNum  << L": \"" << choice  << std::endl;//<< L"\"" << std::endl;
+									}
+								} else if( preference == L"bots know the solution:" ) {
+
+									if( choice == L"true" ) {
+										if( debug ) {
+											std::wcout << L"Bots DO know the solution" << std::endl;
+										}
+										botsKnowSolution = true;
+									} else if( choice == L"false" ) {
+										if( debug ) {
+											std::wcout << L"Bots do NOT know the solution" << std::endl;
+										}
+										botsKnowSolution = false;
+									} else {
+										std::wcerr << L"Error reading \'bots know the solution\' preference on line " << lineNum  << L": \"" << choice  << std::endl;//<< L"\"" << std::endl;
+									}
+								} else if( preference == L"volume:" ) {
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 
@@ -2182,7 +2200,7 @@ void GameManager::readPrefs() {
  */
 void GameManager::resetThings() {
 	try {
-		randomSeed = time( NULL );
+		randomSeed = time( nullptr );
 		loadingDelay = 1000 + ( rand() % 5000 );
 
 		winners.clear();
@@ -2403,7 +2421,7 @@ uint_fast8_t GameManager::run() {
  */
 void GameManager::setControls() {
 	try {
-		boost::filesystem::path controlsPath( L"./controls.cfg" );
+		boost::filesystem::path controlsPath( boost::filesystem::current_path()/L"controls.cfg" );
 		/*uint_least8_t nonPlayerActions = 3; //The number of keys assigned to things other than controlling the player objects: screenshots, opening & closing the menu, etc.
 		keyMap.resize( 4 * ( numPlayers - numBots ) + nonPlayerActions );
 
@@ -2453,11 +2471,11 @@ void GameManager::setControls() {
 				controlsFile.open( controlsPath );
 
 				if( controlsFile.is_open() ) {
-					std::wstring line;
 					uint_fast8_t lineNum = 0;
 
 					while( controlsFile.good() ) {
 						++lineNum;
+						std::wstring line;
 						getline( controlsFile, line );
 						line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
 						boost::algorithm::trim( line ); //Removes trailing and leading spaces
@@ -3017,7 +3035,7 @@ void GameManager::takeScreenShot() {
 			irr::core::stringw filename;
 			filename.append( L"screenshot_" );
 
-			time_t currentTime = time( NULL );
+			time_t currentTime = time( nullptr );
 			wchar_t clockTime[ 20 ];
 			if( wcsftime( clockTime, 20, L"%FT%T", localtime( &currentTime ) ) == 0 ) {
 				throw( std::wstring( L"Could not convert the time to ISO 8601 format.") );
