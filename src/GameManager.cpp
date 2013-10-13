@@ -46,7 +46,6 @@ enum user_event_t { USER_EVENT_WINDOW_RESIZE, USER_EVENT_JOYSTICK_UP, USER_EVENT
 //TODO: Possible idea: Hide parts of the maze not seen yet (seen means line-of-sight to any visited cell)
 //TODO: Add shader to simulate old monitor?
 //TODO: Add more backgrounds.
-//TODO: Add stats (estimated difficulty of maze, number of steps taken, number of cells backtracked, etc) to loading screen.
 
 
 using namespace irr;
@@ -412,11 +411,15 @@ void GameManager::drawBackground() {
 
 /**
  * Draws the loading screen. Assumes that driver->beginScene() has already been called.
+ * //TODO: Add stats (estimated difficulty of maze, number of steps taken, number of cells backtracked, etc) to loading screen.
  */
 void GameManager::drawLoadingScreen() {
 	try {
 		if( loadingFont == nullptr ) {
 			loadingFont = gui->getBuiltInFont();
+		}
+		if( textFont == nullptr ) {
+			textFont = gui->getBuiltInFont();
 		}
 
 		core::dimension2d< unsigned int > loadingDimensions = loadingFont->getDimension( loading.c_str() );
@@ -441,7 +444,11 @@ void GameManager::drawLoadingScreen() {
 			textX += proTipPrefixDimensions.Width;
 			tempRectangle = core::rect< int >( textX, textY, proTipDimensions.Width + textX, proTipDimensions.Height + textY );
 			tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
+			textY += std::max( proTipDimensions.Height, proTipPrefixDimensions.Height );
 		}
+		
+		core::dimension2d< unsigned int > tempDimensions = textFont->getDimension( L"Player stats" );
+		//tempRectangle = core::rect< it >( textX, textY )
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::drawLoadingScreen(): " << e.what() << std::endl;
 	}
@@ -2971,12 +2978,58 @@ void GameManager::setupBackground() {
 				camera->setPosition( core::vector3df( 0, 0, -150 ) );
 				scene::IParticleSystemSceneNode* ps = bgscene->addParticleSystemSceneNode( false );
 
+				irr::video::SColor darkStarColor;
+				irr::video::SColor lightStarColor;
+				
+				switch( rand() % 8 ) { //Not a magic number: count the cases
+					case 0: {
+						darkStarColor = BLACK;
+						lightStarColor = WHITE;
+						break;
+					}
+					case 1: {
+						darkStarColor = BLUE;
+						lightStarColor = LIGHTBLUE;
+						break;
+					}
+					case 2: {
+						darkStarColor = GREEN;
+						lightStarColor = LIGHTGREEN;
+						break;
+					}
+					case 3: {
+						darkStarColor = CYAN;
+						lightStarColor = LIGHTCYAN;
+						break;
+					}
+					case 4: {
+						darkStarColor = RED;
+						lightStarColor = LIGHTRED;
+						break;
+					}
+					case 5: {
+						darkStarColor = MAGENTA;
+						lightStarColor = LIGHTMAGENTA;
+						break;
+					}
+					case 6: {
+						darkStarColor = GRAY;
+						lightStarColor = LIGHTGRAY;
+						break;
+					}
+					case 7: {
+						darkStarColor = YELLOW;
+						lightStarColor = BROWN;
+						break;
+					}
+				}
+
 				scene::IParticleEmitter* em = ps->createBoxEmitter(
 												  camera->getViewFrustum()->getBoundingBox(), //core::aabbox3d< float >(-7,-7,-7,7,7,7), // emitter size
 												  core::vector3df( 0.0f, 0.0f, -0.1f ), // initial direction
 												  100, 500,							// Min & max emit rate
-												  CYAN,	   // darkest color
-												  WHITE,	   // brightest color
+												  darkStarColor,	   // darkest color
+												  lightStarColor,	   // brightest color
 												  2000, 20000, 0,					   // min and max age, angle
 												  core::dimension2df( 1.f, 1.f ),	  // min size
 												  core::dimension2df( 20.f, 20.f ) );	// max size

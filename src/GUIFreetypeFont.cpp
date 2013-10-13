@@ -454,6 +454,16 @@ u32 CGUIFreetypeFont::getGlyphByIndex( u32 idx ) const {
 }
 
 //! returns the dimension of a text
+core::dimension2d< u32 > CGUIFreetypeFont::getDimension( irr::core::stringw text ) const {
+	return getDimension( text.c_str() );
+}
+
+//! returns the dimension of a text
+core::dimension2d< u32 > CGUIFreetypeFont::getDimension( std::wstring text ) const {
+	return getDimension( text.c_str() );
+}
+
+//! returns the dimension of a text
 core::dimension2d< u32 > CGUIFreetypeFont::getDimension( const wchar_t* text ) const {
 	try {
 		core::dimension2d< u32 > dim( 0, Glyphs[ 0 ]->size );

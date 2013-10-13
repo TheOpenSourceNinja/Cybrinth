@@ -227,7 +227,7 @@ void Object::setColor( irr::video::SColor newColor ) {
 
 void Object::setColorBasedOnNum( uint_least8_t num ) {
 	try {
-		switch( num % 13 ) {
+		switch( num % ( NUMCOLORS - 3 ) ) { //Subtract 3 because there are some colors we're not using
 			case 0: {
 				setColor( RED ); //Special case: We don't want the player to be black (color 0) against a black background;
 				//setColor( BLACK );

@@ -23,6 +23,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <irrlicht.h>
+#include <string>
 
 class CGUITTFace : public irr::IReferenceCounted {
 	public:
@@ -90,6 +91,12 @@ class CGUIFreetypeFont : public irr::gui::IGUIFont {
 
 		//! draws an text and clips it to the specified rectangle if wanted
 		virtual void draw( const irr::core::stringw& text, const irr::core::rect<irr::s32>& position, irr::video::SColor color, bool hcenter = false, bool vcenter = false, const irr::core::rect<irr::s32>* clip = 0 );
+
+		//! returns the dimension of a text
+		virtual irr::core::dimension2d< irr::u32 > getDimension( irr::core::stringw text ) const;
+
+		//! returns the dimension of a text
+		virtual irr::core::dimension2d< irr::u32 > getDimension( std::wstring text ) const;
 
 		//! returns the dimension of a text
 		virtual irr::core::dimension2d< irr::u32 > getDimension( const wchar_t* text ) const;

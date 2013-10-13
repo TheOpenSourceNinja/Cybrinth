@@ -36,4 +36,6 @@
 #define WHITE irr::video::SColor( 255, 255, 255, 255 )
 #define INVISIBLE irr::video::SColor( 0, 0, 0, 0 )
 
+#define NUMCOLORS 16 //Does not count duplicates (like grey/gray) or INVISIBLE
+
 #endif // COLORS_H_INCLUDED
