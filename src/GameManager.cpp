@@ -399,10 +399,12 @@ void GameManager::drawBackground() {
 		switch( backgroundChosen ) {
 			case 0: {
 				bgscene->drawAll();
-			}
-			break;
-			default:
 				break;
+			}
+			case 1: {
+				bgscene->drawAll();
+				break;
+			}
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::drawBackground(): " << e.what() << std::endl;
@@ -2964,9 +2966,10 @@ void GameManager::setControls() {
  */
 void GameManager::setupBackground() {
 	try {
-		uint_least8_t availableBackgrounds = 1; //The number of different background animations to choose from
+		uint_least8_t availableBackgrounds = 2; //The number of different background animations to choose from
 
 		backgroundChosen = rand() % availableBackgrounds;
+		//backgroundChosen = 1;
 		if( debug ) {
 			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;
 		}
@@ -3054,13 +3057,157 @@ void GameManager::setupBackground() {
 				pixelImage->setPixel( 0, 0, WHITE, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
 				video::ITexture* pixelTexture = driver->addTexture( "pixel", pixelImage );
 				ps->setMaterialTexture( 0, pixelTexture );
-			}
-			break;
-			default:
 				break;
+			}
+			case 1: {
+				// create a particle system
+				scene::ICameraSceneNode* camera = bgscene->addCameraSceneNode();
+				
+				//Decide which direction to rotate
+				float x, y, z;
+				float magnitude = 0.02;
+				switch( rand() % 3 ) {
+					case 0: {
+						x = -magnitude;
+						break;
+					}
+					case 1: {
+						x = 0;
+						break;
+					}
+					case 2: {
+						x = magnitude;
+						break;
+					}
+				}
+				switch( rand() % 3 ) {
+					case 0: {
+						y = -magnitude;
+						break;
+					}
+					case 1: {
+						y = 0;
+						break;
+					}
+					case 2: {
+						y = magnitude;
+						break;
+					}
+				}
+				switch( rand() % 3 ) {
+					case 0: {
+						z = -magnitude;
+						break;
+					}
+					case 1: {
+						z = 0;
+						break;
+					}
+					case 2: {
+						z = magnitude;
+						break;
+					}
+				}
+				
+				//Create rotation animator and bind it to the camera
+				scene::ISceneNodeAnimator* rotator = bgscene->createRotationAnimator( core::vector3df( x, y, z ) );
+				if( rotator ) {
+					camera->bindTargetAndRotation( true );
+					camera->addAnimator( rotator );
+					std::wcout << "Rotator added" << std::endl;
+					rotator->drop();
+				}
+				
+				camera->setPosition( core::vector3df( 0, 0, -150 ) );
+				scene::IParticleSystemSceneNode* ps = bgscene->addParticleSystemSceneNode( false );
+
+				irr::video::SColor darkStarColor;
+				irr::video::SColor lightStarColor;
+				
+				switch( rand() % 8 ) { //Not a magic number: count the cases
+					case 0: {
+						darkStarColor = BLACK;
+						lightStarColor = WHITE;
+						break;
+					}
+					case 1: {
+						darkStarColor = BLUE;
+						lightStarColor = LIGHTBLUE;
+						break;
+					}
+					case 2: {
+						darkStarColor = GREEN;
+						lightStarColor = LIGHTGREEN;
+						break;
+					}
+					case 3: {
+						darkStarColor = CYAN;
+						lightStarColor = LIGHTCYAN;
+						break;
+					}
+					case 4: {
+						darkStarColor = RED;
+						lightStarColor = LIGHTRED;
+						break;
+					}
+					case 5: {
+						darkStarColor = MAGENTA;
+						lightStarColor = LIGHTMAGENTA;
+						break;
+					}
+					case 6: {
+						darkStarColor = GRAY;
+						lightStarColor = LIGHTGRAY;
+						break;
+					}
+					case 7: {
+						darkStarColor = YELLOW;
+						lightStarColor = BROWN;
+						break;
+					}
+				}
+
+				scene::IParticleEmitter* em = ps->createBoxEmitter(
+												  camera->getViewFrustum()->getBoundingBox(), //core::aabbox3d< float >(-7,-7,-7,7,7,7), // emitter size
+												  core::vector3df( 0.0f, 0.0f, -0.1f ), // initial direction
+												  100, 500,							// Min & max emit rate
+												  darkStarColor,	   // darkest color
+												  lightStarColor,	   // brightest color
+												  4000, 40000, 0,					   // min and max age, angle
+												  core::dimension2df( 1.f, 1.f ),	  // min size
+												  core::dimension2df( 20.f, 20.f ) );	// max size
+
+				ps->setEmitter( em ); // this grabs the emitter
+				em->drop(); // so we can drop it here without deleting it
+
+				//scene::IParticleAffector* paf = ps->createFadeOutParticleAffector();
+
+				//ps->addAffector(paf); // same goes for the affector
+				//paf->drop();
+
+				ps->setPosition( core::vector3df( 0, 0, 40 ) );
+				ps->setScale( core::vector3df( 1, 1, 1 ) );
+				ps->setMaterialFlag( video::EMF_LIGHTING, false );
+				ps->setMaterialFlag( video::EMF_ZWRITE_ENABLE, false );
+				//ps->setMaterialTexture( 0, driver->getTexture( "star.png" ) );
+				ps->setMaterialType( video::EMT_TRANSPARENT_ALPHA_CHANNEL );
+
+				video::IImage* pixelImage = driver->createImage( video::ECF_A8R8G8B8, core::dimension2d< u32 >( 1, 1 ) );
+				//pixelImage->fill( WHITE );
+				pixelImage->setPixel( 0, 0, WHITE, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
+				video::ITexture* pixelTexture = driver->addTexture( "pixel", pixelImage );
+				ps->setMaterialTexture( 0, pixelTexture );
+				break;
+			}
+			default: {
+				std::wstring error = L"Background chosen is not in switch statement.";
+				throw error;
+			}
 		}
 	} catch( std::exception e ) {
 		std::wcerr << L"Error in GameManager::setupBackground(): " << e.what() << std::endl;
+	} catch( std::wstring e ) {
+		std::wcerr << L"Error in GameManager::setupBackground(): " << e << std::endl;
 	}
 }
 
