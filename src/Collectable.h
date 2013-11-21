@@ -13,6 +13,7 @@
 #define COLLECTABLE_H
 
 #include "Object.h"
+#include "ImageModifier.h"
 
 #include <irrlicht.h>
 
@@ -31,9 +32,7 @@ class Collectable : public Object {
 	protected:
 	private:
 		type_t type;
-		void resizeImage( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height );
-		irr::video::IImage* textureToImage( irr::video::IVideoDriver* driver, irr::video::ITexture* texture );
-		irr::video::ITexture* imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* texture, irr::core::stringw name );
+		ImageModifier resizer;
 };
 
 #endif // COLLECTABLE_H

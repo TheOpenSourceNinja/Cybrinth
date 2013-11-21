@@ -46,7 +46,9 @@ enum user_event_t { USER_EVENT_WINDOW_RESIZE, USER_EVENT_JOYSTICK_UP, USER_EVENT
 //TODO: Possible idea: Hide parts of the maze not seen yet (seen means line-of-sight to any visited cell)
 //TODO: Add shader to simulate old monitor?
 //TODO: Add more backgrounds.
-
+//TODO: Support images and/or video as backgrounds.
+//TODO: Add theme support (theme = (zipped?) set of backgrounds, player images, collectable images)
+//TODO: Add wall shadows.
 
 using namespace irr;
 
@@ -404,6 +406,14 @@ void GameManager::drawBackground() {
 			case 1: {
 				bgscene->drawAll();
 				break;
+			}
+			case 2: {
+				if( backgroundTexture != 0 ) {
+					if( backgroundTexture->getSize() != windowSize ) {
+						backgroundTexture = resizer.resize( backgroundTexture, windowSize.Width, windowSize.Height, driver );
+					}
+					driver->draw2DImage( backgroundTexture, core::position2d< s32 >( 0, 0 ) );
+				}
 			}
 		}
 	} catch( std::exception e ) {
@@ -1586,7 +1596,10 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						loadFonts();
 						adjustMenu();
 						if( showBackgrounds ) {
-							bgscene->getActiveCamera()->setAspectRatio( static_cast< float >( windowSize.Width ) / windowSize.Height );
+							scene::ICameraSceneNode* camera = bgscene->getActiveCamera();
+							if( camera != NULL && camera != nullptr ) {
+								camera->setAspectRatio( static_cast< float >( windowSize.Width ) / windowSize.Height );
+							}
 						}
 						return true;
 					}
@@ -2966,10 +2979,10 @@ void GameManager::setControls() {
  */
 void GameManager::setupBackground() {
 	try {
-		uint_least8_t availableBackgrounds = 2; //The number of different background animations to choose from
+		uint_least8_t availableBackgrounds = 3; //The number of different background animations to choose from
 
 		backgroundChosen = rand() % availableBackgrounds;
-		//backgroundChosen = 1;
+		backgroundChosen = 2;
 		if( debug ) {
 			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;
 		}
@@ -3197,6 +3210,15 @@ void GameManager::setupBackground() {
 				pixelImage->setPixel( 0, 0, WHITE, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
 				video::ITexture* pixelTexture = driver->addTexture( "pixel", pixelImage );
 				ps->setMaterialTexture( 0, pixelTexture );
+				break;
+			}
+			case 2: {
+				//load an image
+				backgroundTexture = driver->getTexture(L"julia.png");
+				if( backgroundTexture == 0 ) {
+					std::wstring error = L"Cannot load background texture.";
+					throw error;
+				}
 				break;
 			}
 			default: {

@@ -79,7 +79,7 @@
 			<Option target="non-building files" />
 		</Unit>
 		<Unit filename="src/AI.cpp">
-			<Option target="&lt;{~None~}&gt;" />
+			<Option target="cybrinth" />
 		</Unit>
 		<Unit filename="src/AI.h">
 			<Option target="&lt;{~None~}&gt;" />
@@ -113,6 +113,12 @@
 		</Unit>
 		<Unit filename="src/Goal.h">
 			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="src/ImageModifier.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/ImageModifier.h">
+			<Option target="cybrinth" />
 		</Unit>
 		<Unit filename="src/Integers.h">
 			<Option target="cybrinth" />

@@ -19,6 +19,7 @@
 #include "FontManager.h"
 #include "Goal.h"
 #include "GUIFreetypeFont.h"
+#include "ImageModifier.h"
 #include "KeyMapping.h"
 #include "MazeManager.h"
 #include "MenuOption.h"
@@ -210,12 +211,14 @@ class GameManager : public IEventReceiver {
 		NetworkManager network;
 		MenuOption newGame;
 
+		ImageModifier resizer;
+
 		MenuOption saveMaze;
 
 
 		//2D dimensions----------------------------------
-		core::dimension2d<uint_least16_t> viewportSize;
-		core::dimension2d<uint_least32_t> windowSize;
+		core::dimension2d< uint_least16_t > viewportSize;
+		core::dimension2d< uint_least32_t > windowSize;
 
 
 		//Fonts----------------------------------
@@ -233,6 +236,7 @@ class GameManager : public IEventReceiver {
 
 		//Misc. Irrlicht types----------------------------------
 		scene::ISceneManager* bgscene;
+		video::ITexture* backgroundTexture;
 
 		video::E_DRIVER_TYPE driverType;
 
