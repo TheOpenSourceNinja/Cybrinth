@@ -73,29 +73,38 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_least16_t cellWidth, u
 	try {
 		video::SColor wallColor = WHITE;
 		video::SColor lockColor = BROWN;
+		video::SColor wallShadowColor = BLACK;
+		video::SColor lockShadowColor = BLACK;
+		core::position2d< s32 > shadowOffset( 1, 1 );
 
 		for( uint_fast8_t x = 0; x < cols; ++x ) {
 			for( uint_fast8_t y = 0; y < rows; ++y ) {
 				if( maze[ x ][ y ].visible ) {
 					if( maze[ x ][ y ].getTop() == MazeCell::WALL ) {
-						driver->draw2DLine( core::position2d< irr::s32 >( cellWidth * x, cellHeight * y ), core::position2d< irr::s32 >(cellWidth * ( x + 1 ), cellHeight * y ), wallColor );
+						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), wallShadowColor );
+						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), wallColor );
 					} else if( maze[ x ][ y ].getTop() == MazeCell::LOCK ) {
-						driver->draw2DLine( core::position2d< irr::s32 >( cellWidth * x, cellHeight * y ), core::position2d< irr::s32 >(cellWidth * ( x + 1 ), cellHeight * y ), lockColor );
+						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), lockShadowColor );
+						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), lockColor );
 					}
 
 					if( maze[ x ][ y ].getLeft() == MazeCell::WALL ) {
-						driver->draw2DLine( core::position2d< irr::s32 >( cellWidth * x, cellHeight * y ), core::position2d< irr::s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), wallColor );
+						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), wallShadowColor );
+						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), wallColor );
 					} else if( maze[ x ][ y ].getLeft() == MazeCell::LOCK ) {
-						driver->draw2DLine( core::position2d< irr::s32 >( cellWidth * x, cellHeight * y ), core::position2d< irr::s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), lockColor );
+						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), lockShadowColor );
+						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), lockColor );
 					}
 
 					//Only cells on the right or bottom edge of the maze should have anything other than NONE as right or bottom, and then it should only be a solid WALL
 					if( maze[ x ][ y ].getRight() == MazeCell::WALL ) {
-						driver->draw2DLine( core::position2d< irr::s32 >( cellWidth * ( x + 1 ), cellHeight * y ), core::position2d< irr::s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallColor );
+						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * y ), shadowOffset + core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallShadowColor );
+						driver->draw2DLine( core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * y ), core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallColor );
 					}
 
 					if( maze[ x ][ y ].getBottom() == MazeCell::WALL ) {
-						driver->draw2DLine( core::position2d< irr::s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), core::position2d< irr::s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallColor );
+						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), shadowOffset + core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallShadowColor );
+						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallColor );
 					}
 				}
 			}
@@ -559,12 +568,12 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 
 		if( file.is_open() ) {
 			file << gameManager->randomSeed;
-			irr::core::stringw message( L"This maze has been saved to the file " );
+			core::stringw message( L"This maze has been saved to the file " );
 			message += gameManager->stringConverter.toIrrlichtStringW( dest.wstring() );
 			gameManager->gui->addMessageBox( L"Maze saved", message.c_str() );
 			file.close();
 		} else {
-			irr::core::stringw message( L"Cannot save to file " );
+			core::stringw message( L"Cannot save to file " );
 			message += gameManager->stringConverter.toIrrlichtStringW( dest.wstring() );
 			std::wcerr << message.c_str() << std::endl;
 			gameManager->gui->addMessageBox( L"Maze NOT saved", message.c_str() );

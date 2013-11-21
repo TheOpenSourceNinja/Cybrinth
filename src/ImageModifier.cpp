@@ -40,10 +40,40 @@ video::ITexture* ImageModifier::resize( video::ITexture* image, uint_least32_t w
 		irr::video::IImage* tempImage = textureToImage( driver, image );
 		//driver->removeTexture( image );
 		//image->drop();
-		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< irr::u32 >( width, height ) );
+		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< uint_least32_t >( width, height ) );
 		tempImage->copyToScaling( tempImage2 );
 		//tempImage->drop();
 		image = imageToTexture( driver, tempImage2, L"resized" );
+		//tempImage2->drop();
+		return image;
+	} catch ( std::exception e ) {
+		std::wcerr << L"Error in ImageModifier::resize(): " << e.what() << std::endl;
+	}
+}
+
+video::IImage* ImageModifier::resize( video::IImage* image, uint_least32_t width, uint_least32_t height, irr::video::IVideoDriver* driver ) {
+	try {
+		/*if( image == nullptr || image->getOriginalSize().Width < width || image->getOriginalSize().Height < height ) {
+			switch( type ) {
+				case KEY: { //COLLECTABLE_KEY loads the texture from an image, so load the image before resizing
+						loadTexture( driver );
+						break;
+					}
+				default: {
+					if( image == nullptr ) {
+						loadTexture( driver );
+					}
+					break;
+				}
+			}
+		}*/
+		irr::video::IImage* tempImage = image;//textureToImage( driver, image );
+		//driver->removeTexture( image );
+		//image->drop();
+		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< uint_least32_t >( width, height ) );
+		tempImage->copyToScaling( tempImage2 );
+		//tempImage->drop();
+		image = tempImage2;//imageToTexture( driver, tempImage2, L"resized" );
 		//tempImage2->drop();
 		return image;
 	} catch ( std::exception e ) {
