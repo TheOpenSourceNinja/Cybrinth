@@ -26,6 +26,7 @@
 #include "NetworkManager.h"
 #include "Player.h"
 #include "PlayerStart.h"
+#include "SpellChecker.h"
 #include "StringConverter.h"
 
 #include "Integers.h"
@@ -100,6 +101,8 @@ class GameManager : public IEventReceiver {
 
 		bool doEventActions( std::vector< KeyMapping >::size_type k, const SEvent& event );
 		void drawBackground();
+		
+		bool isNotNull( void* ptr );
 
 		void loadFonts();
 		void loadMusicFont();
@@ -214,6 +217,8 @@ class GameManager : public IEventReceiver {
 		ImageModifier resizer;
 
 		MenuOption saveMaze;
+		
+		SpellChecker spellChecker;
 
 
 		//2D dimensions----------------------------------
@@ -237,6 +242,7 @@ class GameManager : public IEventReceiver {
 		//Misc. Irrlicht types----------------------------------
 		scene::ISceneManager* bgscene;
 		video::ITexture* backgroundTexture;
+		io::path backgroundFilePath;
 
 		video::E_DRIVER_TYPE driverType;
 

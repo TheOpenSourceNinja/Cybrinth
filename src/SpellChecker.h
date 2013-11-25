@@ -5,8 +5,7 @@
 #include <vector>
 #include <string>
 
-class SpellChecker
-{
+class SpellChecker {
 	public:
 		SpellChecker();
 		virtual ~SpellChecker();

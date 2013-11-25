@@ -48,7 +48,6 @@ enum user_event_t { USER_EVENT_WINDOW_RESIZE, USER_EVENT_JOYSTICK_UP, USER_EVENT
 //TODO: Add more backgrounds.
 //TODO: Support images and/or video as backgrounds.
 //TODO: Add theme support (theme = (zipped?) set of backgrounds, player images, collectable images)
-//TODO: Add wall shadows.
 
 using namespace irr;
 
@@ -427,10 +426,10 @@ void GameManager::drawBackground() {
  */
 void GameManager::drawLoadingScreen() {
 	try {
-		if( loadingFont == nullptr ) {
+		if( !isNotNull( loadingFont ) ) {
 			loadingFont = gui->getBuiltInFont();
 		}
-		if( textFont == nullptr ) {
+		if( !isNotNull( textFont ) ) {
 			textFont = gui->getBuiltInFont();
 		}
 
@@ -442,7 +441,7 @@ void GameManager::drawLoadingScreen() {
 
 
 		if( proTips.size() > 0 ) {
-			if( tipFont == nullptr ) {
+			if( !isNotNull( tipFont ) ) {
 				tipFont = gui->getBuiltInFont();
 			}
 
@@ -508,6 +507,7 @@ GameManager::GameManager() {
 		statsFont = nullptr;
 		textFont = nullptr;
 		tipFont = nullptr;
+		backgroundTexture = nullptr;
 
 		loading = L"Loading...";
 		proTipPrefix = L"Pro tip: ";
@@ -906,6 +906,10 @@ Player* GameManager::getPlayer( uint_least8_t p ) {
 	}
 }
 
+bool GameManager::isNotNull( void* ptr ) {
+	return ( ptr != 0 && ptr != NULL && ptr != nullptr );
+}
+
 /**
  * Loads fonts. Calls loadMusicFont() and loadTipFont().
  */
@@ -926,23 +930,23 @@ void GameManager::loadFonts() {
 
 		do { //Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
 			loadingFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( loadingFont != nullptr ) {
+			if( isNotNull( loadingFont ) ) {
 				fontDimensions = loadingFont->getDimension( loading.c_str() );
 				size -= 2;
 			}
-		} while( loadingFont != nullptr && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+		} while( isNotNull( loadingFont ) && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
 		size += 3;
 
 		do {
 			loadingFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( loadingFont != nullptr ) {
+			if( isNotNull( loadingFont ) ) {
 				fontDimensions = loadingFont->getDimension( loading.c_str() );
 				size -= 1;
 			}
-		} while( loadingFont != nullptr && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+		} while( isNotNull( loadingFont ) && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
-		if( loadingFont == nullptr ) {
+		if( !isNotNull( loadingFont ) ) {
 			loadingFont = gui->getBuiltInFont();
 		}
 
@@ -955,7 +959,7 @@ void GameManager::loadFonts() {
 		do {
 			textFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 
-			if( textFont != nullptr ) {
+			if( isNotNull( textFont ) ) {
 				if( debug ) {
 					std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
 				}
@@ -965,14 +969,14 @@ void GameManager::loadFonts() {
 				}
 				size -= 2;
 			}
-		} while( textFont != nullptr && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
+		} while( isNotNull( textFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
 
 		size += 3;
 
 		do {
 			textFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
 
-			if( textFont != nullptr ) {
+			if( isNotNull( textFont ) ) {
 				if( debug ) {
 					std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
 				}
@@ -982,9 +986,9 @@ void GameManager::loadFonts() {
 				}
 				size -= 1;
 			}
-		} while( textFont != nullptr && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
+		} while( isNotNull( textFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
 
-		if( textFont == nullptr ) {
+		if( !isNotNull( textFont ) ) {
 			textFont = gui->getBuiltInFont();
 		}
 
@@ -996,23 +1000,23 @@ void GameManager::loadFonts() {
 
 		do {
 			clockFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( clockFont != nullptr ) {
+			if( isNotNull( clockFont ) ) {
 				fontDimensions = clockFont->getDimension( L"00:00:00" );
 				size -= 2;
 			}
-		} while( clockFont != nullptr && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+		} while( isNotNull( clockFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
 		size += 3;
 
 		do {
 			clockFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( clockFont != nullptr ) {
+			if( isNotNull( clockFont ) ) {
 				fontDimensions = clockFont->getDimension( L"00:00:00" );
 				size -= 1;
 			}
-		} while( clockFont != nullptr && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+		} while( isNotNull( clockFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
-		if( clockFont == nullptr ) {
+		if( !isNotNull( clockFont ) ) {
 			clockFont = gui->getBuiltInFont();
 		}
 
@@ -1069,27 +1073,27 @@ void GameManager::loadMusicFont() {
 
 			do {
 				musicTagFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-				if( musicTagFont != nullptr ) {
+				if( isNotNull( musicTagFont ) ) {
 					artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
 					albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
 					titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
 					size -= 2;
 				}
-			} while( musicTagFont != nullptr && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
+			} while( isNotNull( musicTagFont ) && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
 
 			size += 3;
 
 			do {
 				musicTagFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-				if( musicTagFont != nullptr ) {
+				if( isNotNull( musicTagFont ) ) {
 					artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
 					albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
 					titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
 					size -= 1;
 				}
-			} while( musicTagFont != nullptr && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
+			} while( isNotNull( musicTagFont ) && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
 
-			if( musicTagFont == nullptr ) {
+			if( !isNotNull( musicTagFont ) ) {
 				musicTagFont = gui->getBuiltInFont();
 			}
 		}
@@ -1125,7 +1129,7 @@ void GameManager::loadNextSong() {
 		currentMusic = musicList[positionInList ];
 		music = Mix_LoadMUS( currentMusic.c_str() ); //SDL Mixer does not support wstrings
 
-		if( music == nullptr ) {
+		if( !isNotNull( music ) ) {
 			throw( std::wstring( L"Unable to load music file: " ) + stringConverter.toStdWString( Mix_GetError() ) );
 		} else {
 			int musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to *repeat* the music. -1 means infinite.
@@ -1278,27 +1282,27 @@ void GameManager::loadTipFont() {
 			size = maxWidth / 10; //10 is also arbitrarily chosen.
 		}
 
-		core::dimension2d<uint_fast32_t> tipDimensions;
+		core::dimension2d< uint_fast32_t > tipDimensions;
 
 		do {
 			tipFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( tipFont != nullptr ) {
+			if( isNotNull( tipFont ) ) {
 				tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
 				size -= 2;
 			}
-		} while( tipFont != nullptr && ( tipDimensions.Width > maxWidth ) );
+		} while( isNotNull( tipFont ) && ( tipDimensions.Width > maxWidth ) );
 
 		size += 3;
 
 		do {
 			tipFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( tipFont != nullptr ) {
+			if( isNotNull( tipFont ) ) {
 				tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
 				size -= 1;
 			}
-		} while( tipFont != nullptr && ( tipDimensions.Width > maxWidth ) );
+		} while( isNotNull( tipFont ) && ( tipDimensions.Width > maxWidth ) );
 
-		if( tipFont == nullptr ) {
+		if( !isNotNull( tipFont ) ) {
 			tipFont = gui->getBuiltInFont();
 		}
 	} catch( std::exception e ) {
@@ -1350,7 +1354,7 @@ void GameManager::makeMusicList() {
 					//This way the game is certain to accept any file formats the music library can use.
 					Mix_Music* temp = Mix_LoadMUS( i->path().c_str() );
 
-					if( temp != nullptr ) {
+					if( isNotNull( temp ) ) {
 						musicList.push_back( i->path() );
 						Mix_FreeMusic( temp );
 					}
@@ -1597,8 +1601,17 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						adjustMenu();
 						if( showBackgrounds ) {
 							scene::ICameraSceneNode* camera = bgscene->getActiveCamera();
-							if( camera != NULL && camera != nullptr ) {
+							if( isNotNull( camera ) ) {
 								camera->setAspectRatio( static_cast< float >( windowSize.Width ) / windowSize.Height );
+							}
+							
+							if( isNotNull( backgroundTexture ) && backgroundTexture->getSize() != windowSize ) {
+								if( !backgroundFilePath.empty() ) {
+									backgroundTexture = driver->getTexture( backgroundFilePath );
+								}
+								if( isNotNull( backgroundTexture ) && backgroundTexture->getSize() != windowSize ) {
+									backgroundTexture = resizer.resize( backgroundTexture, windowSize.Width, windowSize.Height, driver );
+								}
 							}
 						}
 						return true;
@@ -2560,7 +2573,17 @@ void GameManager::setControls() {
 									L"play", L"zoom", L"pa1" };
 
 								std::vector< std::wstring > possibleChoicesVector;
-								//possibleChoicesVector.assign( possibleChoicesArray, possibleChoicesArray + sizeof( possibleChoicesArray ) );
+								possibleChoicesVector.assign( possibleChoicesArray, possibleChoicesArray + ( sizeof possibleChoicesArray / sizeof *possibleChoicesArray ) );
+								
+								if( debug ) {
+									std::wcout << L"choiceStr before spell checking: " << choiceStr << "\tand after: ";
+								}
+								
+								choiceStr = possibleChoicesVector.at( spellChecker.indexOfClosestString( choiceStr, possibleChoicesVector ) );
+								
+								if( debug ) {
+									std::wcout << choiceStr << std::endl;
+								}
 
 								if( choiceStr.substr( 0, 5 ) != L"mouse" ) {
 									irr::EKEY_CODE choice;
@@ -2982,10 +3005,12 @@ void GameManager::setupBackground() {
 		uint_least8_t availableBackgrounds = 3; //The number of different background animations to choose from
 
 		backgroundChosen = rand() % availableBackgrounds;
-		backgroundChosen = 2;
+		//backgroundChosen = 2;
 		if( debug ) {
 			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;
 		}
+		
+		backgroundTexture = nullptr;
 
 		switch( backgroundChosen ) {
 			case 0: {
@@ -3127,7 +3152,9 @@ void GameManager::setupBackground() {
 				if( rotator ) {
 					camera->bindTargetAndRotation( true );
 					camera->addAnimator( rotator );
-					std::wcout << "Rotator added" << std::endl;
+					if( debug ) {
+						std::wcout << "Camera rotator added" << std::endl;
+					}
 					rotator->drop();
 				}
 				
@@ -3213,12 +3240,73 @@ void GameManager::setupBackground() {
 				break;
 			}
 			case 2: {
-				//load an image
-				backgroundTexture = driver->getTexture(L"julia.png");
-				if( backgroundTexture == 0 ) {
-					std::wstring error = L"Cannot load background texture.";
-					throw error;
+				std::vector< boost::filesystem::path > backgroundList;
+
+				boost::filesystem::path backgroundPath( boost::filesystem::current_path()/L"backgrounds" );
+
+				//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
+				backgroundPath = system_complete( backgroundPath );
+				//backgroundPath = absolute( backgroundPath );
+
+				if( debug ) {
+					std::wcout << L"background path is absolute? " << backgroundPath.is_absolute() << std::endl;
 				}
+
+				while( ( !exists( backgroundPath ) || !is_directory( backgroundPath ) ) && backgroundPath.has_parent_path() ) {
+					if( debug ) {
+						std::wcout << L"Path " << backgroundPath.wstring() << L" does not exist or is not a directory. Checking parent path " << backgroundPath.parent_path().wstring() << std::endl;
+					}
+
+					backgroundPath = backgroundPath.parent_path();
+				}
+
+				if( exists( backgroundPath ) ) {
+					boost::filesystem::recursive_directory_iterator end;
+
+					for( boost::filesystem::recursive_directory_iterator i( backgroundPath ); i != end; ++i ) {
+						if( !is_directory( i->path() ) ) { //We've found a file
+							//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
+							for( auto loaderNum = driver->getImageLoaderCount() - 1; loaderNum >= 0; --loaderNum ) {
+							
+								video::IImageLoader* loader = driver->getImageLoader( loaderNum );
+								io::IFileSystem* fileSystem = device->getFileSystem();
+								io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
+								
+								if( debug ) {
+									std::wcout << filePath.c_str() << std::endl;
+								}
+								
+								if( !hasFileExtension( filePath, "xcf" ) && loader->isALoadableFileExtension( filePath ) ) { //Workaround until the xcf bug gets fixed in Irrlicht. isALoadableFileExtension() crashes on xcf files?!? (Irrlicht 1.8, may be fixed in 1.8.1).
+									io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
+									if( loader->isALoadableFileFormat( file ) ) { //isALoadableFileFormat() crashes on xcf files (Irrlicht 1.8, may be fixed in 1.8.1). I split this if statement out from the one directly above for the purpose of debugging.
+										backgroundList.push_back( i->path() );
+										file->drop();
+										break;
+									}
+									file->drop();
+								} else {
+									break;
+								}
+							}
+						}
+					}
+				}
+
+				if( backgroundList.size() > 0 ) {
+					std::vector< boost::filesystem::path >::iterator it = std::unique( backgroundList.begin(), backgroundList.end() );
+					backgroundList.resize( std::distance( backgroundList.begin(), it ) );
+				
+					//Pick a random background and load it
+					backgroundFilePath = stringConverter.toIrrlichtStringW( backgroundList.at( rand() % backgroundList.size() ).wstring() );
+					backgroundTexture = driver->getTexture( backgroundFilePath );
+					if( backgroundTexture == 0 ) {
+						std::wstring error = L"Cannot load background texture, even though Irrlicht said it was loadable?!?";
+						throw error;
+					}
+				} else {
+					std::wcout << L"Could not find any background images." << std::endl;
+				}
+				
 				break;
 			}
 			default: {
