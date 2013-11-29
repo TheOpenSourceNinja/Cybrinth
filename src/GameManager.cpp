@@ -39,7 +39,7 @@
 enum user_event_t { USER_EVENT_WINDOW_RESIZE, USER_EVENT_JOYSTICK_UP, USER_EVENT_JOYSTICK_LEFT, USER_EVENT_JOYSTICK_DOWN, USER_EVENT_JOYSTICK_RIGHT };
 
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
-//TODO: Find or record clock ticking sound for use with various items
+//TODO: Find or record clock ticking sound for use with various items?
 //TODO: Get multiplayer working online
 //TODO: Improve AI. Two difficulty settings ('already knows the solution' and 'finds the solution as it plays') and any solving algorithms I can think of (depth-first and breadth-first search)
 //TODO: Possible idea: Hide parts of the maze that are inaccessible due to locks.
@@ -99,7 +99,7 @@ bool GameManager::allHumansAtGoal() {
 		}
 
 		return result;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::allHumansAtGoal(): " << e.what() << std::endl;
 		return false;
 	}
@@ -117,12 +117,10 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 			case KeyMapping::MENU: {
 				showingMenu = true;
 				return true;
-				break;
 			}
 			case KeyMapping::SCREENSHOT: {
 				takeScreenShot();
 				return true;
-				break;
 			}
 			case KeyMapping::VOLUME_UP: {
 				if( event.MouseInput.Wheel > 0 ) {
@@ -163,22 +161,18 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 						case KeyMapping::UP: {
 							movePlayerOnY( keyMap.at( k ).getPlayer(), -1);
 							return true;
-							break;
 						}
 						case KeyMapping::DOWN: {
 							movePlayerOnY( keyMap.at( k ).getPlayer(), 1);
 							return true;
-							break;
 						}
 						case KeyMapping::RIGHT: {
 							movePlayerOnX( keyMap.at( k ).getPlayer(), 1);
 							return true;
-							break;
 						}
 						case KeyMapping::LEFT: {
 							movePlayerOnX( keyMap.at( k ).getPlayer(), -1);
 							return true;
-							break;
 						}
 						default: {
 							std::wcerr << "k is " << k << std::endl;
@@ -192,7 +186,7 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 				break;
 			}
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::doEventActions(): " << e.what() << std::endl;
 	}
 
@@ -200,7 +194,7 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 }
 
 /**
- * Draws everything onto the screen. Calls drawLoadingScreen(), drawBackground(), and the draw functions of objects.
+ * Draws everything onto the screen. Calls other draw functions, including those of objects.
  */
 void GameManager::drawAll() {
 	try {
@@ -387,13 +381,13 @@ void GameManager::drawAll() {
 		}
 
 		driver->endScene();
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::drawAll(): " << e.what() << std::endl;
 	}
 }
 
 /**
- * Draws background animations. Assumes that driver->beginScene() has already been called.
+ * Draws background animations. Assumes that driver->beginScene() has already been called. Should be called by drawAll().
  */
 void GameManager::drawBackground() {
 	try {
@@ -415,13 +409,13 @@ void GameManager::drawBackground() {
 				}
 			}
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::drawBackground(): " << e.what() << std::endl;
 	}
 }
 
 /**
- * Draws the loading screen. Assumes that driver->beginScene() has already been called.
+ * Draws the loading screen. Assumes that driver->beginScene() has already been called. Should be called by drawAll().
  * //TODO: Add stats (estimated difficulty of maze, number of steps taken, number of cells backtracked, etc) to loading screen.
  */
 void GameManager::drawLoadingScreen() {
@@ -460,7 +454,7 @@ void GameManager::drawLoadingScreen() {
 		
 		core::dimension2d< unsigned int > tempDimensions = textFont->getDimension( L"Player stats" );
 		//tempRectangle = core::rect< it >( textX, textY )
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::drawLoadingScreen(): " << e.what() << std::endl;
 	}
 }
@@ -489,7 +483,7 @@ GameManager::~GameManager() {
 
 			SDL_Quit();
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::~GameManager(): " << e.what() << std::endl;
 	}
 }
@@ -655,8 +649,10 @@ GameManager::GameManager() {
 			if( debug ) {
 				Mix_QuerySpec( &audioRate, &audioFormat, &audioChannels );//Don't assume we got everything we asked for above
 				std::wcout << L"Audio sample rate: " << audioRate << L" Hertz format: ";
+				// cppcheck-suppress duplicateIf
 				if( audioFormat == AUDIO_U16SYS ) {
 					std::wcout << L"AUDIO_U16SYS (equivalent to ";
+					//cppcheck-suppress duplicateIf
 					if( AUDIO_U16SYS == AUDIO_U16LSB ) {
 						std::wcout << L"AUDIO_U16LSB)";
 					} else if( AUDIO_U16SYS == AUDIO_U16MSB ) {
@@ -666,8 +662,10 @@ GameManager::GameManager() {
 					} else {
 						std::wcout << L"unknown)";
 					}
+				//cppcheck-suppress duplicateIf
 				} else if( audioFormat == AUDIO_S16SYS ) {
 					std::wcout << L"AUDIO_S16SYS (equivalent to ";
+					//cppcheck-suppress duplicateIf
 					if( AUDIO_S16SYS == AUDIO_S16LSB ) {
 						std::wcout << L"AUDIO_S16LSB)";
 					} else if( AUDIO_S16SYS == AUDIO_S16MSB ) {
@@ -792,9 +790,9 @@ GameManager::GameManager() {
 		if( debug ) {
 			std::wcout << L"end of GameManager constructor" << std::endl;
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::GameManager(): " << e.what() << std::endl;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcerr << L"Error in GameManager::GameManager(): " << e << std::endl;
 	}
 }
@@ -805,10 +803,10 @@ GameManager::GameManager() {
  * --uint_least8_t collectable: The item desired.
  * Returns: A pointer to a Collectable.
  */
-Collectable* GameManager::getCollectable( uint_least8_t collectable ) {
+Collectable* GameManager::getCollectable( uint_fast8_t collectable ) {
 	try {
 		return &stuff.at( collectable );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcout << L"Error in GameManager::getCollectable(): " << e.what() << std::endl;
 	}
 }
@@ -820,7 +818,7 @@ Collectable* GameManager::getCollectable( uint_least8_t collectable ) {
 bool GameManager::getDebugStatus() {
 	try {
 		return debug;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getDebugStatus(): " << e.what() << std::endl;
 		return true;
 	}
@@ -828,14 +826,13 @@ bool GameManager::getDebugStatus() {
 
 /**
  * Lets other objects get a pointer to the goal, perhaps to get its location.
- * Returns: A pointer to the goal object, or nullptr if an exception is caught.
+ * Returns: A pointer to the goal object.
  */
 Goal* GameManager::getGoal() {
 	try {
 		return &goal;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getGoal(): " << e.what() << std::endl;
-		return nullptr;
 	}
 }
 
@@ -845,25 +842,24 @@ Goal* GameManager::getGoal() {
  * --uint_least8_t key: The key desired.
  * Returns: A pointer to a key.
  */
-Collectable* GameManager::getKey( uint_least8_t key ) {
+Collectable* GameManager::getKey( uint_fast8_t key ) {
 	try {
 		//TODO: Update this function if/when we implement Collectables other than keys
 		return getCollectable( key );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcout << L"Error in GameManager::getKey(): " << e.what() << std::endl;
 	}
 }
 
 /**
  * Lets other objects get a pointer to the maze manager, perhaps to get the maze.
- * Returns: A pointer to the mazeManager object, or nullptr if an exception is caught.
+ * Returns: A pointer to the mazeManager object.
  */
 MazeManager* GameManager::getMazeManager() {
 	try {
 		return &mazeManager;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getMazeManager(): " << e.what() << std::endl;
-		return nullptr;
 	}
 }
 
@@ -871,14 +867,14 @@ MazeManager* GameManager::getMazeManager() {
  * Lets other objects know how many locks there are.
  * Returns: the number of keys (currently stuff.size()).
  */
-uint_least8_t GameManager::getNumKeys() {
+uint_fast8_t GameManager::getNumKeys() {
 	try { //TODO: Update this function if/when we implement Collectables other than keys
 		if( numLocks < stuff.size() ) {
 			return numLocks;
 		} else {
 			return stuff.size();
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getNumKeys(): " << e.what() << std::endl;
 		return 0;
 	}
@@ -890,23 +886,30 @@ uint_least8_t GameManager::getNumKeys() {
  * --- uint_least8_t p: the desired player
  * Returns: A pointer to the desired player if that player exists and if no exception is caught, nullptr otherwise.
  */
-Player* GameManager::getPlayer( uint_least8_t p ) {
+Player* GameManager::getPlayer( uint_fast8_t p ) {
 	try {
 		if( p < numPlayers ) {
 			return &player.at( p );
 		} else {
 			throw( std::wstring( L"Request for player (" ) + stringConverter.toStdWString( p ) + L") >= numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")" );
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getPlayer(): " << e.what() << std::endl;
 		return nullptr;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcerr << L"Error in GameManager::getPlayer(): " << e << std::endl;
 		return nullptr;
 	}
 }
 
+/**
+ * Checks whether a pointer is equal to any of the values likely to represent null.
+ * Arguments:
+ * --- void* ptr: Some pointer.
+ * Returns: Guess.
+ */
 bool GameManager::isNotNull( void* ptr ) {
+	// cppcheck-suppress duplicateExpression
 	return ( ptr != 0 && ptr != NULL && ptr != nullptr );
 }
 
@@ -1029,7 +1032,7 @@ void GameManager::loadFonts() {
 		saveMaze.setFont( clockFont );
 		exitGame.setFont( clockFont );
 		backToGame.setFont( clockFont );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::loadFonts(): " << e.what() << std::endl;
 	}
 }
@@ -1077,11 +1080,11 @@ void GameManager::loadMusicFont() {
 					artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
 					albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
 					titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
-					size -= 2;
+					size -= 2; //Initially I had it going down by 1 each time. It's faster to go down by 2 until we've gotten close to our desired size...
 				}
 			} while( isNotNull( musicTagFont ) && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
 
-			size += 3;
+			size += 3; //...then we up the size a little...
 
 			do {
 				musicTagFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
@@ -1089,7 +1092,7 @@ void GameManager::loadMusicFont() {
 					artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
 					albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
 					titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
-					size -= 1;
+					size -= 1; //...and start going down by 1.
 				}
 			} while( isNotNull( musicTagFont ) && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
 
@@ -1097,7 +1100,7 @@ void GameManager::loadMusicFont() {
 				musicTagFont = gui->getBuiltInFont();
 			}
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::loadMusicFont(): " << e.what() << std::endl;
 	}
 }
@@ -1126,13 +1129,13 @@ void GameManager::loadNextSong() {
 			positionInList -= musicList.size();
 		}
 
-		currentMusic = musicList[positionInList ];
+		currentMusic = musicList[ positionInList ];
 		music = Mix_LoadMUS( currentMusic.c_str() ); //SDL Mixer does not support wstrings
 
 		if( !isNotNull( music ) ) {
 			throw( std::wstring( L"Unable to load music file: " ) + stringConverter.toStdWString( Mix_GetError() ) );
 		} else {
-			int musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to *repeat* the music. -1 means infinite.
+			int musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to *repeat* the music. -1 means infinite, 0 means don't repeat.
 
 			if( musicStatus == -1 ) {
 				throw( std::wstring( L"Unable to play music file: " ) + stringConverter.toStdWString( Mix_GetError() ) );
@@ -1173,12 +1176,12 @@ void GameManager::loadNextSong() {
 				}
 
 				//Now playing
-				TagLib::FileRef f( currentMusic.c_str() ); //TagLib doesn't accept wstrings as file names, but it apparently can read tags as wstrings
+				TagLib::FileRef musicFile( currentMusic.c_str() ); //TagLib doesn't accept wstrings as file names, but it apparently can read tags as wstrings
 
-				if( !f.isNull() && f.tag() ) {
-					musicTitle = stringConverter.toIrrlichtStringW( f.tag()->title().toWString() ); //toWString() alone doesn't work here even though these are wide character strings because Irrlicht doesn't like accepting TagLib's wstrings.
-					musicArtist = stringConverter.toIrrlichtStringW( f.tag()->artist().toWString() );
-					musicAlbum = stringConverter.toIrrlichtStringW( f.tag()->album().toWString() );
+				if( !musicFile.isNull() && isNotNull( musicFile.tag() ) ) {
+					musicTitle = stringConverter.toIrrlichtStringW( musicFile.tag()->title().toWString() ); //toWString() alone doesn't work here even though these are wide character strings because Irrlicht doesn't like accepting TagLib's wstrings.
+					musicArtist = stringConverter.toIrrlichtStringW( musicFile.tag()->artist().toWString() );
+					musicAlbum = stringConverter.toIrrlichtStringW( musicFile.tag()->album().toWString() );
 
 					if( musicTitle.size() == 0 ) {
 						musicTitle = L"Unknown Title";
@@ -1202,9 +1205,9 @@ void GameManager::loadNextSong() {
 
 			Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::loadNextSong(): " << e.what() << std::endl;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcerr << L"Error in GameManager::loadNextSong(): " << e << std::endl;
 	}
 }
@@ -1232,7 +1235,7 @@ void GameManager::loadProTips() {
 					while( proTipsFile.good() ) {
 						++lineNum;
 						getline( proTipsFile, line );
-
+						
 						if( !line.empty() ) {
 							proTips.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
 
@@ -1255,9 +1258,9 @@ void GameManager::loadProTips() {
 		} else {
 			throw( std::wstring( L"Pro tips file does not exist. Cannot load pro tips." ) );
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::loadProTips(): " << e.what() << std::endl;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcerr << L"Error in GameManager::loadProTips(): " << e << std::endl;
 	}
 }
@@ -1305,7 +1308,7 @@ void GameManager::loadTipFont() {
 		if( !isNotNull( tipFont ) ) {
 			tipFont = gui->getBuiltInFont();
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::loadTipFont(): " << e.what() << std::endl;
 	}
 }
@@ -1373,7 +1376,7 @@ void GameManager::makeMusicList() {
 			std::wcout << L"Could not find any music to play. Turning off playback." << std::endl;
 			playMusic = false;
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::makeMusicList(): " << e.what() << std::endl;
 	}
 }
@@ -1384,7 +1387,7 @@ void GameManager::makeMusicList() {
  * --- p: the player to move
  * --- direction: a signed integer representing the direction to move.
  */
-void GameManager::movePlayerOnX( uint_least8_t p, int_fast8_t direction ) {
+void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 	try {
 		if( numPlayers > p && mazeManager.cols > 0 ) {
 			if( direction < 0 ) {
@@ -1412,9 +1415,9 @@ void GameManager::movePlayerOnX( uint_least8_t p, int_fast8_t direction ) {
 			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
 			throw e;
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::movePlayerOnX(): " << e.what() << std::endl;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcerr << L"Error in GameManager::movePlayerOnX(): " << e << std::endl;
 	}
 }
@@ -1425,7 +1428,7 @@ void GameManager::movePlayerOnX( uint_least8_t p, int_fast8_t direction ) {
  * --- p: the player to move
  * --- direction: a signed integer representing the direction to move.
  */
-void GameManager::movePlayerOnY( uint_least8_t p, int_fast8_t direction ) {
+void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 	try {
 		if( numPlayers > p && mazeManager.rows > 0 ) {
 			if( direction < 0 ) {
@@ -1453,24 +1456,19 @@ void GameManager::movePlayerOnY( uint_least8_t p, int_fast8_t direction ) {
 			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
 			throw e;
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::movePlayerOnY(): " << e.what() << std::endl;
 	}
 }
 
 /**
- * Calls resetThings(), makes the maze manager create a random level, then adjusts cellWidth and cellHeight.
+ * Calls the other newMaze()
  */
 void GameManager::newMaze() {
 	try {
-		resetThings();
-		mazeManager.makeRandomLevel();
-		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
-		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
-		for( uint_least8_t b = 0; b < numBots; ++b ) {
-			bot.at( b ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm );
-		}
-	} catch( std::exception e ) {
+		boost::filesystem::path p;
+		newMaze( p );
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::newMaze(): " << e.what() << std::endl;
 	}
 }
@@ -1483,13 +1481,17 @@ void GameManager::newMaze() {
 void GameManager::newMaze( boost::filesystem::path src ) {
 	try {
 		resetThings();
-		mazeManager.loadFromFile( src );
+		if( src.empty() ) {
+			mazeManager.makeRandomLevel();
+		} else {
+			mazeManager.loadFromFile( src );
+		}
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
-		for( uint_least8_t b = 0; b < numBots; ++b ) {
+		for( uint_fast8_t b = 0; b < numBots; ++b ) {
 			bot.at( b ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm );
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::newMaze(): " << e.what() << std::endl;
 	}
 }
@@ -1504,7 +1506,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 	try {
 		switch( event.EventType ) {
 			case EET_KEY_INPUT_EVENT: {
-				if( event.KeyInput.PressedDown ) {
+				if( event.KeyInput.PressedDown ) { //Don't react when the key is released, only when it's pressed.
 					if( !( showingMenu || showingLoadingScreen ) ) {
 						for( auto k = 0; k < keyMap.size(); ++k ) {
 							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
@@ -1521,12 +1523,10 @@ bool GameManager::OnEvent( const SEvent& event ) {
 									case KeyMapping::MENU: {
 										showingMenu = false;
 										return true;
-										break;
 									}
 									case KeyMapping::SCREENSHOT: {
 										takeScreenShot();
 										return true;
-										break;
 									}
 								}
 								break;
@@ -1621,7 +1621,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						if( debug ) {
 							std::wcout << L"Joystick moved up" << std::endl;
 						}
-						movePlayerOnY( 0, -1 );
+						movePlayerOnY( myPlayer, -1 );
 						return true;
 					}
 					break;
@@ -1629,7 +1629,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						if( debug ) {
 							std::wcout << L"Joystick moved down" << std::endl;
 						}
-						movePlayerOnY( 0, 1 );
+						movePlayerOnY( myPlayer, 1 );
 						return true;
 					}
 					break;
@@ -1642,6 +1642,8 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				if( event.JoystickEvent.Joystick == joystickChosen ) {
 					core::array<int_least16_t> verticalAxes;
 					verticalAxes.push_back( SEvent::SJoystickEvent::AXIS_Y );
+					core::array<int_least16_t> horizontalAxes;
+					horizontalAxes.push_back( SEvent::SJoystickEvent::AXIS_X );
 
 					bool joystickMovedUp = false;
 					bool joystickMovedDown = false;
@@ -1661,6 +1663,20 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							joystickMovedDown = true;
 						}
 					}
+					
+					for( uint_fast16_t i = 0; i < horizontalAxes.size(); ++i ) {
+						if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
+							if( debug ) {
+								std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
+							}
+							joystickMovedRight = true;
+						} else if( event.JoystickEvent.Axis[ i ] <= ( SHRT_MIN / 2 ) ) {
+							if( debug ) {
+								std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
+							}
+							joystickMovedLeft = true;
+						}
+					}
 
 					if( joystickMovedUp ) {
 						SEvent temp;
@@ -1672,6 +1688,16 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						temp.EventType = EET_USER_EVENT;
 						temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_DOWN;
 						device->postEventFromUser( temp );
+					} else if( joystickMovedRight ) {
+						SEvent temp;
+						temp.EventType = EET_USER_EVENT;
+						temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_RIGHT;
+						device->postEventFromUser( temp );
+					} else if( joystickMovedLeft ) {
+						SEvent temp;
+						temp.EventType = EET_USER_EVENT;
+						temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_LEFT;
+						device->postEventFromUser( temp );
 					}
 
 					return true;
@@ -1682,13 +1708,11 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				switch( event.GUIEvent.EventType ) {
 					case gui::EGET_FILE_SELECTED: {
 						if( debug ) {
-							std::wcout << L"File selected." << std::endl;
-							std::wcout << L"Folder: " << core::stringw( fileChooser->getDirectoryName() ).c_str() << L"\tFile: " << core::stringw( fileChooser->getFileName() ).c_str() << std::endl;
+							std::wcout << L"File selected. Folder: " << core::stringw( fileChooser->getDirectoryName() ).c_str() << L"\tFile: " << core::stringw( fileChooser->getFileName() ).c_str() << std::endl;
 						}
 
 						newMaze( fileChooser->getFileName() );
 						return true;
-						break;
 					}
 					case gui::EGET_DIRECTORY_SELECTED: {
 						if( debug ) {
@@ -1705,7 +1729,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				break;
 		}
 
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::OnEvent(): " << e.what() << std::endl;
 	}
 
@@ -1733,7 +1757,7 @@ void GameManager::readPrefs() {
 		numBots = 0;
 		numPlayers = 1;
 		markTrails = false;
-		musicVolume = 100;
+		musicVolume = 50;
 		network.setPort( 61187 );
 		isServer = false;
 		botsKnowSolution = false;
@@ -1772,36 +1796,51 @@ void GameManager::readPrefs() {
 							try {
 								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
 								std::wstring choice = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
+								
 								if( debug ) {
 									std::wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< std::endl;
 								}
+								
+								std::vector< std::wstring > possiblePrefs = { L"bots' solving algorithm", L"volume", L"number of bots", L"show background animations",
+									L"fullscreen", L"mark player trails", L"debug", L"bits per pixel", L"wait for vertical sync", L"driver type", L"number of players",
+									L"window size", L"play music", L"network port", L"enable joystick", L"joystick number", L"always server", L"bots know the solution" };
+								
+								preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
+								
+								if( debug ) {
+									std::wcout << L"Preference after spellchecking \"" << preference << std::endl;
+								}
 
-								if( preference == L"bots' solving algorithm:" ) {
-
+								if( preference == L"bots' solving algorithm" ) {
+									
+									std::vector< std::wstring > possibleChoices = { L"depth-first search" };
+									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
+									
 									if( choice == L"depth-first search" ) {
 										if( debug ) {
 											std::wcout << L"Bots will use Depth-First Search" << std::endl;
 										}
 										botAlgorithm = AI::DEPTH_FIRST_SEARCH;
-									} else {
-										std::wcerr << L"Error reading \'bots know the solution\' preference on line " << lineNum  << L": \"" << choice  << std::endl;//<< L"\"" << std::endl;
 									}
-								} else if( preference == L"bots know the solution:" ) {
-
+									
+								} else if( preference == L"bots know the solution" ) {
+									
+									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
+									
 									if( choice == L"true" ) {
 										if( debug ) {
 											std::wcout << L"Bots DO know the solution" << std::endl;
 										}
 										botsKnowSolution = true;
-									} else if( choice == L"false" ) {
+									} else {
 										if( debug ) {
 											std::wcout << L"Bots do NOT know the solution" << std::endl;
 										}
 										botsKnowSolution = false;
-									} else {
-										std::wcerr << L"Error reading \'bots know the solution\' preference on line " << lineNum  << L": \"" << choice  << std::endl;//<< L"\"" << std::endl;
 									}
-								} else if( preference == L"volume:" ) {
+									
+								} else if( preference == L"volume" ) {
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 
@@ -1821,12 +1860,12 @@ void GameManager::readPrefs() {
 											Mix_VolumeMusic( MIX_MAX_VOLUME );
 											musicVolume = 100;
 										}
-									} catch( boost::bad_lexical_cast e ) {
+									} catch( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading volume preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
-								} else if( preference == L"number of bots:" ) {
+								} else if( preference == L"number of bots" ) {
 									try {
-										uint_least8_t choiceAsInt = boost::lexical_cast< short int >( choice ); //uint_least8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
+										uint_fast8_t choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_least8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
 
 										if( choiceAsInt <= numPlayers ) {
 											numBots = choiceAsInt;
@@ -1837,69 +1876,77 @@ void GameManager::readPrefs() {
 											std::wcerr << L"Warning: Number of bots not less than or equal to number of players (number of players may not have been read yet): " << choiceAsInt << std::endl;
 											numBots = choiceAsInt;
 										}
-									} catch( boost::bad_lexical_cast e ) {
+									} catch( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
-								} else if( preference == L"show background animations:" ) {
+								} else if( preference == L"show background animations" ) {
+									
+									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
+									
 									if( choice == L"true" ) {
 										if( debug ) {
 											std::wcout << L"Show backgrounds is ON" << std::endl;
 										}
 										showBackgrounds = true;
-									} else if( choice == L"false" ) {
+									} else {
 										if( debug ) {
 											std::wcout << L"Show backgrounds is OFF" << std::endl;
 										}
 										showBackgrounds = false;
-									} else {
-										std::wcerr << L"Error reading show background animations preference on line " << lineNum  << L": \"" << choice  << std::endl;//<< L"\"" << std::endl;
 									}
-								} else if( preference == L"fullscreen:" ) {
+									
+								} else if( preference == L"fullscreen" ) {
+									
+									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 
 									if( choice == L"true" ) {
 										if( debug ) {
 											std::wcout << L"Fullscreen is ON" << std::endl;
 										}
 										fullscreen = true;
-									} else if( choice == L"false" ) {
+									} else {
 										if( debug ) {
 											std::wcout << L"Fullscreen is OFF" << std::endl;
 										}
 										fullscreen = false;
-									} else {
-										std::wcerr << L"Error reading fullscreen preference on line " << lineNum  << L": \"" << choice  << std::endl;//<< L"\"" << std::endl;
 									}
-								} else if( preference == L"mark player trails:" ) {
+									
+								} else if( preference == L"mark player trails" ) {
+									
+									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 
 									if( choice == L"true" ) {
 										if( debug ) {
 											std::wcout << L"Mark trails is ON" << std::endl;
 										}
 										markTrails = true;
-									} else if( choice == L"false" ) {
+									} else {
 										if( debug ) {
 											std::wcout << L"Mark trails is OFF" << std::endl;
 										}
 										markTrails = false;
-									} else {
-										std::wcerr << L"Error reading mark player trails preference on line " << lineNum  << L": \"" << choice  << std::endl;//<< L"\"" << std::endl;
 									}
-								} else if( preference == L"debug:" ) {
+									
+								} else if( preference == L"debug" ) {
 
 									#ifndef DEBUG
-									if( choice == L"true" ) {
-										debug = true;
-									} else if( choice == L"false" ) {
-										debug = false;
-									} else {
-										std::wcerr << L"Error reading debug preference on line " << lineNum  << L": \"" << choice  << std::endl;//<< L"\"" << std::endl;
-									}
+										std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+										choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
+										
+										if( choice == L"true" ) {
+											debug = true;
+										} else {
+											debug = false;
+										}
 									#endif
 
 									if( debug ) {
 										std::wcout << L"Debug is ON" << std::endl;
 									}
-								} else if( preference == L"bits per pixel:" ) {
+								} else if( preference == L"bits per pixel" ) {
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 
@@ -1912,27 +1959,31 @@ void GameManager::readPrefs() {
 											std::wcerr << L"Warning: Bits per pixel not less than or equal to 16: " << choiceAsInt << std::endl;
 											bitsPerPixel = choiceAsInt;
 										}
-									} catch( boost::bad_lexical_cast e ) {
+									} catch( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 
-								} else if( preference == L"wait for vertical sync:" ) {
+								} else if( preference == L"wait for vertical sync" ) {
+									
+									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 
 									if( choice == L"true" ) {
 										if( debug ) {
 											std::wcout << L"Vertical sync is ON" << std::endl;
 										}
 										vsync = true;
-									} else if( choice == L"false" ) {
+									} else {
 										if( debug ) {
 											std::wcout << L"Vertical sync is OFF" << std::endl;
 										}
 										vsync = false;
-									} else {
-										std::wcerr << L"Error reading vertical sync preference on line " << lineNum << L": \"" << choice << L"\"" << std::endl;
 									}
 
-								} else if( preference == L"driver type:" ) {
+								} else if( preference == L"driver type" ) {
+									
+									std::vector< std::wstring > possibleChoices = { L"opengl", L"direct3d9", L"direct3d8", L"burning's video", L"software", L"null" };
+									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 
 									if( choice == L"opengl" ) {
 										driverType = video::EDT_OPENGL;
@@ -1946,9 +1997,6 @@ void GameManager::readPrefs() {
 										driverType = video::EDT_SOFTWARE;
 									} else if( choice == L"null" ) {
 										driverType = video::EDT_NULL;
-									} else {
-										std::wcerr << L"Warning: Selected driver type " << choice << L" not recognized. Trying OpenGL." << std::endl;
-										choice = L"opengl";
 									}
 
 									if( !device->isDriverSupported( driverType ) ) {
@@ -1986,7 +2034,7 @@ void GameManager::readPrefs() {
 										std::wcout << L"Driver type is " << choice << std::endl;
 									}
 
-								} else if( preference == L"number of players:" ) {
+								} else if( preference == L"number of players" ) {
 									try {
 										uint_least8_t choiceAsInt = boost::lexical_cast< short int >( choice ); //uint_least8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
 
@@ -2005,11 +2053,11 @@ void GameManager::readPrefs() {
 										} else {
 											std::wcerr << L"Warning: Number of players is zero or not a number: " << choiceAsInt << L". Setting number of players to default." << std::endl;
 										}
-									} catch( boost::bad_lexical_cast e ) {
+									} catch( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 
-								} else if( preference == L"window size:" ) {
+								} else if( preference == L"window size" ) {
 									size_t locationOfX = choice.find( L"x" );
 									std::wstring width = choice.substr( 0, locationOfX );
 									std::wstring height = choice.substr( locationOfX + 1 );
@@ -2029,22 +2077,24 @@ void GameManager::readPrefs() {
 										windowSize = core::dimension2d<uint_least16_t>( widthAsInt, heightAsInt );
 									}
 
-								} else if( preference == L"play music:" ) {
+								} else if( preference == L"play music" ) {
+									
+									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
+									
 									if( choice == L"true" ) {
 										if( debug ) {
 											std::wcout << L"Play music is ON" << std::endl;
 										}
 										playMusic = true;
-									} else if( choice == L"false" ) {
+									} else {
 										if( debug ) {
 											std::wcout << L"Play music is OFF" << std::endl;
 										}
 										playMusic = false;
-									} else {
-										std::wcerr << L"Error reading play music preference on line " << lineNum << L": \"" << choice << L"\"" << std::endl;
 									}
 
-								} else if( preference == L"network port:" ) {
+								} else if( preference == L"network port" ) {
 									if( debug ) {
 										std::wcout << L"Network port: " << choice << std::endl;
 									}
@@ -2052,51 +2102,56 @@ void GameManager::readPrefs() {
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 										network.setPort( choiceAsInt );
-									} catch( boost::bad_lexical_cast e ) {
+									} catch( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
-								} else if( preference == L"enable joystick:" ) {
+								} else if( preference == L"enable joystick" ) {
+									
+									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
+									
 									if( choice == L"true" ) {
 										if( debug ) {
 											std::wcout << L"Joystick is ENABLED" << std::endl;
 										}
 										enableJoystick = true;
-									} else if( choice == L"false" ) {
+									} else {
 										if( debug ) {
 											std::wcout << L"Joystick is DISABLED" << std::endl;
 										}
 										enableJoystick = false;
-									} else {
-										std::wcerr << L"Error reading enable joystick preference on line " << lineNum << L": \"" << choice << L"\"" << std::endl;
 									}
-								} else if( preference == L"joystick number:" ) {
+									
+								} else if( preference == L"joystick number" ) {
 									if( debug ) {
 										std::wcout << L"Joystick number: " << choice << std::endl;
 									}
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 										joystickChosen = choiceAsInt;
-									} catch (boost::bad_lexical_cast e ) {
+									} catch (boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading joystick number (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
-								} else if( preference == L"always server:" ) {
+								} else if( preference == L"always server" ) {
+									
+									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
+									
 									if( choice == L"true" ) {
 										if( debug ) {
 											std::wcout << L"This is always a server" << std::endl;
 										}
 										isServer = true;
-									} else if( choice == L"false" ) {
+									} else {
 										if( debug ) {
 											std::wcout << L"This is not always a server" << std::endl;
 										}
 										isServer = false;
-									} else {
-										std::wcerr << L"Error reading \"always server\" preference on line " << lineNum << L": \"" << choice << L"\"" << std::endl;
 									}
-								} else {
-									std::wcerr << L"Unrecognized preference on line " << lineNum << L": \"" << line << L"\"" << std::endl;
+									
 								}
-							} catch ( std::exception e ) {
+								
+							} catch ( std::exception &e ) {
 								std::wcout << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << std::endl;
 							}
 						}
@@ -2117,10 +2172,10 @@ void GameManager::readPrefs() {
 			prefsFile.open( prefsPath );
 
 			if( prefsFile.is_open() ) {
-				prefsFile << L"volume:\t" << musicVolume << std::endl;
-				prefsFile << L"number of bots:\t" << numBots << std::endl;
+				prefsFile << L"volume\t" << musicVolume << std::endl;
+				prefsFile << L"number of bots\t" << numBots << std::endl;
 
-				prefsFile << L"show background animations:\t";
+				prefsFile << L"show background animations\t";
 				if( showBackgrounds ) {
 					prefsFile << L"true";
 				} else {
@@ -2128,7 +2183,7 @@ void GameManager::readPrefs() {
 				}
 				prefsFile << std::endl;
 
-				prefsFile << L"fullscreen:\t";
+				prefsFile << L"fullscreen\t";
 				if( fullscreen ) {
 					prefsFile << L"true";
 				} else {
@@ -2136,7 +2191,7 @@ void GameManager::readPrefs() {
 				}
 				prefsFile << std::endl;
 
-				prefsFile << L"mark player trails:\t";
+				prefsFile << L"mark player trails\t";
 				if( markTrails ) {
 					prefsFile << L"true";
 				} else {
@@ -2144,7 +2199,7 @@ void GameManager::readPrefs() {
 				}
 				prefsFile << std::endl;
 
-				prefsFile << L"debug:\t";
+				prefsFile << L"debug\t";
 				if( debug ) {
 					prefsFile << L"true";
 				} else {
@@ -2152,9 +2207,9 @@ void GameManager::readPrefs() {
 				}
 				prefsFile << std::endl;
 
-				prefsFile << L"bits per pixel:\t" << bitsPerPixel << std::endl;
+				prefsFile << L"bits per pixel\t" << bitsPerPixel << std::endl;
 
-				prefsFile << L"wait for vertical sync:\t";
+				prefsFile << L"wait for vertical sync\t";
 				if( vsync ) {
 					prefsFile << L"true";
 				} else {
@@ -2162,7 +2217,7 @@ void GameManager::readPrefs() {
 				}
 				prefsFile << std::endl;
 
-				prefsFile << L"driver type:\t";
+				prefsFile << L"driver type\t";
 				if( driverType == video::EDT_OPENGL ) {
 					prefsFile << L"opengl";
 				} else if( driverType == video::EDT_DIRECT3D9 ) {
@@ -2181,11 +2236,11 @@ void GameManager::readPrefs() {
 				}
 				prefsFile << std::endl;
 
-				prefsFile << L"number of players:\t" << numPlayers << std::endl;
+				prefsFile << L"number of players\t" << numPlayers << std::endl;
 
-				prefsFile << L"window size:\t" << windowSize.Width << L"x" << windowSize.Height << std::endl;
+				prefsFile << L"window size\t" << windowSize.Width << L"x" << windowSize.Height << std::endl;
 
-				prefsFile << L"play music:\t";
+				prefsFile << L"play music\t";
 				if( playMusic ) {
 					prefsFile << L"true";
 				} else {
@@ -2193,9 +2248,9 @@ void GameManager::readPrefs() {
 				}
 				prefsFile << std::endl;
 
-				prefsFile << L"network port:\t" << network.getPort() << std::endl;
+				prefsFile << L"network port\t" << network.getPort() << std::endl;
 
-				prefsFile << L"enable joystick:\t";
+				prefsFile << L"enable joystick\t";
 				if( enableJoystick ) {
 					prefsFile << L"true";
 				} else {
@@ -2203,9 +2258,9 @@ void GameManager::readPrefs() {
 				}
 				prefsFile << std::endl;
 
-				prefsFile << L"joystick number:\t" << joystickChosen << std::endl;
+				prefsFile << L"joystick number\t" << joystickChosen << std::endl;
 
-				prefsFile << L"always server:\t";
+				prefsFile << L"always server\t";
 				if( isServer ) {
 					prefsFile << L"true";
 				} else {
@@ -2223,9 +2278,9 @@ void GameManager::readPrefs() {
 			isServer = ( a == L's' || a == L'S' );
 			myPlayer = 0;
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::readPrefs(): " << e.what() << std::endl;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcerr << L"Error in GameManager::readPrefs(): " << e << std::endl;
 	}
 }
@@ -2277,7 +2332,7 @@ void GameManager::resetThings() {
 		currentProTip = ( currentProTip + 1 ) % proTips.size();
 
 		loadTipFont();
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::resetThings(): " << e.what() << std::endl;
 	}
 }
@@ -2338,11 +2393,7 @@ uint_fast8_t GameManager::run() {
 									case Collectable::KEY: {
 										++numKeysFound;
 										stuff.erase( stuff.begin() + s );
-
-										for( uint_fast8_t b = 0; b < numBots; ++b ) {
-											bot.at( b ).keyFound( s );
-										}
-
+										
 										if( numKeysFound >= numLocks ) {
 											for( uint_fast8_t c = 0; c < mazeManager.cols; ++c ) {
 												for( uint_fast8_t r = 0; r < mazeManager.rows; ++r ) {
@@ -2352,6 +2403,10 @@ uint_fast8_t GameManager::run() {
 
 											for( uint_fast8_t b = 0; b < numBots; ++b ) {
 												bot.at( b ).allKeysFound();
+											}
+										} else {
+											for( uint_fast8_t b = 0; b < numBots; ++b ) {
+												bot.at( b ).keyFound( s );
 											}
 										}
 
@@ -2444,7 +2499,7 @@ uint_fast8_t GameManager::run() {
 				startLoadingScreen();
 			}
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::run(): " << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
@@ -2506,7 +2561,7 @@ void GameManager::setControls() {
 				controlsFile.open( controlsPath );
 
 				if( controlsFile.is_open() ) {
-					uint_fast8_t lineNum = 0;
+					uint_fast8_t lineNum = 0; //I'm assuming here that the file will never exceed 255 lines.
 
 					while( controlsFile.good() ) {
 						++lineNum;
@@ -2514,12 +2569,12 @@ void GameManager::setControls() {
 						getline( controlsFile, line );
 						line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
 						boost::algorithm::trim( line ); //Removes trailing and leading spaces
-						boost::algorithm::to_lower( line );
+						boost::algorithm::to_lower( line ); //Converts to lower case
 						if( debug ) {
 							std::wcout << L"Line " << lineNum << L": \"" << line << "\"" << std::endl;
 						}
 
-						if( !line.empty() ) {
+						if( !line.empty() ) { //The line may be empty, either in the actual file or the result of removing comments and spaces
 							try {
 								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
 								std::wstring choiceStr = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
@@ -2530,8 +2585,7 @@ void GameManager::setControls() {
 								KeyMapping temp;
 								keyMap.push_back( temp );
 
-								//TODO: Possibly use Damerau–Levenshtein distances to account for spelling errors.
-								std::wstring possibleChoicesArray[ ] = {
+								std::vector< std::wstring > possibleChoices = {
 									L"mousewheelup", L"mousewheeldown",
 									L"mouseleftdown", L"mouserightdown", L"mousemiddledown",
 									L"mouseleftup", L"mouserightup", L"mousemiddleup",
@@ -2553,7 +2607,7 @@ void GameManager::setControls() {
 									L"accept", L"modechange", L"space",
 									L"prior", L"next", L"end", L"home",
 									L"left", L"up", L"right", L"down",
-									L"select", L"print", L"screenshot",
+									L"select", L"print", L"snapshot",
 									L"execut", L"insert", L"delete", L"help",
 									L"key_0", L"key_1", L"key_2", L"key_3", L"key_4", L"key_5", L"key_6", L"key_7", L"key_8", L"key_9",
 									L"key_a", L"key_b", L"key_c", L"key_d", L"key_e", L"key_f", L"key_g",
@@ -2571,18 +2625,15 @@ void GameManager::setControls() {
 									L"oem_1", L"oem_2", L"oem_3", L"oem_4", L"oem_5", L"oem_6", L"oem_7", L"oem_8", L"oem_ax", L"oem_102", L"oem_clear",
 									L"attn", L"crsel", L"exsel", L"ereof",
 									L"play", L"zoom", L"pa1" };
-
-								std::vector< std::wstring > possibleChoicesVector;
-								possibleChoicesVector.assign( possibleChoicesArray, possibleChoicesArray + ( sizeof possibleChoicesArray / sizeof *possibleChoicesArray ) );
 								
 								if( debug ) {
-									std::wcout << L"choiceStr before spell checking: " << choiceStr << "\tand after: ";
+									std::wcout << L"choiceStr before spell checking: " << choiceStr;
 								}
 								
-								choiceStr = possibleChoicesVector.at( spellChecker.indexOfClosestString( choiceStr, possibleChoicesVector ) );
+								choiceStr = possibleChoices.at( spellChecker.indexOfClosestString( choiceStr, possibleChoices ) );
 								
 								if( debug ) {
-									std::wcout << choiceStr << std::endl;
+									std::wcout  << "\tand after: " << choiceStr << std::endl;
 								}
 
 								if( choiceStr.substr( 0, 5 ) != L"mouse" ) {
@@ -2906,7 +2957,9 @@ void GameManager::setControls() {
 									if( debug ) {
 										std::wcout << L"choiceStr before: " << choiceStr;
 									}
-									choiceStr = choiceStr.substr( 5, choiceStr.length() - 5 );
+									
+									choiceStr = choiceStr.substr( 5, choiceStr.length() - 5 ); //5 = length of the word "mouse"
+									
 									if( debug ) {
 										std::wcout << L" and after: " << choiceStr << std::endl;
 									}
@@ -2950,31 +3003,22 @@ void GameManager::setControls() {
 									preference = preference.substr( 7 );
 									std::wstring playerNumStr = boost::algorithm::trim_copy( preference.substr( 0, preference.find( L' ' ) ) );
 									std::wstring actionStr = boost::algorithm::trim_copy( preference.substr( preference.find( L' ' ) ) );
-									uint_fast8_t playerNum = boost::lexical_cast< uint_fast16_t >( playerNumStr );
+									uint_fast8_t playerNum = boost::lexical_cast< uint_fast16_t >( playerNumStr ); //Boost doesn't like casting to uint_fast8_t
 
 									if( playerNum < numPlayers ) {
 										keyMap.back().setPlayer( playerNum );
 										//wchar_t action = actionStr.at( 0 );
 										keyMap.back().setActionFromString( actionStr );
-									} else {
+									} else { //We ignore that player number because we don't have that many players
 										keyMap.pop_back();
 									}
 								} else {
 									keyMap.back().setActionFromString( preference );
 								}
 
-								/*if( preference == L"menu" ) {
-									keyMap.back().setAction(L'm');
-								} else if( preference == L"screenshot" ) {
-									keyMap.back().setAction(L's');
-								} else  else if( preference == L"volumeup" ) {
-									keyMap.back().setAction(L'^');
-								} else if( preference == L"volumedown" ) {
-									keyMap.back().setAction(L'v');
-								}*/
-							} catch( std::exception e ) {
+							} catch( std::exception &e ) {
 								std::wcerr << L"Error in GameManager::setControls(): " << e.what() << std::endl;
-							} catch( std::wstring e ) {
+							} catch( std::wstring &e ) {
 								std::wcerr << L"Error in GameManager::setControls(): " << e << std::endl;
 							}
 						}
@@ -2990,9 +3034,9 @@ void GameManager::setControls() {
 		} else {
 			throw( std::wstring( L"controls.cfg does not exist." ) );
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::setControls(): " << e.what() << std::endl;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcerr << L"Error in GameManager::setControls(): " << e << std::endl;
 	}
 }
@@ -3276,7 +3320,7 @@ void GameManager::setupBackground() {
 									std::wcout << filePath.c_str() << std::endl;
 								}
 								
-								if( !hasFileExtension( filePath, "xcf" ) && loader->isALoadableFileExtension( filePath ) ) { //Workaround until the xcf bug gets fixed in Irrlicht. isALoadableFileExtension() crashes on xcf files?!? (Irrlicht 1.8, may be fixed in 1.8.1).
+								if( !core::hasFileExtension( filePath, "xcf" ) ) { //Workaround until the xcf bug gets fixed in Irrlicht. isALoadableFileExtension() crashes on xcf files?!? (Irrlicht 1.8, may be fixed in 1.8.1).
 									io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
 									if( loader->isALoadableFileFormat( file ) ) { //isALoadableFileFormat() crashes on xcf files (Irrlicht 1.8, may be fixed in 1.8.1). I split this if statement out from the one directly above for the purpose of debugging.
 										backgroundList.push_back( i->path() );
@@ -3285,6 +3329,12 @@ void GameManager::setupBackground() {
 									}
 									file->drop();
 								} else {
+									if( debug ) {
+										bool hasXCF = core::hasFileExtension( filePath, "xcf" );
+										bool hasPNG = core::hasFileExtension( filePath, "png" );
+										bool isLoadable = loader->isALoadableFileExtension( filePath );
+										std::wcout << "hax xcf? " << hasXCF << "\thas png? " << hasPNG << "\tis loadable? " << isLoadable << std::endl;
+									}
 									break;
 								}
 							}
@@ -3314,9 +3364,9 @@ void GameManager::setupBackground() {
 				throw error;
 			}
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::setupBackground(): " << e.what() << std::endl;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcerr << L"Error in GameManager::setupBackground(): " << e << std::endl;
 	}
 }
@@ -3329,7 +3379,7 @@ void GameManager::startLoadingScreen() {
 		showingLoadingScreen = true;
 		timeStartedLoading = timer->getRealTime();
 		drawLoadingScreen();
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::startLoadingScreen(): " << e.what() << std::endl;
 	}
 }
@@ -3363,7 +3413,7 @@ void GameManager::takeScreenShot() {
 		} else {
 			throw( std::wstring( L"takeScreenShot(): Failed to take screen shot" ) );
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::takeScreenShot(): " << e.what() << std::endl;
 	}
 }

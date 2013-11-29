@@ -18,7 +18,7 @@ This class exists just to convert between Irrlicht's wide character strings and 
 
 StringConverter::StringConverter() {
 	try {
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::StringConverter(): " << e.what() << std::endl;
 	}
 }
@@ -32,7 +32,7 @@ StringConverter::StringConverter() {
 		}
 		result.validate(); //Not sure what this does; Irrlicht documentation just says "verify the existing string". Figured it probably wouldn't hurt to call the function here.
 		return result;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toIrrlichtStringW(): " << e.what() << std::endl;
 		irr::core::stringw s;
 		return s;
@@ -48,7 +48,7 @@ irr::core::stringw StringConverter::toIrrlichtStringW( std::wstring input ) {
 		}
 		result.validate(); //Not sure what this does; Irrlicht documentation just says "verify the existing string". Figured it probably wouldn't hurt to call the function here.
 		return result;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toIrrlichtStringW(): " << e.what() << std::endl;
 		irr::core::stringw s;
 		return s;
@@ -60,7 +60,7 @@ TagLib::wstring StringConverter::toTaglibWString ( irr::core::stringw input ) {
 		TagLib::wstring result;
 		result.append( input.c_str() );
 		return result;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toTaglibWString(): " << e.what() << std::endl;
 		TagLib::wstring w;
 		return w;
@@ -72,7 +72,7 @@ TagLib::wstring StringConverter::toTaglibWString( std::wstring input ) {
 		TagLib::wstring result;
 		result.append( input );
 		return result;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toTaglibWString(): " << e.what() << std::endl;
 		TagLib::wstring w;
 		return w;
@@ -84,7 +84,7 @@ std::wstring StringConverter::toStdWString ( irr::core::stringw input ) {
 		std::wstring result;
 		result.append( input.c_str() );
 		return result;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toTaglibWString(): " << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -96,7 +96,7 @@ std::wstring StringConverter::toStdWString( TagLib::wstring input ) {
 		std::wstring result;
 		result.append( input );
 		return result;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString(): " << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -108,7 +108,7 @@ std::wstring StringConverter::toStdWString( std::string input ) {
 		std::wstring result;
 		result.assign( input.begin(), input.end() );
 		return result;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString(): " << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -118,7 +118,7 @@ std::wstring StringConverter::toStdWString( std::string input ) {
 std::wstring StringConverter::toStdWString( char* input ) {
 	try {
 		return toStdWString( std::string( input ) );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -128,7 +128,7 @@ std::wstring StringConverter::toStdWString( char* input ) {
 std::wstring StringConverter::toStdWString( wchar_t* input ) {
 	try {
 		return std::wstring( input );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -138,7 +138,7 @@ std::wstring StringConverter::toStdWString( wchar_t* input ) {
 std::wstring StringConverter::toStdWString( const char* input ) {
 	try {
 		return toStdWString( std::string( input ) );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -148,7 +148,7 @@ std::wstring StringConverter::toStdWString( const char* input ) {
 std::wstring StringConverter::toStdWString( const wchar_t* input ) {
 	try {
 		return std::wstring( input );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -158,7 +158,7 @@ std::wstring StringConverter::toStdWString( const wchar_t* input ) {
 std::wstring StringConverter::toStdWString( int input ) {
 	try {
 		return std::to_wstring( input );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -168,7 +168,7 @@ std::wstring StringConverter::toStdWString( int input ) {
 std::wstring StringConverter::toStdWString( long input ) {
 	try {
 		return std::to_wstring( input );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -178,7 +178,7 @@ std::wstring StringConverter::toStdWString( long input ) {
 std::wstring StringConverter::toStdWString( long long input ) {
 	try {
 		return std::to_wstring( input );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -188,7 +188,7 @@ std::wstring StringConverter::toStdWString( long long input ) {
 std::wstring StringConverter::toStdWString( unsigned input ) {
 	try {
 		return std::to_wstring( input );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -198,7 +198,7 @@ std::wstring StringConverter::toStdWString( unsigned input ) {
 std::wstring StringConverter::toStdWString( unsigned long input ) {
 	try {
 		return std::to_wstring( input );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -208,7 +208,7 @@ std::wstring StringConverter::toStdWString( unsigned long input ) {
 std::wstring StringConverter::toStdWString( unsigned long long input ) {
 	try {
 		return std::to_wstring( input );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -218,7 +218,7 @@ std::wstring StringConverter::toStdWString( unsigned long long input ) {
 std::wstring StringConverter::toStdWString( float input ) {
 	try {
 		return std::to_wstring( input );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -228,7 +228,7 @@ std::wstring StringConverter::toStdWString( float input ) {
 std::wstring StringConverter::toStdWString( double input ) {
 	try {
 		return std::to_wstring( input );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -238,7 +238,7 @@ std::wstring StringConverter::toStdWString( double input ) {
 std::wstring StringConverter::toStdWString( long double input ) {
 	try {
 		return std::to_wstring( input );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
 		std::wstring w;
 		return w;
@@ -247,7 +247,7 @@ std::wstring StringConverter::toStdWString( long double input ) {
 
 StringConverter::~StringConverter() {
 	try {
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::~StringConverter(): " << e.what() << std::endl;
 	}
 }

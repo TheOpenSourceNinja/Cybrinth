@@ -47,7 +47,7 @@ CGUITTGlyph::CGUITTGlyph()
 	, tex16( nullptr )
 	, image( nullptr ) {
 	try {
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUITTGlyph::CGUITTGlyph(): " << e.what() << std::endl;
 	}
 }
@@ -55,7 +55,7 @@ CGUITTGlyph::CGUITTGlyph()
 CGUITTGlyph::~CGUITTGlyph() {
 	try {
 		delete[ ] image;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUITTGlyph::~CGUITTGlyph(): " << e.what() << std::endl;
 	}
 }
@@ -151,7 +151,7 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 					}
 
 					c8 name[ 128 ];
-					sprintf( name, "ttf%d_%d_%p", idx_, size, ( void * ) freetypeFont );
+					sprintf( name, "ttf%u_%u_%p", idx_, size, ( void * ) freetypeFont );
 					video::IImage *img = freetypeFont->Driver->createImageFromData( video::ECF_A8R8G8B8, core::dimension2d< u32 >( imgw, imgh ), texd );
 					setGlyphTextureFlags( freetypeFont->Driver );
 					tex = freetypeFont->Driver->addTexture( name, img );
@@ -225,7 +225,7 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 			}
 
 			c8 name[ 128 ];
-			sprintf( name, "ttf%d_%d_%p_16", idx_, size, ( void * ) freetypeFont );
+			sprintf( name, "ttf%u_%u_%p_16", idx_, size, ( void * ) freetypeFont );
 			video::IImage *img = freetypeFont->Driver->createImageFromData( video::ECF_A1R5G5B5, core::dimension2d< u32 >( imgw16, imgh16 ), texd16 );
 			setGlyphTextureFlags( freetypeFont->Driver );
 			tex16 = freetypeFont->Driver->addTexture( name, img );
@@ -234,9 +234,9 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 	//		freetypeFont->Driver->makeColorKeyTexture(tex16,video::SColor(0,0,0,0));
 			delete[ ] texd16;
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in CGUITTGlyph::cache(): " << e.what() << std::endl;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcerr << L"Error in CGUITTGlyph::cache(): " << e << std::endl;
 	}
 }
@@ -253,7 +253,7 @@ void CGUITTGlyph::setGlyphTextureFlags( video::IVideoDriver* driver_ ) {
 		driver_->setTextureCreationFlag( video::ETCF_ALWAYS_16_BIT, false );
 		driver_->setTextureCreationFlag( video::ETCF_ALWAYS_16_BIT, true );
 		driver_->setTextureCreationFlag( video::ETCF_CREATE_MIP_MAPS, false );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUITTGlyph::setGlyphTextureFlags(): " << e.what() << std::endl;
 	}
 }
@@ -263,7 +263,7 @@ void CGUITTGlyph::restoreTextureFlags( video::IVideoDriver* driver_ ) {
 		driver_->setTextureCreationFlag( video::ETCF_ALWAYS_16_BIT, mTexFlag16 );
 		driver_->setTextureCreationFlag( video::ETCF_ALWAYS_16_BIT, mTexFlag16 );
 		driver_->setTextureCreationFlag( video::ETCF_CREATE_MIP_MAPS, mTexFlagMip );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUITTGlyph::restoreTextureFlags(): " << e.what() << std::endl;
 	}
 }
@@ -276,7 +276,7 @@ CGUITTFace::CGUITTFace()
 	: face( 0 ) {
 	try {
 		++countClassObjects;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUITTFace::CGUITTFace(): " << e.what() << std::endl;
 	}
 }
@@ -293,7 +293,7 @@ CGUITTFace::~CGUITTFace() {
 			FT_Done_FreeType( library );
 			library = 0;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUITTFace::~CGUITTFace(): " << e.what() << std::endl;
 	}
 }
@@ -314,7 +314,7 @@ bool CGUITTFace::load( const irr::io::path& filename ) {
 		}
 
 		return true;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUITTFace::load(): " << e.what() << std::endl;
 		return false;
 	}
@@ -335,7 +335,7 @@ CGUIFreetypeFont::CGUIFreetypeFont( video::IVideoDriver* driver )
 
 		AntiAlias = false;
 		Transparency = false;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUIFreetypeFont::CGUIFreetypeFont(): " << e.what() << std::endl;
 	}
 }
@@ -352,7 +352,7 @@ CGUIFreetypeFont::~CGUIFreetypeFont() {
 			Driver->drop();
 
 		clearGlyphs();
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUIFreetypeFont::~CGUIFreetypeFont(): " << e.what() << std::endl;
 	}
 }
@@ -405,7 +405,7 @@ bool CGUIFreetypeFont::attach( CGUITTFace *Face, u32 size ) {
 		}*/
 
 		return	true;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUIFreetypeFont::attach(): " << e.what() << std::endl;
 		return false;
 	}
@@ -420,7 +420,7 @@ void CGUIFreetypeFont::clearGlyphs() {
 
 			Glyphs[ i ] = 0;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUIFreetypeFont::clearGlyphs(): " << e.what() << std::endl;
 	}
 }
@@ -433,7 +433,7 @@ u32 CGUIFreetypeFont::getGlyphByChar( wchar_t c ) const {
 			Glyphs[ idx - 1 ]->cache( idx, this );
 
 		return	idx;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUIFreetypeFont::getGlyphByChar(): " << e.what() << std::endl;
 		return 0;
 	}
@@ -447,7 +447,7 @@ u32 CGUIFreetypeFont::getGlyphByIndex( u32 idx ) const {
 			Glyphs[ idx - 1 ]->cache( idx, this );
 
 		return	idx;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUIFreetypeFont::getGlyphByChar(): " << e.what() << std::endl;
 		return 0;
 	}
@@ -479,7 +479,7 @@ core::dimension2d< u32 > CGUIFreetypeFont::getDimension( const wchar_t* text ) c
 			dim.Height = LargestGlyph.Height;
 
 		return dim;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUIFreetypeFont::getDimension(): " << e.what() << std::endl;
 		return core::dimension2d< u32 >();
 	}
@@ -503,7 +503,7 @@ inline u32 CGUIFreetypeFont::getWidthFromCharacter( wchar_t c ) const {
 		} else {
 			return	Glyphs[ 0 ]->size / 2;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUIFreetypeFont::getWidthFromCharacter(): " << e.what() << std::endl;
 		return 0;
 	}
@@ -518,11 +518,11 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 
 		core::dimension2d< irr::s32 > textDimension;
 		core::position2d< irr::s32 > offset = position.UpperLeftCorner;
-		video::SColor colors[ 4 ];
+		/*video::SColor colors[ 4 ];
 
 		for( int i = 0; i < 4; ++i ) {
-			colors[ i ] = color;
-		}
+			colors[ i ] = color; //cppcheck alerted me to this: "Variable 'colors' is assigned a value that is never used.
+		}*/
 
 		const wchar_t * text = textstring.c_str();
 
@@ -536,10 +536,8 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 				offset.Y = (( position.getHeight() - textDimension.Height ) >> 1 ) + offset.Y;
 		}
 
-		u32 n;
-
 		while( *text ) {
-			n = getGlyphByChar( *text );
+			u32 n = getGlyphByChar( *text );
 
 			if( n > 0 ) {
 				if( AntiAlias ) {
@@ -601,7 +599,7 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 
 			++text;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUIFreetypeFont::draw(): " << e.what() << std::endl;
 	}
 }
@@ -622,7 +620,7 @@ irr::s32  CGUIFreetypeFont::getCharacterFromPos( const wchar_t* text, irr::s32 p
 		}
 
 		return -1;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in CGUIFreetypeFont::getCharacterFromPos(): " << e.what() << std::endl;
 		return -1;
 	}

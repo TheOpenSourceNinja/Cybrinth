@@ -48,11 +48,11 @@ class AI {
 		algorithm_t algorithm;
 		std::vector< irr::core::position2d< uint_least8_t > > cellsVisited;
 		uint_least8_t cols;
-		uint_least8_t controlsPlayer;
+		uint_fast8_t controlsPlayer;
 		enum direction_t{ UP, DOWN, LEFT, RIGHT };
 		std::vector< irr::core::position2d< uint_least8_t > > DFSCellsVisited;
 		GameManager * gm;
-		uint_least8_t keyImSeeking;
+		uint_fast8_t keyImSeeking;
 		uint_least32_t lastTimeMoved;
 		MazeCell ** maze;
 		uint_least16_t movementDelay; //How long to delay between movements

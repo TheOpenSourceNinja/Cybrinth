@@ -48,16 +48,16 @@ class GameManager : public IEventReceiver {
 		void drawAll();
 		void drawLoadingScreen();
 
-		Collectable* getCollectable( uint_least8_t collectable );
+		Collectable* getCollectable( uint_fast8_t collectable );
 		bool getDebugStatus();
 		Goal* getGoal();
-		Collectable* getKey( uint_least8_t key );
+		Collectable* getKey( uint_fast8_t key );
 		MazeManager* getMazeManager();
-		uint_least8_t getNumKeys();
-		Player* getPlayer( uint_least8_t p );
+		uint_fast8_t getNumKeys();
+		Player* getPlayer( uint_fast8_t p );
 
-		void movePlayerOnX( uint_least8_t p, int_fast8_t direction );
-		void movePlayerOnY( uint_least8_t p, int_fast8_t direction );
+		void movePlayerOnX( uint_fast8_t p, int_fast8_t direction );
+		void movePlayerOnY( uint_fast8_t p, int_fast8_t direction );
 
 		bool OnEvent( const SEvent& );
 
@@ -78,9 +78,9 @@ class GameManager : public IEventReceiver {
 
 		uint_least16_t loadingDelay;
 
-		uint_least8_t numBots;
-		uint_least8_t numLocks;
-		uint_least8_t numPlayers;
+		uint_fast8_t numBots;
+		uint_fast8_t numLocks;
+		uint_fast8_t numPlayers;
 
 		std::vector< Player > player;
 		std::vector< PlayerStart > playerStart;
@@ -156,13 +156,13 @@ class GameManager : public IEventReceiver {
 		//unsigned 8-bit integers----------------------------------
 		uint_least8_t backgroundChosen;
 
-		uint_least8_t myPlayer; //If in client mode, control only one player
+		uint_fast8_t myPlayer; //If in client mode, control only one player
 
-		uint_least8_t numKeysFound;
+		uint_fast8_t numKeysFound;
 
 		uint_least8_t sideDisplaySizeDenominator;
 
-		std::vector< uint_least8_t > winners;
+		std::vector< uint_fast8_t > winners;
 
 
 		//unsigned 16-bit integers----------------------------------
@@ -217,7 +217,6 @@ class GameManager : public IEventReceiver {
 		ImageModifier resizer;
 
 		MenuOption saveMaze;
-		
 		SpellChecker spellChecker;
 
 

@@ -22,12 +22,14 @@ void *NetworkManager::get_in_addr( struct sockaddr *sa ) {
 		}
 
 		return &((( struct sockaddr_in6* )sa )->sin6_addr );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::get_in_addr(): " << e.what() << std::endl;
 		return nullptr;
 	}
 }
 
+//The following comment prevents cppcheck from complaining about remoteIP not being initialized in the constructor. Don't worry, it gets initialized soon enough.
+// cppcheck-suppress uninitMemberVar
 NetworkManager::NetworkManager() {
 	try {
 		//ctor
@@ -48,7 +50,7 @@ NetworkManager::NetworkManager() {
 			exit(1);
 		}
 		#endif
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::NetworkManager(): " << e.what() << std::endl;
 	}
 }
@@ -56,7 +58,7 @@ NetworkManager::NetworkManager() {
 void NetworkManager::setGameManager( GameManager* newGM ) {
 	try {
 		gm = newGM;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::setGameManager(): " << e.what() << std::endl;
 	}
 }
@@ -74,7 +76,7 @@ void NetworkManager::setPort( uint_least16_t newPort ) {
 		}
 
 		port = newPort;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::setPort(): " << e.what() << std::endl;
 	}
 }
@@ -82,7 +84,7 @@ void NetworkManager::setPort( uint_least16_t newPort ) {
 uint_least16_t NetworkManager::getPort() {
 	try {
 		return port;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::getPort(): " << e.what() << std::endl;
 		return UINT_LEAST16_MAX;
 	}
@@ -166,11 +168,8 @@ int NetworkManager::setup( bool isServer ) {
 		}
 
 		return 0;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::setup(): " << e.what() << std::endl;
-		return -1;
-	} catch ( std::wstring e ) {
-		std::wcerr << L"Error in NetworkManager::setup(): " << e << std::endl;
 		return -1;
 	}
 }
@@ -188,7 +187,7 @@ NetworkManager::~NetworkManager() {
 		#if defined WINDOWS
 		WSACleanup();
 		#endif
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::~NetworkManager(): " << e.what() << std::endl;
 	}
 }
@@ -206,11 +205,8 @@ int NetworkManager::checkForConnections() {
 		} else {
 			return result;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::checkForConnections(): " << e.what() << std::endl;
-		return -1;
-	} catch ( std::wstring e ) {
-		std::wcerr << L"Error in NetworkManager::checkForConnections(): " << e << std::endl;
 		return -1;
 	}
 }
@@ -239,7 +235,7 @@ int NetworkManager::sendData( int sockfd, unsigned char *buf, size_t *len ) {
 		} else {
 			return 0;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::sendData(): " << e.what() << std::endl;
 		return -1;
 	}
@@ -273,11 +269,8 @@ bool NetworkManager::hasNewPlayerConnected() {
 			//std::wcout << L"No new connections at this time." << std::endl;
 			return false;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::hasNewPlayerConnected(): " << e.what() << std::endl;
-		return false;
-	} catch ( std::wstring e ) {
-		std::wcerr << L"Error in NetworkManager::hasNewPlayerConnected(): " << e << std::endl;
 		return false;
 	}
 }
@@ -330,7 +323,7 @@ void NetworkManager::sendMaze( MazeCell ** maze, uint_least8_t cols, uint_least8
 				}
 			}
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::sendMaze(): " << e.what() << std::endl;
 	}
 }
@@ -369,7 +362,7 @@ void NetworkManager::sendPlayerPos( uint_least8_t player, uint_least8_t x, uint_
 				}
 			}
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::sendPlayerPos(): " << e.what() << std::endl;
 	}
 }
@@ -407,7 +400,7 @@ void NetworkManager::sendGoal( Goal goal ) {
 				}
 			}
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::sendGoal(): " << e.what() << std::endl;
 	}
 }
@@ -452,7 +445,7 @@ void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 				}
 			}
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::sendPlayerStarts(): " << e.what() << std::endl;
 	}
 }
@@ -498,7 +491,7 @@ void NetworkManager::sendU8( uint_least8_t num, std::wstring desc ) {
 				}
 			}
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::sendU8(): " << e.what() << std::endl;
 	}
 }
@@ -541,7 +534,7 @@ void NetworkManager::sendCollectables( std::vector<Collectable> stuff ) {
 				}
 			}
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::sendCollectables(): " << e.what() << std::endl;
 	}
 }
@@ -558,7 +551,7 @@ bool NetworkManager::receiveData() {
 		} else {
 			return true;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::receiveData(): " << e.what() << std::endl;
 		return false;
 	}

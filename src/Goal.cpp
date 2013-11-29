@@ -17,14 +17,14 @@
 Goal::Goal() {
 	try {
 		setColor( WHITE );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Goal::Goal(): " << e.what() << std::endl;
 	}
 }
 
 Goal::~Goal() {
 	try {
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Goal::~Goal(): " << e.what() << std::endl;
 	}
 }
@@ -44,7 +44,7 @@ void Goal::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_le
 		}
 
 		Object::draw( driver, width, height );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Goal::draw(): " << e.what() << std::endl;
 	}
 }
@@ -54,7 +54,7 @@ void Goal::loadTexture( irr::video::IVideoDriver* driver ) {
 	try {
 		//texture = driver->getTexture( "diamond.png" );
 		loadTexture( driver, 1 );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Goal::loadTexture(): " << e.what() << std::endl;
 	}
 }
@@ -89,7 +89,7 @@ void Goal::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size ) 
 
 		driver->removeTexture( texture );
 		texture = driver->addTexture( L"goalDiamond", tempImage );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Goal::loadTexture(): " << e.what() << std::endl;
 	}
 }

@@ -15,14 +15,14 @@
 PlayerStart::PlayerStart() {
 	try {
 		reset();
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in PlayerStart::PlayerStart(): " << e.what() << std::endl;
 	}
 }
 
 PlayerStart::~PlayerStart() {
 	try {
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in PlayerStart::~PlayerStart(): " << e.what() << std::endl;
 	}
 }
@@ -33,7 +33,7 @@ void PlayerStart::reset() {
 		x = 0;
 		y = 0;
 		distanceFromExit = 0;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in PlayerStart::reset(): " << e.what() << std::endl;
 	}
 }
@@ -41,7 +41,7 @@ void PlayerStart::reset() {
 void PlayerStart::loadTexture( irr::video::IVideoDriver* driver ) {
 	try {
 		loadTexture( driver, 1 );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in PlayerStart::loadTexture(): " << e.what() << std::endl;
 	}
 }
@@ -54,7 +54,7 @@ void PlayerStart::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t 
 
 		driver->removeTexture( texture );
 		texture = driver->addTexture( L"playerStart", tempImage );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in PlayerStart::loadTexture(): " << e.what() << std::endl;
 	}
 }
@@ -74,7 +74,7 @@ void PlayerStart::draw( irr::video::IVideoDriver* driver, uint_least16_t width, 
 		}
 
 		Object::draw( driver, width, height );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in PlayerStart::draw(): " << e.what() << std::endl;
 	}
 }

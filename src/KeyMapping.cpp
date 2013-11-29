@@ -5,7 +5,7 @@
 KeyMapping::action_t KeyMapping::getAction() {
 	try {
 		return action;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::getAction(): " << e.what() << std::endl;
 		return ERROR_DO_NOT_USE;
 	}
@@ -16,46 +16,33 @@ std::wstring KeyMapping::getActionAsString() {
 		switch( action ) {
 			case MENU: {
 				return L"menu";
-				break;
 			}
 			case SCREENSHOT: {
 				return L"screenshot";
-				break;
 			}
 			case VOLUME_UP: {
 				return L"volumeup";
-				break;
 			}
 			case VOLUME_DOWN: {
 				return L"volumedown";
-				break;
 			}
 			case UP: {
 				return L"up";
-				break;
 			}
 			case DOWN: {
 				return L"down";
-				break;
 			}
 			case RIGHT: {
 				return L"right";
-				break;
 			}
 			case LEFT: {
 				return L"left";
-				break;
-			}
-			case ERROR_DO_NOT_USE: {
-				return L"ERROR DO NOT USE";
-				break;
 			}
 			default: {
 				return L"ERROR DO NOT USE";
-				break;
 			}
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcout << L"Error in KeyMapping::getActionAsString(): " << e.what() << std::endl;
 		return L"ERROR";
 	}
@@ -83,10 +70,10 @@ void KeyMapping::setActionFromString( std::wstring val ) {
 			std::wstring error = L"Action string not recognized: " + val;
 			throw error;
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::setActionFromString(): " << e.what() << std::endl;
 		action = ERROR_DO_NOT_USE;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcerr << L"Error in KeyMapping::setActionFromString(): " << e << std::endl;
 		action = ERROR_DO_NOT_USE;
 	}
@@ -95,7 +82,7 @@ void KeyMapping::setActionFromString( std::wstring val ) {
 irr::EKEY_CODE KeyMapping::getKey() {
 	try {
 		return key;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::getKey(): " << e.what() << std::endl;
 		return irr::KEY_KEY_CODES_COUNT;
 	}
@@ -118,7 +105,7 @@ irr::EMOUSE_INPUT_EVENT KeyMapping::getMouseEvent() {
 uint_least8_t KeyMapping::getPlayer() {
 	try {
 		return player;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::getPlayer(): " << e.what() << std::endl;
 		return UINT_LEAST8_MAX;
 	}
@@ -127,7 +114,7 @@ uint_least8_t KeyMapping::getPlayer() {
 void KeyMapping::setAction( action_t val ) {
 	try {
 		action = val;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::setAction(): " << e.what() << std::endl;
 		action = ERROR_DO_NOT_USE;
 	}
@@ -136,7 +123,7 @@ void KeyMapping::setAction( action_t val ) {
 void KeyMapping::setKey( irr::EKEY_CODE val ) {
 	try {
 		key = val;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::setKey(): " << e.what() << std::endl;
 	}
 }
@@ -158,7 +145,7 @@ void KeyMapping::setMouseWheelUp( bool val ) {
 void KeyMapping::setPlayer( uint_least8_t val ) {
 	try {
 		player = val;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::setPlayer(): " << e.what() << std::endl;
 	}
 }
@@ -169,14 +156,14 @@ KeyMapping::KeyMapping() {
 		mouseEvent = irr::EMIE_COUNT;
 		key = irr::KEY_KEY_CODES_COUNT;
 		setAction( ERROR_DO_NOT_USE );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::KeyMapping(): " << e.what() << std::endl;
 	}
 }
 
 KeyMapping::~KeyMapping() {
 	try {
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::~KeyMapping(): " << e.what() << std::endl;
 	}
 }

@@ -18,14 +18,14 @@ Collectable::Collectable() {
 		x = 0;
 		y = 0;
 		setType( KEY );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Collectable::Collectable(): " << e.what() << std::endl;
 	}
 }
 
 Collectable::~Collectable() {
 	try {
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Collectable::~Collectable(): " << e.what() << std::endl;
 	}
 }
@@ -45,7 +45,7 @@ void Collectable::draw( irr::video::IVideoDriver* driver, uint_least16_t width, 
 		}
 
 		Object::draw( driver, width, height );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Collectable::draw(): " << e.what() << std::endl;
 	}
 }
@@ -53,7 +53,7 @@ void Collectable::draw( irr::video::IVideoDriver* driver, uint_least16_t width, 
 Collectable::type_t Collectable::getType() {
 	try {
 		return type;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Collectable::getType(): " << e.what() << std::endl;
 	}
 }
@@ -146,7 +146,7 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 			temp->fill( WHITE );
 			texture = resizer.imageToTexture( driver, temp, "generic collectable" );
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Collectable::loadTexture(): " << e.what() << std::endl;
 	}
 }
@@ -165,7 +165,7 @@ void Collectable::setType( type_t newType ) {
 				}
 			default: break;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Collectable::setType(): " << e.what() << std::endl;
 	}
 }

@@ -19,14 +19,14 @@ AI::AI() : algorithm( DEPTH_FIRST_SEARCH ), cols(0), controlsPlayer(0), gm(nullp
 	try {
 		//TODO: Allow custom AI movement delays for increased/decreased challenge
 		//setup( nullptr, 0, 0, nullptr );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::AI(): " << e.what() << std::endl;
 	}
 }
 
 AI::~AI() {
 	try {
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in AI::~AI(): " << e.what() << std::endl;
 	}
 }
@@ -65,7 +65,7 @@ void AI::allKeysFound() { //Makes the bot 'forget' that it has visited certain m
 		pathsToLockedCells.clear();
 		pathsToLockedCells.shrink_to_fit(); //If your compiler doesn't support C++11 or later, comment this line and uncomment the next
 		//std::vector< std::vector< core::position2d< uint_least8_t > > >().swap( pathsToLockedCells );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::allKeysFound(): " << e.what() << std::endl;
 	}
 }
@@ -82,7 +82,7 @@ bool AI::alreadyVisited( irr::core::position2d< uint_least8_t > position ) {
 			++i;
 		}
 		return result;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::alreadyVisited(): " << e.what() << std::endl;
 		return false;
 	}
@@ -100,7 +100,7 @@ bool AI::alreadyVisitedDFS( irr::core::position2d< uint_least8_t > position ) {
 			++i;
 		}
 		return result;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::alreadyVisitedDFS(): " << e.what() << std::endl;
 		return false;
 	}
@@ -115,7 +115,7 @@ bool AI::atGoal() {
 		} else {
 			return false;
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcout << "Error in AI::atGoal(): " << e.what() << std::endl;
 		return true;
 	}
@@ -128,7 +128,7 @@ bool AI::doneWaiting() {
 		} else {
 			return false;
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcout << L"Error in AI::doneWaiting(): " << e.what() << std::endl;
 		return false;
 	}
@@ -151,7 +151,6 @@ void AI::findSolution() {
 			default: {
 				StringConverter sc;
 				throw( std::wstring( L"Algorithm " ) + sc.toStdWString( algorithm ) + L" not yet added to findSolution()." );
-				break;
 			}
 		}
 
@@ -161,9 +160,9 @@ void AI::findSolution() {
 				solution.pop_back();
 			}
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcout << L"Error in AI::findSolution(): " << e.what() << std::endl;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcout << L"Error in AI::findSolution(): " << e << std::endl;
 	}
 }
@@ -184,7 +183,7 @@ void AI::findSolutionDFS( irr::core::position2d< uint_least8_t > currentPosition
 			tempSolution.pop_back();
 		}
 		solution.push_back( currentPosition );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcout << L"Error in AI::findSolutionDFS(): " << e.what() << std::endl;
 	}
 }
@@ -210,6 +209,8 @@ void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > 
 
 					//ignoreLocks = ( numKeysInSolution >= gm->getNumKeys() );
 					keyImSeeking = k;
+					//std::wcout << "Bot is seeking key " << k << std::endl;
+					break;
 				}
 			}
 
@@ -278,7 +279,7 @@ void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > 
 			solution = partialSolution;
 			return;
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcout << L"Error in AI::findSolutionDFS(): " << e.what() << std::endl;
 	}
 	if( partialSolution.size() > 0 ) {
@@ -289,7 +290,7 @@ void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > 
 uint_least8_t AI::getPlayer() {
 	try {
 		return controlsPlayer;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::AI(): " << e.what() << std::endl;
 		return 0; //This should never be reached. If it is, good luck to the real player 0.
 	}
@@ -297,10 +298,16 @@ uint_least8_t AI::getPlayer() {
 
 void AI::keyFound( uint_fast8_t key ) {
 	try {
-		if( startSolved && key == keyImSeeking ) {
-			findSolution();
+		//std::wcout << L"Bot acknowledging key " << key << L" found." << std::endl;
+		if( startSolved ) {
+			//std::wcout << L"Seeking key " << keyImSeeking << std::endl;
+			if( key == keyImSeeking ) {
+				//std::wcout << L"They're the same" << std::endl;
+				findSolution();
+			}
 		}
-	} catch( std::exception e ) {
+
+	} catch( std::exception &e ) {
 		std::wcout << L"Error in AI::keyFound(): " << e.what() << std::endl;
 	}
 }
@@ -475,7 +482,7 @@ void AI::move() {
 				}
 			}
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in AI::move(): " << e.what() << std::endl;
 	}
 }
@@ -496,15 +503,15 @@ void AI::reset() {
 		if( startSolved && gm != nullptr ) {
 			findSolution();
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcout << L"Error in AI::reset(): " << e.what() << std::endl;
 	}
 }
 
-void AI::setPlayer( uint_least8_t newPlayer ) {
+void AI::setPlayer( uint_fast8_t newPlayer ) {
 	try {
 		controlsPlayer = newPlayer;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::setPlayer(): " << e.what() << std::endl;
 	}
 }
@@ -518,7 +525,7 @@ void AI::setup( MazeCell ** newMaze, uint_least8_t newCols, uint_least8_t newRow
 		startSolved = newStartSolved;
 		algorithm = newAlgorithm;
 		reset();
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::setup(): " << e.what() << std::endl;
 	}
 }

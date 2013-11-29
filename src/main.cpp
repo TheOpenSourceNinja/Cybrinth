@@ -18,7 +18,7 @@ int main() {
 		int exitValue = gm->run();
 		delete gm;
 		exit( exitValue );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error caught by main(): " << e.what() << std::endl;
 		exit( EXIT_FAILURE );
 	}

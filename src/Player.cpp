@@ -26,14 +26,14 @@ Player::Player() {
 		texture = nullptr;
 		isHuman = true;
 		reset();
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::Player(): " << e.what() << std::endl;
 	}
 }
 
 Player::~Player() {
 	try {
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::~Player(): " << e.what() << std::endl;
 	}
 }
@@ -41,7 +41,7 @@ Player::~Player() {
 void Player::loadTexture( irr::video::IVideoDriver* driver ) {
 	try {
 		loadTexture( driver, 1 );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::loadTexture(): " << e.what() << std::endl;
 	}
 }
@@ -83,7 +83,7 @@ void Player::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size 
 
 		driver->removeTexture( texture );
 		texture = driver->addTexture( L"playerCircle", tempImage );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::loadTexture(): " << e.what() << std::endl;
 	}
 }
@@ -103,7 +103,7 @@ void Player::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_
 		}
 
 		Object::draw( driver, width, height );
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::draw(): " << e.what() << std::endl;
 	}
 }
@@ -112,7 +112,7 @@ void Player::moveX( int_fast8_t val ) {
 	try {
 		Object::moveX( val );
 		stepsTaken += 1;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::moveX(): " << e.what() << std::endl;
 	}
 }
@@ -121,7 +121,7 @@ void Player::moveY( int_fast8_t val ) {
 	try {
 		Object::moveY( val );
 		stepsTaken += 1;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::moveY(): " << e.what() << std::endl;
 	}
 }
@@ -129,7 +129,7 @@ void Player::moveY( int_fast8_t val ) {
 void Player::reset() {
 	try {
 		stepsTaken = 0;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::reset(): " << e.what() << std::endl;
 	}
 }

@@ -21,14 +21,14 @@ MenuOption::MenuOption() {
 		setText( "" );
 		font = nullptr;
 		setDimension();
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::MenuOption(): " << e.what() << std::endl;
 	}
 }
 
 MenuOption::~MenuOption() {
 	try {
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::~MenuOption(): " << e.what() << std::endl;
 	}
 }
@@ -37,7 +37,7 @@ void MenuOption::setText( irr::core::stringw newText ) {
 	try {
 		text = newText;
 		setDimension();
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::setText(): " << e.what() << std::endl;
 	}
 }
@@ -46,7 +46,7 @@ void MenuOption::setFont( irr::gui::IGUIFont* newFont ) {
 	try {
 		font = newFont;
 		setDimension();
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::setFont(): " << e.what() << std::endl;
 	}
 }
@@ -58,7 +58,7 @@ void MenuOption::setDimension() {
 		} else {
 			dimension = irr::core::dimension2d<uint_least16_t>( 0, 0 );
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::setDimension(): " << e.what() << std::endl;
 	}
 }
@@ -69,7 +69,7 @@ void MenuOption::draw( irr::video::IVideoDriver* driver ) {
 		if( font != nullptr ) {
 			font->draw( text, irr::core::rect< irr::s32 >( x, y, dimension.Width, dimension.Height ), LIGHTCYAN );
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::draw(): " << e.what() << std::endl;
 	}
 }
@@ -77,7 +77,7 @@ void MenuOption::draw( irr::video::IVideoDriver* driver ) {
 void MenuOption::setX( uint_least16_t val ) {
 	try {
 		x = val;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::MenuOption(): " << e.what() << std::endl;
 	}
 }
@@ -85,7 +85,7 @@ void MenuOption::setX( uint_least16_t val ) {
 void MenuOption::setY( uint_least16_t val ) {
 	try {
 		y = val;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::MenuOption(): " << e.what() << std::endl;
 	}
 }
@@ -93,7 +93,7 @@ void MenuOption::setY( uint_least16_t val ) {
 uint_least16_t MenuOption::getX() {
 	try {
 		return x;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::getX(): " << e.what() << std::endl;
 		return UINT_LEAST16_MAX;
 	}
@@ -102,7 +102,7 @@ uint_least16_t MenuOption::getX() {
 uint_least16_t MenuOption::getY() {
 	try {
 		return y;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::getY(): " << e.what() << std::endl;
 		return UINT_LEAST16_MAX;
 	}
@@ -111,7 +111,7 @@ uint_least16_t MenuOption::getY() {
 bool MenuOption::contains( irr::core::position2d<uint_least16_t> test ) {
 	try {
 		return ( test.X >= x && test.Y >= y && test.X <= x + dimension.Width && test.Y <= y + dimension.Height );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::contains(): " << e.what() << std::endl;
 		return false;
 	}
@@ -120,7 +120,7 @@ bool MenuOption::contains( irr::core::position2d<uint_least16_t> test ) {
 bool MenuOption::contains( uint_least16_t testX, uint_least16_t testY ) {
 	try {
 		return contains( irr::core::position2d<uint_least16_t>( testX, testY ) );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::contains(): " << e.what() << std::endl;
 		return false;
 	}

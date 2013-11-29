@@ -24,7 +24,7 @@ MazeCell::MazeCell() {
 		id = 0;
 		setVisitorColor(BLACK);
 		visible = true;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::MazeCell(): " << e.what() << std::endl;
 	}
 }
@@ -32,7 +32,7 @@ MazeCell::MazeCell() {
 void MazeCell::setVisitorColor( irr::video::SColor color ) {
 	try {
 		visitorColor = color;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::setVisitorColor(): " << e.what() << std::endl;
 	}
 }
@@ -40,7 +40,7 @@ void MazeCell::setVisitorColor( irr::video::SColor color ) {
 irr::video::SColor MazeCell::getVisitorColor() {
 	try {
 		return visitorColor;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::getVisitorColor(): " << e.what() << std::endl;
 		return WHITE;
 	}
@@ -48,7 +48,7 @@ irr::video::SColor MazeCell::getVisitorColor() {
 
 MazeCell::~MazeCell() {
 	try {
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::~MazeCell(): " << e.what() << std::endl;
 	}
 }
@@ -56,7 +56,7 @@ MazeCell::~MazeCell() {
 MazeCell::border_t MazeCell::getTop() {
 	try {
 		return top;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::getTop(): " << e.what() << std::endl;
 		return NONE;
 	}
@@ -65,7 +65,7 @@ MazeCell::border_t MazeCell::getTop() {
 void MazeCell::setTop( border_t val )  {
 	try {
 		top = val;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::setTop(): " << e.what() << std::endl;
 	}
 }
@@ -73,7 +73,7 @@ void MazeCell::setTop( border_t val )  {
 MazeCell::border_t MazeCell::getLeft() {
 	try {
 		return left;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::getLeft(): " << e.what() << std::endl;
 		return NONE;
 	}
@@ -82,7 +82,7 @@ MazeCell::border_t MazeCell::getLeft() {
 void MazeCell::setLeft( border_t val ) {
 	try {
 		left = val;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::setLeft(): " << e.what() << std::endl;
 	}
 }
@@ -90,7 +90,7 @@ void MazeCell::setLeft( border_t val ) {
 MazeCell::border_t MazeCell::getBottom() {
 	try {
 		return bottom;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::getBottom(): " << e.what() << std::endl;
 		return NONE;
 	}
@@ -99,7 +99,7 @@ MazeCell::border_t MazeCell::getBottom() {
 void MazeCell::setBottom( border_t val ) {
 	try {
 		bottom = val;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::setBottom(): " << e.what() << std::endl;
 	}
 }
@@ -107,7 +107,7 @@ void MazeCell::setBottom( border_t val ) {
 MazeCell::border_t MazeCell::getRight() {
 	try {
 		return right;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::getRight(): " << e.what() << std::endl;
 		return NONE;
 	}
@@ -116,7 +116,7 @@ MazeCell::border_t MazeCell::getRight() {
 void MazeCell::setRight( border_t val ) {
 	try {
 		right = val;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::setRight(): " << e.what() << std::endl;
 	}
 }
@@ -138,7 +138,7 @@ void MazeCell::removeLocks() {
 		if( right == LOCK ) {
 			right = NONE;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::removeLocks(): " << e.what() << std::endl;
 	}
 }
@@ -150,7 +150,7 @@ bool MazeCell::hasLock() {
 		} else {
 			return false;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::hasLock(): " << e.what() << std::endl;
 		return false;
 	}
@@ -163,7 +163,7 @@ bool MazeCell::hasLeftLock() {
 		} else {
 			return false;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::hasLeftLock(): " << e.what() << std::endl;
 		return false;
 	}
@@ -176,7 +176,7 @@ bool MazeCell::hasTopLock() {
 		} else {
 			return false;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::hasTopLock(): " << e.what() << std::endl;
 		return false;
 	}
@@ -202,7 +202,7 @@ bool MazeCell::isDeadEnd() {
 			result = false;
 		}
 		return result;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::isDeadEnd(): " << e.what() << std::endl;
 		return false;
 	}

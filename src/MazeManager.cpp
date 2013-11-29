@@ -35,7 +35,7 @@ bool MazeManager::canGetTo( uint_least8_t startX, uint_least8_t startY, uint_lea
 		}
 
 		return found;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::canGetTo(): " << e.what() << std::endl;
 		return false;
 	}
@@ -63,7 +63,7 @@ bool MazeManager::canGetToAllCollectables( uint_least8_t startX, uint_least8_t s
 		}
 
 		return result;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::canGetToAllCollectables(): " << e.what() << std::endl;
 		return false;
 	}
@@ -109,7 +109,7 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_least16_t cellWidth, u
 				}
 			}
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::draw(): " << e.what() << std::endl;
 	}
 }
@@ -129,7 +129,7 @@ bool MazeManager::existsAnythingAt( uint_least8_t x, uint_least8_t y ) {
 		}
 
 		return result;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::existsAnythingAt(): " << e.what() << std::endl;
 		return false;
 	}
@@ -138,7 +138,7 @@ bool MazeManager::existsAnythingAt( uint_least8_t x, uint_least8_t y ) {
 bool MazeManager::loadFromFile() {
 	try {
 		return loadFromFile( L"default.maz" );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::loadFromFile(): " << e.what() << std::endl;
 		return false;
 	}
@@ -165,13 +165,13 @@ bool MazeManager::loadFromFile( boost::filesystem::path src ) {
 		} else {
 			throw( std::wstring( L"Cannot open file: " ) + src.wstring() );
 		}
-	} catch( const boost::filesystem::filesystem_error e ) {
+	} catch( const boost::filesystem::filesystem_error &e ) {
 		std::wcerr << L"Boost Filesystem error in MazeManager::loadFromFile: " << e.what() << std::endl;
 		return false;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"non-Boost-Filesystem error in MazeManager::loadFromFile: " << e.what() << std::endl;
 		return false;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcerr << L"non-Boost-Filesystem error in MazeManager::loadFromFile: " << e << std::endl;
 		return false;
 	}
@@ -390,7 +390,7 @@ void MazeManager::makeRandomLevel() {
 				gameManager->bot[ i ].setup( maze, cols, rows, gameManager );
 			}
 		}*/
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::makeRandomLevel(): " << e.what() << std::endl;
 	}
 }
@@ -400,7 +400,9 @@ MazeManager::MazeManager() {
 		//resizeMaze() will set cols and rows to whatever gets passed into it; we're making them zero here only so that resizeMaze() doesn't try to copy from the nonexistent previous maze.
 		cols = 0;
 		rows = 0;
-	} catch ( std::exception e ) {
+		maze = nullptr;
+		gameManager = nullptr;
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::MazeManager(): " << e.what() << std::endl;
 	}
 }
@@ -412,7 +414,7 @@ MazeManager::~MazeManager() {
 		}
 
 		delete [ ] maze ;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::~MazeManager(): " << e.what() << std::endl;
 	}
 }
@@ -490,7 +492,7 @@ void MazeManager::recurseRandom( uint_least8_t x, uint_least8_t y, uint_least16_
 				keepGoing = true;
 			}
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::recurseRandom(): " << e.what() << std::endl;
 	}
 }
@@ -543,7 +545,7 @@ void MazeManager::resizeMaze( uint_least8_t newCols, uint_least8_t newRows ) {
 		rows = newRows;
 
 		maze = temp;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::resizeMaze(): " << e.what() << std::endl;
 	}
 }
@@ -551,7 +553,7 @@ void MazeManager::resizeMaze( uint_least8_t newCols, uint_least8_t newRows ) {
 bool MazeManager::saveToFile() {
 	try {
 		return saveToFile( L"default.maz" );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::saveToFile(): " << e.what() << std::endl;
 		return false;
 	}
@@ -580,13 +582,13 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 		}
 
 		return true;
-	} catch( const boost::filesystem::filesystem_error e ) {
+	} catch( const boost::filesystem::filesystem_error &e ) {
 		std::wcerr << L"Boost Filesystem error in MazeManager::saveToFile(): " << e.what() << std::endl;
 		return false;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"non-Boost-Filesystem error in MazeManager::saveToFile(): " << e.what() << std::endl;
 		return false;
-	} catch( std::wstring e ) {
+	} catch( std::wstring &e ) {
 		std::wcerr << L"non-Boost-Filesystem error in MazeManager::saveToFile(): " << e << std::endl;
 		return false;
 	}
@@ -595,7 +597,7 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 void MazeManager::setGameManager( GameManager* newGM ) {
 	try {
 		gameManager = newGM;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::setGameManager(): " << e.what() << std::endl;
 	}
 }

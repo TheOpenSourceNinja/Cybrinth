@@ -21,7 +21,7 @@
 
 FontManager::FontManager() {
 	try {
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in FontManager::FontManager(): " << e.what() << std::endl;
 	}
 }
@@ -39,7 +39,7 @@ FontManager::~FontManager() {
 		for( ; itFace != mFaceMap.end(); ++itFace ) {
 			itFace->second->drop();
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in FontManager::~FontManager(): " << e.what() << std::endl;
 	}
 }
@@ -54,7 +54,7 @@ bool FontManager::canLoadFont( irr::core::stringw filename_ ) {
 			face->drop();
 			return false;
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in FontManager::canLoadFont(): " << e.what() << std::endl;
 		return false;
 	}
@@ -66,7 +66,7 @@ bool FontManager::canLoadFont( boost::filesystem::path filename_ ) {
 			StringConverter sc;
 			return canLoadFont( sc.toIrrlichtStringW( filename_.wstring() ) );
 		}
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in FontManager::canLoadFont(): " << e.what() << std::endl;
 	}
 	return false;
@@ -119,7 +119,7 @@ irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, ir
 		mFontMap[ fontString ] = font;
 
 		return font;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in FontManager::GetTtFont(): " << e.what() << std::endl;
 		return nullptr;
 	}
@@ -149,7 +149,7 @@ irr::core::stringw FontManager::MakeFontIdentifier( irr::core::stringw filename_
 			result.append( 't' );
 		}
 		return result;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in FontManager::MakeFontIdentifier(): " << e.what() << std::endl;
 		irr::core::stringw s;
 		return s;

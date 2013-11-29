@@ -15,7 +15,7 @@ video::ITexture* ImageModifier::imageToTexture( irr::video::IVideoDriver* driver
 		irr::video::ITexture* texture = driver->addTexture( name.c_str(), oldImage );
 		texture->grab();
 		return texture;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in ImageModifier::imageToTexture(): " << e.what() << std::endl;
 		return nullptr;
 	}
@@ -46,7 +46,7 @@ video::ITexture* ImageModifier::resize( video::ITexture* image, uint_least32_t w
 		image = imageToTexture( driver, tempImage2, L"resized" );
 		//tempImage2->drop();
 		return image;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in ImageModifier::resize(): " << e.what() << std::endl;
 	}
 }
@@ -76,7 +76,7 @@ video::IImage* ImageModifier::resize( video::IImage* image, uint_least32_t width
 		image = tempImage2;//imageToTexture( driver, tempImage2, L"resized" );
 		//tempImage2->drop();
 		return image;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in ImageModifier::resize(): " << e.what() << std::endl;
 	}
 }
@@ -86,7 +86,7 @@ video::IImage* ImageModifier::textureToImage( irr::video::IVideoDriver* driver, 
 		irr::video::IImage* newImage = driver->createImageFromData( texture->getColorFormat(), texture->getSize(), texture->lock(), false );
 		texture->unlock();
 		return newImage;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in ImageModifier::textureToImage(): " << e.what() << std::endl;
 		return nullptr;
 	}

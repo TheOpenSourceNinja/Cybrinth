@@ -23,14 +23,14 @@ Object::Object() {
 		moving = false;
 		distanceFromExit = 0;
 		texture = nullptr;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::Object(): " << e.what() << std::endl;
 	}
 }
 
 Object::~Object() {
 	try {
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::~Object(): " << e.what() << std::endl;
 	}
 }
@@ -73,7 +73,6 @@ void Object::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_
 		if( texture != nullptr ) {
 			int_least16_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
 			int_least16_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
-			irr::video::SColor colorArray[ ] = {colorTwo, colorTwo, colorTwo, colorTwo};
 			driver->draw2DImage( texture,
 								 irr::core::rect< irr::s32 >( cornerX, cornerY, cornerX + size, cornerY + size ),
 								 irr::core::rect< irr::s32 >( irr::core::position2d< irr::s32 >( 0, 0 ), texture->getSize() ),
@@ -81,7 +80,7 @@ void Object::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_
 								 0, //"Array of 4 colors denoting the color values of the corners of the destRect". Zero means use the texture's own colors.
 								 true ); //Whether to use the texture's alpha channel
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::draw(): " << e.what() << std::endl;
 	}
 }
@@ -89,7 +88,7 @@ void Object::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_
 irr::video::SColor Object::getColor() {
 	try {
 		return getColorOne();
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::getColor(): " << e.what() << std::endl;
 		irr::video::SColor c;
 		return c;
@@ -99,7 +98,7 @@ irr::video::SColor Object::getColor() {
 irr::video::SColor Object::getColorOne() {
 	try {
 		return colorOne;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::getColorOne(): " << e.what() << std::endl;
 		irr::video::SColor c;
 		return c;
@@ -109,7 +108,7 @@ irr::video::SColor Object::getColorOne() {
 irr::video::SColor Object::getColorTwo() {
 	try {
 		return colorTwo;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::getColorTwo(): " << e.what() << std::endl;
 		irr::video::SColor c;
 		return c;
@@ -119,7 +118,7 @@ irr::video::SColor Object::getColorTwo() {
 uint_least8_t Object::getX() {
 	try {
 		return x;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::getX(): " << e.what() << std::endl;
 		return UINT_LEAST8_MAX;
 	}
@@ -128,7 +127,7 @@ uint_least8_t Object::getX() {
 uint_least8_t Object::getY() {
 	try {
 		return y;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::getY(): " << e.what() << std::endl;
 		return UINT_LEAST8_MAX;
 	}
@@ -145,7 +144,7 @@ void Object::moveX( int_fast8_t val ) {
 			x += val;
 			moving = true;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::moveX(): " << e.what() << std::endl;
 	}
 }
@@ -161,7 +160,7 @@ void Object::moveY( int_fast8_t val ) {
 			y += val;
 			moving = true;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::moveY(): " << e.what() << std::endl;
 	}
 }
@@ -220,7 +219,7 @@ void Object::setColor( irr::video::SColor newColor ) {
 			colorOne = GREEN; //Magenta on a green background: Never used in DOS games because, on composite monitors, it left too much color 'smearing'. Likewise, it should never be used in this game.
 			colorTwo = MAGENTA;
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::setColor(): " << e.what() << std::endl;
 	}
 }
@@ -282,7 +281,7 @@ void Object::setColorBasedOnNum( uint_least8_t num ) {
 				break;
 			}
 		}
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::setColorBasedOnNum(): " << e.what() << std::endl;
 	}
 }
@@ -291,7 +290,7 @@ void Object::setPos( uint_least8_t newX, uint_least8_t newY ) {
 	try {
 		setX( newX );
 		setY( newY );
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::setPos(): " << e.what() << std::endl;
 	}
 }
@@ -300,7 +299,7 @@ void Object::setX( uint_least8_t val ) {
 	try {
 		x = val;
 		xInterp = x;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::setX(): " << e.what() << std::endl;
 	}
 }
@@ -309,7 +308,7 @@ void Object::setY( uint_least8_t val ) {
 	try {
 		y = val;
 		yInterp = y;
-	} catch ( std::exception e ) {
+	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::setY(): " << e.what() << std::endl;
 	}
 }
