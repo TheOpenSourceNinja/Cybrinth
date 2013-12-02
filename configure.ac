@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([Cybrinth], [0.01], [dearingj@lifetime.oregonstate.edu], [cybrinth], [http://bettercodes.org/projects/cybrinth])
+AC_INIT([Cybrinth], m4_esyscmd_s(date -uIhours), [dearingj@lifetime.oregonstate.edu], [cybrinth], [http://bettercodes.org/projects/cybrinth])
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_AUX_DIR([build-aux])

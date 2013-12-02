@@ -12,7 +12,7 @@
 #include <iostream>
 
 int main() {
-	std::wcout << L"Now starting " << PACKAGE_STRING << L". Please report bugs to " << PACKAGE_BUGREPORT << L". Enjoy!" << std::endl;
+	std::wcout << L"Now starting " << PACKAGE_NAME << L" version " << PACKAGE_VERSION << L". Please report bugs to " << PACKAGE_BUGREPORT << L". Enjoy!" << std::endl;
 	try {
 		GameManager* gm = new GameManager();
 		int exitValue = gm->run();
