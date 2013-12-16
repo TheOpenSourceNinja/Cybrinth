@@ -47,7 +47,7 @@ void Player::loadTexture( irr::video::IVideoDriver* driver ) {
 }
 
 //Draws a filled circle. Somebody please implement a faster algorithm.
-void Player::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size ) {
+void Player::loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t size ) {
 	try {
 		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) ); //Colorspace should be irr::video::A1R5G5B5 but that causes a bug on my current laptop.
 		tempImage->fill( irr::video::SColor( 0, 0, 0, 0 ) ); //Fills the image with invisibility!
@@ -88,9 +88,9 @@ void Player::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size 
 	}
 }
 
-void Player::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
+void Player::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height ) {
 	try {
-		uint_least16_t size;
+		uint_fast16_t size;
 
 		if( width < height ) {
 			size = width;

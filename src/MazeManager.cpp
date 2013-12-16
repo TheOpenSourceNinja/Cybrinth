@@ -8,7 +8,7 @@
 
 
 //Recursively searches the maze to see if it can get from start to end
-bool MazeManager::canGetTo( uint_least8_t startX, uint_least8_t startY, uint_least8_t goalX, uint_least8_t goalY ) {
+bool MazeManager::canGetTo( uint_fast8_t startX, uint_fast8_t startY, uint_fast8_t goalX, uint_fast8_t goalY ) {
 	try {
 		bool found = false;
 
@@ -42,7 +42,7 @@ bool MazeManager::canGetTo( uint_least8_t startX, uint_least8_t startY, uint_lea
 }
 
 //Iterates through all collectables, calls canGetTo on their locations
-bool MazeManager::canGetToAllCollectables( uint_least8_t startX, uint_least8_t startY ) {
+bool MazeManager::canGetToAllCollectables( uint_fast8_t startX, uint_fast8_t startY ) {
 	try {
 		bool result = true;
 
@@ -69,7 +69,7 @@ bool MazeManager::canGetToAllCollectables( uint_least8_t startX, uint_least8_t s
 	}
 }
 
-void MazeManager::draw( video::IVideoDriver* driver, uint_least16_t cellWidth, uint_least16_t cellHeight ) {
+void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, uint_fast16_t cellHeight ) {
 	try {
 		video::SColor wallColor = WHITE;
 		video::SColor lockColor = BROWN;
@@ -114,7 +114,7 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_least16_t cellWidth, u
 	}
 }
 
-bool MazeManager::existsAnythingAt( uint_least8_t x, uint_least8_t y ) {
+bool MazeManager::existsAnythingAt( uint_fast8_t x, uint_fast8_t y ) {
 	try {
 		bool result = false;
 
@@ -146,12 +146,16 @@ bool MazeManager::loadFromFile() {
 
 bool MazeManager::loadFromFile( boost::filesystem::path src ) {
 	try {
+		if( gameManager->getDebugStatus() ) {
+			std::wcout << L"Trying to load from file " << src.wstring() << std::endl;
+		}
+		
 		if( !exists( src ) ) {
 			throw( std::wstring( L"File not found: " ) + src.wstring() );
 		} else if( is_directory( src ) ) {
 			throw( std::wstring( L"Directory specified, file needed: " ) + src.wstring() );
 		}
-
+		
 		boost::filesystem::wifstream file; //Identical to a standard C++ fstream, except it takes Boost paths
 		file.open( src );
 
@@ -183,8 +187,8 @@ void MazeManager::makeRandomLevel() {
 		gameManager->drawAll();
 
 		srand( gameManager->randomSeed ); //randomSeed is set either by resetThings() or by loadFromFile()
-		uint_least8_t tempCols = rand() % 28 + 2;
-		uint_least8_t tempRows = tempCols + ( rand() % 5 );
+		uint_fast8_t tempCols = rand() % 28 + 2;
+		uint_fast8_t tempRows = tempCols + ( rand() % 5 );
 		resizeMaze( tempCols, tempRows );
 
 		for( uint_fast8_t x = 0; x < cols; ++x ) {
@@ -237,8 +241,8 @@ void MazeManager::makeRandomLevel() {
 		}
 
 		//Find all dead ends. I'm sure it would be more efficient to do this during maze generation rather than going back through afterward, but I can't be bothered with that now.
-		std::vector<uint_least8_t> deadEndsX;
-		std::vector<uint_least8_t> deadEndsY;
+		std::vector<uint_fast8_t> deadEndsX;
+		std::vector<uint_fast8_t> deadEndsY;
 
 		for( uint_fast8_t x = 0; x < cols; ++x ) {
 			for( uint_fast8_t y = 0; y < rows; ++y ) {
@@ -271,21 +275,21 @@ void MazeManager::makeRandomLevel() {
 			gameManager->numLocks = deadEndsX.size();
 		}
 
-		uint_least8_t numKeys = gameManager->numLocks;
+		uint_fast8_t numKeys = gameManager->numLocks;
 
 		//Place keys in dead ends
-		//vector<uint_least8_t> keyPlaceX;
-		//vector<uint_least8_t> keyPlaceY;
+		//vector<uint_fast8_t> keyPlaceX;
+		//vector<uint_fast8_t> keyPlaceY;
 
 		for( uint_fast8_t k = 0; k < numKeys; ++k ) {
-			//vector<uint_least8_t> chosenPlaces;
+			//vector<uint_fast8_t> chosenPlaces;
 
 			if( deadEndsX.size() == 0 ) {
 				deadEndsX.push_back( gameManager->playerStart.at( 0 ).getX() );
 				deadEndsY.push_back( gameManager->playerStart.at( 0 ).getY() );
 			}
 			//Pick one of the dead ends randomly.
-			uint_least8_t chosen = rand() % deadEndsX.size();
+			uint_fast8_t chosen = rand() % deadEndsX.size();
 
 			//Finally, create a key and put it there.
 			Collectable temp;
@@ -320,8 +324,8 @@ void MazeManager::makeRandomLevel() {
 			uint_fast8_t numLocksPlaced = 1;
 
 			while( gameManager->device->run() != false && numLocksPlaced < gameManager->numLocks && gameManager->timer->getTime() < gameManager->timeStartedLoading + gameManager->loadingDelay ) {
-				uint_least8_t tempX = rand() % cols;
-				uint_least8_t tempY = rand() % rows;
+				uint_fast8_t tempX = rand() % cols;
+				uint_fast8_t tempY = rand() % rows;
 
 				if( maze[ tempX ][ tempY ].getTop() == MazeCell::NONE ) {
 					maze[ tempX ][ tempY ].setTop( MazeCell::LOCK );
@@ -420,8 +424,9 @@ MazeManager::~MazeManager() {
 }
 
 //Generates the maze recursively
-void MazeManager::recurseRandom( uint_least8_t x, uint_least8_t y, uint_least16_t depth, uint_least16_t numSoFar ) {
+void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t depth, uint_fast16_t numSoFar ) {
 	try {
+		//At one point I included the following two lines because I hoped to show the maze as it was being generated. Might still add that as an option. Now they're there so that the loading screen gets drawn and lasts long enough to read it.
 		gameManager->device->run();
 		gameManager->drawAll();
 
@@ -498,10 +503,10 @@ void MazeManager::recurseRandom( uint_least8_t x, uint_least8_t y, uint_least16_
 }
 
 //Creates a new maze of the desired size, copies from old maze to new, then deletes old maze
-void MazeManager::resizeMaze( uint_least8_t newCols, uint_least8_t newRows ) {
+void MazeManager::resizeMaze( uint_fast8_t newCols, uint_fast8_t newRows ) {
 	try {
-		uint_least8_t oldCols = cols;
-		uint_least8_t oldRows = rows;
+		uint_fast8_t oldCols = cols;
+		uint_fast8_t oldRows = rows;
 
 		if( gameManager->getDebugStatus() && ( newCols < oldCols || newRows < oldRows ) ) {
 			std::wcerr << L"Warning: New maze size smaller than old in some dimension. newCols: " << static_cast<unsigned int>( newCols ) << L" oldCols: " << static_cast<unsigned int>( oldCols ) << L" newRows: " << static_cast<unsigned int>( newRows ) << L" oldRows: " << static_cast<unsigned int>( oldRows ) << std::endl;
@@ -513,7 +518,7 @@ void MazeManager::resizeMaze( uint_least8_t newCols, uint_least8_t newRows ) {
 			temp[ i ] = new MazeCell[ newRows ];
 		}
 
-		uint_least8_t colsToCopy;
+		uint_fast8_t colsToCopy;
 
 		if( newCols > oldCols ) {
 			colsToCopy = oldCols;
@@ -521,7 +526,7 @@ void MazeManager::resizeMaze( uint_least8_t newCols, uint_least8_t newRows ) {
 			colsToCopy = newCols;
 		}
 
-		uint_least8_t rowsToCopy;
+		uint_fast8_t rowsToCopy;
 
 		if( newRows > oldRows ) {
 			rowsToCopy = oldRows;

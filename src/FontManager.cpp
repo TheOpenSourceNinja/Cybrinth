@@ -76,7 +76,7 @@ irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, ir
 	try {
 		/*if( !filename_ || !strlen( filename_ ) )
 			return nullptr;*/
-		if( filename_.size() <= 0 ) {
+		if( filename_.size() == 0 ) {
 			return nullptr;
 		}
 

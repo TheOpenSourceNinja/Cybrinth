@@ -30,9 +30,9 @@ Collectable::~Collectable() {
 	}
 }
 
-void Collectable::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
+void Collectable::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height ) {
 	try {
-		uint_least16_t smaller = height;
+		uint_fast16_t smaller = height;
 		if( smaller > width ) {
 			smaller = width;
 		}
@@ -40,8 +40,10 @@ void Collectable::draw( irr::video::IVideoDriver* driver, uint_least16_t width, 
 		//wcout << L"desired size: " << smaller << std::endl;
 
 		if( texture->getSize().Width != smaller && texture->getSize().Height != smaller ) {
-			//resizeImage( driver, smaller, smaller );
-			texture = resizer.resize( texture, smaller, smaller, driver );
+			loadTexture( driver );
+			if( texture->getSize().Width != smaller && texture->getSize().Height != smaller ) {
+				texture = resizer.resize( texture, smaller, smaller, driver );
+			}
 		}
 
 		Object::draw( driver, width, height );

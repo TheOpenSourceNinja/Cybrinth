@@ -49,11 +49,11 @@ class KeyMapping
 		/** Access player
 		 * \return The current value of player
 		 */
-		uint_least8_t getPlayer();
+		uint_fast8_t getPlayer();
 		/** Set player
 		 * \param val New value to set
 		 */
-		void setPlayer( uint_least8_t val );
+		void setPlayer( uint_fast8_t val );
 		/** Set mouse event
 		 * \param val New value to set
 		 */
@@ -68,7 +68,7 @@ class KeyMapping
 		irr::EMOUSE_INPUT_EVENT mouseEvent;
 		bool mouseWheelUp;
 		action_t action;
-		uint_least8_t player;
+		uint_fast8_t player;
 };
 
 #endif // KEYMAPPING_H

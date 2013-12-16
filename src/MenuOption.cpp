@@ -56,7 +56,7 @@ void MenuOption::setDimension() {
 		if( font != nullptr ) {
 			dimension = font->getDimension( text.c_str() );
 		} else {
-			dimension = irr::core::dimension2d<uint_least16_t>( 0, 0 );
+			dimension = irr::core::dimension2d<uint_fast16_t>( 0, 0 );
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::setDimension(): " << e.what() << std::endl;
@@ -65,7 +65,7 @@ void MenuOption::setDimension() {
 
 void MenuOption::draw( irr::video::IVideoDriver* driver ) {
 	try {
-		//driver->draw2DImage( texture, core::position2d<int_least16_t>( x, y ) );
+		//driver->draw2DImage( texture, core::position2d<int_fast16_t>( x, y ) );
 		if( font != nullptr ) {
 			font->draw( text, irr::core::rect< irr::s32 >( x, y, dimension.Width, dimension.Height ), LIGHTCYAN );
 		}
@@ -74,7 +74,7 @@ void MenuOption::draw( irr::video::IVideoDriver* driver ) {
 	}
 }
 
-void MenuOption::setX( uint_least16_t val ) {
+void MenuOption::setX( uint_fast16_t val ) {
 	try {
 		x = val;
 	} catch ( std::exception &e ) {
@@ -82,7 +82,7 @@ void MenuOption::setX( uint_least16_t val ) {
 	}
 }
 
-void MenuOption::setY( uint_least16_t val ) {
+void MenuOption::setY( uint_fast16_t val ) {
 	try {
 		y = val;
 	} catch ( std::exception &e ) {
@@ -90,25 +90,25 @@ void MenuOption::setY( uint_least16_t val ) {
 	}
 }
 
-uint_least16_t MenuOption::getX() {
+uint_fast16_t MenuOption::getX() {
 	try {
 		return x;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::getX(): " << e.what() << std::endl;
-		return UINT_LEAST16_MAX;
+		return UINT_FAST16_MAX;
 	}
 }
 
-uint_least16_t MenuOption::getY() {
+uint_fast16_t MenuOption::getY() {
 	try {
 		return y;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::getY(): " << e.what() << std::endl;
-		return UINT_LEAST16_MAX;
+		return UINT_FAST16_MAX;
 	}
 }
 
-bool MenuOption::contains( irr::core::position2d<uint_least16_t> test ) {
+bool MenuOption::contains( irr::core::position2d<uint_fast16_t> test ) {
 	try {
 		return ( test.X >= x && test.Y >= y && test.X <= x + dimension.Width && test.Y <= y + dimension.Height );
 	} catch ( std::exception &e ) {
@@ -117,9 +117,9 @@ bool MenuOption::contains( irr::core::position2d<uint_least16_t> test ) {
 	}
 }
 
-bool MenuOption::contains( uint_least16_t testX, uint_least16_t testY ) {
+bool MenuOption::contains( uint_fast16_t testX, uint_fast16_t testY ) {
 	try {
-		return contains( irr::core::position2d<uint_least16_t>( testX, testY ) );
+		return contains( irr::core::position2d<uint_fast16_t>( testX, testY ) );
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::contains(): " << e.what() << std::endl;
 		return false;

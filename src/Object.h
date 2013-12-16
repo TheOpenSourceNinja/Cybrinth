@@ -19,26 +19,26 @@ class Object {
 	public:
 		Object();
 		virtual ~Object();
-		uint_least8_t getY();
-		uint_least8_t getX();
-		void setPos( uint_least8_t newX, uint_least8_t newY );
-		void setX( uint_least8_t val );
-		void setY( uint_least8_t val );
+		uint_fast8_t getY();
+		uint_fast8_t getX();
+		void setPos( uint_fast8_t newX, uint_fast8_t newY );
+		void setX( uint_fast8_t val );
+		void setY( uint_fast8_t val );
 		void moveY( int_fast8_t val );
 		void moveX( int_fast8_t val );
-		void draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height );
+		void draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height );
 		virtual void loadTexture( irr::video::IVideoDriver* driver ) = 0;
 		virtual void reset() = 0;
-		void setColorBasedOnNum( uint_least8_t num );
+		void setColorBasedOnNum( uint_fast8_t num );
 		void setColor( irr::video::SColor newColor );
 		irr::video::SColor getColorOne();
 		irr::video::SColor getColorTwo();
 		irr::video::SColor getColor();
-		uint_least16_t distanceFromExit;
+		uint_fast16_t distanceFromExit;
 	protected:
-		uint_least8_t x;
+		uint_fast8_t x;
 		float xInterp;
-		uint_least8_t y;
+		uint_fast8_t y;
 		float yInterp;
 		bool moving;
 		irr::video::ITexture* texture;

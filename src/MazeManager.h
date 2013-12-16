@@ -21,31 +21,31 @@ class MazeManager
 
 		MazeCell** maze;
 
-		bool canGetTo( uint_least8_t startX, uint_least8_t startY, uint_least8_t goalX, uint_least8_t goalY );
-		bool canGetToAllCollectables( uint_least8_t startX, uint_least8_t startY );
+		bool canGetTo( uint_fast8_t startX, uint_fast8_t startY, uint_fast8_t goalX, uint_fast8_t goalY );
+		bool canGetToAllCollectables( uint_fast8_t startX, uint_fast8_t startY );
 
-		void draw( irr::video::IVideoDriver* driver, uint_least16_t cellWidth, uint_least16_t cellHeight );
+		void draw( irr::video::IVideoDriver* driver, uint_fast16_t cellWidth, uint_fast16_t cellHeight );
 
-		bool existsAnythingAt( uint_least8_t x, uint_least8_t y );
+		bool existsAnythingAt( uint_fast8_t x, uint_fast8_t y );
 
 		bool loadFromFile();
 		bool loadFromFile( boost::filesystem::path src );
 
 		void makeRandomLevel();
 
-		void recurseRandom( uint_least8_t x, uint_least8_t y, uint_least16_t depth, uint_least16_t numSoFar );
-		void resizeMaze( uint_least8_t newCols, uint_least8_t newRows );
+		void recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t depth, uint_fast16_t numSoFar );
+		void resizeMaze( uint_fast8_t newCols, uint_fast8_t newRows );
 
 		bool saveToFile();
 		bool saveToFile( boost::filesystem::path dest );
 
 		void setGameManager( GameManager* newGM );
 
-		uint_least8_t cols;
+		uint_fast8_t cols;
 
 		GameManager* gameManager;
 
-		uint_least8_t rows;
+		uint_fast8_t rows;
 	protected:
 	private:
 };

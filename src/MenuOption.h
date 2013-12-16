@@ -21,20 +21,20 @@ class MenuOption {
 	public:
 		MenuOption();
 		virtual ~MenuOption();
-		uint_least16_t getX();
-		void setX( uint_least16_t val );
-		uint_least16_t getY();
-		void setY( uint_least16_t val );
+		uint_fast16_t getX();
+		void setX( uint_fast16_t val );
+		uint_fast16_t getY();
+		void setY( uint_fast16_t val );
 		void setFont( irr::gui::IGUIFont* newFont );
 		void draw( irr::video::IVideoDriver* driver );
-		bool contains( irr::core::position2d<uint_least16_t> test );
-		bool contains( uint_least16_t testX, uint_least16_t testY );
+		bool contains( irr::core::position2d<uint_fast16_t> test );
+		bool contains( uint_fast16_t testX, uint_fast16_t testY );
 		void setText( irr::core::stringw newText );
 	protected:
 	private:
-		uint_least16_t x;
-		uint_least16_t y;
-		irr::core::dimension2d<uint_least16_t> dimension;
+		uint_fast16_t x;
+		uint_fast16_t y;
+		irr::core::dimension2d<uint_fast16_t> dimension;
 		irr::gui::IGUIFont* font;
 		irr::core::stringw text;
 		void setDimension();

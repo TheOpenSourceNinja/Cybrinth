@@ -102,12 +102,12 @@ irr::EMOUSE_INPUT_EVENT KeyMapping::getMouseEvent() {
 	return mouseEvent;
 }
 
-uint_least8_t KeyMapping::getPlayer() {
+uint_fast8_t KeyMapping::getPlayer() {
 	try {
 		return player;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::getPlayer(): " << e.what() << std::endl;
-		return UINT_LEAST8_MAX;
+		return UINT_FAST8_MAX;
 	}
 }
 
@@ -142,7 +142,7 @@ void KeyMapping::setMouseWheelUp( bool val ) {
 	mouseWheelUp = val;
 }
 
-void KeyMapping::setPlayer( uint_least8_t val ) {
+void KeyMapping::setPlayer( uint_fast8_t val ) {
 	try {
 		player = val;
 	} catch ( std::exception &e ) {

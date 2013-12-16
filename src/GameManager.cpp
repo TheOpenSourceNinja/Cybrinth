@@ -55,12 +55,13 @@ using namespace irr;
  * Places the menu options at the correct locations on screen.
  */
 void GameManager::adjustMenu() {
-	uint_fast8_t numMenuOptions = 5;
+	uint_fast8_t numMenuOptions = 6;
 	newGame.setY( 0 );
 	loadMaze.setY( 1 * windowSize.Height / numMenuOptions );
 	saveMaze.setY( 2 * windowSize.Height / numMenuOptions );
 	exitGame.setY( 3 * windowSize.Height / numMenuOptions );
 	backToGame.setY( 4 * windowSize.Height / numMenuOptions );
+	freedom.setY( 5 * windowSize.Height / numMenuOptions );
 }
 
 /**
@@ -69,7 +70,7 @@ void GameManager::adjustMenu() {
  */
 bool GameManager::allHumansAtGoal() {
 	try {
-		std::vector< uint_least8_t > humanPlayers; //Get a list of players
+		std::vector< uint_fast8_t > humanPlayers; //Get a list of players
 
 		for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
 			humanPlayers.push_back( p );
@@ -78,7 +79,7 @@ bool GameManager::allHumansAtGoal() {
 		bool result = false;
 
 		for( uint_fast8_t b = 0; b < numBots; ++b ) { //Remove bots from the list
-			uint_least8_t botPlayer = bot.at( b ).getPlayer();
+			uint_fast8_t botPlayer = bot.at( b ).getPlayer();
 
 			for( uint_fast8_t p = 0; p < humanPlayers.size(); ++p ) {
 				if( humanPlayers.at( p ) == botPlayer ) {
@@ -199,6 +200,7 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 void GameManager::drawAll() {
 	try {
 		driver->beginScene();
+		//driver->beginScene( false, true );
 
 		if( !showingLoadingScreen ) {
 			if( showBackgrounds ) {
@@ -252,36 +254,37 @@ void GameManager::drawAll() {
 				saveMaze.draw( driver );
 				exitGame.draw( driver );
 				backToGame.draw( driver );
+				freedom.draw( driver );
 			}
 
 
-			uint_least32_t spaceBetween = windowSize.Height / 30;
-			uint_least32_t textY = spaceBetween;
+			uint_fast32_t spaceBetween = windowSize.Height / 30;
+			uint_fast32_t textY = spaceBetween;
 
 			time_t currentTime = time( nullptr );
 			wchar_t clockTime[9 ];
 			wcsftime( clockTime, 9, L"%H:%M:%S", localtime( &currentTime ) );
-			core::dimension2d<uint_least32_t> tempDimensions = clockFont->getDimension( core::stringw( clockTime ).c_str() );
-			core::rect<int_least32_t> tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			core::dimension2d< u32 > tempDimensions = clockFont->getDimension( core::stringw( clockTime ).c_str() );
+			core::rect< s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			clockFont->draw( clockTime, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
 
 			core::stringw timeLabel( L"Time:" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( timeLabel.c_str() );
-			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( L"Time:", tempRectangle, YELLOW, true, true, &tempRectangle );
 			core::stringw timerStr( "" );
 			timerStr += ( timer->getTime() / 1000 );
 			timerStr += L" seconds";
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( timerStr.c_str() );
-			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( timerStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 			core::stringw keysFoundStr( L"Keys found:" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( keysFoundStr.c_str() );
-			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( keysFoundStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 			core::stringw keyStr;
@@ -290,19 +293,19 @@ void GameManager::drawAll() {
 			keyStr += numLocks;
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( keyStr.c_str() );
-			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( keyStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 			core::stringw seedLabel( L"Random seed:" );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( seedLabel.c_str() );
-			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( seedLabel, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 			core::stringw seedStr( randomSeed );
 			textY += tempDimensions.Height;
 			tempDimensions = textFont->getDimension( seedStr.c_str() );
-			tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 			textFont->draw( seedStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 			core::stringw headfor( L"Head for" );
@@ -314,7 +317,7 @@ void GameManager::drawAll() {
 			}
 
 			if( numKeysFound >= numLocks ) {
-				tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( headfor, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
 			}
 
@@ -323,7 +326,7 @@ void GameManager::drawAll() {
 			tempDimensions = textFont->getDimension( theexit.c_str() );
 
 			if( numKeysFound >= numLocks ) {
-				tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( theexit, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
 			}
 
@@ -331,47 +334,47 @@ void GameManager::drawAll() {
 				core::stringw nowplaying( L"Now playing:" );
 				textY += tempDimensions.Height;
 				tempDimensions = textFont->getDimension( nowplaying.c_str() );
-				tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( nowplaying, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 				textY += tempDimensions.Height;
 				tempDimensions = musicTagFont->getDimension( musicTitle.c_str() );
-				tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				musicTagFont->draw( musicTitle, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
 
 				core::stringw by( L"by" );
 				textY += tempDimensions.Height;
 				tempDimensions = textFont->getDimension( by.c_str() );
-				tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( by, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 				textY += tempDimensions.Height;
 				tempDimensions = musicTagFont->getDimension( musicArtist.c_str() );
-				tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				musicTagFont->draw( musicArtist, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
 
 				core::stringw fromalbum( L"from album" );
 				textY += tempDimensions.Height;
 				tempDimensions = textFont->getDimension( fromalbum.c_str() );
-				tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( fromalbum, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 				textY += tempDimensions.Height;
 				tempDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
-				tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				musicTagFont->draw( musicAlbum, tempRectangle, LIGHTGRAY, true, true, &tempRectangle );
 
 				core::stringw volume( L"Volume:" );
 				textY += tempDimensions.Height;
 				tempDimensions = textFont->getDimension( volume.c_str() );
-				tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( volume, tempRectangle, YELLOW, true, true, &tempRectangle );
 
 				core::stringw volumeNumber( musicVolume );
 				volumeNumber.append( L"%" );
 				textY += tempDimensions.Height;
 				tempDimensions = textFont->getDimension( volumeNumber.c_str() );
-				tempRectangle = core::rect<int_least32_t>( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( volumeNumber, tempRectangle, LIGHTRED, true, true, &tempRectangle );
 			}
 
@@ -420,44 +423,77 @@ void GameManager::drawBackground() {
  */
 void GameManager::drawLoadingScreen() {
 	try {
-		if( !isNotNull( loadingFont ) ) {
-			loadingFont = gui->getBuiltInFont();
-		}
-		if( !isNotNull( textFont ) ) {
-			textFont = gui->getBuiltInFont();
-		}
-
-		core::dimension2d< unsigned int > loadingDimensions = loadingFont->getDimension( loading.c_str() );
-		int_fast16_t textY = 0;
-		int_fast16_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
-		core::rect< int > tempRectangle(textX, textY, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + textY );
-		loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
-
-
-		if( proTips.size() > 0 ) {
-			if( !isNotNull( tipFont ) ) {
-				tipFont = gui->getBuiltInFont();
+		if( !haveShownLogo ) { //This is an ugly hack, but it works and I can't think of a better way to do it.
+			drawLogo();
+		} else {
+			if( !isNotNull( loadingFont ) ) {
+				loadingFont = gui->getBuiltInFont();
+			}
+			if( !isNotNull( textFont ) ) {
+				textFont = gui->getBuiltInFont();
 			}
 
-			textY = loadingDimensions.Height + textY + 1;
-			core::dimension2d< unsigned int > proTipPrefixDimensions = tipFont->getDimension( proTipPrefix.c_str() );
-			core::dimension2d< unsigned int > proTipDimensions = tipFont->getDimension( proTips.at( currentProTip ).c_str() );
-			textX = ( windowSize.Width / 2 ) - ( ( proTipPrefixDimensions.Width + proTipDimensions.Width ) / 2 );
-			tempRectangle = core::rect< int >( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
-			tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
+			core::dimension2d< unsigned int > loadingDimensions = loadingFont->getDimension( loading.c_str() );
+			int_fast16_t textY = 0;
+			int_fast16_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
+			core::rect< int > tempRectangle(textX, textY, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + textY );
+			loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
 
-			textX += proTipPrefixDimensions.Width;
-			tempRectangle = core::rect< int >( textX, textY, proTipDimensions.Width + textX, proTipDimensions.Height + textY );
-			tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
-			textY += std::max( proTipDimensions.Height, proTipPrefixDimensions.Height );
+
+			if( proTips.size() > 0 ) {
+				if( !isNotNull( tipFont ) ) {
+					tipFont = gui->getBuiltInFont();
+				}
+
+				textY = loadingDimensions.Height + textY + 1;
+				core::dimension2d< unsigned int > proTipPrefixDimensions = tipFont->getDimension( proTipPrefix.c_str() );
+				core::dimension2d< unsigned int > proTipDimensions = tipFont->getDimension( proTips.at( currentProTip ).c_str() );
+				textX = ( windowSize.Width / 2 ) - ( ( proTipPrefixDimensions.Width + proTipDimensions.Width ) / 2 );
+				tempRectangle = core::rect< int >( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
+				tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
+
+				textX += proTipPrefixDimensions.Width;
+				tempRectangle = core::rect< int >( textX, textY, proTipDimensions.Width + textX, proTipDimensions.Height + textY );
+				tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
+				textY += std::max( proTipDimensions.Height, proTipPrefixDimensions.Height );
+			}
+			
+			core::dimension2d< unsigned int > tempDimensions = textFont->getDimension( L"Player stats" );
+			//tempRectangle = core::rect< it >( textX, textY )
 		}
-		
-		core::dimension2d< unsigned int > tempDimensions = textFont->getDimension( L"Player stats" );
-		//tempRectangle = core::rect< it >( textX, textY )
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::drawLoadingScreen(): " << e.what() << std::endl;
 	}
 }
+
+/**
+ * Randomly selects a logo and draws it on screen. Should NOT be called by drawAll().
+ */
+ void GameManager::drawLogo() {
+	try {
+	
+		if( !isNotNull( logoTexture ) ) {
+			std::wstring error = L"drawLogo() called but logoTexture is null.";
+			throw error;
+		}
+		
+		if( logoTexture->getSize() != windowSize ) {
+			std::wcout << L"Resizing texture from " << logoTexture->getSize().Width << L"x" << logoTexture->getSize().Height << L" to " << windowSize.Width << L"x" << windowSize.Height << std::endl;
+			logoTexture = resizer.resize( logoTexture, windowSize.Width, windowSize.Height, driver );
+		}
+		
+		if( !isNotNull( logoTexture ) ) {
+			std::wstring error = L"Cannot resize logo texture.";
+			throw error;
+		} else {
+			driver->draw2DImage( logoTexture, core::position2d< s32 >( 0, 0 ) );
+		}
+	} catch( std::wstring error ) {
+		std::wcout << L"Error in drawLogo(): " << error << std::endl;
+	} catch ( std::exception &error ) {
+		std::wcout << L"Error in drawLogo(): " << error.what() << std::endl;
+	}
+ }
 
 /**
  * This object's destructor. Destroys stuff.
@@ -515,6 +551,8 @@ GameManager::GameManager() {
 		sideDisplaySizeDenominator = 6; //What fraction of the screen's width is set aside for displaying text, statistics, etc. during play.
 		minWidth = 640;
 		minHeight = 480;
+		currentDirectory = boost::filesystem::current_path();
+		haveShownLogo = false;
 
 		fontFile = "";
 		boost::filesystem::recursive_directory_iterator end;
@@ -527,7 +565,7 @@ GameManager::GameManager() {
 
 		device = createDevice( video::EDT_NULL ); //Must create a device before calling readPrefs();
 
-		if( !device ) {
+		if( !isNotNull( device ) ) {
 			throw( std::wstring( L"Cannot create null device. Something is definitely wrong here!" ) );
 		} else if ( debug ) {
 			std::wcout << L"Got the null device" << std::endl;
@@ -551,17 +589,17 @@ GameManager::GameManager() {
 		}
 
 		viewportSize.set( windowSize.Width - ( windowSize.Width / sideDisplaySizeDenominator ), windowSize.Height - 1 );
-
-		bool sbuffershadows = false; //Would not be visible anyway since this game is 2D
-		IEventReceiver* receiver = this;
-
+		
 		device->closeDevice(); //Signals to the existing device that it needs to close itself on next run() so that we can create a new device
 		device->run(); //This is next run()
 		device->drop(); //Cleans up after the device
+		
+		bool sbuffershadows = false; //Would not be visible anyway since this game is 2D
+		IEventReceiver* receiver = this;
 
 		device = createDevice( driverType, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver ); //Most of these parameters were read from the preferences file
 
-		if( !device ) {
+		if( !isNotNull( device ) ) {
 			std::wcerr << L"Error: Cannot create device. Trying software renderer." << std::endl;
 			device = createDevice( video::EDT_SOFTWARE, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
 
@@ -571,37 +609,9 @@ GameManager::GameManager() {
 		} else if ( debug ) {
 			std::wcout << L"Got the new device" << std::endl;
 		}
-
-		gui = device->getGUIEnvironment(); //Put this before drawLoadingScreen() because drawLoadingScreen() needs gui
-		if( !gui ) {
-			throw( std::wstring( L"Cannot get GUI environment" ) );
-		} else {
-			if ( debug ) {
-				std::wcout << L"Got the gui environment" << std::endl;
-			}
-			for( uint_fast16_t i = 0; i < gui::EGDC_COUNT ; ++i ) {
-				video::SColor guiSkinColor = gui->getSkin()->getColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ) );
-				guiSkinColor.setAlpha( 255 );
-				gui->getSkin()->setColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ), guiSkinColor );
-			}
-		}
-
-		device->getVideoDriver()->beginScene(true, false, BLACK);
-		drawLoadingScreen();
-		device->getVideoDriver()->endScene();
-
-		loadProTips();
-
-		device->setWindowCaption( core::stringw( PACKAGE_STRING ).c_str() );
-
-		if( debug ) {
-			device->getLogger()->setLogLevel( ELL_INFORMATION );
-		} else {
-			device->getLogger()->setLogLevel( ELL_ERROR );
-		}
-
+		
 		driver = device->getVideoDriver(); //Not sure if this would be possible with a null device, which is why we don't exit
-		if( !driver ) {
+		if( !isNotNull( driver ) ) {
 			throw( std::wstring( L"Cannot get video driver" ) );
 		} else if ( debug ) {
 			std::wcout << L"Got the video driver" << std::endl;
@@ -614,12 +624,45 @@ GameManager::GameManager() {
 		} else {
 			driver->setTextureCreationFlag( video::ETCF_OPTIMIZED_FOR_QUALITY, true );
 		}
-		if( driverType = video::EDT_SOFTWARE ) {
+		if( driverType == video::EDT_SOFTWARE ) {
 			driver->setTextureCreationFlag( video::ETCF_ALLOW_NON_POWER_2, false );
 		}
 
+		pickLogo();
+		driver->beginScene( false, false ); //These falses specify whether the back buffer and z buffer should be cleared. Since this is the first time drawing anything, there's no need to clear anything beforehand.
+		drawLogo(); //Why the fuck isn't this working consistently? Sometimes it draws, sometimes it only thinks it draws. Had to hack the drawLoadingScreen() function (which gets called several times, therefore is likely to work at least once).
+		driver->endScene();
+		
+		/*if( !debug ) { //Ensures the logo will be visible. I don't like just stopping like this but I haven't thought of a good, satisfying way to keep the program running and also continue drawing the logo.
+			device->sleep( 5000 ); //<=5 seconds. "It may not wait the full given time, as sleep may be interrupted." (Quote from the Irrlicht documentation)
+		}*/
+
+		gui = device->getGUIEnvironment();
+		if( !isNotNull( gui ) ) {
+			throw( std::wstring( L"Cannot get GUI environment" ) );
+		} else {
+			if ( debug ) {
+				std::wcout << L"Got the gui environment" << std::endl;
+			}
+			for( uint_fast16_t i = 0; i < gui::EGDC_COUNT ; ++i ) {
+				video::SColor guiSkinColor = gui->getSkin()->getColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ) );
+				guiSkinColor.setAlpha( 255 );
+				gui->getSkin()->setColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ), guiSkinColor );
+			}
+		}
+
+		loadProTips();
+
+		device->setWindowCaption( core::stringw( PACKAGE_STRING ).c_str() );
+
+		if( debug ) {
+			device->getLogger()->setLogLevel( ELL_INFORMATION );
+		} else {
+			device->getLogger()->setLogLevel( ELL_ERROR );
+		}
+
 		bgscene = device->getSceneManager(); //Not sure if this would be possible with a null device, which is why we don't exit
-		if( !bgscene ) {
+		if( !isNotNull( bgscene ) ) {
 			throw( std::wstring( L"Cannot get scene manager" ) );
 		} else if ( debug ) {
 			std::wcout << L"Got the scene manager" << std::endl;
@@ -718,6 +761,7 @@ GameManager::GameManager() {
 		saveMaze.setText( L"Save maze" );
 		exitGame.setText( L"Exit game" );
 		backToGame.setText( L"Back to game" );
+		freedom.setText( L"Freedom" );
 		adjustMenu();
 
 		if ( debug ) {
@@ -800,7 +844,7 @@ GameManager::GameManager() {
 /**
  * Lets other objects get a pointer to one of the collectables, probably to see if a player has touched one.
  * Arguments:
- * --uint_least8_t collectable: The item desired.
+ * --uint_fast8_t collectable: The item desired.
  * Returns: A pointer to a Collectable.
  */
 Collectable* GameManager::getCollectable( uint_fast8_t collectable ) {
@@ -839,7 +883,7 @@ Goal* GameManager::getGoal() {
 /**
  * Lets other objects get a pointer to one of the keys, probably to see if a player has touched one.
  * Arguments:
- * --uint_least8_t key: The key desired.
+ * --uint_fast8_t key: The key desired.
  * Returns: A pointer to a key.
  */
 Collectable* GameManager::getKey( uint_fast8_t key ) {
@@ -883,7 +927,7 @@ uint_fast8_t GameManager::getNumKeys() {
 /**
  * Lets other objects get a pointer to a player object.
  * Arguments:
- * --- uint_least8_t p: the desired player
+ * --- uint_fast8_t p: the desired player
  * Returns: A pointer to the desired player if that player exists and if no exception is caught, nullptr otherwise.
  */
 Player* GameManager::getPlayer( uint_fast8_t p ) {
@@ -928,8 +972,8 @@ void GameManager::loadFonts() {
 			std::wcout << L"Returned from loadMusicFont" << std::endl;
 		}
 
-		core::dimension2d< uint_least32_t > fontDimensions;
-		uint_least32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
+		core::dimension2d< uint_fast32_t > fontDimensions;
+		uint_fast32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
 
 		do { //Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
 			loadingFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
@@ -1032,6 +1076,10 @@ void GameManager::loadFonts() {
 		saveMaze.setFont( clockFont );
 		exitGame.setFont( clockFont );
 		backToGame.setFont( clockFont );
+		freedom.setFont( clockFont );
+		
+		size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect playability on large or small screens, but it's better on large screens than the built-in font.
+		gui->getSkin()->setFont( fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts ) );
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::loadFonts(): " << e.what() << std::endl;
 	}
@@ -1322,7 +1370,7 @@ void GameManager::makeMusicList() {
 
 		if( debug ) {
 			std::wcout << L"makeMusicList() called" << std::endl;
-			uint_least8_t numMusicDecoders = Mix_GetNumMusicDecoders();
+			uint_fast8_t numMusicDecoders = Mix_GetNumMusicDecoders();
 			std::wcout << L"There are " << numMusicDecoders << L" music decoders available. They are:" << std::endl;
 
 			for( uint_fast8_t decoder = 0; decoder < numMusicDecoders; ++decoder ) {
@@ -1540,10 +1588,13 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			case EET_MOUSE_INPUT_EVENT: {
 				if( showingMenu && event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN ) {
 						if( exitGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-							device->closeDevice();
-							donePlaying = true;
+							exitConfirmation = gui->addMessageBox( L"Exit?", L"Are you sure you want to exit?", true, ( gui::EMBF_YES | gui::EMBF_NO ) );
 							return true;
 						} else if( loadMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
+							if( debug ) {
+								std::wcout << L"Current working directory: " << currentDirectory << std::endl;
+							}
+							
 							fileChooser = gui->addFileOpenDialog( L"Select a Maze", true, 0, -1 );
 							//std::wcout << L"Directory: " << fileChooser->getDirectoryName().c_str() << std::endl;
 							//loadFromFile();
@@ -1557,6 +1608,15 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						} else if( backToGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
 							showingMenu = false;
 							return true;
+						} else if( freedom.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
+							std::wstring message = stringConverter.toStdWString( PACKAGE_NAME );
+							message += L" is copyright 2013 by James Dearing. Licensed under the GNU Affero General Public License, version 3.0 or (at your option) any later version, as published by the Free Software Foundation. See the file \"COPYING\" or https://www.gnu.org/licenses/agpl.html.\n\nThis means you're free to do what you want with this game: mod it, give copies to friends, sell it if you want. Whatever. It's Free software, Free as in Freedom. You should have received the program's source code with this copy; if you don't have it, you can get it from ";
+							message += stringConverter.toStdWString( PACKAGE_URL );
+							message += L".\n\n"; 
+							message += stringConverter.toStdWString( PACKAGE_NAME );
+							message += L" is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.";
+							gui->addMessageBox( L"Freedom", message.c_str() );
+							return true;
 						}
 				}
 
@@ -1567,8 +1627,8 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						}
 					}
 				}
-			break;
 			}
+			break;
 
 			case EET_USER_EVENT: {
 				switch( event.UserEvent.UserData1 ) {
@@ -1638,11 +1698,12 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				}
 			}
 			break;
+			
 			case EET_JOYSTICK_INPUT_EVENT: {
 				if( event.JoystickEvent.Joystick == joystickChosen ) {
-					core::array<int_least16_t> verticalAxes;
+					core::array<int_fast16_t> verticalAxes;
 					verticalAxes.push_back( SEvent::SJoystickEvent::AXIS_Y );
-					core::array<int_least16_t> horizontalAxes;
+					core::array<int_fast16_t> horizontalAxes;
 					horizontalAxes.push_back( SEvent::SJoystickEvent::AXIS_X );
 
 					bool joystickMovedUp = false;
@@ -1704,21 +1765,44 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				}
 			}
 			break;
+			
 			case EET_GUI_EVENT: {
 				switch( event.GUIEvent.EventType ) {
 					case gui::EGET_FILE_SELECTED: {
-						if( debug ) {
-							std::wcout << L"File selected. Folder: " << core::stringw( fileChooser->getDirectoryName() ).c_str() << L"\tFile: " << core::stringw( fileChooser->getFileName() ).c_str() << std::endl;
-						}
+						if( event.GUIEvent.Caller->getID() == fileChooser->getID() ) {
+							if( debug ) {
+								std::wcout << L"File selected. Folder: " << core::stringw( fileChooser->getDirectoryName() ).c_str() << L"\tFile: " << core::stringw( fileChooser->getFileName() ).c_str() << std::endl;
+							}
+							boost::filesystem::current_path( currentDirectory ); //Resets the actual current directory to currentDirectory, since the file chooser can change the current directory.
 
-						newMaze( fileChooser->getFileName() );
-						return true;
+							newMaze( fileChooser->getFileName() );
+							return true;
+						}
+						break;
 					}
 					case gui::EGET_DIRECTORY_SELECTED: {
-						if( debug ) {
-							std::wcout << L"Folder selected." << std::endl;
+						if( event.GUIEvent.Caller->getID() == fileChooser->getID() ) {
+							if( debug ) {
+								std::wcout << L"Folder selected." << std::endl;
+							}
+							return true;
 						}
 
+						break;
+					}
+					case gui::EGET_MESSAGEBOX_YES: {
+						if( event.GUIEvent.Caller->getID() == exitConfirmation->getID() ) {
+							device->closeDevice();
+							donePlaying = true;
+							return true;
+						}
+						break;
+					}
+					case gui::EGET_MESSAGEBOX_NO: {
+						if( event.GUIEvent.Caller->getID() == exitConfirmation->getID() ) {
+							//do nothing
+							return true;
+						}
 						break;
 					}
 					default:
@@ -1737,6 +1821,91 @@ bool GameManager::OnEvent( const SEvent& event ) {
 }
 
 /**
+ * Randomly selects a logo and draws it on screen. Should NOT be called by drawAll().
+ */
+ void GameManager::pickLogo() {
+	try {
+		std::vector< boost::filesystem::path > logoList;
+		
+		boost::filesystem::path logoPath( boost::filesystem::current_path()/L"logos" );
+		
+		//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
+		logoPath = system_complete( logoPath );
+		//logoPath = absolute( logoPath );
+
+		while( ( !exists( logoPath ) || !is_directory( logoPath ) ) && logoPath.has_parent_path() ) {
+			if( debug ) {
+				std::wcout << L"Path " << logoPath.wstring() << L" does not exist or is not a directory. Checking parent path " << logoPath.parent_path().wstring() << std::endl;
+			}
+			
+			logoPath = logoPath.parent_path();
+		}
+		
+		if( exists( logoPath ) ) {
+			boost::filesystem::recursive_directory_iterator end;
+			
+			for( boost::filesystem::recursive_directory_iterator i( logoPath ); i != end; ++i ) {
+				if( !is_directory( i->path() ) ) { //We've found a file
+					if( debug ) {
+						std::wcout << i->path().wstring() << std::endl;
+					}
+				
+					//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
+					for( auto loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
+					
+						video::IImageLoader* loader = driver->getImageLoader( loaderNum );
+						io::IFileSystem* fileSystem = device->getFileSystem();
+						io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
+						
+						//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
+							io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
+							if( loader->isALoadableFileFormat( file ) ) {
+								logoList.push_back( i->path() );
+								file->drop();
+								break;
+							}
+							file->drop();
+						/*} else {
+							if( debug ) {
+								bool isLoadableExtension = loader->isALoadableFileExtension( filePath );
+								bool isLoadableFormat = loader->isALoadableFileFormat( fileSystem->createAndOpenFile( filePath ) );
+								std::wcout << "is loadable extension? " << isLoadableExtension << " is loadable format? " << isLoadableFormat << std::endl;
+							}
+						}*/
+					}
+				}
+			}
+		}
+		
+		if( logoList.size() > 0 ) {
+			std::vector< boost::filesystem::path >::iterator newEnd = std::unique( logoList.begin(), logoList.end() ); //unique "removes all but the first element from every consecutive group of equivalent elements in the range [first,last)." (source: http://www.cplusplus.com/reference/algorithm/unique/ )
+			logoList.resize( std::distance( logoList.begin(), newEnd ) );
+			
+			//Pick a random logo and load it
+			auto logoChosen = rand() % logoList.size();
+			std::wcout << L"Logo chosen " << logoChosen;
+			std::wcout << L" " << logoList.at( logoChosen ).wstring() << std::endl;
+			io::path logoFilePath = stringConverter.toIrrlichtStringW( logoList.at( logoChosen ).wstring() );
+			logoTexture = driver->getTexture( logoFilePath );
+			if( !isNotNull( logoTexture ) ) {
+				std::wstring error = L"Cannot load logo texture, even though Irrlicht said it was loadable?!?";
+				throw error;
+			}
+
+			drawLogo();
+			
+			std::wcout << L"logoTexture size: " << logoTexture->getSize().Width << L"x" << logoTexture->getSize().Height << std::endl;
+		} else {
+			std::wcout << L"Could not find any logo images." << std::endl;
+		}
+	} catch( std::wstring error ) {
+		std::wcout << L"Error in drawLogo(): " << error << std::endl;
+	} catch ( std::exception &error ) {
+		std::wcout << L"Error in drawLogo(): " << error.what() << std::endl;
+	}
+ }
+
+/**
  * Reads preferences from prefs.cfg. Sets defaults for any preference not found in the file. If the file does not exist, creates it.
  */
 void GameManager::readPrefs() {
@@ -1749,7 +1918,7 @@ void GameManager::readPrefs() {
 		bitsPerPixel = 8;
 		vsync = true;
 		driverType = video::EDT_OPENGL;
-		windowSize = core::dimension2d< uint_least16_t >( minWidth, minHeight );
+		windowSize = core::dimension2d< uint_fast16_t >( minWidth, minHeight );
 		allowSmallSize = false;
 		playMusic = true;
 		enableJoystick = false;
@@ -1801,7 +1970,7 @@ void GameManager::readPrefs() {
 									std::wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< std::endl;
 								}
 								
-								std::vector< std::wstring > possiblePrefs = { L"bots' solving algorithm", L"volume", L"number of bots", L"show background animations",
+								std::vector< std::wstring > possiblePrefs = { L"bots' solving algorithm", L"volume", L"number of bots", L"show backgrounds",
 									L"fullscreen", L"mark player trails", L"debug", L"bits per pixel", L"wait for vertical sync", L"driver type", L"number of players",
 									L"window size", L"play music", L"network port", L"enable joystick", L"joystick number", L"always server", L"bots know the solution" };
 								
@@ -1811,36 +1980,24 @@ void GameManager::readPrefs() {
 									std::wcout << L"Preference after spellchecking \"" << preference << std::endl;
 								}
 
-								if( preference == L"bots' solving algorithm" ) {
+								if( preference == possiblePrefs.at( 0 ) ) { //L"bots' solving algorithm"
 									
-									std::vector< std::wstring > possibleChoices = { L"depth-first search" };
+									std::vector< std::wstring > possibleChoices = { L"depth-first search", L"iterative deepening depth-first search" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 									
-									if( choice == L"depth-first search" ) {
+									if( choice == possibleChoices.at( 0 ) ) { //DFS
 										if( debug ) {
 											std::wcout << L"Bots will use Depth-First Search" << std::endl;
 										}
 										botAlgorithm = AI::DEPTH_FIRST_SEARCH;
+									} else if( choice == possibleChoices.at( 1 ) ) { //IDDFS
+										if( debug ) {
+											std::wcout << L"Bots will use Iterative Deepening Depth-First Search" << std::endl;
+										}
+										botAlgorithm = AI::ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH;
 									}
 									
-								} else if( preference == L"bots know the solution" ) {
-									
-									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
-									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
-									if( choice == L"true" ) {
-										if( debug ) {
-											std::wcout << L"Bots DO know the solution" << std::endl;
-										}
-										botsKnowSolution = true;
-									} else {
-										if( debug ) {
-											std::wcout << L"Bots do NOT know the solution" << std::endl;
-										}
-										botsKnowSolution = false;
-									}
-									
-								} else if( preference == L"volume" ) {
+								} else if( preference == possiblePrefs.at( 1 ) ) { //L"volume"
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 
@@ -1863,9 +2020,9 @@ void GameManager::readPrefs() {
 									} catch( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading volume preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
-								} else if( preference == L"number of bots" ) {
+								} else if( preference == possiblePrefs.at( 2 ) ) { //L"number of bots"
 									try {
-										uint_fast8_t choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_least8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
+										uint_fast8_t choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
 
 										if( choiceAsInt <= numPlayers ) {
 											numBots = choiceAsInt;
@@ -1879,12 +2036,12 @@ void GameManager::readPrefs() {
 									} catch( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
-								} else if( preference == L"show background animations" ) {
+								} else if( preference == possiblePrefs.at( 3 ) ) { //L"show backgrounds"
 									
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 									
-									if( choice == L"true" ) {
+									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Show backgrounds is ON" << std::endl;
 										}
@@ -1896,12 +2053,12 @@ void GameManager::readPrefs() {
 										showBackgrounds = false;
 									}
 									
-								} else if( preference == L"fullscreen" ) {
+								} else if( preference == possiblePrefs.at( 4 ) ) { //L"fullscreen"
 									
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 
-									if( choice == L"true" ) {
+									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Fullscreen is ON" << std::endl;
 										}
@@ -1913,12 +2070,12 @@ void GameManager::readPrefs() {
 										fullscreen = false;
 									}
 									
-								} else if( preference == L"mark player trails" ) {
+								} else if( preference == possiblePrefs.at( 5 ) ) { //L"mark player trails"
 									
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 
-									if( choice == L"true" ) {
+									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Mark trails is ON" << std::endl;
 										}
@@ -1930,13 +2087,13 @@ void GameManager::readPrefs() {
 										markTrails = false;
 									}
 									
-								} else if( preference == L"debug" ) {
+								} else if( preference == possiblePrefs.at( 6 ) ) { //L"debug"
 
 									#ifndef DEBUG
 										std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 										choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 										
-										if( choice == L"true" ) {
+										if( choice == possibleChoices.at( 0 ) ) {
 											debug = true;
 										} else {
 											debug = false;
@@ -1946,7 +2103,7 @@ void GameManager::readPrefs() {
 									if( debug ) {
 										std::wcout << L"Debug is ON" << std::endl;
 									}
-								} else if( preference == L"bits per pixel" ) {
+								} else if( preference == possiblePrefs.at( 7 ) ) { //L"bits per pixel"
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 
@@ -1963,12 +2120,12 @@ void GameManager::readPrefs() {
 										std::wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 
-								} else if( preference == L"wait for vertical sync" ) {
+								} else if( preference == possiblePrefs.at( 8 ) ) { //L"wait for vertical sync"
 									
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 
-									if( choice == L"true" ) {
+									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Vertical sync is ON" << std::endl;
 										}
@@ -1980,28 +2137,29 @@ void GameManager::readPrefs() {
 										vsync = false;
 									}
 
-								} else if( preference == L"driver type" ) {
+								} else if( preference == possiblePrefs.at( 9 ) ) { //L"driver type"
 									
 									std::vector< std::wstring > possibleChoices = { L"opengl", L"direct3d9", L"direct3d8", L"burning's video", L"software", L"null" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 
-									if( choice == L"opengl" ) {
+									if( choice == possibleChoices.at( 0 ) ) { //L"opengl"
 										driverType = video::EDT_OPENGL;
-									} else if( choice == L"direct3d9" ) {
+									} else if( choice == possibleChoices.at( 1 ) ) { //L"direct3d9"
 										driverType = video::EDT_DIRECT3D9;
-									} else if( choice == L"direct3d8" ) {
+									} else if( choice == possibleChoices.at( 2 ) ) { //L"direct3d8"
 										driverType = video::EDT_DIRECT3D8;
-									} else if( choice == L"burning's video" ) {
+									} else if( choice == possibleChoices.at( 3 ) ) { //L"burning's video"
 										driverType = video::EDT_BURNINGSVIDEO;
-									} else if( choice == L"software" ) {
+									} else if( choice == possibleChoices.at( 4 ) ) { //L"software"
 										driverType = video::EDT_SOFTWARE;
-									} else if( choice == L"null" ) {
+									} else if( choice == possibleChoices.at( 5 ) ) { //L"null"
 										driverType = video::EDT_NULL;
 									}
 
 									if( !device->isDriverSupported( driverType ) ) {
 										std::wcerr << L"Warning: Chosen driver type " << choice << L" is not supported on this system. ";
-
+										
+										//TODO: Can we replace this with a for loop?
 										if( device->isDriverSupported( video::EDT_OPENGL ) ) {
 											std::wcerr << L"Trying OpenGL." << std::endl;
 											driverType = video::EDT_OPENGL;
@@ -2034,13 +2192,9 @@ void GameManager::readPrefs() {
 										std::wcout << L"Driver type is " << choice << std::endl;
 									}
 
-								} else if( preference == L"number of players" ) {
+								} else if( preference == possiblePrefs.at( 10 ) ) { //L"number of players"
 									try {
-										uint_least8_t choiceAsInt = boost::lexical_cast< short int >( choice ); //uint_least8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
-
-										if( choiceAsInt > UINT_LEAST8_MAX ) { //The maximum number of players is whatever a uint_least8_t can hold, presumably 255 (the 8 is the minimum number of bits, it may not be the true number).
-											choiceAsInt = UINT_LEAST8_MAX;
-										}
+										uint_fast8_t choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
 
 										if( choiceAsInt <= 4 && choiceAsInt > 0 ) {
 											numPlayers = choiceAsInt;
@@ -2057,7 +2211,7 @@ void GameManager::readPrefs() {
 										std::wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 
-								} else if( preference == L"window size" ) {
+								} else if( preference == possiblePrefs.at( 11 ) ) { //L"window size"
 									size_t locationOfX = choice.find( L"x" );
 									std::wstring width = choice.substr( 0, locationOfX );
 									std::wstring height = choice.substr( locationOfX + 1 );
@@ -2072,17 +2226,17 @@ void GameManager::readPrefs() {
 										std::wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << std::endl;
 									} else if( widthAsInt == 160 && heightAsInt == 240 ) {
 										std::wcout << L"Rock on, CGA graphics. Rock on." << std::endl;
-										windowSize = core::dimension2d<uint_least16_t>( widthAsInt, heightAsInt );
+										windowSize = core::dimension2d< uint_fast16_t >( widthAsInt, heightAsInt );
 									} else {
-										windowSize = core::dimension2d<uint_least16_t>( widthAsInt, heightAsInt );
+										windowSize = core::dimension2d< uint_fast16_t >( widthAsInt, heightAsInt );
 									}
 
-								} else if( preference == L"play music" ) {
+								} else if( preference == possiblePrefs.at( 12 ) ) { //L"play music"
 									
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 									
-									if( choice == L"true" ) {
+									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Play music is ON" << std::endl;
 										}
@@ -2094,7 +2248,7 @@ void GameManager::readPrefs() {
 										playMusic = false;
 									}
 
-								} else if( preference == L"network port" ) {
+								} else if( preference == possiblePrefs.at( 13 ) ) { //L"network port"
 									if( debug ) {
 										std::wcout << L"Network port: " << choice << std::endl;
 									}
@@ -2105,12 +2259,12 @@ void GameManager::readPrefs() {
 									} catch( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
-								} else if( preference == L"enable joystick" ) {
+								} else if( preference == possiblePrefs.at( 14 ) ) { //L"enable joystick"
 									
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 									
-									if( choice == L"true" ) {
+									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Joystick is ENABLED" << std::endl;
 										}
@@ -2122,7 +2276,7 @@ void GameManager::readPrefs() {
 										enableJoystick = false;
 									}
 									
-								} else if( preference == L"joystick number" ) {
+								} else if( preference == possiblePrefs.at( 15 ) ) { //L"joystick number"
 									if( debug ) {
 										std::wcout << L"Joystick number: " << choice << std::endl;
 									}
@@ -2132,12 +2286,12 @@ void GameManager::readPrefs() {
 									} catch (boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading joystick number (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
-								} else if( preference == L"always server" ) {
+								} else if( preference == possiblePrefs.at( 16 ) ) { //L"always server"
 									
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 									
-									if( choice == L"true" ) {
+									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"This is always a server" << std::endl;
 										}
@@ -2149,7 +2303,24 @@ void GameManager::readPrefs() {
 										isServer = false;
 									}
 									
-								}
+								} else if( preference == possiblePrefs.at( 17 ) ) { //L"bots know the solution"
+									
+									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
+									
+									if( choice == possibleChoices.at( 0 ) ) { //L"true"
+										if( debug ) {
+											std::wcout << L"Bots DO know the solution" << std::endl;
+										}
+										botsKnowSolution = true;
+									} else {
+										if( debug ) {
+											std::wcout << L"Bots do NOT know the solution" << std::endl;
+										}
+										botsKnowSolution = false;
+									}
+									
+								} 
 								
 							} catch ( std::exception &e ) {
 								std::wcout << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << std::endl;
@@ -2291,7 +2462,13 @@ void GameManager::readPrefs() {
 void GameManager::resetThings() {
 	try {
 		randomSeed = time( nullptr );
-		loadingDelay = 1000 + ( rand() % 5000 );
+		
+		//The delay exists so that people can admire the logo artwork or read the pro tips on the loading screen. Actual loading happens in the blink of an eye on my computer.
+		if( !haveShownLogo ) {
+			loadingDelay = 6000;
+		} else {
+			loadingDelay = 1000 + ( rand() % 5000 ); //Adds some randomness just to make it seem less artificial.6
+		}
 
 		winners.clear();
 		stuff.clear();
@@ -2327,11 +2504,9 @@ void GameManager::resetThings() {
 		}
 		timer->setTime( 0 );
 		timer->start();
-		startLoadingScreen();
-
 		currentProTip = ( currentProTip + 1 ) % proTips.size();
-
 		loadTipFont();
+		startLoadingScreen();
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::resetThings(): " << e.what() << std::endl;
 	}
@@ -2345,6 +2520,7 @@ uint_fast8_t GameManager::run() {
 	try {
 		while( device->run() && !donePlaying ) {
 			newMaze();
+			haveShownLogo = true; //This should only ever be false at the start of the program.
 
 			while( device->run() && !won && !donePlaying ) {
 
@@ -2512,7 +2688,7 @@ uint_fast8_t GameManager::run() {
 void GameManager::setControls() {
 	try {
 		boost::filesystem::path controlsPath( boost::filesystem::current_path()/L"controls.cfg" );
-		/*uint_least8_t nonPlayerActions = 3; //The number of keys assigned to things other than controlling the player objects: screenshots, opening & closing the menu, etc.
+		/*uint_fast8_t nonPlayerActions = 3; //The number of keys assigned to things other than controlling the player objects: screenshots, opening & closing the menu, etc.
 		keyMap.resize( 4 * ( numPlayers - numBots ) + nonPlayerActions );
 
 		//set defaults
@@ -2584,373 +2760,19 @@ void GameManager::setControls() {
 
 								KeyMapping temp;
 								keyMap.push_back( temp );
-
-								std::vector< std::wstring > possibleChoices = {
-									L"mousewheelup", L"mousewheeldown",
-									L"mouseleftdown", L"mouserightdown", L"mousemiddledown",
-									L"mouseleftup", L"mouserightup", L"mousemiddleup",
-									L"mousemoved",
-									L"mouseleftdoubleclick", L"mouserightdoubleclick", L"mousemiddledoubleclick",
-									L"moustlefttripleclick", L"mouserighttripleclick", L"mousemiddletripleclick",
-									L"lbutton", L"rbutton", L"mbutton",
-									L"cancel", L"xbutton1", L"xbutton2",
-									L"back", L"tab", L"clear",
-									L"return", L"enter",
-									L"shift", L"lshift", L"rshift",
-									L"menu", L"pause", L"escape", L"lmenu", L"rmenu",
-									L"capital",
-									L"kana", L"hanguel", L"hangul",
-									L"junja",
-									L"final",
-									L"hanja", L"kanji",
-									L"convert", L"nonconvert",
-									L"accept", L"modechange", L"space",
-									L"prior", L"next", L"end", L"home",
-									L"left", L"up", L"right", L"down",
-									L"select", L"print", L"snapshot",
-									L"execut", L"insert", L"delete", L"help",
-									L"key_0", L"key_1", L"key_2", L"key_3", L"key_4", L"key_5", L"key_6", L"key_7", L"key_8", L"key_9",
-									L"key_a", L"key_b", L"key_c", L"key_d", L"key_e", L"key_f", L"key_g",
-									L"key_h", L"key_i", L"key_j", L"key_k", L"key_l", L"key_m", L"key_n", L"key_o", L"key_p",
-									L"key_q", L"key_r", L"key_s", L"key_t", L"key_u", L"key_v", L"key_w", L"key_y", L"key_x", L"key_z",
-									L"numpad0", L"numpad1", L"numpad2", L"numpad3", L"numpad4", L"numpad5", L"numpad6", L"numpad7", L"numpad8", L"numpad9",
-									L"lwin", L"rwin", L"apps", L"sleep",
-									L"multiply", L"add", L"subtract", L"divide",
-									L"separator", L"decimal",
-									L"f1", L"f2", L"f3", L"f4", L"f5", L"f6", L"f7", L"f8", L"f9", L"f10", L"f11", L"f12", L"f13", L"f14", L"f15", L"f16", L"f17", L"f18", L"f19", L"f20", L"f21", L"f22", L"f23", L"f24",
-									L"numlock", L"scroll",
-									L"control", L"lcontrol", L"rcontrol",
-									L"plus", L"minus",
-									L"comma", L"period",
-									L"oem_1", L"oem_2", L"oem_3", L"oem_4", L"oem_5", L"oem_6", L"oem_7", L"oem_8", L"oem_ax", L"oem_102", L"oem_clear",
-									L"attn", L"crsel", L"exsel", L"ereof",
-									L"play", L"zoom", L"pa1" };
 								
 								if( debug ) {
 									std::wcout << L"choiceStr before spell checking: " << choiceStr;
 								}
-								
-								choiceStr = possibleChoices.at( spellChecker.indexOfClosestString( choiceStr, possibleChoices ) );
 								
 								if( debug ) {
 									std::wcout  << "\tand after: " << choiceStr << std::endl;
 								}
 
 								if( choiceStr.substr( 0, 5 ) != L"mouse" ) {
-									irr::EKEY_CODE choice;
-									//Is there some other way to do the following? Perhaps using a for loop?
-									if( choiceStr == L"lbutton" ) {
-										choice = KEY_LBUTTON;
-									} else if( choiceStr == L"rbutton" ) {
-										choice = KEY_RBUTTON;
-									} else if( choiceStr == L"cancel" ) {
-										choice = KEY_CANCEL;
-									} else if( choiceStr == L"mbutton" ) {
-										choice = KEY_MBUTTON;
-									} else if( choiceStr == L"xbutton1" ) {
-										choice = KEY_XBUTTON1;
-									} else if( choiceStr == L"xbutton2" ) {
-										choice = KEY_XBUTTON2;
-									} else if( choiceStr == L"back" ) {
-										choice = KEY_BACK;
-									} else if( choiceStr == L"tab" ) {
-										choice = KEY_TAB;
-									} else if( choiceStr == L"clear" ) {
-										choice = KEY_CLEAR;
-									} else if( choiceStr == L"return" ) {
-										choice = KEY_RETURN;
-									} else if( choiceStr == L"enter" ) {
-										choice = KEY_RETURN;
-									} else if( choiceStr == L"shift" ) {
-										choice = KEY_SHIFT;
-									} else if( choiceStr == L"control" ) {
-										choice = KEY_CONTROL;
-									} else if( choiceStr == L"menu" ) {
-										choice = KEY_MENU;
-									} else if( choiceStr == L"pause" ) {
-										choice = KEY_PAUSE;
-									} else if( choiceStr == L"capital" ) {
-										choice = KEY_CAPITAL;
-									} else if( choiceStr == L"kana" ) {
-										choice = KEY_KANA;
-									} else if( choiceStr == L"hanguel" ) {
-										choice = KEY_HANGUEL;
-									} else if( choiceStr == L"hangul" ) {
-										choice = KEY_HANGUL;
-									} else if( choiceStr == L"junja" ) {
-										choice = KEY_JUNJA;
-									} else if( choiceStr == L"final" ) {
-										choice = KEY_FINAL;
-									} else if( choiceStr == L"hanja" ) {
-										choice = KEY_HANJA;
-									} else if( choiceStr == L"kanji" ) {
-										choice = KEY_KANJI;
-									} else if( choiceStr == L"escape" ) {
-										choice = KEY_ESCAPE;
-									} else if( choiceStr == L"convert" ) {
-										choice = KEY_CONVERT;
-									} else if( choiceStr == L"nonconvert" ) {
-										choice = KEY_NONCONVERT;
-									} else if( choiceStr == L"accept" ) {
-										choice = KEY_ACCEPT;
-									} else if( choiceStr == L"modechange" ) {
-										choice = KEY_MODECHANGE;
-									} else if( choiceStr == L"space" ) {
-										choice = KEY_SPACE;
-									} else if( choiceStr == L"prior" ) {
-										choice = KEY_PRIOR;
-									} else if( choiceStr == L"next" ) {
-										choice = KEY_NEXT;
-									} else if( choiceStr == L"end" ) {
-										choice = KEY_END;
-									} else if( choiceStr == L"home" ) {
-										choice = KEY_HOME;
-									} else if( choiceStr == L"left" ) {
-										choice = KEY_LEFT;
-									} else if( choiceStr == L"up" ) {
-										choice = KEY_UP;
-									} else if( choiceStr == L"right" ) {
-										choice = KEY_RIGHT;
-									} else if( choiceStr == L"down" ) {
-										choice = KEY_DOWN;
-									} else if( choiceStr == L"select" ) {
-										choice = KEY_SELECT;
-									} else if( choiceStr == L"print" ) {
-										choice = KEY_PRINT;
-									} else if( choiceStr == L"execut" ) {
-										choice = KEY_EXECUT;
-									} else if( choiceStr == L"snapshot" ) {
-										choice = KEY_SNAPSHOT;
-									} else if( choiceStr == L"insert" ) {
-										choice = KEY_INSERT;
-									} else if( choiceStr == L"delete" ) {
-										choice = KEY_DELETE;
-									} else if( choiceStr == L"help" ) {
-										choice = KEY_HELP;
-									} else if( choiceStr == L"key_0" ) {
-										choice = KEY_KEY_0;
-									} else if( choiceStr == L"key_1" ) {
-										choice = KEY_KEY_1;
-									} else if( choiceStr == L"key_2" ) {
-										choice = KEY_KEY_2;
-									} else if( choiceStr == L"key_3" ) {
-										choice = KEY_KEY_3;
-									} else if( choiceStr == L"key_4" ) {
-										choice = KEY_KEY_4;
-									} else if( choiceStr == L"key_5" ) {
-										choice = KEY_KEY_5;
-									} else if( choiceStr == L"key_6" ) {
-										choice = KEY_KEY_6;
-									} else if( choiceStr == L"key_7" ) {
-										choice = KEY_KEY_7;
-									} else if( choiceStr == L"key_8" ) {
-										choice = KEY_KEY_8;
-									} else if( choiceStr == L"key_9" ) {
-										choice = KEY_KEY_9;
-									} else if( choiceStr == L"key_a" ) {
-										choice = KEY_KEY_A;
-									} else if( choiceStr == L"key_b" ) {
-										choice = KEY_KEY_B;
-									} else if( choiceStr == L"key_c" ) {
-										choice = KEY_KEY_C;
-									} else if( choiceStr == L"key_d" ) {
-										choice = KEY_KEY_D;
-									} else if( choiceStr == L"key_e" ) {
-										choice = KEY_KEY_E;
-									} else if( choiceStr == L"key_f" ) {
-										choice = KEY_KEY_F;
-									} else if( choiceStr == L"key_g" ) {
-										choice = KEY_KEY_G;
-									} else if( choiceStr == L"key_h" ) {
-										choice = KEY_KEY_H;
-									} else if( choiceStr == L"key_i" ) {
-										choice = KEY_KEY_I;
-									} else if( choiceStr == L"key_j" ) {
-										choice = KEY_KEY_J;
-									} else if( choiceStr == L"key_k" ) {
-										choice = KEY_KEY_K;
-									} else if( choiceStr == L"key_l" ) {
-										choice = KEY_KEY_L;
-									} else if( choiceStr == L"key_m" ) {
-										choice = KEY_KEY_M;
-									} else if( choiceStr == L"key_n" ) {
-										choice = KEY_KEY_N;
-									} else if( choiceStr == L"key_o" ) {
-										choice = KEY_KEY_O;
-									} else if( choiceStr == L"key_p" ) {
-										choice = KEY_KEY_P;
-									} else if( choiceStr == L"key_q" ) {
-										choice = KEY_KEY_Q;
-									} else if( choiceStr == L"key_r" ) {
-										choice = KEY_KEY_R;
-									} else if( choiceStr == L"key_s" ) {
-										choice = KEY_KEY_S;
-									} else if( choiceStr == L"key_t" ) {
-										choice = KEY_KEY_T;
-									} else if( choiceStr == L"key_u" ) {
-										choice = KEY_KEY_U;
-									} else if( choiceStr == L"key_v" ) {
-										choice = KEY_KEY_V;
-									} else if( choiceStr == L"key_w" ) {
-										choice = KEY_KEY_W;
-									} else if( choiceStr == L"key_x" ) {
-										choice = KEY_KEY_X;
-									} else if( choiceStr == L"key_y" ) {
-										choice = KEY_KEY_Y;
-									} else if( choiceStr == L"key_z" ) {
-										choice = KEY_KEY_Z;
-									} else if( choiceStr == L"lwin" ) {
-										choice = KEY_LWIN;
-									} else if( choiceStr == L"rwin" ) {
-										choice = KEY_RWIN;
-									} else if( choiceStr == L"apps" ) {
-										choice = KEY_APPS;
-									} else if( choiceStr == L"sleep" ) {
-										choice = KEY_SLEEP;
-									} else if( choiceStr == L"numpad0" ) {
-										choice = KEY_NUMPAD0;
-									} else if( choiceStr == L"numpad1" ) {
-										choice = KEY_NUMPAD1;
-									} else if( choiceStr == L"numpad2" ) {
-										choice = KEY_NUMPAD2;
-									} else if( choiceStr == L"numpad3" ) {
-										choice = KEY_NUMPAD3;
-									} else if( choiceStr == L"numpad4" ) {
-										choice = KEY_NUMPAD4;
-									} else if( choiceStr == L"numpad5" ) {
-										choice = KEY_NUMPAD5;
-									} else if( choiceStr == L"numpad6" ) {
-										choice = KEY_NUMPAD6;
-									} else if( choiceStr == L"numpad7" ) {
-										choice = KEY_NUMPAD7;
-									} else if( choiceStr == L"numpad8" ) {
-										choice = KEY_NUMPAD8;
-									} else if( choiceStr == L"numpad9" ) {
-										choice = KEY_NUMPAD9;
-									} else if( choiceStr == L"multiply" ) {
-										choice = KEY_MULTIPLY;
-									} else if( choiceStr == L"add" ) {
-										choice = KEY_ADD;
-									} else if( choiceStr == L"separator" ) {
-										choice = KEY_SEPARATOR;
-									} else if( choiceStr == L"subtract" ) {
-										choice = KEY_SUBTRACT;
-									} else if( choiceStr == L"decimal" ) {
-										choice = KEY_DECIMAL;
-									} else if( choiceStr == L"divide" ) {
-										choice = KEY_DIVIDE;
-									} else if( choiceStr == L"f1" ) {
-										choice = KEY_F1;
-									} else if( choiceStr == L"f2" ) {
-										choice = KEY_F2;
-									} else if( choiceStr == L"f3" ) {
-										choice = KEY_F3;
-									} else if( choiceStr == L"f4" ) {
-										choice = KEY_F4;
-									} else if( choiceStr == L"f5" ) {
-										choice = KEY_F5;
-									} else if( choiceStr == L"f6" ) {
-										choice = KEY_F6;
-									} else if( choiceStr == L"f7" ) {
-										choice = KEY_F7;
-									} else if( choiceStr == L"f8" ) {
-										choice = KEY_F8;
-									} else if( choiceStr == L"f9" ) {
-										choice = KEY_F9;
-									} else if( choiceStr == L"f10" ) {
-										choice = KEY_F10;
-									} else if( choiceStr == L"f11" ) {
-										choice = KEY_F11;
-									} else if( choiceStr == L"f12" ) {
-										choice = KEY_F12;
-									} else if( choiceStr == L"f13" ) {
-										choice = KEY_F13;
-									} else if( choiceStr == L"f14" ) {
-										choice = KEY_F14;
-									} else if( choiceStr == L"f15" ) {
-										choice = KEY_F15;
-									} else if( choiceStr == L"f16" ) {
-										choice = KEY_F16;
-									} else if( choiceStr == L"f17" ) {
-										choice = KEY_F17;
-									} else if( choiceStr == L"f18" ) {
-										choice = KEY_F18;
-									} else if( choiceStr == L"f19" ) {
-										choice = KEY_F19;
-									} else if( choiceStr == L"f20" ) {
-										choice = KEY_F20;
-									} else if( choiceStr == L"f21" ) {
-										choice = KEY_F21;
-									} else if( choiceStr == L"f22" ) {
-										choice = KEY_F22;
-									} else if( choiceStr == L"f23" ) {
-										choice = KEY_F23;
-									} else if( choiceStr == L"f24" ) {
-										choice = KEY_F24;
-									} else if( choiceStr == L"numlock" ) {
-										choice = KEY_NUMLOCK;
-									} else if( choiceStr == L"scroll" ) {
-										choice = KEY_SCROLL;
-									} else if( choiceStr == L"lshift" ) {
-										choice = KEY_LSHIFT;
-									} else if( choiceStr == L"rshift" ) {
-										choice = KEY_RSHIFT;
-									} else if( choiceStr == L"lcontrol" ) {
-										choice = KEY_LCONTROL;
-									} else if( choiceStr == L"rcontrol" ) {
-										choice = KEY_RCONTROL;
-									} else if( choiceStr == L"lmenu" ) {
-										choice = KEY_LMENU;
-									} else if( choiceStr == L"rmenu" ) {
-										choice = KEY_RMENU;
-									} else if( choiceStr == L"plus" ) {
-										choice = KEY_PLUS;
-									} else if( choiceStr == L"comma" ) {
-										choice = KEY_COMMA;
-									} else if( choiceStr == L"minus" ) {
-										choice = KEY_MINUS;
-									} else if( choiceStr == L"period" ) {
-										choice = KEY_PERIOD;
-									} else if( choiceStr == L"oem_1" ) {
-										choice = KEY_OEM_1;
-									} else if( choiceStr == L"oem_2" ) {
-										choice = KEY_OEM_2;
-									} else if( choiceStr == L"oem_3" ) {
-										choice = KEY_OEM_3;
-									} else if( choiceStr == L"oem_4" ) {
-										choice = KEY_OEM_4;
-									} else if( choiceStr == L"oem_5" ) {
-										choice = KEY_OEM_5;
-									} else if( choiceStr == L"oem_6" ) {
-										choice = KEY_OEM_6;
-									} else if( choiceStr == L"oem_7" ) {
-										choice = KEY_OEM_7;
-									} else if( choiceStr == L"oem_8" ) {
-										choice = KEY_OEM_8;
-									} else if( choiceStr == L"oem_ax" ) {
-										choice = KEY_OEM_AX;
-									} else if( choiceStr == L"oem_102" ) {
-										choice = KEY_OEM_102;
-									} else if( choiceStr == L"oem_clear" ) {
-										choice = KEY_OEM_CLEAR;
-									} else if( choiceStr == L"attn" ) {
-										choice = KEY_ATTN;
-									} else if( choiceStr == L"crsel" ) {
-										choice = KEY_CRSEL;
-									} else if( choiceStr == L"exsel" ) {
-										choice = KEY_EXSEL;
-									} else if( choiceStr == L"ereof" ) {
-										choice = KEY_EREOF;
-									} else if( choiceStr == L"play" ) {
-										choice = KEY_PLAY;
-									} else if( choiceStr == L"zoom" ) {
-										choice = KEY_ZOOM;
-									} else if( choiceStr == L"pa1" ) {
-										choice = KEY_PA1;
-									} else {
-										std::wcerr << L"Unrecognized key " << choiceStr << L". Using space bar instead." << std::endl;
-										choice = KEY_SPACE;
-									}
+									EKEY_CODE choice;
+									
+									choice = static_cast< EKEY_CODE >( boost::lexical_cast< int >( choiceStr ) ); //Boost lexical cast can't convert directly to enumerated types
 
 									keyMap.back().setKey( choice );
 								} else {
@@ -3046,7 +2868,7 @@ void GameManager::setControls() {
  */
 void GameManager::setupBackground() {
 	try {
-		uint_least8_t availableBackgrounds = 3; //The number of different background animations to choose from
+		uint_fast8_t availableBackgrounds = 3; //The number of different background animations to choose from
 
 		backgroundChosen = rand() % availableBackgrounds;
 		//backgroundChosen = 2;
@@ -3309,42 +3131,40 @@ void GameManager::setupBackground() {
 
 					for( boost::filesystem::recursive_directory_iterator i( backgroundPath ); i != end; ++i ) {
 						if( !is_directory( i->path() ) ) { //We've found a file
+							if( debug ) {
+								std::wcout << i->path().wstring() << std::endl;
+							}
+						
 							//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
-							for( auto loaderNum = driver->getImageLoaderCount() - 1; loaderNum >= 0; --loaderNum ) {
+							for( auto loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
 							
 								video::IImageLoader* loader = driver->getImageLoader( loaderNum );
 								io::IFileSystem* fileSystem = device->getFileSystem();
 								io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
 								
-								if( debug ) {
-									std::wcout << filePath.c_str() << std::endl;
-								}
-								
-								if( !core::hasFileExtension( filePath, "xcf" ) ) { //Workaround until the xcf bug gets fixed in Irrlicht. isALoadableFileExtension() crashes on xcf files?!? (Irrlicht 1.8, may be fixed in 1.8.1).
+								//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
 									io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
-									if( loader->isALoadableFileFormat( file ) ) { //isALoadableFileFormat() crashes on xcf files (Irrlicht 1.8, may be fixed in 1.8.1). I split this if statement out from the one directly above for the purpose of debugging.
+									if( loader->isALoadableFileFormat( file ) ) {
 										backgroundList.push_back( i->path() );
 										file->drop();
 										break;
 									}
 									file->drop();
-								} else {
+								/*} else {
 									if( debug ) {
-										bool hasXCF = core::hasFileExtension( filePath, "xcf" );
-										bool hasPNG = core::hasFileExtension( filePath, "png" );
-										bool isLoadable = loader->isALoadableFileExtension( filePath );
-										std::wcout << "hax xcf? " << hasXCF << "\thas png? " << hasPNG << "\tis loadable? " << isLoadable << std::endl;
+										bool isLoadableExtension = loader->isALoadableFileExtension( filePath );
+										bool isLoadableFormat = loader->isALoadableFileFormat( fileSystem->createAndOpenFile( filePath ) );
+										std::wcout << "is loadable extension? " << isLoadableExtension << " is loadable format? " << isLoadableFormat << std::endl;
 									}
-									break;
-								}
+								}*/
 							}
 						}
 					}
 				}
 
 				if( backgroundList.size() > 0 ) {
-					std::vector< boost::filesystem::path >::iterator it = std::unique( backgroundList.begin(), backgroundList.end() );
-					backgroundList.resize( std::distance( backgroundList.begin(), it ) );
+					std::vector< boost::filesystem::path >::iterator newEnd = std::unique( backgroundList.begin(), backgroundList.end() ); //unique "removes all but the first element from every consecutive group of equivalent elements in the range [first,last)." (source: http://www.cplusplus.com/reference/algorithm/unique/ )
+					backgroundList.resize( std::distance( backgroundList.begin(), newEnd ) );
 				
 					//Pick a random background and load it
 					backgroundFilePath = stringConverter.toIrrlichtStringW( backgroundList.at( rand() % backgroundList.size() ).wstring() );
@@ -3378,7 +3198,7 @@ void GameManager::startLoadingScreen() {
 	try {
 		showingLoadingScreen = true;
 		timeStartedLoading = timer->getRealTime();
-		drawLoadingScreen();
+		//drawLoadingScreen();
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::startLoadingScreen(): " << e.what() << std::endl;
 	}

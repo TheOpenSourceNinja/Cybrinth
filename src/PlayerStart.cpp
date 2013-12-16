@@ -46,7 +46,7 @@ void PlayerStart::loadTexture( irr::video::IVideoDriver* driver ) {
 	}
 }
 
-void PlayerStart::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size ) {
+void PlayerStart::loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t size ) {
 	try {
 		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) );
 		tempImage->fill( WHITE );
@@ -59,9 +59,9 @@ void PlayerStart::loadTexture( irr::video::IVideoDriver* driver, uint_least16_t 
 	}
 }
 
-void PlayerStart::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
+void PlayerStart::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height ) {
 	try {
-		uint_least16_t size;
+		uint_fast16_t size;
 
 		if( width < height ) {
 			size = width;

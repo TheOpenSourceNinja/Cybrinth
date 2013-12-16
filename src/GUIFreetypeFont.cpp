@@ -492,7 +492,7 @@ inline u32 CGUIFreetypeFont::getWidthFromCharacter( wchar_t c ) const {
 
 		if( n > 0 ) {
 			int w = Glyphs[ n - 1 ]->texw;
-			int_least16_t left = Glyphs[ n - 1 ]->left;
+			int_fast16_t left = Glyphs[ n - 1 ]->left;
 
 			if( w + left > 0 )
 				return w + left;

@@ -63,7 +63,7 @@ void NetworkManager::setGameManager( GameManager* newGM ) {
 	}
 }
 
-void NetworkManager::setPort( uint_least16_t newPort ) {
+void NetworkManager::setPort( uint_fast16_t newPort ) {
 	try {
 		if( newPort <= 1023 ) {
 			std::wcerr << L"Warning: Port " << newPort << L" is in the \"well-known\" range (0-1023). This may not work. Recommend using ports above 49151." << std::endl;
@@ -81,12 +81,12 @@ void NetworkManager::setPort( uint_least16_t newPort ) {
 	}
 }
 
-uint_least16_t NetworkManager::getPort() {
+uint_fast16_t NetworkManager::getPort() {
 	try {
 		return port;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::getPort(): " << e.what() << std::endl;
-		return UINT_LEAST16_MAX;
+		return UINT_FAST16_MAX;
 	}
 }
 
@@ -275,10 +275,10 @@ bool NetworkManager::hasNewPlayerConnected() {
 	}
 }
 
-void NetworkManager::sendMaze( MazeCell ** maze, uint_least8_t cols, uint_least8_t rows ) {
+void NetworkManager::sendMaze( MazeCell ** maze, uint_fast8_t cols, uint_fast8_t rows ) {
 	try {
 		//char buffer[sizeof(cols) + sizeof(rows) + (cols * rows) ];
-		std::vector<uint_least8_t> toSend;
+		std::vector<uint_fast8_t> toSend;
 		toSend.reserve( 9 + 7 + 2 + ( cols * rows * 4 ) );
 		toSend.push_back( 'S' );
 		toSend.push_back( 'T' );
@@ -328,11 +328,11 @@ void NetworkManager::sendMaze( MazeCell ** maze, uint_least8_t cols, uint_least8
 	}
 }
 
-void NetworkManager::sendPlayerPos( uint_least8_t player, uint_least8_t x, uint_least8_t y ) {
+void NetworkManager::sendPlayerPos( uint_fast8_t player, uint_fast8_t x, uint_fast8_t y ) {
 	try {
 		//std::wcout << L"Sending player " << player << L" position " << x << L"," << y << std::endl;
 
-		std::vector<uint_least8_t> toSend;
+		std::vector<uint_fast8_t> toSend;
 		toSend.reserve( 6 + 3 + 4 );
 		toSend.push_back( 'S' );
 		toSend.push_back( 'T' );
@@ -369,7 +369,7 @@ void NetworkManager::sendPlayerPos( uint_least8_t player, uint_least8_t x, uint_
 
 void NetworkManager::sendGoal( Goal goal ) {
 	try {
-		std::vector<uint_least8_t> toSend;
+		std::vector<uint_fast8_t> toSend;
 		toSend.reserve( 6 + 2 + 4 );
 		toSend.push_back( 'S' );
 		toSend.push_back( 'T' );
@@ -407,7 +407,7 @@ void NetworkManager::sendGoal( Goal goal ) {
 
 void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 	try {
-		std::vector<uint_least8_t> toSend;
+		std::vector<uint_fast8_t> toSend;
 		toSend.reserve( 7 + starts.size() + 5 );
 		toSend.push_back( 'S' );
 		toSend.push_back( 'T' );
@@ -450,11 +450,11 @@ void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 	}
 }
 
-void NetworkManager::sendU8( uint_least8_t num, std::wstring desc ) {
+void NetworkManager::sendU8( uint_fast8_t num, std::wstring desc ) {
 	try {
-		std::wcout << L"Sending uint_least8_t " << desc << L": " << num << std::endl;
+		std::wcout << L"Sending uint_fast8_t " << desc << L": " << num << std::endl;
 
-		std::vector<uint_least8_t> toSend;
+		std::vector<uint_fast8_t> toSend;
 		toSend.reserve( 5 + ( desc.size() * 2 ) + 1 + 3 );
 		toSend.push_back( 'S' );
 		toSend.push_back( 'T' );
@@ -498,7 +498,7 @@ void NetworkManager::sendU8( uint_least8_t num, std::wstring desc ) {
 
 void NetworkManager::sendCollectables( std::vector<Collectable> stuff ) {
 	try {
-		std::vector<uint_least8_t> toSend;
+		std::vector<uint_fast8_t> toSend;
 		toSend.reserve( 6 + stuff.size() + 4 );
 		toSend.push_back( 'S' );
 		toSend.push_back( 'T' );

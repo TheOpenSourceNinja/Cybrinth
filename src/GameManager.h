@@ -45,8 +45,7 @@ class GameManager : public IEventReceiver {
 		GameManager();
 		virtual ~GameManager();
 
-		void drawAll();
-		void drawLoadingScreen();
+		void drawAll(); //Public because it's called by MazeManager. Otherwise the loading screen wouldn't get drawn during maze generation.
 
 		Collectable* getCollectable( uint_fast8_t collectable );
 		bool getDebugStatus();
@@ -60,6 +59,8 @@ class GameManager : public IEventReceiver {
 		void movePlayerOnY( uint_fast8_t p, int_fast8_t direction );
 
 		bool OnEvent( const SEvent& );
+		
+		void pickLogo();
 
 		void resetThings();
 		uint_fast8_t run();
@@ -76,7 +77,7 @@ class GameManager : public IEventReceiver {
 		Goal goal;
 		gui::IGUIEnvironment* gui;
 
-		uint_least16_t loadingDelay;
+		uint_fast16_t loadingDelay;
 
 		uint_fast8_t numBots;
 		uint_fast8_t numLocks;
@@ -85,13 +86,13 @@ class GameManager : public IEventReceiver {
 		std::vector< Player > player;
 		std::vector< PlayerStart > playerStart;
 
-		uint_least16_t randomSeed;
+		uint_fast16_t randomSeed;
 
 		StringConverter stringConverter;
 		std::vector< Collectable > stuff;
 
 		ITimer* timer;
-		uint_least16_t timeStartedLoading;
+		uint_fast16_t timeStartedLoading;
 
 	protected:
 	private:
@@ -101,6 +102,10 @@ class GameManager : public IEventReceiver {
 
 		bool doEventActions( std::vector< KeyMapping >::size_type k, const SEvent& event );
 		void drawBackground();
+		void drawLoadingScreen();
+		void drawLogo();
+		
+		bool haveShownLogo;
 		
 		bool isNotNull( void* ptr );
 
@@ -154,31 +159,31 @@ class GameManager : public IEventReceiver {
 
 
 		//unsigned 8-bit integers----------------------------------
-		uint_least8_t backgroundChosen;
+		uint_fast8_t backgroundChosen;
 
 		uint_fast8_t myPlayer; //If in client mode, control only one player
 
 		uint_fast8_t numKeysFound;
 
-		uint_least8_t sideDisplaySizeDenominator;
+		uint_fast8_t sideDisplaySizeDenominator;
 
 		std::vector< uint_fast8_t > winners;
 
 
 		//unsigned 16-bit integers----------------------------------
-		uint_least16_t bitsPerPixel;
+		uint_fast16_t bitsPerPixel;
 
-		uint_least16_t cellWidth;
-		uint_least16_t cellHeight;
+		uint_fast16_t cellWidth;
+		uint_fast16_t cellHeight;
 
-		uint_least16_t joystickChosen;
+		uint_fast16_t joystickChosen;
 
-		uint_least16_t musicVolume;
+		uint_fast16_t musicVolume;
 
 
 		//unsigned 32-bit integers----------------------------------
-		uint_least32_t minWidth;
-		uint_least32_t minHeight;
+		uint_fast32_t minWidth;
+		uint_fast32_t minHeight;
 
 
 		//wide character strings----------------------------------
@@ -200,6 +205,8 @@ class GameManager : public IEventReceiver {
 		AI::algorithm_t botAlgorithm;
 		
 		MenuOption backToGame;
+		
+		MenuOption freedom;
 
 		MenuOption exitGame;
 
@@ -221,8 +228,8 @@ class GameManager : public IEventReceiver {
 
 
 		//2D dimensions----------------------------------
-		core::dimension2d< uint_least16_t > viewportSize;
-		core::dimension2d< uint_least32_t > windowSize;
+		core::dimension2d< uint_fast16_t > viewportSize;
+		core::dimension2d< u32 > windowSize;
 
 
 		//Fonts----------------------------------
@@ -245,10 +252,13 @@ class GameManager : public IEventReceiver {
 
 		video::E_DRIVER_TYPE driverType;
 
+		gui::IGUIWindow* exitConfirmation;
+
 		gui::IGUIFileOpenDialog* fileChooser;
 
 		core::array<SJoystickInfo> joystickInfo;
 
+		video::ITexture* logoTexture;
 
 		boost::filesystem::directory_iterator currentFile;
 
@@ -258,6 +268,7 @@ class GameManager : public IEventReceiver {
 
 
 		//Misc. Boost/Boost Filesystem types----------------------------------
+		boost::filesystem::path currentDirectory;
 		boost::filesystem::path currentMusic;
 
 		std::vector<boost::filesystem::path> musicList;

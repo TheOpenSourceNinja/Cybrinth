@@ -27,40 +27,46 @@ class AI {
 		/** Default destructor */
 		virtual ~AI();
 
-		enum algorithm_t{ DEPTH_FIRST_SEARCH };
+		enum algorithm_t{ DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH };
 		void allKeysFound();
 		bool atGoal();
 		bool doneWaiting();
-		uint_least8_t getPlayer();
+		uint_fast8_t getPlayer();
 		void keyFound( uint_fast8_t s );
 		void move(); //Needs to call GameManager's movePlayerOnX and movePlayerOnY functions.
 		void reset();
-		void setPlayer( uint_least8_t newPlayer );
-		void setup( MazeCell ** newMaze, uint_least8_t newCols, uint_least8_t newRows,  GameManager * newGM, bool newStartSolved, algorithm_t newAlgorithm ); //Provides the AI with whatever info it needs to work.
+		void setPlayer( uint_fast8_t newPlayer );
+		void setup( MazeCell ** newMaze, uint_fast8_t newCols, uint_fast8_t newRows,  GameManager * newGM, bool newStartSolved, algorithm_t newAlgorithm ); //Provides the AI with whatever info it needs to work.
 	protected:
 	private:
-		bool alreadyVisited( irr::core::position2d< uint_least8_t > position );
-		bool alreadyVisitedDFS( irr::core::position2d< uint_least8_t > position );
+		bool alreadyVisited( irr::core::position2d< uint_fast8_t > position );
+		bool alreadyVisitedDFS( irr::core::position2d< uint_fast8_t > position );
+		bool alreadyVisitedIDDFS( irr::core::position2d< uint_fast8_t > position );
 		void findSolution();
-		void findSolutionDFS( irr::core::position2d< uint_least8_t > currentPosition );
-		void findSolutionDFS( std::vector< irr::core::position2d< uint_least8_t > > partialSolution, irr::core::position2d< uint_least8_t > currentPosition );
+		void findSolutionDFS( irr::core::position2d< uint_fast8_t > currentPosition );
+		void findSolutionDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > currentPosition );
+		void findSolutionIDDFS( irr::core::position2d< uint_fast8_t > currentPosition );
+		void findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > currentPosition, uint_fast16_t depthLimit );
 
 		algorithm_t algorithm;
-		std::vector< irr::core::position2d< uint_least8_t > > cellsVisited;
-		uint_least8_t cols;
+		std::vector< irr::core::position2d< uint_fast8_t > > cellsVisited;
+		uint_fast8_t cols;
 		uint_fast8_t controlsPlayer;
 		enum direction_t{ UP, DOWN, LEFT, RIGHT };
-		std::vector< irr::core::position2d< uint_least8_t > > DFSCellsVisited;
+		std::vector< irr::core::position2d< uint_fast8_t > > DFSCellsVisited;
+		std::vector< irr::core::position2d< uint_fast8_t > > IDDFSCellsVisited;
+		uint_fast16_t IDDFSDepthLimit; //For use only when the bots don't know the solution.
+		uint_fast16_t IDDFSMaxDepthLimit; //For use only when the bots don't know the solution.
 		GameManager * gm;
 		uint_fast8_t keyImSeeking;
-		uint_least32_t lastTimeMoved;
+		uint_fast32_t lastTimeMoved;
 		MazeCell ** maze;
-		uint_least16_t movementDelay; //How long to delay between movements
-		//uint_least8_t numKeysInSolution;
-		std::vector< std::vector< irr::core::position2d< uint_least8_t > > > pathsToLockedCells;
-		std::vector< irr::core::position2d< uint_least8_t > > pathTaken;
-		uint_least8_t rows;
-		std::vector< irr::core::position2d< uint_least8_t > > solution;
+		uint_fast16_t movementDelay; //How long to delay between movements
+		//uint_fast8_t numKeysInSolution;
+		std::vector< std::vector< irr::core::position2d< uint_fast8_t > > > pathsToLockedCells;
+		std::vector< irr::core::position2d< uint_fast8_t > > pathTaken;
+		uint_fast8_t rows;
+		std::vector< irr::core::position2d< uint_fast8_t > > solution;
 		bool solved;
 		bool startSolved;
 };

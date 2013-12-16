@@ -35,7 +35,7 @@ Object::~Object() {
 	}
 }
 
-void Object::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height ) {
+void Object::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height ) {
 	try {
 		if( moving ) {
 			float speed = .2;
@@ -62,7 +62,7 @@ void Object::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_
 			yInterp = y;
 		}
 
-		uint_least16_t size;
+		uint_fast16_t size;
 
 		if( width < height ) {
 			size = width;
@@ -71,8 +71,8 @@ void Object::draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_
 		}
 
 		if( texture != nullptr ) {
-			int_least16_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
-			int_least16_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
+			int_fast16_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
+			int_fast16_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
 			driver->draw2DImage( texture,
 								 irr::core::rect< irr::s32 >( cornerX, cornerY, cornerX + size, cornerY + size ),
 								 irr::core::rect< irr::s32 >( irr::core::position2d< irr::s32 >( 0, 0 ), texture->getSize() ),
@@ -115,21 +115,21 @@ irr::video::SColor Object::getColorTwo() {
 	}
 }
 
-uint_least8_t Object::getX() {
+uint_fast8_t Object::getX() {
 	try {
 		return x;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::getX(): " << e.what() << std::endl;
-		return UINT_LEAST8_MAX;
+		return UINT_FAST8_MAX;
 	}
 }
 
-uint_least8_t Object::getY() {
+uint_fast8_t Object::getY() {
 	try {
 		return y;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::getY(): " << e.what() << std::endl;
-		return UINT_LEAST8_MAX;
+		return UINT_FAST8_MAX;
 	}
 }
 
@@ -224,7 +224,7 @@ void Object::setColor( irr::video::SColor newColor ) {
 	}
 }
 
-void Object::setColorBasedOnNum( uint_least8_t num ) {
+void Object::setColorBasedOnNum( uint_fast8_t num ) {
 	try {
 		switch( num % ( NUMCOLORS - 3 ) ) { //Subtract 3 because there are some colors we're not using
 			case 0: {
@@ -286,7 +286,7 @@ void Object::setColorBasedOnNum( uint_least8_t num ) {
 	}
 }
 
-void Object::setPos( uint_least8_t newX, uint_least8_t newY ) {
+void Object::setPos( uint_fast8_t newX, uint_fast8_t newY ) {
 	try {
 		setX( newX );
 		setY( newY );
@@ -295,7 +295,7 @@ void Object::setPos( uint_least8_t newX, uint_least8_t newY ) {
 	}
 }
 
-void Object::setX( uint_least8_t val ) {
+void Object::setX( uint_fast8_t val ) {
 	try {
 		x = val;
 		xInterp = x;
@@ -304,7 +304,7 @@ void Object::setX( uint_least8_t val ) {
 	}
 }
 
-void Object::setY( uint_least8_t val ) {
+void Object::setY( uint_fast8_t val ) {
 	try {
 		y = val;
 		yInterp = y;

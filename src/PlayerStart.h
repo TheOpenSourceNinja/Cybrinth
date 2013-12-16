@@ -22,8 +22,8 @@ class PlayerStart : public Object {
 		virtual ~PlayerStart();
 		void reset();
 		void loadTexture( irr::video::IVideoDriver* driver );
-		void loadTexture( irr::video::IVideoDriver* driver, uint_least16_t size );
-		void draw( irr::video::IVideoDriver* driver, uint_least16_t width, uint_least16_t height );
+		void loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t size );
+		void draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height );
 	protected:
 	private:
 };

@@ -30,8 +30,8 @@ class MazeCell {
 		void setRight( border_t val );
 		void removeLocks();
 		bool visited; //Used by the maze generation algorithm to ensure there are no loops, by canGetTo() to indicate which cells it's already look at, and during play for the players' own use.
-		uint_least16_t distanceFromStart;
-		uint_least16_t id;
+		uint_fast16_t distanceFromStart;
+		uint_fast16_t id;
 		bool isDeadEnd();
 		irr::video::SColor getVisitorColor();
 		void setVisitorColor( irr::video::SColor color );
