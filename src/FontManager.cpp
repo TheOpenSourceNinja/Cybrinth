@@ -74,9 +74,7 @@ bool FontManager::canLoadFont( boost::filesystem::path filename_ ) {
 
 irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, irr::core::stringw filename_, unsigned int size_, bool antiAlias_, bool transparency_ ) {
 	try {
-		/*if( !filename_ || !strlen( filename_ ) )
-			return nullptr;*/
-		if( filename_.size() == 0 ) {
+		if( filename_.empty() ) {
 			return nullptr;
 		}
 

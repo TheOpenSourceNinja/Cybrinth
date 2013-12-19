@@ -15,7 +15,7 @@
 #include "Player.h"
 #include "StringConverter.h"
 
-AI::AI() : algorithm( DEPTH_FIRST_SEARCH ), cols(0), controlsPlayer(0), gm(nullptr), keyImSeeking(0), lastTimeMoved(0), maze(nullptr), movementDelay(300), rows(0), solved(false), startSolved(true), IDDFSDepthLimit(1), IDDFSMaxDepthLimit(1) {
+AI::AI() : algorithm( DEPTH_FIRST_SEARCH ), cols(0), controlsPlayer(0), gm(nullptr), keyImSeeking(0), lastTimeMoved(0), maze(nullptr), movementDelay(300), rows(0), solved(false), startSolved(true), IDDFSDepthLimit(1), IDDFSMaxDepthLimit(1), noKeysLeft(false), hand(RIGHT) {
 	try {
 		//TODO: Allow custom AI movement delays for increased/decreased challenge
 		//setup( nullptr, 0, 0, nullptr );
@@ -33,6 +33,7 @@ AI::~AI() {
 
 void AI::allKeysFound() { //Makes the bot 'forget' that it has visited certain maze cells
 	try {
+		noKeysLeft = true;
 		findSolution();
 		//pathTaken.clear();
 		//cellsVisited.clear();
@@ -172,6 +173,13 @@ void AI::findSolution() {
 				solved = true;
 				break;
 			}
+			case RIGHT_HAND_RULE: 
+			case LEFT_HAND_RULE: {
+				//These two algorithms would work the same as if startSolved were false (i.e. bots dont' know the solution). So, instead of adding needless code, we just set startSolved to false.
+				solved = false;
+				startSolved = false;
+				break;
+			}
 			default: {
 				StringConverter sc;
 				throw( std::wstring( L"Algorithm " ) + sc.toStdWString( algorithm ) + L" not yet added to findSolution()." );
@@ -214,115 +222,34 @@ void AI::findSolutionDFS( irr::core::position2d< uint_fast8_t > currentPosition 
 
 void AI::findSolutionDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > currentPosition ) {
 	try {
-		if( gm->getDebugStatus() ) {
-			//std::wcout << L"findSolutionDFS: currentPosition: " << currentPosition.X << L"x" << currentPosition.Y << L" goal: " << gm->getGoal()->getX() << L"x" << gm->getGoal()->getY() << std::endl;
-		}
-
-		DFSCellsVisited.push_back( currentPosition );
-		partialSolution.push_back( currentPosition );
-		std::vector< direction_t > possibleDirections;
-		if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
-			//bool ignoreLocks = ( numKeysInSolution >= gm->getNumKeys() );
-
-			for( uint_fast8_t k = 0; k < gm->getNumKeys(); ++k ) {
-				if( ( currentPosition.X == gm->getKey( k )->getX() && currentPosition.Y == gm->getKey( k )->getY() ) ) {
-					//DFSCellsVisited.clear(); //Clear places visited so we can continue searching for the next key or the goal
-					//DFSCellsVisited.push_back( currentPosition );
-					solution = partialSolution;
-					//++numKeysInSolution;
-
-					//ignoreLocks = ( numKeysInSolution >= gm->getNumKeys() );
-					keyImSeeking = k;
-					//std::wcout << "Bot is seeking key " << k << std::endl;
-					break;
-				}
-			}
-
-			//See which direction(s) the bot can move
-			if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE && !alreadyVisitedDFS( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
-				possibleDirections.push_back( UP );
-			}
-			if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE && !alreadyVisitedDFS( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
-				possibleDirections.push_back( LEFT );
-			}
-			if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE && !alreadyVisitedDFS( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
-				possibleDirections.push_back( DOWN );
-			}
-			if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE && !alreadyVisitedDFS( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
-				possibleDirections.push_back( RIGHT );
-			}
-
-			/*if( ignoreLocks ) {
-				//See which direction(s) the bot can move
-				if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].hasTopLock() && !alreadyVisitedDFS( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
-					possibleDirections.push_back( UP );
-				}
-				if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].hasLeftLock() && !alreadyVisitedDFS( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
-					possibleDirections.push_back( LEFT );
-				}
-				if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].hasTopLock() && !alreadyVisitedDFS( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
-					possibleDirections.push_back( DOWN );
-				}
-				if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].hasTopLock() && !alreadyVisitedDFS( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
-					possibleDirections.push_back( RIGHT );
-				}
-			}*/
-
-			if( possibleDirections.size() == 0 && partialSolution.size() != 0 ) {
-				partialSolution.pop_back();
-			} else {
-				random_shuffle( possibleDirections.begin(), possibleDirections.end() ); //Ensures that different bots will choose different directions
-				for( auto i = 0; ( i < possibleDirections.size() && solution.empty() ); ++i ) {
-					direction_t choice = possibleDirections.at( i );
-					switch( choice ) {
-						case UP: {
-							core::position2d< uint_fast8_t > newPosition( currentPosition.X, currentPosition.Y - 1 );
-							//partialSolution.push_back( newPosition );
-							findSolutionDFS( partialSolution, newPosition );
-						} break;
-						case DOWN: {
-							core::position2d< uint_fast8_t > newPosition( currentPosition.X, currentPosition.Y + 1 );
-							//partialSolution.push_back( newPosition );
-							findSolutionDFS( partialSolution, newPosition );
-						} break;
-						case LEFT: {
-							core::position2d< uint_fast8_t > newPosition( currentPosition.X - 1, currentPosition.Y );
-							//partialSolution.push_back( newPosition );
-							findSolutionDFS( partialSolution, newPosition );
-						} break;
-						case RIGHT: {
-							core::position2d< uint_fast8_t > newPosition( currentPosition.X + 1, currentPosition.Y );
-							//partialSolution.push_back( newPosition );
-							findSolutionDFS( partialSolution, newPosition );
-						} break;
-					}
-				}
-			}
-
-		} else { //If we're at the goal
-			solution = partialSolution;
-			return;
-		}
+		uint_fast16_t maxDepth = ( uint_fast16_t ) cols * rows;
+		IDDFSCellsVisited.clear();
+		findSolutionIDDFS( partialSolution, currentPosition, maxDepth );
 	} catch( std::exception &e ) {
 		std::wcout << L"Error in AI::findSolutionDFS(): " << e.what() << std::endl;
-	}
-	if( partialSolution.size() > 0 ) {
-		partialSolution.pop_back();
 	}
 }
 
 void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > currentPosition ) {
 	try {
 		std::vector< irr::core::position2d< uint_fast8_t > > partialSolution;
-		for( uint_fast16_t i = 1; solution.size() == 0 && i <= (uint_fast16_t) cols * rows; i++ ) {
-			if( gm->getDebugStatus() ) {
-				std::wcout << L"In IDDFS loop, i=" << i << std::endl;
-			}
+		
+		uint_fast16_t maxDepth = ( uint_fast16_t ) cols * rows;
+		
+		if( noKeysLeft ) {
 			IDDFSCellsVisited.clear();
-			findSolutionIDDFS( partialSolution, currentPosition, i );
+			findSolutionIDDFS( partialSolution, currentPosition, maxDepth );
+		} else {
+			for( uint_fast16_t i = 1; solution.size() == 0 && i <= maxDepth; i++ ) {
+				if( gm->getDebugStatus() ) {
+					std::wcout << L"In IDDFS loop, i=" << i << std::endl;
+				}
+				IDDFSCellsVisited.clear();
+				findSolutionIDDFS( partialSolution, currentPosition, i );
+			}
 		}
 
-		//Reverses the order of the solution, so we don't start and the wrong end
+		//Reverses the order of the solution, so we don't start at the wrong end
 		std::vector< irr::core::position2d< uint_fast8_t > > tempSolution;
 		while( !solution.empty() ) {
 			tempSolution.push_back( solution.back() );
@@ -442,7 +369,7 @@ uint_fast8_t AI::getPlayer() {
 		return controlsPlayer;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::AI(): " << e.what() << std::endl;
-		return 0; //This should never be reached. If it is, good luck to the real player 0.
+		return UINT_FAST8_MAX; //This should never be reached.
 	}
 }
 
@@ -470,55 +397,23 @@ void AI::move() {
 		if( startSolved ) {
 			if( !solved ) {
 				findSolution();
-			}/* else if( gm->getDebugStatus() ) {
-				std::wcout << L"Solution: " << std::endl;
-				StringConverter sc;
-				for( auto rit = solution.rbegin(); !solution.empty() && rit != solution.rend(); ++rit ) {
-					irr::core::position2d< uint_fast8_t > p = *rit;
-					std::wcout << sc.toStdWString( p.X ) << L"x" << sc.toStdWString( p.Y ) << std::endl;
-				}
-			}*/
-
-			/*std::vector< irr::core::position2d< uint_fast8_t > >::size_type currentPlaceInSolution;
-			for( auto i = 0; i < solution.size(); ++i) {
-				if( currentPosition == solution.at( i ) ) {
-					currentPlaceInSolution = i;
-					break;
-				}
-			}*/
-
-			//if( currentPlaceInSolution > 0 ) {//< solution.size() - 1 ) {
+			}
 
 			if( !solution.empty() ) {
 				if( solution.back().X > currentPosition.X ) {
-					if( gm->getDebugStatus() ) {
-						//std::wcout << L"Moving right" << std::endl;
-					}
 					gm->movePlayerOnX( controlsPlayer, 1 );
 				} else if( solution.back().X < currentPosition.X ) {
-					if( gm->getDebugStatus() ) {
-						//std::wcout << L"Moving left" << std::endl;
-					}
 					gm->movePlayerOnX( controlsPlayer, -1 );
 				} else if( solution.back().Y > currentPosition.Y ) {
-					if( gm->getDebugStatus() ) {
-						//std::wcout << L"Moving down" << std::endl;
-					}
 					gm->movePlayerOnY( controlsPlayer, 1 );
 				} else if( solution.back().Y < currentPosition.Y ) {
-					if( gm->getDebugStatus() ) {
-						//std::wcout << L"Moving up" << std::endl;
-					}
 					gm->movePlayerOnY( controlsPlayer, -1 );
-				} else {
 				}
 				solution.pop_back();
 			} else {
 				solved = false;
-				findSolution();
-				//throw( std::wstring( L"Error in AI::move(): Solution is empty, but I'm not at the goal and startSolved is true. Setting solved to false so a solution will be found." ) );
+				startSolved = false;
 			}
-			//}
 
 		} else {
 			//if( algorithm == DEPTH_FIRST_SEARCH ) {
@@ -757,6 +652,96 @@ void AI::move() {
 					}
 					break;
 				}
+				case RIGHT_HAND_RULE: {
+					switch( hand ) {
+						case RIGHT: {
+							if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE ) {
+								gm->movePlayerOnY( controlsPlayer, -1 );
+								hand = DOWN;
+							} else {
+								hand = UP;
+								move();
+							}
+							break;
+						}
+						case UP: {
+							if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE ) {
+								gm->movePlayerOnX( controlsPlayer, -1 );
+								hand = RIGHT;
+							} else {
+								hand = LEFT;
+								move();
+							}
+							break;
+						}
+						case LEFT: {
+							if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE ) {
+								gm->movePlayerOnY( controlsPlayer, 1 );
+								hand = UP;
+							} else {
+								hand = DOWN;
+								move();
+							}
+							break;
+						}
+						case DOWN: {
+							if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE ) {
+								gm->movePlayerOnX( controlsPlayer, 1 );
+								hand = LEFT;
+							} else {
+								hand = RIGHT;
+								move();
+							}
+							break;
+						}
+					}
+					break;
+				}
+				case LEFT_HAND_RULE: {
+					switch( hand ) {
+						case RIGHT: {
+							if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE ) {
+								gm->movePlayerOnY( controlsPlayer, -1 );
+								hand = UP;
+							} else {
+								hand = DOWN;
+								move();
+							}
+							break;
+						}
+						case UP: {
+							if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE ) {
+								gm->movePlayerOnX( controlsPlayer, -1 );
+								hand = LEFT;
+							} else {
+								hand = RIGHT;
+								move();
+							}
+							break;
+						}
+						case LEFT: {
+							if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE ) {
+								gm->movePlayerOnY( controlsPlayer, 1 );
+								hand = DOWN;
+							} else {
+								hand = UP;
+								move();
+							}
+							break;
+						}
+						case DOWN: {
+							if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE ) {
+								gm->movePlayerOnX( controlsPlayer, 1 );
+								hand = RIGHT;
+							} else {
+								hand = LEFT;
+								move();
+							}
+							break;
+						}
+					}
+					break;
+				}
 				default: {
 					std::wcout << L"The current algorithm cannot be used when bots don't know the solution." << std::endl;
 					break;
@@ -770,6 +755,7 @@ void AI::move() {
 
 void AI::reset() {
 	try {
+		hand = RIGHT;
 		lastTimeMoved = 0;
 		solution.clear();
 		solved = false;

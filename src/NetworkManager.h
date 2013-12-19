@@ -37,7 +37,7 @@ class NetworkManager {
 	public:
 		NetworkManager();
 		virtual ~NetworkManager();
-		int setup( bool isServer );
+		bool setup( bool isServer );
 		void setGameManager( GameManager * newGM );
 		bool hasNewPlayerConnected();
 		uint_fast8_t getNewPlayer();
@@ -70,7 +70,7 @@ class NetworkManager {
 		struct sockaddr_storage remoteaddr; // client address
 		struct timeval timeout;
 		void *get_in_addr( struct sockaddr *sa );
-		int sendData( int sockfd, unsigned char *buf, size_t *len );
+		bool sendData( int sockfd, unsigned char *buf, size_t *len );
 		uint_fast8_t receivedData[51 ]; //51 is the maximum possible size of a maze plus "STARTMAZE" and "ENDMAZE"
 
 		#if defined WINDOWS

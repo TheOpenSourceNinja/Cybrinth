@@ -27,7 +27,7 @@ class AI {
 		/** Default destructor */
 		virtual ~AI();
 
-		enum algorithm_t{ DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH };
+		enum algorithm_t{ DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH, RIGHT_HAND_RULE, LEFT_HAND_RULE };
 		void allKeysFound();
 		bool atGoal();
 		bool doneWaiting();
@@ -54,11 +54,13 @@ class AI {
 		uint_fast8_t controlsPlayer;
 		enum direction_t{ UP, DOWN, LEFT, RIGHT };
 		std::vector< irr::core::position2d< uint_fast8_t > > DFSCellsVisited;
+		direction_t hand;
 		std::vector< irr::core::position2d< uint_fast8_t > > IDDFSCellsVisited;
 		uint_fast16_t IDDFSDepthLimit; //For use only when the bots don't know the solution.
 		uint_fast16_t IDDFSMaxDepthLimit; //For use only when the bots don't know the solution.
 		GameManager * gm;
 		uint_fast8_t keyImSeeking;
+		bool noKeysLeft; //the IDDFS algorithm uses this to determine whether it should really deepen or just start with the max depth like DFS.
 		uint_fast32_t lastTimeMoved;
 		MazeCell ** maze;
 		uint_fast16_t movementDelay; //How long to delay between movements

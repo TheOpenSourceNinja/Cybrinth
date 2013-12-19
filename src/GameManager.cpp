@@ -39,14 +39,13 @@
 enum user_event_t { USER_EVENT_WINDOW_RESIZE, USER_EVENT_JOYSTICK_UP, USER_EVENT_JOYSTICK_LEFT, USER_EVENT_JOYSTICK_DOWN, USER_EVENT_JOYSTICK_RIGHT };
 
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
-//TODO: Find or record clock ticking sound for use with various items?
 //TODO: Get multiplayer working online
-//TODO: Improve AI. Two difficulty settings ('already knows the solution' and 'finds the solution as it plays') and any solving algorithms I can think of (depth-first and breadth-first search)
+//TODO: Improve AI. Add any solving algorithms I can think of.
 //TODO: Possible idea: Hide parts of the maze that are inaccessible due to locks.
 //TODO: Possible idea: Hide parts of the maze not seen yet (seen means line-of-sight to any visited cell)
 //TODO: Add shader to simulate old monitor?
 //TODO: Add more backgrounds.
-//TODO: Support images and/or video as backgrounds.
+//TODO: Support video as backgrounds?
 //TODO: Add theme support (theme = (zipped?) set of backgrounds, player images, collectable images)
 
 using namespace irr;
@@ -567,8 +566,6 @@ GameManager::GameManager() {
 
 		if( !isNotNull( device ) ) {
 			throw( std::wstring( L"Cannot create null device. Something is definitely wrong here!" ) );
-		} else if ( debug ) {
-			std::wcout << L"Got the null device" << std::endl;
 		}
 
 		readPrefs();
@@ -920,7 +917,7 @@ uint_fast8_t GameManager::getNumKeys() {
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getNumKeys(): " << e.what() << std::endl;
-		return 0;
+		return UINT_FAST8_MAX;
 	}
 }
 
@@ -1881,8 +1878,10 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			
 			//Pick a random logo and load it
 			auto logoChosen = rand() % logoList.size();
-			std::wcout << L"Logo chosen " << logoChosen;
-			std::wcout << L" " << logoList.at( logoChosen ).wstring() << std::endl;
+			if( debug ) {
+				std::wcout << L"Logo chosen: #" << logoChosen;
+				std::wcout << L" " << logoList.at( logoChosen ).wstring() << std::endl;
+			}
 			io::path logoFilePath = stringConverter.toIrrlichtStringW( logoList.at( logoChosen ).wstring() );
 			logoTexture = driver->getTexture( logoFilePath );
 			if( !isNotNull( logoTexture ) ) {
@@ -1891,8 +1890,6 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			}
 
 			drawLogo();
-			
-			std::wcout << L"logoTexture size: " << logoTexture->getSize().Width << L"x" << logoTexture->getSize().Height << std::endl;
 		} else {
 			std::wcout << L"Could not find any logo images." << std::endl;
 		}
@@ -1980,7 +1977,7 @@ void GameManager::readPrefs() {
 
 								if( preference == possiblePrefs.at( 0 ) ) { //L"bots' solving algorithm"
 									
-									std::vector< std::wstring > possibleChoices = { L"depth-first search", L"iterative deepening depth-first search" };
+									std::vector< std::wstring > possibleChoices = { L"depth-first search", L"iterative deepening depth-first search", L"right hand rule", L"left hand rule" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 									
 									if( choice == possibleChoices.at( 0 ) ) { //DFS
@@ -1993,6 +1990,16 @@ void GameManager::readPrefs() {
 											std::wcout << L"Bots will use Iterative Deepening Depth-First Search" << std::endl;
 										}
 										botAlgorithm = AI::ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH;
+									} else if( choice == possibleChoices.at( 2 ) ) {
+										if( debug ) {
+											std::wcout << L"Bots will use the Right Hand Rule" << std::endl;
+										}
+										botAlgorithm = AI::RIGHT_HAND_RULE;
+									} else if( choice == possibleChoices.at( 3 ) ) {
+										if( debug ) {
+											std::wcout << L"Bots will use the Left Hand Rule" << std::endl;
+										}
+										botAlgorithm = AI::LEFT_HAND_RULE;
 									}
 									
 								} else if( preference == possiblePrefs.at( 1 ) ) { //L"volume"
@@ -2155,33 +2162,19 @@ void GameManager::readPrefs() {
 									}
 
 									if( !device->isDriverSupported( driverType ) ) {
-										std::wcerr << L"Warning: Chosen driver type " << choice << L" is not supported on this system. ";
+										std::wcerr << L"Warning: Chosen driver type " << choice << L" is not supported on this system. Auto-picking a new type.";
 										
-										//TODO: Can we replace this with a for loop?
-										if( device->isDriverSupported( video::EDT_OPENGL ) ) {
-											std::wcerr << L"Trying OpenGL." << std::endl;
-											driverType = video::EDT_OPENGL;
-											choice = L"opengl";
-										} else if( device->isDriverSupported( video::EDT_DIRECT3D9 ) ) {
-											std::wcerr << L"Trying Direct3D 9." << std::endl;
-											driverType = video::EDT_DIRECT3D9;
-											choice = L"direct3d9";
-										} else if( device->isDriverSupported( video::EDT_DIRECT3D8 ) ) {
-											std::wcerr << L"Trying Direct3D 8." << std::endl;
-											driverType = video::EDT_DIRECT3D8;
-											choice = L"direct3d8";
-										} else if( device->isDriverSupported( video::EDT_BURNINGSVIDEO ) ) {
-											std::wcerr << L"Trying Burning's video." << std::endl;
-											driverType = video::EDT_BURNINGSVIDEO;
-											choice = L"burning's video";
-										} else if( device->isDriverSupported( video::EDT_SOFTWARE ) ) {
-											std::wcerr << L"Trying software renderer." << std::endl;
-											driverType = video::EDT_SOFTWARE;
-											choice = L"software";
-										} else {
+										driverType = video::EDT_NULL;
+										//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
+										for( uint_fast8_t i = ( uint_fast8_t ) video::EDT_COUNT; i != ( uint_fast8_t ) video::EDT_NULL; i-- ) {
+											if( device->isDriverSupported( ( video::E_DRIVER_TYPE ) i ) ) {
+												driverType = ( video::E_DRIVER_TYPE ) i;
+												break;
+											}
+										}
+										
+										if( driverType == video::EDT_NULL ) {
 											std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
-											driverType = video::EDT_NULL;
-											choice = L"NULL";
 											debug = true;
 										}
 									}

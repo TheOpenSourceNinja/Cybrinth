@@ -18,10 +18,10 @@
 void *NetworkManager::get_in_addr( struct sockaddr *sa ) {
 	try {
 		if( sa->sa_family == AF_INET ) {
-			return &((( struct sockaddr_in* )sa )->sin_addr );
+			return &( ( ( struct sockaddr_in* ) sa )->sin_addr );
 		}
 
-		return &((( struct sockaddr_in6* )sa )->sin6_addr );
+		return &( ( ( struct sockaddr_in6* ) sa )->sin6_addr );
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::get_in_addr(): " << e.what() << std::endl;
 		return nullptr;
@@ -90,7 +90,7 @@ uint_fast16_t NetworkManager::getPort() {
 	}
 }
 
-int NetworkManager::setup( bool isServer ) {
+bool NetworkManager::setup( bool isServer ) {
 	try {
 		memset( &hints, 0, sizeof hints );
 		hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version, AF_UNSPEC otherwise
@@ -167,10 +167,10 @@ int NetworkManager::setup( bool isServer ) {
 			fdmax = listener;
 		}
 
-		return 0;
+		return true;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::setup(): " << e.what() << std::endl;
-		return -1;
+		return false;
 	}
 }
 
@@ -211,7 +211,7 @@ int NetworkManager::checkForConnections() {
 	}
 }
 
-int NetworkManager::sendData( int sockfd, unsigned char *buf, size_t *len ) {
+bool NetworkManager::sendData( int sockfd, unsigned char *buf, size_t *len ) {
 	try {
 		size_t bytesSent = 0;
 		int bytesLeft = *len;
@@ -231,13 +231,13 @@ int NetworkManager::sendData( int sockfd, unsigned char *buf, size_t *len ) {
 		*len = bytesSent; //Sets the variable pointed to by len to bytesSent, so that the caller can see how many bytes were sent.
 
 		if( n < 0 ) {
-			return -1;
+			return false;
 		} else {
-			return 0;
+			return true;
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::sendData(): " << e.what() << std::endl;
-		return -1;
+		return false;
 	}
 }
 
