@@ -116,7 +116,7 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 	try {
 		switch( keyMap.at( k ).getAction() ) {
 			case KeyMapping::MENU: {
-				showingMenu = true;
+				showingMenu = !showingMenu;
 				return true;
 			}
 			case KeyMapping::SCREENSHOT: {
@@ -1564,17 +1564,15 @@ bool GameManager::OnEvent( const SEvent& event ) {
 								break;
 							}
 						}
-					} else if( showingMenu ) {
+					} else if( showingMenu ) { //We only want certain actions to work if we're showing the menu
 						for( auto k = 0; k < keyMap.size(); ++k ) {
 							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
 								switch( keyMap.at( k ).getAction() ) {
-									case KeyMapping::MENU: {
-										showingMenu = false;
-										return true;
-									}
+									case KeyMapping::MENU:
 									case KeyMapping::SCREENSHOT: {
-										takeScreenShot();
-										return true;
+										if( doEventActions( k, event ) ) {
+											return true;
+										}
 									}
 								}
 								break;
@@ -2548,7 +2546,7 @@ uint_fast8_t GameManager::run() {
 					loadNextSong();
 				}
 
-				if(( !showingLoadingScreen && device->isWindowActive() ) || debug ) {
+				if( ( !showingLoadingScreen && device->isWindowActive() ) || debug ) {
 					//It's the bots' turn to move now.
 					if( !( showingMenu || showingLoadingScreen ) && numBots > 0 ) {
 						for( uint_fast8_t i = 0; i < numBots; ++i ) {
@@ -2614,7 +2612,7 @@ uint_fast8_t GameManager::run() {
 
 					won = ( winners.size() >= numPlayers ); //If all the players are on the winners list, we've won.
 
-				} else {
+				} else if( !device->isWindowActive() ) { //if(( !showingLoadingScreen && device->isWindowActive() ) || debug )
 					showingMenu = true;
 					device->yield();
 				}
