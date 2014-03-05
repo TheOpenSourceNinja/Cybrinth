@@ -3,8 +3,8 @@
 
 //#include "GameManager.h"
 #include "MazeCell.h"
+#include "PreprocessorCommands.h"
 
-#define BOOST_FILESYSTEM_NO_DEPRECATED //Recommended by the Boost filesystem library documentation to prevent us from using functions which will be removed in later versions
 #include <filesystem.hpp>
 
 #include <irrlicht.h>

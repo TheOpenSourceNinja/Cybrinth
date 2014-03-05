@@ -4,6 +4,7 @@
 #include <irrlicht.h>
 #include <string>
 #include "Integers.h"
+#include "PreprocessorCommands.h"
 
 class KeyMapping
 {

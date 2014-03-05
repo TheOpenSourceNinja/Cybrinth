@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 James Dearing.
+ * Copyright © 2012-2014 James Dearing.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -12,24 +12,24 @@
 #ifndef GAMEMANAGER_H
 #define GAMEMANAGER_H
 
-#define BOOST_FILESYSTEM_NO_DEPRECATED //Recommended by the Boost filesystem library documentation to prevent us from using functions which will be removed in later versions
-
 #include "AI.h"
 #include "Collectable.h"
 #include "FontManager.h"
 #include "Goal.h"
 #include "GUIFreetypeFont.h"
 #include "ImageModifier.h"
+#include "Integers.h"
 #include "KeyMapping.h"
 #include "MazeManager.h"
 #include "MenuOption.h"
 #include "NetworkManager.h"
 #include "Player.h"
 #include "PlayerStart.h"
+#include "PreprocessorCommands.h"
 #include "SpellChecker.h"
 #include "StringConverter.h"
+#include "SystemSpecificsManager.h"
 
-#include "Integers.h"
 #include <irrlicht.h>
 #include <SDL_mixer.h>
 #include <string>
@@ -54,6 +54,7 @@ class GameManager : public IEventReceiver {
 		MazeManager* getMazeManager();
 		uint_fast8_t getNumKeys();
 		Player* getPlayer( uint_fast8_t p );
+		PlayerStart* getStart( uint_fast8_t ps );
 
 		void movePlayerOnX( uint_fast8_t p, int_fast8_t direction );
 		void movePlayerOnY( uint_fast8_t p, int_fast8_t direction );
@@ -225,6 +226,8 @@ class GameManager : public IEventReceiver {
 
 		MenuOption saveMaze;
 		SpellChecker spellChecker;
+		
+		SystemSpecificsManager system;
 
 
 		//2D dimensions----------------------------------

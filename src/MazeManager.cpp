@@ -2,7 +2,6 @@
 #include "MazeManager.h"
 #include "GameManager.h"
 
-#define BOOST_FILESYSTEM_NO_DEPRECATED //Recommended by the Boost filesystem library documentation to prevent us from using functions which will be removed in later versions
 #include <filesystem/fstream.hpp>
 #include <iostream>
 
@@ -187,9 +186,11 @@ void MazeManager::makeRandomLevel() {
 		gameManager->drawAll();
 
 		srand( gameManager->randomSeed ); //randomSeed is set either by resetThings() or by loadFromFile()
-		uint_fast8_t tempCols = rand() % 28 + 2;
-		uint_fast8_t tempRows = tempCols + ( rand() % 5 );
-		resizeMaze( tempCols, tempRows );
+		{
+			uint_fast8_t tempCols = rand() % 28 + 2;
+			uint_fast8_t tempRows = tempCols + ( rand() % 5 );
+			resizeMaze( tempCols, tempRows );
+		}
 
 		for( uint_fast8_t x = 0; x < cols; ++x ) {
 			for( uint_fast8_t y = 0; y < rows; ++y ) {
@@ -211,9 +212,6 @@ void MazeManager::makeRandomLevel() {
 		gameManager->goal.setX( rand() % cols );
 		gameManager->goal.setY( rand() % rows );
 		//} while (player.getX() == gameManager->goal.getX() && player.getY() == gameManager->goal.getY());
-
-		gameManager->numLocks = ( rand() % 10 ) % cols;
-		//numLocks = rand() % ( cols * rows ); //Uncomment this for a crazy number of keys!
 
 		recurseRandom( gameManager->goal.getX(), gameManager->goal.getY(), 0, 0 ); //Start recursion from the gameManager->goal; for some reason that makes the mazes harder than if we started recursion from the player's starting point.
 
@@ -271,16 +269,13 @@ void MazeManager::makeRandomLevel() {
 			}
 		}
 
-		if( gameManager->numLocks > deadEndsX.size() ) {
-			gameManager->numLocks = deadEndsX.size();
-		}
+		gameManager->numLocks = ( ( rand() % 10 ) % cols ) % deadEndsX.size();
+		//gameManager->numLocks = rand() % deadEndsX.size();
+		//gameManager->numLocks = rand() % ( cols * rows ); //Uncomment this for a crazy number of keys!
 
 		uint_fast8_t numKeys = gameManager->numLocks;
 
 		//Place keys in dead ends
-		//vector<uint_fast8_t> keyPlaceX;
-		//vector<uint_fast8_t> keyPlaceY;
-
 		for( uint_fast8_t k = 0; k < numKeys; ++k ) {
 			//vector<uint_fast8_t> chosenPlaces;
 
@@ -288,20 +283,23 @@ void MazeManager::makeRandomLevel() {
 				deadEndsX.push_back( gameManager->playerStart.at( 0 ).getX() );
 				deadEndsY.push_back( gameManager->playerStart.at( 0 ).getY() );
 			}
-			//Pick one of the dead ends randomly.
-			uint_fast8_t chosen = rand() % deadEndsX.size();
+			
+			{ //Pick one of the dead ends randomly.
+				uint_fast8_t chosen = rand() % deadEndsX.size();
 
-			//Finally, create a key and put it there.
-			Collectable temp;
-			temp.setX( deadEndsX.at( chosen ) );
-			temp.setY( deadEndsY.at( chosen ) );
-			temp.setType( Collectable::KEY );
-			temp.loadTexture( gameManager->driver );
-			gameManager->stuff.push_back( temp );
+				{ //Finally, create a key and put it there.
+					Collectable temp;
+					temp.setX( deadEndsX.at( chosen ) );
+					temp.setY( deadEndsY.at( chosen ) );
+					temp.setType( Collectable::KEY );
+					temp.loadTexture( gameManager->driver );
+					gameManager->stuff.push_back( temp );
+				}
 
-			//Remove chosen from the list of dead ends so no other keys go there
-			deadEndsX.erase( deadEndsX.begin() + chosen );
-			deadEndsY.erase( deadEndsY.begin() + chosen );
+				//Remove chosen from the list of dead ends so no other keys go there
+				deadEndsX.erase( deadEndsX.begin() + chosen );
+				deadEndsY.erase( deadEndsY.begin() + chosen );
+			}
 		}
 
 		for( uint_fast8_t p = 0; p < gameManager->numPlayers; ++p ) {
@@ -387,13 +385,6 @@ void MazeManager::makeRandomLevel() {
 			maze[ gameManager->playerStart[ p ].getX() ][ gameManager->playerStart[ p ].getY() ].visited = true;
 			maze[ gameManager->playerStart[ p ].getX() ][ gameManager->playerStart[ p ].getY() ].setVisitorColor( gameManager->player[ p ].getColorTwo() );
 		}
-
-		//Set up bots; Not necessary here since the GameManager does this too
-		/*if( gameManager->numBots > 0 ) {
-			for( uint_fast8_t i = 0; i < gameManager->numBots; ++i ) {
-				gameManager->bot[ i ].setup( maze, cols, rows, gameManager );
-			}
-		}*/
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::makeRandomLevel(): " << e.what() << std::endl;
 	}
@@ -512,31 +503,33 @@ void MazeManager::resizeMaze( uint_fast8_t newCols, uint_fast8_t newRows ) {
 			std::wcerr << L"Warning: New maze size smaller than old in some dimension. newCols: " << static_cast<unsigned int>( newCols ) << L" oldCols: " << static_cast<unsigned int>( oldCols ) << L" newRows: " << static_cast<unsigned int>( newRows ) << L" oldRows: " << static_cast<unsigned int>( oldRows ) << std::endl;
 		}
 
-		MazeCell** temp = new MazeCell *[ newCols ];
+		MazeCell** newMaze = new MazeCell *[ newCols ];
 
 		for( uint_fast8_t i = 0 ; i < newCols ; ++i ) {
-			temp[ i ] = new MazeCell[ newRows ];
+			newMaze[ i ] = new MazeCell[ newRows ];
 		}
 
-		uint_fast8_t colsToCopy;
+		{
+			uint_fast8_t colsToCopy;
 
-		if( newCols > oldCols ) {
-			colsToCopy = oldCols;
-		} else {
-			colsToCopy = newCols;
-		}
+			if( newCols > oldCols ) {
+				colsToCopy = oldCols;
+			} else {
+				colsToCopy = newCols;
+			}
 
-		uint_fast8_t rowsToCopy;
+			uint_fast8_t rowsToCopy;
 
-		if( newRows > oldRows ) {
-			rowsToCopy = oldRows;
-		} else {
-			rowsToCopy = newRows;
-		}
+			if( newRows > oldRows ) {
+				rowsToCopy = oldRows;
+			} else {
+				rowsToCopy = newRows;
+			}
 
-		for( uint_fast8_t x = 0; x < colsToCopy; ++x ) {
-			for( uint_fast8_t y = 0; y < rowsToCopy; ++y ) {
-				temp[ x ][ y ] = maze[ x ][ y ];
+			for( uint_fast8_t x = 0; x < colsToCopy; ++x ) {
+				for( uint_fast8_t y = 0; y < rowsToCopy; ++y ) {
+					newMaze[ x ][ y ] = maze[ x ][ y ];
+				}
 			}
 		}
 
@@ -549,7 +542,7 @@ void MazeManager::resizeMaze( uint_fast8_t newCols, uint_fast8_t newRows ) {
 		cols = newCols;
 		rows = newRows;
 
-		maze = temp;
+		maze = newMaze;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::resizeMaze(): " << e.what() << std::endl;
 	}

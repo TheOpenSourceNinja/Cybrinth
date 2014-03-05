@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 James Dearing.
+ * Copyright © 2012-2014 James Dearing.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -69,31 +69,33 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 					if( texture == nullptr ) {
 						//Uncomment the following if using key.h instead of key.c:
 						/*#include "compiled-images/key.h"
-						irr::video::IImage* temp = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( width, height ) );
-						temp->fill( INVISIBLE );
+						{
+							irr::video::IImage* temp = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( width, height ) );
+							temp->fill( INVISIBLE );
 
-						auto* data = header_data;
-						auto topLeftPixel[ 3 ]; //Assume that the top left pixel is supposed to be invisible
-						for( auto y = 0; y < height; ++y ) {
-							for( auto x = 0; x < width; ++x ) {
-								auto pixel[ 3 ];
-								HEADER_PIXEL( data, pixel );
-								if( y == 0 && x == 0 ) {
-									topLeftPixel[ 0 ] = pixel[ 0 ];
-									topLeftPixel[ 1 ] = pixel[ 1 ];
-									topLeftPixel[ 2 ] = pixel[ 2 ];
-								}
+							auto* data = header_data;
+							auto topLeftPixel[ 3 ]; //Assume that the top left pixel is supposed to be invisible
+							for( auto y = 0; y < height; ++y ) {
+								for( auto x = 0; x < width; ++x ) {
+									auto pixel[ 3 ];
+									HEADER_PIXEL( data, pixel );
+									if( y == 0 && x == 0 ) {
+										topLeftPixel[ 0 ] = pixel[ 0 ];
+										topLeftPixel[ 1 ] = pixel[ 1 ];
+										topLeftPixel[ 2 ] = pixel[ 2 ];
+									}
 
-								//std::wcout << "Pixel: " << static_cast< uint8_t >( pixel[ 0 ] ) << L'\t' << static_cast< uint8_t >( pixel[ 1 ] ) << L'\t' <<  static_cast< uint8_t >( pixel[ 2 ] ) << std::endl;
-								if( pixel[ 0 ] == topLeftPixel[ 0 ] && pixel[ 1 ] == topLeftPixel[ 1 ] && pixel[ 2 ] == topLeftPixel[ 2 ] ) {
-									temp->setPixel( x, y, irr::video::SColor( 0, 0, 0, 0 ) );
-								} else {
-									temp->setPixel( x, y, irr::video::SColor( 255, pixel[ 0 ], pixel[ 1 ], pixel[ 2 ] ) );
+									//std::wcout << "Pixel: " << static_cast< uint8_t >( pixel[ 0 ] ) << L'\t' << static_cast< uint8_t >( pixel[ 1 ] ) << L'\t' <<  static_cast< uint8_t >( pixel[ 2 ] ) << std::endl;
+									if( pixel[ 0 ] == topLeftPixel[ 0 ] && pixel[ 1 ] == topLeftPixel[ 1 ] && pixel[ 2 ] == topLeftPixel[ 2 ] ) {
+										temp->setPixel( x, y, irr::video::SColor( 0, 0, 0, 0 ) );
+									} else {
+										temp->setPixel( x, y, irr::video::SColor( 255, pixel[ 0 ], pixel[ 1 ], pixel[ 2 ] ) );
+									}
 								}
 							}
-						}
 
-						texture = imageToTexture( driver, temp, "key" );*/
+							texture = imageToTexture( driver, temp, "key" );
+						}*/
 						
 						//Key.c:
 						#include "compiled-images/key.c"
@@ -112,30 +114,32 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 								format = irr::video::ECF_A8R8G8B8;
 							}
 						}
-						//The following line works but produces the wrong colors, since GIMP outputs in RGBA and Irrlicht apparently expects ARGB
-						//irr::video::IImage* temp = driver->createImageFromData( format, irr::core::dimension2d< irr::u32 >( gimp_image.width, gimp_image.height ), const_cast< unsigned char* >( gimp_image.pixel_data ), false, false );
 						
-						irr::video::IImage* temp = driver->createImage( format, irr::core::dimension2d< irr::u32 >( gimp_image.width, gimp_image.height ) );
-						
-						for( auto y = 0; y < gimp_image.height; ++y ) {
-							for( auto x = 0; x < gimp_image.width; ++x ) {
-								char pixel[ 4 ];
-								pixel[ 0 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 0 ]; //Red
-								pixel[ 1 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 1 ]; //Green
-								pixel[ 2 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 2 ]; //Blue
-								
-								//Alpha
-								if( gimp_image.bytes_per_pixel == 4 ) {
-									pixel[ 3 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 3 ];
-								} else {
-									pixel[ 3 ] = 255;
+						{ //The following line works but produces the wrong colors, since GIMP outputs in RGBA and Irrlicht apparently expects ARGB
+							//irr::video::IImage* temp = driver->createImageFromData( format, irr::core::dimension2d< irr::u32 >( gimp_image.width, gimp_image.height ), const_cast< unsigned char* >( gimp_image.pixel_data ), false, false );
+							
+							irr::video::IImage* temp = driver->createImage( format, irr::core::dimension2d< irr::u32 >( gimp_image.width, gimp_image.height ) );
+							
+							for( auto y = 0; y < gimp_image.height; ++y ) {
+								for( auto x = 0; x < gimp_image.width; ++x ) {
+									char pixel[ 4 ];
+									pixel[ 0 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 0 ]; //Red
+									pixel[ 1 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 1 ]; //Green
+									pixel[ 2 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 2 ]; //Blue
+									
+									//Alpha
+									if( gimp_image.bytes_per_pixel == 4 ) {
+										pixel[ 3 ] = gimp_image.pixel_data[ ( y * gimp_image.width * gimp_image.bytes_per_pixel ) + ( x * gimp_image.bytes_per_pixel ) + 3 ];
+									} else {
+										pixel[ 3 ] = 255;
+									}
+									
+									temp->setPixel( x, y, irr::video::SColor( pixel[ 3 ], pixel[ 0 ], pixel[ 1 ], pixel[ 2 ] ) );
 								}
-								
-								temp->setPixel( x, y, irr::video::SColor( pixel[ 3 ], pixel[ 0 ], pixel[ 1 ], pixel[ 2 ] ) );
 							}
+							
+							texture = resizer.imageToTexture( driver, temp, "key" );
 						}
-						
-						texture = resizer.imageToTexture( driver, temp, "key" );
 					}
 
 					break;

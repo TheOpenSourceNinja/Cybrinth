@@ -9,24 +9,25 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef PLAYERSTART_H
-#define PLAYERSTART_H
+#ifndef SYSTEMSPECIFICSMANAGER_H
+#define SYSTEMSPECIFICSMANAGER_H
 
-#include "Object.h"
+#include <filesystem.hpp>
+#include <vector>
+
 #include "PreprocessorCommands.h"
+#include "StringConverter.h"
 
-#include <irrlicht.h>
-
-class PlayerStart : public Object {
+class SystemSpecificsManager
+{
 	public:
-		PlayerStart();
-		virtual ~PlayerStart();
-		void reset();
-		void loadTexture( irr::video::IVideoDriver* driver );
-		void loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t size );
-		void draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height );
+		SystemSpecificsManager();
+		virtual ~SystemSpecificsManager();
+		std::vector< boost::filesystem::path > getFontFolders();
 	protected:
+		std::wstring getEnvironmentVariable( std::string name );
 	private:
+		StringConverter sc;
 };
 
-#endif // PLAYERSTART_H
+#endif // SYSTEMSPECIFICSMANAGER_H

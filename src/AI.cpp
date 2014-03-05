@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 James Dearing.
+ * Copyright © 2012-2014 James Dearing.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -15,10 +15,10 @@
 #include "Player.h"
 #include "StringConverter.h"
 
-AI::AI() : algorithm( DEPTH_FIRST_SEARCH ), cols(0), controlsPlayer(0), gm(nullptr), keyImSeeking(0), lastTimeMoved(0), maze(nullptr), movementDelay(300), rows(0), solved(false), startSolved(true), IDDFSDepthLimit(1), IDDFSMaxDepthLimit(1), noKeysLeft(false), hand(RIGHT) {
+AI::AI() : controlsPlayer(0), movementDelay(300) {
 	try {
 		//TODO: Allow custom AI movement delays for increased/decreased challenge
-		//setup( nullptr, 0, 0, nullptr );
+		setup( nullptr, 0, 0, nullptr, false, DEPTH_FIRST_SEARCH ); //setup( pointer to the maze, number of columns, number of rows, pointer to GameManager, whether to start solved, and the algorithm to use )
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::AI(): " << e.what() << std::endl;
 	}
@@ -204,15 +204,16 @@ void AI::findSolutionDFS( irr::core::position2d< uint_fast8_t > currentPosition 
 		std::vector< irr::core::position2d< uint_fast8_t > > partialSolution;
 		findSolutionDFS( partialSolution, currentPosition );
 
-		//Reverses the order of the solution, so we don't start and the wrong end
-		std::vector< irr::core::position2d< uint_fast8_t > > tempSolution;
-		while( !solution.empty() ) {
-			tempSolution.push_back( solution.back() );
-			solution.pop_back();
-		}
-		while( !tempSolution.empty() ) {
-			solution.insert( solution.begin(), tempSolution.back() );
-			tempSolution.pop_back();
+		{ //Reverses the order of the solution, so we don't start at the wrong end
+			std::vector< irr::core::position2d< uint_fast8_t > > tempSolution;
+			while( !solution.empty() ) {
+				tempSolution.push_back( solution.back() );
+				solution.pop_back();
+			}
+			while( !tempSolution.empty() ) {
+				solution.insert( solution.begin(), tempSolution.back() );
+				tempSolution.pop_back();
+			}
 		}
 		solution.push_back( currentPosition );
 	} catch( std::exception &e ) {
@@ -249,15 +250,16 @@ void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > currentPositio
 			}
 		}
 
-		//Reverses the order of the solution, so we don't start at the wrong end
-		std::vector< irr::core::position2d< uint_fast8_t > > tempSolution;
-		while( !solution.empty() ) {
-			tempSolution.push_back( solution.back() );
-			solution.pop_back();
-		}
-		while( !tempSolution.empty() ) {
-			solution.insert( solution.begin(), tempSolution.back() );
-			tempSolution.pop_back();
+		{ //Reverses the order of the solution, so we don't start at the wrong end
+			std::vector< irr::core::position2d< uint_fast8_t > > tempSolution;
+			while( !solution.empty() ) {
+				tempSolution.push_back( solution.back() );
+				solution.pop_back();
+			}
+			while( !tempSolution.empty() ) {
+				solution.insert( solution.begin(), tempSolution.back() );
+				tempSolution.pop_back();
+			}
 		}
 		solution.push_back( currentPosition );
 	} catch( std::exception &e ) {
@@ -413,10 +415,12 @@ void AI::move() {
 			} else {
 				solved = false;
 				startSolved = false;
+				std::wcout << L"Could not find a solution" << std::endl;
+				move();
 			}
 
 		} else {
-			//if( algorithm == DEPTH_FIRST_SEARCH ) {
+
 			switch( algorithm ) {
 				case DEPTH_FIRST_SEARCH: {
 					core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
@@ -531,16 +535,11 @@ void AI::move() {
 				}
 				case ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH: {
 					
-					/*if( IDDFSDepthLimit == 0 && pathTaken.size() > 0 ) {
-						IDDFSMaxDepthLimit += 1;
-						IDDFSDepthLimit = IDDFSMaxDepthLimit;
-					} else if( IDDFSDepthLimit > 0 ) {
-						IDDFSDepthLimit -= 1;
-					}*/
-					
 					core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 					
-					if( pathTaken.size() == 0 ) { //Ensures that the player's start position is marked as visited
+					if( pathTaken.empty() ) {//currentPosition.X == gm->getStart( controlsPlayer )->getX() && currentPosition.Y == gm->getStart( controlsPlayer )->getY() ) {
+						IDDFSDepthLimit += 1;
+						cellsVisited.clear();
 						pathTaken.push_back( currentPosition );
 					}
 					
@@ -550,22 +549,6 @@ void AI::move() {
 					
 					std::vector< direction_t > possibleDirections;
 					if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
-
-						//Check for locks
-						/*if( maze[ currentPosition.X ][ currentPosition.Y ].hasLock() ) {
-							pathsToLockedCells.push_back( std::vector< core::position2d< uint_fast8_t > >() );
-							pathsToLockedCells.back().push_back( currentPosition );
-						}
-						if( currentPosition.X < ( cols - 1 ) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].hasLeftLock() ) {
-							pathsToLockedCells.push_back( std::vector< core::position2d< uint_fast8_t > >() );
-							pathsToLockedCells.back().push_back( currentPosition );
-							pathsToLockedCells.back().push_back( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) );
-						}
-						if( currentPosition.Y < ( rows - 1 ) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].hasTopLock() ) {
-							pathsToLockedCells.push_back( std::vector< core::position2d< uint_fast8_t > >() );
-							pathsToLockedCells.back().push_back( currentPosition );
-							pathsToLockedCells.back().push_back( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) );
-						}*/
 
 						//See which direction(s) the bot can move
 						if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
@@ -582,19 +565,15 @@ void AI::move() {
 						}
 					}
 					
-					if( pathTaken.size() >= IDDFSDepthLimit ) {
+					if( pathTaken.size() == IDDFSDepthLimit ) {
 						possibleDirections.clear();
 					}
 
 					//If we can't go anywhere new, go back to previous position
-					if( possibleDirections.size() == 0 && pathTaken.size() > 1 && !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
+					if( possibleDirections.empty() && !pathTaken.empty() && !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
 						pathTaken.pop_back();
 						core::position2d< uint_fast8_t > oldPosition = pathTaken.back();
-						/*for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
-							if( pathsToLockedCells.at( o ).back() != oldPosition ) {
-								pathsToLockedCells.at( o ).push_back( oldPosition );
-							}
-						}*/
+
 						if( oldPosition.X < currentPosition.X ) {
 							gm->movePlayerOnX( controlsPlayer, -1 );
 						} else if( oldPosition.X > currentPosition.X ) {
@@ -604,48 +583,28 @@ void AI::move() {
 						} else { //if( oldPosition.Y > currentPosition.Y ) {
 							gm->movePlayerOnY( controlsPlayer, 1 );
 						}
-					} else if ( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) { //Go to next position
-						//uint_fast8_t choiceNum = rand() % possibleDirections.size();
-						direction_t choice = possibleDirections.at( rand() % possibleDirections.size() );
+					} else if ( !possibleDirections.empty() && !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) { //Go to next position
+						uint_fast8_t choiceNum = 0;//rand() % possibleDirections.size();
+						direction_t choice = possibleDirections.at( choiceNum );
 						switch( choice ) {
 							case UP: {
 								core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y - 1 );
 								pathTaken.push_back( position );
-								for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
-									//for( std::vector< core::dimension2d< uint_fast8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
-										pathsToLockedCells.at( o ).push_back( position );
-									//}
-								}
 								gm->movePlayerOnY( controlsPlayer, -1 );
 							} break;
 							case DOWN: {
 								core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y + 1 );
 								pathTaken.push_back( position );
-								for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
-									//for( std::vector< core::dimension2d< uint_fast8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
-										pathsToLockedCells.at( o ).push_back( position );
-									//}
-								}
 								gm->movePlayerOnY( controlsPlayer, 1 );
 							} break;
 							case LEFT: {
 								core::position2d< uint_fast8_t > position( currentPosition.X - 1, currentPosition.Y );
 								pathTaken.push_back( position );
-								for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
-									//for( std::vector< core::dimension2d< uint_fast8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
-										pathsToLockedCells.at( o ).push_back( position );
-									//}
-								}
 								gm->movePlayerOnX( controlsPlayer, -1 );
 							} break;
 							case RIGHT: {
 								core::position2d< uint_fast8_t > position( currentPosition.X + 1, currentPosition.Y );
 								pathTaken.push_back( position );
-								for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
-									//for( std::vector< core::dimension2d< uint_fast8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
-										pathsToLockedCells.at( o ).push_back( position );
-									//}
-								}
 								gm->movePlayerOnX( controlsPlayer, 1 );
 							} break;
 						}
@@ -755,11 +714,15 @@ void AI::move() {
 
 void AI::reset() {
 	try {
+		noKeysLeft = false;
+		keyImSeeking = 0;
+		IDDFSDepthLimit = 1;
 		hand = RIGHT;
 		lastTimeMoved = 0;
 		solution.clear();
 		solved = false;
 		DFSCellsVisited.clear();
+		IDDFSCellsVisited.clear();
 		for( auto i = 0; i < pathsToLockedCells.size(); ++i ) {
 			pathsToLockedCells.at( i ).clear();
 		}

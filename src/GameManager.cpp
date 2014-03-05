@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 James Dearing.
+ * Copyright © 2012-2014 James Dearing.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it
@@ -16,8 +16,6 @@
  * License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define BOOST_FILESYSTEM_NO_DEPRECATED //Recommended by the Boost filesystem library documentation to prevent us from using functions which will be removed in later versions
-
 #include "GameManager.h"
 #include <filesystem/fstream.hpp>
 #include <algorithm/string.hpp>
@@ -29,10 +27,7 @@
 #if defined WINDOWS //Networking stuff
 #include <winsock>
 #elif defined LINUX
-#include <sys/socket>
-#include <netinet/in>
-#include <arpa/inet>
-#include <netdb>
+//don't know what to include here if anything
 #endif //What about other operating systems? I don't know what to include for BSD etc.
 
 //Custom user events for Irrlicht
@@ -259,122 +254,155 @@ void GameManager::drawAll() {
 
 			uint_fast32_t spaceBetween = windowSize.Height / 30;
 			uint_fast32_t textY = spaceBetween;
+			core::dimension2d< u32 > tempDimensions;
 
-			time_t currentTime = time( nullptr );
-			wchar_t clockTime[9 ];
-			wcsftime( clockTime, 9, L"%H:%M:%S", localtime( &currentTime ) );
-			core::dimension2d< u32 > tempDimensions = clockFont->getDimension( core::stringw( clockTime ).c_str() );
-			core::rect< s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-			clockFont->draw( clockTime, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
-
-			core::stringw timeLabel( L"Time:" );
-			textY += tempDimensions.Height;
-			tempDimensions = textFont->getDimension( timeLabel.c_str() );
-			tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-			textFont->draw( L"Time:", tempRectangle, YELLOW, true, true, &tempRectangle );
-			core::stringw timerStr( "" );
-			timerStr += ( timer->getTime() / 1000 );
-			timerStr += L" seconds";
-			textY += tempDimensions.Height;
-			tempDimensions = textFont->getDimension( timerStr.c_str() );
-			tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-			textFont->draw( timerStr, tempRectangle, YELLOW, true, true, &tempRectangle );
-
-			core::stringw keysFoundStr( L"Keys found:" );
-			textY += tempDimensions.Height;
-			tempDimensions = textFont->getDimension( keysFoundStr.c_str() );
-			tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-			textFont->draw( keysFoundStr, tempRectangle, YELLOW, true, true, &tempRectangle );
-
-			core::stringw keyStr;
-			keyStr += numKeysFound;
-			keyStr += L"/";
-			keyStr += numLocks;
-			textY += tempDimensions.Height;
-			tempDimensions = textFont->getDimension( keyStr.c_str() );
-			tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-			textFont->draw( keyStr, tempRectangle, YELLOW, true, true, &tempRectangle );
-
-			core::stringw seedLabel( L"Random seed:" );
-			textY += tempDimensions.Height;
-			tempDimensions = textFont->getDimension( seedLabel.c_str() );
-			tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-			textFont->draw( seedLabel, tempRectangle, YELLOW, true, true, &tempRectangle );
-
-			core::stringw seedStr( randomSeed );
-			textY += tempDimensions.Height;
-			tempDimensions = textFont->getDimension( seedStr.c_str() );
-			tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-			textFont->draw( seedStr, tempRectangle, YELLOW, true, true, &tempRectangle );
-
-			core::stringw headfor( L"Head for" );
-			textY += tempDimensions.Height;
-			tempDimensions = textFont->getDimension( headfor.c_str() );
-
-			if( textY < (( windowSize.Height / 2 ) - tempDimensions.Height ) ) {
-				textY = (( windowSize.Height / 2 ) - tempDimensions.Height );
+			{
+				time_t currentTime = time( nullptr );
+				wchar_t clockTime[ 9 ];
+				wcsftime( clockTime, 9, L"%H:%M:%S", localtime( &currentTime ) );
+				tempDimensions = clockFont->getDimension( core::stringw( clockTime ).c_str() );
+				core::rect< s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				clockFont->draw( clockTime, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
+			}
+			
+			{
+				core::stringw timeLabel( L"Time:" );
+				textY += tempDimensions.Height;
+				tempDimensions = textFont->getDimension( timeLabel.c_str() );
+				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				textFont->draw( L"Time:", tempRectangle, YELLOW, true, true, &tempRectangle );
+			}
+			
+			{
+				core::stringw timerStr( "" );
+				timerStr += ( timer->getTime() / 1000 );
+				timerStr += L" seconds";
+				textY += tempDimensions.Height;
+				tempDimensions = textFont->getDimension( timerStr.c_str() );
+				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				textFont->draw( timerStr, tempRectangle, YELLOW, true, true, &tempRectangle );
+			}
+			
+			{
+				core::stringw keysFoundStr( L"Keys found:" );
+				textY += tempDimensions.Height;
+				tempDimensions = textFont->getDimension( keysFoundStr.c_str() );
+				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				textFont->draw( keysFoundStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
 
-			if( numKeysFound >= numLocks ) {
-				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( headfor, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
+			{
+				core::stringw keyStr;
+				keyStr += numKeysFound;
+				keyStr += L"/";
+				keyStr += numLocks;
+				textY += tempDimensions.Height;
+				tempDimensions = textFont->getDimension( keyStr.c_str() );
+				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				textFont->draw( keyStr, tempRectangle, YELLOW, true, true, &tempRectangle );
+			}
+			
+			{
+				core::stringw seedLabel( L"Random seed:" );
+				textY += tempDimensions.Height;
+				tempDimensions = textFont->getDimension( seedLabel.c_str() );
+				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				textFont->draw( seedLabel, tempRectangle, YELLOW, true, true, &tempRectangle );
+			}
+			
+			{
+				core::stringw seedStr( randomSeed );
+				textY += tempDimensions.Height;
+				tempDimensions = textFont->getDimension( seedStr.c_str() );
+				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				textFont->draw( seedStr, tempRectangle, YELLOW, true, true, &tempRectangle );
+			}
+			
+			{
+				core::stringw headfor( L"Head for" );
+				tempDimensions = textFont->getDimension( headfor.c_str() );
+				textY += tempDimensions.Height;
+				if( textY < (( windowSize.Height / 2 ) - tempDimensions.Height ) ) {
+					textY = (( windowSize.Height / 2 ) - tempDimensions.Height );
+				}
+				if( numKeysFound >= numLocks ) {
+					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					textFont->draw( headfor, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
+				}
 			}
 
-			core::stringw theexit( L"the exit!" );
-			textY += tempDimensions.Height;
-			tempDimensions = textFont->getDimension( theexit.c_str() );
-
-			if( numKeysFound >= numLocks ) {
-				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( theexit, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
+			{
+				core::stringw theexit( L"the exit!" );
+				tempDimensions = textFont->getDimension( theexit.c_str() );
+				textY += tempDimensions.Height;
+				if( numKeysFound >= numLocks ) {
+					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					textFont->draw( theexit, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
+				}
 			}
 
 			if( playMusic ) {
-				core::stringw nowplaying( L"Now playing:" );
-				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( nowplaying.c_str() );
-				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( nowplaying, tempRectangle, YELLOW, true, true, &tempRectangle );
-
-				textY += tempDimensions.Height;
-				tempDimensions = musicTagFont->getDimension( musicTitle.c_str() );
-				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				musicTagFont->draw( musicTitle, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
-
-				core::stringw by( L"by" );
-				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( by.c_str() );
-				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( by, tempRectangle, YELLOW, true, true, &tempRectangle );
-
-				textY += tempDimensions.Height;
-				tempDimensions = musicTagFont->getDimension( musicArtist.c_str() );
-				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				musicTagFont->draw( musicArtist, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
-
-				core::stringw fromalbum( L"from album" );
-				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( fromalbum.c_str() );
-				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( fromalbum, tempRectangle, YELLOW, true, true, &tempRectangle );
-
-				textY += tempDimensions.Height;
-				tempDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
-				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				musicTagFont->draw( musicAlbum, tempRectangle, LIGHTGRAY, true, true, &tempRectangle );
-
-				core::stringw volume( L"Volume:" );
-				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( volume.c_str() );
-				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( volume, tempRectangle, YELLOW, true, true, &tempRectangle );
-
-				core::stringw volumeNumber( musicVolume );
-				volumeNumber.append( L"%" );
-				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( volumeNumber.c_str() );
-				tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( volumeNumber, tempRectangle, LIGHTRED, true, true, &tempRectangle );
+				{
+					core::stringw nowplaying( L"Now playing:" );
+					textY += tempDimensions.Height;
+					tempDimensions = textFont->getDimension( nowplaying.c_str() );
+					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					textFont->draw( nowplaying, tempRectangle, YELLOW, true, true, &tempRectangle );
+				}
+				
+				{
+					textY += tempDimensions.Height;
+					tempDimensions = musicTagFont->getDimension( musicTitle.c_str() );
+					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					musicTagFont->draw( musicTitle, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
+				}
+				
+				{
+					core::stringw by( L"by" );
+					textY += tempDimensions.Height;
+					tempDimensions = textFont->getDimension( by.c_str() );
+					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					textFont->draw( by, tempRectangle, YELLOW, true, true, &tempRectangle );
+				}
+				
+				{
+					textY += tempDimensions.Height;
+					tempDimensions = musicTagFont->getDimension( musicArtist.c_str() );
+					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					musicTagFont->draw( musicArtist, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
+				}
+				
+				{
+					core::stringw fromalbum( L"from album" );
+					textY += tempDimensions.Height;
+					tempDimensions = textFont->getDimension( fromalbum.c_str() );
+					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					textFont->draw( fromalbum, tempRectangle, YELLOW, true, true, &tempRectangle );
+				}
+				
+				{
+					textY += tempDimensions.Height;
+					tempDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
+					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					musicTagFont->draw( musicAlbum, tempRectangle, LIGHTGRAY, true, true, &tempRectangle );
+				}
+				
+				{
+					core::stringw volume( L"Volume:" );
+					textY += tempDimensions.Height;
+					tempDimensions = textFont->getDimension( volume.c_str() );
+					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					textFont->draw( volume, tempRectangle, YELLOW, true, true, &tempRectangle );
+				}
+				
+				{
+					core::stringw volumeNumber( musicVolume );
+					volumeNumber.append( L"%" );
+					textY += tempDimensions.Height;
+					tempDimensions = textFont->getDimension( volumeNumber.c_str() );
+					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					textFont->draw( volumeNumber, tempRectangle, LIGHTRED, true, true, &tempRectangle );
+				}
 			}
 
 			gui->drawAll();
@@ -431,34 +459,52 @@ void GameManager::drawLoadingScreen() {
 			if( !isNotNull( textFont ) ) {
 				textFont = gui->getBuiltInFont();
 			}
+			if( !isNotNull( statsFont ) ) {
+				statsFont = gui->getBuiltInFont();
+			}
 
 			core::dimension2d< unsigned int > loadingDimensions = loadingFont->getDimension( loading.c_str() );
 			int_fast16_t textY = 0;
-			int_fast16_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
-			core::rect< int > tempRectangle(textX, textY, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + textY );
-			loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
-
+			{
+				int_fast16_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
+				core::rect< int > tempRectangle(textX, textY, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + textY );
+				loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
+			}
 
 			if( proTips.size() > 0 ) {
 				if( !isNotNull( tipFont ) ) {
 					tipFont = gui->getBuiltInFont();
 				}
-
-				textY = loadingDimensions.Height + textY + 1;
-				core::dimension2d< unsigned int > proTipPrefixDimensions = tipFont->getDimension( proTipPrefix.c_str() );
-				core::dimension2d< unsigned int > proTipDimensions = tipFont->getDimension( proTips.at( currentProTip ).c_str() );
-				textX = ( windowSize.Width / 2 ) - ( ( proTipPrefixDimensions.Width + proTipDimensions.Width ) / 2 );
-				tempRectangle = core::rect< int >( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
-				tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
-
-				textX += proTipPrefixDimensions.Width;
-				tempRectangle = core::rect< int >( textX, textY, proTipDimensions.Width + textX, proTipDimensions.Height + textY );
-				tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
-				textY += std::max( proTipDimensions.Height, proTipPrefixDimensions.Height );
+				
+				unsigned int proTipHeight = 0;
+				
+				{
+					textY += loadingDimensions.Height + 1;
+					int_fast16_t textX = 0;
+					core::dimension2d< unsigned int > proTipPrefixDimensions = tipFont->getDimension( proTipPrefix.c_str() );
+					core::dimension2d< unsigned int > proTipDimensions = tipFont->getDimension( proTips.at( currentProTip ).c_str() );
+					proTipHeight = std::max( proTipDimensions.Height, proTipPrefixDimensions.Height );
+					
+					{
+						core::rect< int > tempRectangle = core::rect< int >( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
+						tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
+					}
+					
+					{
+						core::rect< int > tempRectangle = core::rect< int >( textX + proTipPrefixDimensions.Width, textY, proTipDimensions.Width + textX + proTipPrefixDimensions.Width, proTipDimensions.Height + textY );
+						tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
+					}
+					
+					textY += proTipHeight;
+				}
 			}
 			
-			core::dimension2d< unsigned int > tempDimensions = textFont->getDimension( L"Player stats" );
-			//tempRectangle = core::rect< it >( textX, textY )
+			{
+				core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stats.c_str() );
+				int_fast16_t textX = 0;
+				core::rect< int > tempRectangle = core::rect< int >( textX, textY, tempDimensions.Width + textX, tempDimensions.Height + textY );
+				statsFont->draw( stats, tempRectangle, WHITE, true, true, &tempRectangle );
+			}
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::drawLoadingScreen(): " << e.what() << std::endl;
@@ -555,9 +601,31 @@ GameManager::GameManager() {
 
 		fontFile = "";
 		boost::filesystem::recursive_directory_iterator end;
-		for( boost::filesystem::recursive_directory_iterator i( boost::filesystem::current_path() ); i != end; ++i ) {
-			if( fontManager.canLoadFont( i->path() ) ) {
-				fontFile = i->path().c_str();
+		std::vector< boost::filesystem::path > fontFolders = system.getFontFolders();
+		
+		if( debug ) {
+			std::wcout << L"fontFolders.size(): " << fontFolders.size() << std::endl;
+		}
+		
+		//for( std::vector< boost::filesystem::path >::iterator o = fontFolders.begin(); o != fontFolders.end(); o++ ) {
+		for( std::vector< boost::filesystem::path >::size_type o = 0; o < fontFolders.size(); o++ ) {
+			//for( boost::filesystem::recursive_directory_iterator i( *o ); i != end; ++i ) {
+			if( debug ) {
+				std::wcout << L"Looking for fonts in folder " << fontFolders.at( o ) << std::endl;
+			}
+			for( boost::filesystem::recursive_directory_iterator i( fontFolders.at( o ) ); i != end; ++i ) {
+				if( debug ) {
+					std::wcout << L"Trying to load " << i->path() << L" as a font." << std::endl;
+				}
+				if( fontManager.canLoadFont( i->path() ) ) {
+					if( debug ) {
+						std::wcout << L"SUCCESS: " << i->path() << L" is a loadable font." << std::endl;
+					}
+					fontFile = i->path().c_str();
+					break;
+				}
+			}
+			if( fontFile != "" ) { //We've found a loadable file
 				break;
 			}
 		}
@@ -944,6 +1012,21 @@ Player* GameManager::getPlayer( uint_fast8_t p ) {
 }
 
 /**
+ * Lets other objects get a pointer to the player start objects.
+ * Arguments:
+ * --- uint_fast8_t ps: The desired player start
+ * Returns: A pointer to the desired player start object if it exists, nullptr otherwise.
+ */
+PlayerStart* GameManager::getStart( uint_fast8_t ps ) {
+	try {
+		return &playerStart.at( ps );
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in GameManager::getStart(): " << e.what() << std::endl;
+		return nullptr;
+	}
+}
+
+/**
  * Checks whether a pointer is equal to any of the values likely to represent null.
  * Arguments:
  * --- void* ptr: Some pointer.
@@ -965,107 +1048,171 @@ void GameManager::loadFonts() {
 		//These were split off into separate functions because they are needed more often than loadFonts()
 		loadTipFont();
 		loadMusicFont();
-		if( debug ) {
-			std::wcout << L"Returned from loadMusicFont" << std::endl;
+		
+		{ //Load loadingFont
+			core::dimension2d< uint_fast32_t > fontDimensions;
+			uint_fast32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
+
+			if( fontFile != "" ) {
+				do { //Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
+					loadingFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+					if( isNotNull( loadingFont ) ) {
+						fontDimensions = loadingFont->getDimension( loading.c_str() );
+						size -= 2;
+					}
+				} while( isNotNull( loadingFont ) && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+
+				size += 3;
+
+				do {
+					loadingFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+					if( isNotNull( loadingFont ) ) {
+						fontDimensions = loadingFont->getDimension( loading.c_str() );
+						size -= 1;
+					}
+				} while( isNotNull( loadingFont ) && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+			}
+
+			if( fontFile == "" || !isNotNull( loadingFont ) ) {
+				loadingFont = gui->getBuiltInFont();
+			}
+
+			if( debug ) {
+				std::wcout << L"loadingFont is loaded" << std::endl;
+			}
+		}
+		
+		
+		{ //load textFont
+			core::dimension2d< uint_fast32_t > fontDimensions;
+			if( fontFile != "" ) {
+				uint_fast32_t size = ( windowSize.Width / sideDisplaySizeDenominator ) / 6; //found through experimentation, adjust it however you like and see how many times the font gets loaded
+
+				do {
+					textFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+
+					if( isNotNull( textFont ) ) {
+						if( debug ) {
+							std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
+						}
+						fontDimensions = textFont->getDimension( L"Random seed: " );
+						if( debug ) {
+							std::wcout << L"fontDimensions set to " << fontDimensions.Width << L"x" << fontDimensions.Height << std::endl;
+						}
+						size -= 2;
+					}
+				} while( isNotNull( textFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
+
+				size += 3;
+
+				do {
+					textFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+
+					if( isNotNull( textFont ) ) {
+						if( debug ) {
+							std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
+						}
+						fontDimensions = textFont->getDimension( L"Random seed: " );
+						if( debug ) {
+							std::wcout << L"fontDimensions set to " << fontDimensions.Width << L"x" << fontDimensions.Height << std::endl;
+						}
+						size -= 1;
+					}
+				} while( isNotNull( textFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
+			}
+
+			if( fontFile == "" || !isNotNull( textFont ) ) {
+				textFont = gui->getBuiltInFont();
+			}
+
+			if( debug ) {
+				std::wcout << L"textFont is loaded" << std::endl;
+			}
 		}
 
-		core::dimension2d< uint_fast32_t > fontDimensions;
-		uint_fast32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
 
-		do { //Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
-			loadingFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( isNotNull( loadingFont ) ) {
-				fontDimensions = loadingFont->getDimension( loading.c_str() );
-				size -= 2;
+		{ //Load clockFont
+			core::dimension2d< uint_fast32_t > fontDimensions;
+			if( fontFile != "" ) {
+				uint_fast32_t size = ( windowSize.Width / sideDisplaySizeDenominator );
+
+				do {
+					clockFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+					if( isNotNull( clockFont ) ) {
+						fontDimensions = clockFont->getDimension( L"00:00:00" );
+						size -= 2;
+					}
+				} while( isNotNull( clockFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+
+				size += 3;
+
+				do {
+					clockFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+					if( isNotNull( clockFont ) ) {
+						fontDimensions = clockFont->getDimension( L"00:00:00" );
+						size -= 1;
+					}
+				} while( isNotNull( clockFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 			}
-		} while( isNotNull( loadingFont ) && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
-		size += 3;
-
-		do {
-			loadingFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( isNotNull( loadingFont ) ) {
-				fontDimensions = loadingFont->getDimension( loading.c_str() );
-				size -= 1;
+			if( fontFile == "" || !isNotNull( clockFont ) ) {
+				clockFont = gui->getBuiltInFont();
 			}
-		} while( isNotNull( loadingFont ) && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
-		if( !isNotNull( loadingFont ) ) {
-			loadingFont = gui->getBuiltInFont();
+			if( debug ) {
+				std::wcout << L"clockFont is loaded" << std::endl;
+			}
 		}
+		
+		
+		{ //Load statsFont
+			core::dimension2d< uint_fast32_t > fontDimensions;
+			if( fontFile != "" ) {
+				uint_fast32_t size = ( windowSize.Width / sideDisplaySizeDenominator ) / 6; //The 6 Copied from the "load textFont" block above. Yeah, it's a magic number. Change it however you like.
 
-		if( debug ) {
-			std::wcout << L"loadingFont is loaded" << std::endl;
-		}
+				do {
+					statsFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+					if( isNotNull( statsFont ) ) {
+						core::dimension2d< uint_fast32_t > temp;
+						if( numPlayers < 10 ) {
+							temp = statsFont->getDimension( L"P0" );
+						} else if( numPlayers < 100 ) {
+							temp = statsFont->getDimension( L"P00" );
+						} else {
+							temp = statsFont->getDimension( L"P000" );
+						}
+						
+						fontDimensions = core::dimension2d< uint_fast32_t >( temp.Width * numPlayers, temp.Height );
+						size -= 2;
+					}
+				} while( isNotNull( statsFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 
-		size = ( windowSize.Width / sideDisplaySizeDenominator ) / 6; //found through experimentation, adjust it however you like and see how many times the font gets loaded
+				size += 3;
 
-		do {
-			textFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-
-			if( isNotNull( textFont ) ) {
-				if( debug ) {
-					std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
-				}
-				fontDimensions = textFont->getDimension( L"Random seed: " );
-				if( debug ) {
-					std::wcout << L"fontDimensions set to " << fontDimensions.Width << L"x" << fontDimensions.Height << std::endl;
-				}
-				size -= 2;
+				do {
+					statsFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+					if( isNotNull( statsFont ) ) {
+						core::dimension2d< uint_fast32_t > temp;
+						if( numPlayers < 10 ) {
+							temp = statsFont->getDimension( L"P0" );
+						} else if( numPlayers < 100 ) {
+							temp = statsFont->getDimension( L"P00" );
+						} else {
+							temp = statsFont->getDimension( L"P000" );
+						}
+						fontDimensions = core::dimension2d< uint_fast32_t >( temp.Width * numPlayers, temp.Height );
+						size -= 1;
+					}
+				} while( isNotNull( statsFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 			}
-		} while( isNotNull( textFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
 
-		size += 3;
-
-		do {
-			textFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-
-			if( isNotNull( textFont ) ) {
-				if( debug ) {
-					std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
-				}
-				fontDimensions = textFont->getDimension( L"Random seed: " );
-				if( debug ) {
-					std::wcout << L"fontDimensions set to " << fontDimensions.Width << L"x" << fontDimensions.Height << std::endl;
-				}
-				size -= 1;
+			if( fontFile == "" || !isNotNull( statsFont ) ) {
+				statsFont = gui->getBuiltInFont();
 			}
-		} while( isNotNull( textFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
 
-		if( !isNotNull( textFont ) ) {
-			textFont = gui->getBuiltInFont();
-		}
-
-		if( debug ) {
-			std::wcout << L"textFont is loaded" << std::endl;
-		}
-
-		size = ( windowSize.Width / sideDisplaySizeDenominator );
-
-		do {
-			clockFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( isNotNull( clockFont ) ) {
-				fontDimensions = clockFont->getDimension( L"00:00:00" );
-				size -= 2;
+			if( debug ) {
+				std::wcout << L"statsFont is loaded" << std::endl;
 			}
-		} while( isNotNull( clockFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
-
-		size += 3;
-
-		do {
-			clockFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( isNotNull( clockFont ) ) {
-				fontDimensions = clockFont->getDimension( L"00:00:00" );
-				size -= 1;
-			}
-		} while( isNotNull( clockFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
-
-		if( !isNotNull( clockFont ) ) {
-			clockFont = gui->getBuiltInFont();
-		}
-
-		if( debug ) {
-			std::wcout << L"clockFont is loaded" << std::endl;
 		}
 
 		newGame.setFont( clockFont );
@@ -1075,7 +1222,7 @@ void GameManager::loadFonts() {
 		backToGame.setFont( clockFont );
 		freedom.setFont( clockFont );
 		
-		size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect playability on large or small screens, but it's better on large screens than the built-in font.
+		uint_fast32_t size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect playability on large or small screens, but it's better on large screens than the built-in font.
 		gui->getSkin()->setFont( fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts ) );
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::loadFonts(): " << e.what() << std::endl;
@@ -1092,56 +1239,58 @@ void GameManager::loadMusicFont() {
 		}
 
 		if( playMusic ) {
-			uint_fast32_t maxWidth = ( windowSize.Width / sideDisplaySizeDenominator );
-			uint_fast32_t size = 0;
-			uint_fast32_t numerator = 2.5 * maxWidth; //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
+			if( fontFile != "" ) {
+				uint_fast32_t maxWidth = ( windowSize.Width / sideDisplaySizeDenominator );
+				uint_fast32_t size = 0;
+				uint_fast32_t numerator = 2.5 * maxWidth; //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
 
-			//I felt it looked best if all three (artist, album, and title) had the same font size, so we're picking the longest of the three and basing the font size on its length.
-			if( musicArtist.size() >= musicAlbum.size() && musicArtist.size() > 0 ) {
-				if( musicArtist.size() >= musicTitle.size() ) {
-					size = numerator / musicArtist.size();
-				} else if( musicTitle.size() > 0 ) {
-					size = numerator / musicTitle.size();
+				//I felt it looked best if all three (artist, album, and title) had the same font size, so we're picking the longest of the three and basing the font size on its length.
+				if( musicArtist.size() >= musicAlbum.size() && musicArtist.size() > 0 ) {
+					if( musicArtist.size() >= musicTitle.size() ) {
+						size = numerator / musicArtist.size();
+					} else if( musicTitle.size() > 0 ) {
+						size = numerator / musicTitle.size();
+					}
+				} else {
+					if( musicAlbum.size() >= musicTitle.size() && musicAlbum.size() > 0 ) {
+						size = numerator / musicAlbum.size();
+					} else if( musicTitle.size() > 0 ) {
+						size = numerator / musicTitle.size();
+					}
 				}
-			} else {
-				if( musicAlbum.size() >= musicTitle.size() && musicAlbum.size() > 0 ) {
-					size = numerator / musicAlbum.size();
-				} else if( musicTitle.size() > 0 ) {
-					size = numerator / musicTitle.size();
+
+				if( size == 0 ) { //If none of album, artist, and title had lengths greater than zero: maybe they haven't been read yet, or maybe the file doesn't contain those tags.
+					size = numerator;
 				}
+
+				core::dimension2d< uint_fast32_t > artistDimensions;
+				core::dimension2d< uint_fast32_t > albumDimensions;
+				core::dimension2d< uint_fast32_t > titleDimensions;
+
+				do {
+					musicTagFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+					if( isNotNull( musicTagFont ) ) {
+						artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
+						albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
+						titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
+						size -= 2; //Initially I had it going down by 1 each time. It's faster to go down by 2 until we've gotten close to our desired size...
+					}
+				} while( isNotNull( musicTagFont ) && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
+
+				size += 3; //...then we up the size a little...
+
+				do {
+					musicTagFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+					if( isNotNull( musicTagFont ) ) {
+						artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
+						albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
+						titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
+						size -= 1; //...and start going down by 1.
+					}
+				} while( isNotNull( musicTagFont ) && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
 			}
 
-			if( size == 0 ) { //If none of album, artist, and title had lengths greater than zero: maybe they haven't been read yet, or maybe the file doesn't contain those tags.
-				size = numerator;
-			}
-
-			core::dimension2d< uint_fast32_t > artistDimensions;
-			core::dimension2d< uint_fast32_t > albumDimensions;
-			core::dimension2d< uint_fast32_t > titleDimensions;
-
-			do {
-				musicTagFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-				if( isNotNull( musicTagFont ) ) {
-					artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
-					albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
-					titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
-					size -= 2; //Initially I had it going down by 1 each time. It's faster to go down by 2 until we've gotten close to our desired size...
-				}
-			} while( isNotNull( musicTagFont ) && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
-
-			size += 3; //...then we up the size a little...
-
-			do {
-				musicTagFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-				if( isNotNull( musicTagFont ) ) {
-					artistDimensions = musicTagFont->getDimension( musicArtist.c_str() );
-					albumDimensions = musicTagFont->getDimension( musicAlbum.c_str() );
-					titleDimensions = musicTagFont->getDimension( musicTitle.c_str() );
-					size -= 1; //...and start going down by 1.
-				}
-			} while( isNotNull( musicTagFont ) && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
-
-			if( !isNotNull( musicTagFont ) ) {
+			if( fontFile == "" || !isNotNull( musicTagFont ) ) {
 				musicTagFont = gui->getBuiltInFont();
 			}
 		}
@@ -1319,38 +1468,40 @@ void GameManager::loadTipFont() {
 			std::wcout << L"loadTipFont called" << std::endl;
 		}
 
-		uint_fast32_t maxWidth = windowSize.Width;
-		uint_fast32_t size;
-		core::stringw tipIncludingPrefix = proTipPrefix;
+		if( fontFile != "" ) {
+			uint_fast32_t maxWidth = windowSize.Width;
+			uint_fast32_t size;
+			core::stringw tipIncludingPrefix = proTipPrefix;
 
-		if( proTips.size() > 0 ) { //If pro tips have been loaded, guess size based on tip length.
-			tipIncludingPrefix.append( proTips.at( currentProTip ) );
-			size = 2.5 * maxWidth / tipIncludingPrefix.size(); //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
-		} else {
-			size = maxWidth / 10; //10 is also arbitrarily chosen.
+			if( proTips.size() > 0 ) { //If pro tips have been loaded, guess size based on tip length.
+				tipIncludingPrefix.append( proTips.at( currentProTip ) );
+				size = 2.5 * maxWidth / tipIncludingPrefix.size(); //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
+			} else {
+				size = maxWidth / 10; //10 is also arbitrarily chosen.
+			}
+
+			core::dimension2d< uint_fast32_t > tipDimensions;
+
+			do {
+				tipFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+				if( isNotNull( tipFont ) ) {
+					tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
+					size -= 2;
+				}
+			} while( isNotNull( tipFont ) && ( tipDimensions.Width > maxWidth ) );
+
+			size += 3;
+
+			do {
+				tipFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
+				if( isNotNull( tipFont ) ) {
+					tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
+					size -= 1;
+				}
+			} while( isNotNull( tipFont ) && ( tipDimensions.Width > maxWidth ) );
 		}
 
-		core::dimension2d< uint_fast32_t > tipDimensions;
-
-		do {
-			tipFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( isNotNull( tipFont ) ) {
-				tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
-				size -= 2;
-			}
-		} while( isNotNull( tipFont ) && ( tipDimensions.Width > maxWidth ) );
-
-		size += 3;
-
-		do {
-			tipFont = fontManager.GetTtFont( driver, fontFile.c_str(), size, antiAliasFonts );
-			if( isNotNull( tipFont ) ) {
-				tipDimensions = tipFont->getDimension( tipIncludingPrefix.c_str() );
-				size -= 1;
-			}
-		} while( isNotNull( tipFont ) && ( tipDimensions.Width > maxWidth ) );
-
-		if( !isNotNull( tipFont ) ) {
+		if( fontFile == "" || !isNotNull( tipFont ) ) {
 			tipFont = gui->getBuiltInFont();
 		}
 	} catch( std::exception &e ) {
@@ -1605,7 +1756,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							return true;
 						} else if( freedom.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
 							std::wstring message = stringConverter.toStdWString( PACKAGE_NAME );
-							message += L" is copyright 2013 by James Dearing. Licensed under the GNU Affero General Public License, version 3.0 or (at your option) any later version, as published by the Free Software Foundation. See the file \"COPYING\" or https://www.gnu.org/licenses/agpl.html.\n\nThis means you're free to do what you want with this game: mod it, give copies to friends, sell it if you want. Whatever. It's Free software, Free as in Freedom. You should have received the program's source code with this copy; if you don't have it, you can get it from ";
+							message += L" is copyright 2012-2014 by James Dearing. Licensed under the GNU Affero General Public License, version 3.0 or (at your option) any later version, as published by the Free Software Foundation. See the file \"COPYING\" or https://www.gnu.org/licenses/agpl.html.\n\nThis means you're free to do what you want with this game: mod it, give copies to friends, sell it if you want. Whatever. It's Free software, Free as in Freedom. You should have received the program's source code with this copy; if you don't have it, you can get it from ";
 							message += stringConverter.toStdWString( PACKAGE_URL );
 							message += L".\n\n"; 
 							message += stringConverter.toStdWString( PACKAGE_NAME );
@@ -1927,7 +2078,7 @@ void GameManager::readPrefs() {
 		botsKnowSolution = false;
 		botAlgorithm = AI::DEPTH_FIRST_SEARCH;
 
-	#ifdef DEBUG
+	#if defined DEBUG
 		debug = true;
 	#else
 		debug = false;
@@ -2749,15 +2900,9 @@ void GameManager::setControls() {
 									std::wcout << L"Preference \"" << preference << L"\" choiceStr \"" << choiceStr << L"\""<< std::endl;
 								}
 
-								KeyMapping temp;
-								keyMap.push_back( temp );
-								
-								if( debug ) {
-									std::wcout << L"choiceStr before spell checking: " << choiceStr;
-								}
-								
-								if( debug ) {
-									std::wcout  << "\tand after: " << choiceStr << std::endl;
+								{
+									KeyMapping temp;
+									keyMap.push_back( temp );
 								}
 
 								if( choiceStr.substr( 0, 5 ) != L"mouse" ) {
@@ -2767,47 +2912,51 @@ void GameManager::setControls() {
 
 									keyMap.back().setKey( choice );
 								} else {
-									if( debug ) {
-										std::wcout << L"choiceStr before: " << choiceStr;
-									}
 									
 									choiceStr = choiceStr.substr( 5, choiceStr.length() - 5 ); //5 = length of the word "mouse"
 									
 									if( debug ) {
-										std::wcout << L" and after: " << choiceStr << std::endl;
+										std::wcout << L"choiceStr before spell checking: " << choiceStr;
 									}
-
-									if( choiceStr == L"wheelup" ) {
+									
+									std::vector< std::wstring > possibleChoices = { L"wheelup", L"wheeldown", L"leftdown", L"rightdown", L"middledown", L"leftup", L"rightup", L"middleup", L"moved", L"leftdoubleclick", L"rightdoubleclick", L"middledoubleclick", L"lefttripleclick", L"righttripleclick", L"middletripleclick" };
+									choiceStr = possibleChoices.at( spellChecker.indexOfClosestString( choiceStr, possibleChoices ) );
+									
+									if( debug ) {
+										std::wcout  << "\tand after: " << choiceStr << std::endl;
+									}
+									
+									if( choiceStr == possibleChoices.at( 0 ) ) { //L"wheelup"
 										keyMap.back().setMouseWheelUp( true );
 										keyMap.back().setMouseEvent( EMIE_MOUSE_WHEEL );
-									} else if( choiceStr == L"wheeldown" ) {
+									} else if( choiceStr == possibleChoices.at( 1 ) ) { //L"wheeldown"
 										keyMap.back().setMouseWheelUp( false );
 										keyMap.back().setMouseEvent( EMIE_MOUSE_WHEEL );
-									} else if( choiceStr == L"leftdown" ) {
+									} else if( choiceStr == possibleChoices.at( 2 ) ) { //L"leftdown"
 										keyMap.back().setMouseEvent( EMIE_LMOUSE_PRESSED_DOWN );
-									} else if( choiceStr == L"rightdown" ) {
+									} else if( choiceStr == possibleChoices.at( 3 ) ) { //L"rightdown"
 										keyMap.back().setMouseEvent( EMIE_RMOUSE_PRESSED_DOWN );
-									} else if( choiceStr == L"middledown" ) {
+									} else if( choiceStr == possibleChoices.at( 4 ) ) { //L"middledown"
 										keyMap.back().setMouseEvent( EMIE_MMOUSE_PRESSED_DOWN );
-									} else if( choiceStr == L"leftup" ) {
+									} else if( choiceStr == possibleChoices.at( 5 ) ) { //L"leftup"
 										keyMap.back().setMouseEvent( EMIE_LMOUSE_LEFT_UP );
-									} else if( choiceStr == L"rightup" ) {
+									} else if( choiceStr == possibleChoices.at( 6 ) ) { //L"rightup"
 										keyMap.back().setMouseEvent( EMIE_RMOUSE_LEFT_UP );
-									} else if( choiceStr == L"middleup" ) {
+									} else if( choiceStr == possibleChoices.at( 7 ) ) { //L"middleup"
 										keyMap.back().setMouseEvent( EMIE_MMOUSE_LEFT_UP );
-									} else if( choiceStr == L"moved" ) {
+									} else if( choiceStr == possibleChoices.at( 8 ) ) { //L"moved"
 										keyMap.back().setMouseEvent( EMIE_MOUSE_MOVED );
-									} else if( choiceStr == L"leftdoubleclick" ) {
+									} else if( choiceStr == possibleChoices.at( 9 ) ) { //L"leftdoubleclick"
 										keyMap.back().setMouseEvent( EMIE_LMOUSE_DOUBLE_CLICK );
-									} else if( choiceStr == L"rightdoubleclick" ) {
+									} else if( choiceStr == possibleChoices.at( 10 ) ) { //L"rightdoubleclick"
 										keyMap.back().setMouseEvent( EMIE_RMOUSE_DOUBLE_CLICK );
-									} else if( choiceStr == L"middledoubleclick" ) {
+									} else if( choiceStr == possibleChoices.at( 11 ) ) { //L"middledoubleclick"
 										keyMap.back().setMouseEvent( EMIE_MMOUSE_DOUBLE_CLICK );
-									} else if( choiceStr == L"lefttripleclick" ) {
+									} else if( choiceStr == possibleChoices.at( 12 ) ) { //L"lefttripleclick"
 										keyMap.back().setMouseEvent( EMIE_LMOUSE_TRIPLE_CLICK );
-									} else if( choiceStr == L"righttripleclick" ) {
+									} else if( choiceStr == possibleChoices.at( 13 ) ) { //L"righttripleclick"
 										keyMap.back().setMouseEvent( EMIE_RMOUSE_TRIPLE_CLICK );
-									} else if( choiceStr == L"middletripleclick" ) {
+									} else if( choiceStr == possibleChoices.at( 14 ) ) { //L"middletripleclick"
 										keyMap.back().setMouseEvent( EMIE_MMOUSE_TRIPLE_CLICK );
 									}
 								}
@@ -2826,6 +2975,17 @@ void GameManager::setControls() {
 										keyMap.pop_back();
 									}
 								} else {
+									if( debug ) {
+										std::wcout << L"preference before spell checking: " << preference;
+									}
+									
+									std::vector< std::wstring > possiblePrefs = { L"menu", L"screenshot", L"volumeup", L"volumedown", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l" };
+									preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
+									
+									if( debug ) {
+										std::wcout  << "\tand after: " << preference << std::endl;
+									}
+									
 									keyMap.back().setActionFromString( preference );
 								}
 

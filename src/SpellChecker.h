@@ -2,6 +2,7 @@
 #define SPELLCHECKER_H
 
 #include "Integers.h"
+#include "PreprocessorCommands.h"
 #include <vector>
 #include <string>
 

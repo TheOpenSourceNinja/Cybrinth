@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 James Dearing.
+ * Copyright © 2012-2014 James Dearing.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include "MazeCell.h"
+#include "PreprocessorCommands.h"
 
 //#include "GameManager.h"
 class GameManager; //Avoids circular dependency
@@ -54,10 +55,9 @@ class AI {
 		uint_fast8_t controlsPlayer;
 		enum direction_t{ UP, DOWN, LEFT, RIGHT };
 		std::vector< irr::core::position2d< uint_fast8_t > > DFSCellsVisited;
-		direction_t hand;
+		direction_t hand; //Used in Right Hand Rule and Left Hand Rule
 		std::vector< irr::core::position2d< uint_fast8_t > > IDDFSCellsVisited;
 		uint_fast16_t IDDFSDepthLimit; //For use only when the bots don't know the solution.
-		uint_fast16_t IDDFSMaxDepthLimit; //For use only when the bots don't know the solution.
 		GameManager * gm;
 		uint_fast8_t keyImSeeking;
 		bool noKeysLeft; //the IDDFS algorithm uses this to determine whether it should really deepen or just start with the max depth like DFS.

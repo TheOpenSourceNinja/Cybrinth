@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 James Dearing.
+ * Copyright © 2012-2014 James Dearing.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -52,31 +52,35 @@ void Player::loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t size )
 		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) ); //Colorspace should be irr::video::A1R5G5B5 but that causes a bug on my current laptop.
 		tempImage->fill( irr::video::SColor( 0, 0, 0, 0 ) ); //Fills the image with invisibility!
 		tempImage->setPixel( size - 1, size - 1, irr::video::SColor( 0, 0, 0, 0 ) ); //Workaround for a bug in Irrlicht's software renderer
+		
+		irr::core::position2d< int_fast16_t > origin( size / 2, size / 2 );
 
-		int_fast16_t radius = size / 2;
-		irr::core::position2d< int_fast16_t > origin( radius, radius );
-		float rSquared = pow( radius, 2 );
-		for( int_fast16_t x = -radius; x <= 0; ++x ) {
-			int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
-			for( int_fast16_t y = -height; y <= 0; ++y ) {
-				tempImage->setPixel( x + origin.X, y + origin.Y, colorOne );
-				tempImage->setPixel( x + origin.X, -y + origin.Y, colorOne );
-				tempImage->setPixel( -x + origin.X, y + origin.Y, colorOne );
-				tempImage->setPixel( -x + origin.X, -y + origin.Y, colorOne );
+		{
+			int_fast16_t radius = size / 2;
+			float rSquared = pow( radius, 2 );
+			for( int_fast16_t x = -radius; x <= 0; ++x ) {
+				int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
+				for( int_fast16_t y = -height; y <= 0; ++y ) {
+					tempImage->setPixel( x + origin.X, y + origin.Y, colorOne );
+					tempImage->setPixel( x + origin.X, -y + origin.Y, colorOne );
+					tempImage->setPixel( -x + origin.X, y + origin.Y, colorOne );
+					tempImage->setPixel( -x + origin.X, -y + origin.Y, colorOne );
+				}
 			}
 		}
-
-		size /= 2;
-
-		radius = size / 2;
-		rSquared = pow( radius, 2 );
-		for( int_fast16_t x = -radius; x <= 0; ++x ) {
-			int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
-			for( int_fast16_t y = -height; y <= 0; ++y ) {
-				tempImage->setPixel( x + origin.X, y + origin.Y, colorTwo );
-				tempImage->setPixel( x + origin.X, -y + origin.Y, colorTwo );
-				tempImage->setPixel( -x + origin.X, y + origin.Y, colorTwo );
-				tempImage->setPixel( -x + origin.X, -y + origin.Y, colorTwo );
+		
+		{
+			size /= 2;
+			int_fast16_t radius = size / 2;
+			float rSquared = pow( radius, 2 );
+			for( int_fast16_t x = -radius; x <= 0; ++x ) {
+				int_fast16_t height = static_cast< int_fast16_t >( sqrt( rSquared - pow( x, 2 ) ) );
+				for( int_fast16_t y = -height; y <= 0; ++y ) {
+					tempImage->setPixel( x + origin.X, y + origin.Y, colorTwo );
+					tempImage->setPixel( x + origin.X, -y + origin.Y, colorTwo );
+					tempImage->setPixel( -x + origin.X, y + origin.Y, colorTwo );
+					tempImage->setPixel( -x + origin.X, -y + origin.Y, colorTwo );
+				}
 			}
 		}
 

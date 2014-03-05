@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-# Cybrinth created by James Dearing, copyright 2012-2013 and licensed under the GNU AGPL (see the file COPYING)
+# Cybrinth created by James Dearing, copyright 2012-2014 and licensed under the GNU AGPL (see the file COPYING)
 
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
@@ -107,7 +107,8 @@ am_cybrinth_OBJECTS = src/AI.$(OBJEXT) src/Collectable.$(OBJEXT) \
 	src/MenuOption.$(OBJEXT) src/NetworkManager.$(OBJEXT) \
 	src/Object.$(OBJEXT) src/Player.$(OBJEXT) \
 	src/PlayerStart.$(OBJEXT) src/StringConverter.$(OBJEXT) \
-	src/SpellChecker.$(OBJEXT) src/ImageModifier.$(OBJEXT)
+	src/SpellChecker.$(OBJEXT) src/ImageModifier.$(OBJEXT) \
+	src/SystemSpecificsManager.$(OBJEXT)
 cybrinth_OBJECTS = $(am_cybrinth_OBJECTS)
 am__DEPENDENCIES_1 =
 cybrinth_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -297,7 +298,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -std=c++0x $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS)
-cybrinth_SOURCES = src/AI.h src/AI.cpp src/Collectable.h src/Collectable.cpp src/colors.h src/FontManager.h src/FontManager.cpp src/GameManager.h src/GameManager.cpp src/Goal.h src/Goal.cpp src/GUIFreetypeFont.h src/GUIFreetypeFont.cpp src/KeyMapping.h src/KeyMapping.cpp src/main.cpp src/MazeCell.h src/MazeCell.cpp src/MazeManager.h src/MazeManager.cpp src/MenuOption.h src/MenuOption.cpp src/NetworkManager.h src/NetworkManager.cpp src/Object.h src/Object.cpp src/Player.h src/Player.cpp src/PlayerStart.h src/PlayerStart.cpp src/StringConverter.h src/StringConverter.cpp src/SpellChecker.h src/SpellChecker.cpp src/ImageModifier.h src/ImageModifier.cpp
+cybrinth_SOURCES = src/AI.h src/AI.cpp src/Collectable.h src/Collectable.cpp src/colors.h src/FontManager.h src/FontManager.cpp src/GameManager.h src/GameManager.cpp src/Goal.h src/Goal.cpp src/GUIFreetypeFont.h src/GUIFreetypeFont.cpp src/KeyMapping.h src/KeyMapping.cpp src/main.cpp src/MazeCell.h src/MazeCell.cpp src/MazeManager.h src/MazeManager.cpp src/MenuOption.h src/MenuOption.cpp src/NetworkManager.h src/NetworkManager.cpp src/Object.h src/Object.cpp src/Player.h src/Player.cpp src/PlayerStart.h src/PlayerStart.cpp src/StringConverter.h src/StringConverter.cpp src/SpellChecker.h src/SpellChecker.cpp src/ImageModifier.h src/ImageModifier.cpp src/SystemSpecificsManager.h src/SystemSpecificsManager.cpp src/PreprocessorCommands.h
 cybrinth_LDADD = $(IRRLICHT_LIBS) $(BOOSTFILESYSTEM_LIBS) $(BOOSTSYSTEM_LIBS) $(DEPS_LIBS)
 all: all-am
 
@@ -418,6 +419,8 @@ src/SpellChecker.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/ImageModifier.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/SystemSpecificsManager.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 
 cybrinth$(EXEEXT): $(cybrinth_OBJECTS) $(cybrinth_DEPENDENCIES) $(EXTRA_cybrinth_DEPENDENCIES) 
 	@rm -f cybrinth$(EXEEXT)
@@ -447,6 +450,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/PlayerStart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/SpellChecker.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/StringConverter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/SystemSpecificsManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/main.Po@am__quote@
 
 .cpp.o:

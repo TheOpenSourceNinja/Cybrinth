@@ -22,45 +22,51 @@ std::wstring::size_type SpellChecker::DamerauLevenshteinDistance( std::wstring s
 		} else if ( target.empty() ) {
 			return source.size();
 		}
-
+		
 		std::wstring::size_type score[ source.size() + 2 ][ target.size() + 2 ]; //Where do these +2s come from? Ask Wikipedia.
+		
+		{
+			std::wstring::size_type infinity = source.size() + target.size(); //Okay, so this isn't really infinity. It's close enough.
+			score[ 0 ][ 0 ] = infinity;
 
-		std::wstring::size_type infinity = source.size() + target.size();
-		score[ 0 ][ 0 ] = infinity;
-
-		for ( auto s = 0; s <= source.size(); ++s ) {
-			score[ s + 1 ][ 1 ] = s;
-			score[ s + 1 ][ 0 ] = infinity;
-		}
-
-		for ( auto t = 0; t <= target.size(); ++t ) {
-			score[ 1 ][ t + 1 ] = t;
-			score[ 0 ][ t + 1 ] = infinity;
-		}
-
-		std::map< std::wstring::value_type, std::wstring::size_type > SortedDictionary;
-		std::wstring temp = source + target;
-		for( auto i = temp.begin(); i != temp.end(); ++i ) {
-			SortedDictionary[ *i ] = 0;
-		}
-
-		for ( auto s = 1; s <= source.size(); ++s ) {
-			std::wstring::size_type DB = 0;
-			for ( auto t = 1; t <= target.size(); ++t ) {
-				auto s1 = SortedDictionary[ target[ t - 1 ] ];
-				auto t1 = DB;
-
-				if ( source[ s - 1 ] == target[ t - 1 ] ) {
-					score[ s + 1 ][ t + 1 ] = score[ s ][ t ];
-					DB = t;
-				} else {
-					score[ s + 1 ][ t + 1 ] = std::min( score[ s ][ t ], std::min( score[ s + 1 ][ t ], score[ s ][ t + 1 ] ) ) + 1;
-				}
-
-				score[ s + 1 ][ t + 1 ] = std::min( score[ s + 1 ][ t + 1 ], score[ s1 ][ t1 ] + ( s - s1 - 1 ) + 1 + ( t - t1 - 1 ) );
+			for ( auto s = 0; s <= source.size(); ++s ) {
+				score[ s + 1 ][ 1 ] = s;
+				score[ s + 1 ][ 0 ] = infinity;
 			}
 
-			SortedDictionary[ source[ s - 1 ] ] = s;
+			for ( auto t = 0; t <= target.size(); ++t ) {
+				score[ 1 ][ t + 1 ] = t;
+				score[ 0 ][ t + 1 ] = infinity;
+			}
+		}
+		
+		{
+			std::map< std::wstring::value_type, std::wstring::size_type > SortedDictionary;
+			{
+				std::wstring temp = source + target;
+				for( auto i = temp.begin(); i != temp.end(); ++i ) {
+					SortedDictionary[ *i ] = 0;
+				}
+			}
+
+			for ( auto s = 1; s <= source.size(); ++s ) {
+				std::wstring::size_type DB = 0;
+				for ( auto t = 1; t <= target.size(); ++t ) {
+					auto s1 = SortedDictionary[ target[ t - 1 ] ];
+					auto t1 = DB;
+
+					if ( source[ s - 1 ] == target[ t - 1 ] ) {
+						score[ s + 1 ][ t + 1 ] = score[ s ][ t ];
+						DB = t;
+					} else {
+						score[ s + 1 ][ t + 1 ] = std::min( score[ s ][ t ], std::min( score[ s + 1 ][ t ], score[ s ][ t + 1 ] ) ) + 1;
+					}
+
+					score[ s + 1 ][ t + 1 ] = std::min( score[ s + 1 ][ t + 1 ], score[ s1 ][ t1 ] + ( s - s1 - 1 ) + 1 + ( t - t1 - 1 ) );
+				}
+
+				SortedDictionary[ source[ s - 1 ] ] = s;
+			}
 		}
 
 		return score[ source.size() + 1 ][ target.size() + 1 ];

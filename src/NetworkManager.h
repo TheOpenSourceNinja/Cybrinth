@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 James Dearing.
+ * Copyright © 2012-2014 James Dearing.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -16,6 +16,7 @@
 #include "MazeCell.h"
 #include "PlayerStart.h"
 #include "Collectable.h"
+#include "PreprocessorCommands.h"
 #include <irrlicht.h>
 #include <sstream>
 #include <vector>

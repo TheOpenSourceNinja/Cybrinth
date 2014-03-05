@@ -2,6 +2,7 @@
 #define IMAGEMODIFIER_H
 
 #include "Integers.h"
+#include "PreprocessorCommands.h"
 
 #include <irrlicht.h>
 using namespace irr;

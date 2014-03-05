@@ -1,6 +1,6 @@
 //This file originally downloaded from http://www.michaelzeilfelder.de/irrlicht.htm#TrueType. The copyright statement and license below do not apply to that original version, only to the modified version contained here.
 /**
- * Copyright © 2013 James Dearing.
+ * Copyright © 2012-2014 James Dearing.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -13,9 +13,7 @@
 #ifndef _GUI_FREETYPE_FONT_H
 #define _GUI_FREETYPE_FONT_H
 
-//! freetype support enabled with 1 and disabled with 0
-#define COMPILE_WITH_FREETYPE 1
-
+#include "PreprocessorCommands.h"
 
 #if COMPILE_WITH_FREETYPE
 
