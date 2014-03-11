@@ -105,6 +105,7 @@ class GameManager : public IEventReceiver {
 		void drawBackground();
 		void drawLoadingScreen();
 		void drawLogo();
+		void drawStats( int_fast16_t textY );
 		
 		bool haveShownLogo;
 		
@@ -169,10 +170,12 @@ class GameManager : public IEventReceiver {
 		uint_fast8_t sideDisplaySizeDenominator;
 
 		std::vector< uint_fast8_t > winners;
+		std::vector< uint_fast8_t > winnersLoadingScreen; //An ugly hack: Copy winners to winnersLoadingScreen so that we can show it on the loading screen after winners is cleared
 
 
 		//unsigned 16-bit integers----------------------------------
 		uint_fast16_t bitsPerPixel;
+		uint_fast16_t botMovementDelay;
 
 		uint_fast16_t cellWidth;
 		uint_fast16_t cellHeight;

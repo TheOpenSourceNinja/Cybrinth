@@ -15,10 +15,10 @@
 #include "Player.h"
 #include "StringConverter.h"
 
-AI::AI() : controlsPlayer(0), movementDelay(300) {
+AI::AI() : controlsPlayer(0) {
 	try {
 		//TODO: Allow custom AI movement delays for increased/decreased challenge
-		setup( nullptr, 0, 0, nullptr, false, DEPTH_FIRST_SEARCH ); //setup( pointer to the maze, number of columns, number of rows, pointer to GameManager, whether to start solved, and the algorithm to use )
+		setup( nullptr, 0, 0, nullptr, false, DEPTH_FIRST_SEARCH, 300 ); //setup( pointer to the maze, number of columns, number of rows, pointer to GameManager, whether to start solved, the algorithm to use, and the movement delay )
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::AI(): " << e.what() << std::endl;
 	}
@@ -746,8 +746,9 @@ void AI::setPlayer( uint_fast8_t newPlayer ) {
 	}
 }
 
-void AI::setup( MazeCell ** newMaze, uint_fast8_t newCols, uint_fast8_t newRows, GameManager *newGM, bool newStartSolved, algorithm_t newAlgorithm ) {
+void AI::setup( MazeCell ** newMaze, uint_fast8_t newCols, uint_fast8_t newRows, GameManager *newGM, bool newStartSolved, algorithm_t newAlgorithm, uint_fast16_t newMovementDelay ) {
 	try {
+		movementDelay = newMovementDelay;
 		maze = newMaze;
 		cols = newCols;
 		rows = newRows;

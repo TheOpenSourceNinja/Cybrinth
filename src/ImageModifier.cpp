@@ -1,4 +1,5 @@
 #include "ImageModifier.h"
+#include "StringConverter.h"
 
 #include <iostream>
 
@@ -12,7 +13,8 @@ ImageModifier::~ImageModifier() {
 
 video::ITexture* ImageModifier::imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* oldImage, irr::core::stringw name ) {
 	try {
-		irr::video::ITexture* texture = driver->addTexture( name.c_str(), oldImage );
+		StringConverter sc;
+		irr::video::ITexture* texture = driver->addTexture( sc.toWCharArray( name ), oldImage );
 		texture->grab();
 		return texture;
 	} catch ( std::exception &e ) {

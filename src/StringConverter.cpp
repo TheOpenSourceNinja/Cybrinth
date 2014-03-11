@@ -245,6 +245,18 @@ std::wstring StringConverter::toStdWString( long double input ) {
 	}
 }
 
+const wchar_t* StringConverter::toWCharArray( std::wstring input ) {
+	return input.c_str();
+}
+
+const wchar_t* StringConverter::toWCharArray( irr::core::stringw input ) {
+	return input.c_str();
+}
+
+const wchar_t* StringConverter::toWCharArray( char* input ) {
+	return toStdWString( input ).c_str();
+}
+
 StringConverter::~StringConverter() {
 	try {
 	} catch ( std::exception &e ) {

@@ -27,7 +27,8 @@ class Player : public Object {
 		void moveX( int_fast8_t val );
 		void moveY( int_fast8_t val );
 		void reset();
-		uint_fast16_t stepsTaken;
+		uint_fast16_t stepsTakenLastMaze;
+		uint_fast16_t stepsTakenThisMaze;
 		bool isHuman;
 	protected:
 	private:

@@ -115,7 +115,7 @@ void Player::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_f
 void Player::moveX( int_fast8_t val ) {
 	try {
 		Object::moveX( val );
-		stepsTaken += 1;
+		stepsTakenThisMaze += 1;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::moveX(): " << e.what() << std::endl;
 	}
@@ -124,7 +124,7 @@ void Player::moveX( int_fast8_t val ) {
 void Player::moveY( int_fast8_t val ) {
 	try {
 		Object::moveY( val );
-		stepsTaken += 1;
+		stepsTakenThisMaze += 1;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::moveY(): " << e.what() << std::endl;
 	}
@@ -132,7 +132,8 @@ void Player::moveY( int_fast8_t val ) {
 
 void Player::reset() {
 	try {
-		stepsTaken = 0;
+		stepsTakenLastMaze = stepsTakenThisMaze;
+		stepsTakenThisMaze = 0;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::reset(): " << e.what() << std::endl;
 	}

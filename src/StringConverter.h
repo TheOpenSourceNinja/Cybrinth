@@ -34,15 +34,18 @@ class StringConverter
 		std::wstring toStdWString( wchar_t* input );
 		std::wstring toStdWString( const char* input );
 		std::wstring toStdWString( const wchar_t* input );
-		std::wstring toStdWString (int input);
-		std::wstring toStdWString (long input);
-		std::wstring toStdWString (long long input);
-		std::wstring toStdWString (unsigned input);
-		std::wstring toStdWString (unsigned long input);
-		std::wstring toStdWString (unsigned long long input);
-		std::wstring toStdWString (float input);
-		std::wstring toStdWString (double input);
-		std::wstring toStdWString (long double input);
+		std::wstring toStdWString( int input );
+		std::wstring toStdWString( long input );
+		std::wstring toStdWString( long long input );
+		std::wstring toStdWString( unsigned input );
+		std::wstring toStdWString( unsigned long input );
+		std::wstring toStdWString( unsigned long long input );
+		std::wstring toStdWString( float input );
+		std::wstring toStdWString( double input );
+		std::wstring toStdWString( long double input );
+		const wchar_t* toWCharArray( std::wstring input );
+		const wchar_t* toWCharArray( irr::core::stringw input );
+		const wchar_t* toWCharArray( char* input );
 	protected:
 	private:
 };

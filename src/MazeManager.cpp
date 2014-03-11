@@ -570,13 +570,13 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 			file << gameManager->randomSeed;
 			core::stringw message( L"This maze has been saved to the file " );
 			message += gameManager->stringConverter.toIrrlichtStringW( dest.wstring() );
-			gameManager->gui->addMessageBox( L"Maze saved", message.c_str() );
+			gameManager->gui->addMessageBox( L"Maze saved", gameManager->stringConverter.toWCharArray( message ) );
 			file.close();
 		} else {
 			core::stringw message( L"Cannot save to file " );
 			message += gameManager->stringConverter.toIrrlichtStringW( dest.wstring() );
-			std::wcerr << message.c_str() << std::endl;
-			gameManager->gui->addMessageBox( L"Maze NOT saved", message.c_str() );
+			std::wcerr << gameManager->stringConverter.toWCharArray( message ) << std::endl;
+			gameManager->gui->addMessageBox( L"Maze NOT saved", gameManager->stringConverter.toWCharArray( message ) );
 		}
 
 		return true;

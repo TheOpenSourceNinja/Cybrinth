@@ -37,7 +37,7 @@ class AI {
 		void move(); //Needs to call GameManager's movePlayerOnX and movePlayerOnY functions.
 		void reset();
 		void setPlayer( uint_fast8_t newPlayer );
-		void setup( MazeCell ** newMaze, uint_fast8_t newCols, uint_fast8_t newRows,  GameManager * newGM, bool newStartSolved, algorithm_t newAlgorithm ); //Provides the AI with whatever info it needs to work.
+		void setup( MazeCell ** newMaze, uint_fast8_t newCols, uint_fast8_t newRows,  GameManager * newGM, bool newStartSolved, algorithm_t newAlgorithm, uint_fast16_t newMovementDelay ); //Provides the AI with whatever info it needs to work.
 	protected:
 	private:
 		bool alreadyVisited( irr::core::position2d< uint_fast8_t > position );

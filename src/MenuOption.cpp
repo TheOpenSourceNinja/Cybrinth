@@ -10,6 +10,7 @@
 */
 #include "MenuOption.h"
 #include "colors.h"
+#include "StringConverter.h"
 #include <iostream>
 
 #include <irrlicht.h>
@@ -54,7 +55,8 @@ void MenuOption::setFont( irr::gui::IGUIFont* newFont ) {
 void MenuOption::setDimension() {
 	try {
 		if( font != nullptr ) {
-			dimension = font->getDimension( text.c_str() );
+			StringConverter sc;
+			dimension = font->getDimension( sc.toWCharArray( text ) );
 		} else {
 			dimension = irr::core::dimension2d<uint_fast16_t>( 0, 0 );
 		}
