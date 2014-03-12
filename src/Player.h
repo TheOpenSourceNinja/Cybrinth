@@ -22,6 +22,7 @@ class Player : public Object {
 		Player();
 		virtual ~Player();
 		void draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height );
+		bool isHuman;
 		void loadTexture( irr::video::IVideoDriver* driver );
 		void loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t size );
 		void moveX( int_fast8_t val );
@@ -29,7 +30,8 @@ class Player : public Object {
 		void reset();
 		uint_fast16_t stepsTakenLastMaze;
 		uint_fast16_t stepsTakenThisMaze;
-		bool isHuman;
+		uint_fast32_t timeTakenLastMaze;
+		uint_fast32_t timeTakenThisMaze;
 	protected:
 	private:
 };

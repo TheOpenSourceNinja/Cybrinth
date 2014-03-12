@@ -268,9 +268,15 @@ void MazeManager::makeRandomLevel() {
 				deadEndsY.erase( deadEndsY.begin() + i );
 			}
 		}
+		
+		{ //Decide how many keys/locks to use (# of keys = # of locks)
+			uint_fast8_t temp = rand() % cols;
+			if( deadEndsX.size() > 0 ) {
+				temp = temp % deadEndsX.size();
+			}
+			gameManager->numLocks = temp;
+		}
 
-		gameManager->numLocks = ( ( rand() % 10 ) % cols ) % deadEndsX.size();
-		//gameManager->numLocks = rand() % deadEndsX.size();
 		//gameManager->numLocks = rand() % ( cols * rows ); //Uncomment this for a crazy number of keys!
 
 		uint_fast8_t numKeys = gameManager->numLocks;

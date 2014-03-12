@@ -203,6 +203,8 @@ class GameManager : public IEventReceiver {
 
 		core::stringw stats;
 		core::stringw steps;
+		
+		core::stringw times;
 
 
 		//Our own types----------------------------------

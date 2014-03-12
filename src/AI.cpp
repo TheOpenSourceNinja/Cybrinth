@@ -17,7 +17,6 @@
 
 AI::AI() : controlsPlayer(0) {
 	try {
-		//TODO: Allow custom AI movement delays for increased/decreased challenge
 		setup( nullptr, 0, 0, nullptr, false, DEPTH_FIRST_SEARCH, 300 ); //setup( pointer to the maze, number of columns, number of rows, pointer to GameManager, whether to start solved, the algorithm to use, and the movement delay )
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::AI(): " << e.what() << std::endl;

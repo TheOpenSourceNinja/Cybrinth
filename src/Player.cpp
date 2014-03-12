@@ -13,8 +13,6 @@
 #include <iostream>
 #include "colors.h"
 
-
-
 Player::Player() {
 	try {
 		x = 0;
@@ -25,6 +23,7 @@ Player::Player() {
 		setColor( RED );
 		texture = nullptr;
 		isHuman = true;
+		timeTakenThisMaze = 0;
 		reset();
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::Player(): " << e.what() << std::endl;
@@ -134,6 +133,8 @@ void Player::reset() {
 	try {
 		stepsTakenLastMaze = stepsTakenThisMaze;
 		stepsTakenThisMaze = 0;
+		timeTakenLastMaze = timeTakenThisMaze;
+		timeTakenThisMaze = 0;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::reset(): " << e.what() << std::endl;
 	}

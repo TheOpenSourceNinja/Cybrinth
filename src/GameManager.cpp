@@ -447,7 +447,6 @@ void GameManager::drawBackground() {
 
 /**
  * Draws the loading screen. Assumes that driver->beginScene() has already been called. Should be called by drawAll().
- * //TODO: Add stats (estimated difficulty of maze, number of steps taken, number of cells backtracked, etc) to loading screen.
  */
 void GameManager::drawLoadingScreen() {
 	try {
@@ -538,6 +537,7 @@ void GameManager::drawLoadingScreen() {
 
 /**
  * Should only be called from drawLoadingScreen(). Just putting it here for code separation/readability.
+ * //TODO: Add more stats (number of keys collected, estimated difficulty of maze, number of cells backtracked, etc) to loading screen.
  */
 void GameManager::drawStats( int_fast16_t textY ) {
 	if( !isNotNull( statsFont ) ) {
@@ -548,6 +548,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 	int_fast16_t textXOriginal = textX;
 	int_fast16_t textYOriginal = textY;
 	int_fast16_t textYSteps = textYOriginal;
+	int_fast16_t textYTimes = textYOriginal;
 	//To determine how tall each row of text is, we draw the row labels first (their text could conceivably have hangy-down bits like a lower-case y)
 	{
 		core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( stats ) );
@@ -568,7 +569,18 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		if( tempDimensions.Width + textXOriginal > textX ) {
 			textX = tempDimensions.Width + textXOriginal;
 		}
-		//textY = textYOriginal + tempDimensions.Height;
+		textYTimes = textYSteps + tempDimensions.Height;
+	}
+	
+	{
+		core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( times ) );
+		core::rect< int > tempRectangle = core::rect< int >( textXOriginal, textYTimes, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYTimes );
+		statsFont->draw( times, tempRectangle, WHITE, true, true, &tempRectangle );
+		
+		if( tempDimensions.Width + textXOriginal > textX ) {
+			textX = tempDimensions.Width + textXOriginal;
+		}
+		//textYTime = textYSteps + tempDimensions.Height;
 	}
 	
 	textY = textYOriginal;
@@ -593,6 +605,15 @@ void GameManager::drawStats( int_fast16_t textY ) {
 			core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
 			core::rect< int > tempRectangle = core::rect< int >( textXOld, textYSteps, tempDimensions.Width + textXOld, tempDimensions.Height + textYSteps );
 			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
+			if( tempDimensions.Width + textXOld > textX ) {
+				textX = tempDimensions.Width + textXOld;
+			}
+		}
+		{ //Now we show how long each player took in seconds
+			core::stringw text( player.at( winnersLoadingScreen.at( p ) ).timeTakenLastMaze / 1000 );
+			core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+			core::rect< int > tempRectangle = core::rect< int >( textXOld, textYTimes, tempDimensions.Width + textXOld, tempDimensions.Height + textYTimes );
+			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
 			if( tempDimensions.Width + textXOld > textX ) {
 				textX = tempDimensions.Width + textXOld;
 			}
@@ -646,8 +667,9 @@ GameManager::GameManager() {
 
 		loading = L"Loading...";
 		proTipPrefix = L"Pro tip: ";
-		stats = L"Player stats: ";
+		stats = L"Winners: ";
 		steps = L"Steps: ";
+		times = L"Times: ";
 		network.setGameManager( this );
 		mazeManager.setGameManager( this );
 		isServer = false;
@@ -1248,7 +1270,7 @@ void GameManager::loadFonts() {
 							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) );
 							size -= 2;
 						}
-					} while( size > BuiltInFontWidth && isNotNull( statsFont ) && ( fontDimensions.Width > windowSize.Width  || fontDimensions.Height > windowSize.Height ) );
+					} while( size > BuiltInFontWidth && isNotNull( statsFont ) && ( fontDimensions.Width >= windowSize.Width  || fontDimensions.Height >= windowSize.Height ) );
 
 					size += 3;
 
@@ -1269,7 +1291,7 @@ void GameManager::loadFonts() {
 							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) );
 							size -= 1;
 						}
-					} while( size > BuiltInFontWidth && isNotNull( statsFont ) && ( fontDimensions.Width > windowSize.Width  || fontDimensions.Height > windowSize.Height ) );
+					} while( size > BuiltInFontWidth && isNotNull( statsFont ) && ( fontDimensions.Width >= windowSize.Width / 2  || fontDimensions.Height >= windowSize.Height / 2 ) );
 				}
 			}
 
@@ -2826,6 +2848,7 @@ uint_fast8_t GameManager::run() {
 							}
 
 							if( !alreadyFinished ) {
+								player.at( p ).timeTakenThisMaze = timer->getTime();
 								winners.push_back( p );
 							}
 						}
