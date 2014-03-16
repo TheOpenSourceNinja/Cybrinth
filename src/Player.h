@@ -21,15 +21,25 @@ class Player : public Object {
 	public:
 		Player();
 		virtual ~Player();
+		
 		void draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height );
+		
 		bool isHuman;
+		
+		uint_fast8_t keysCollectedThisMaze;
+		uint_fast8_t keysCollectedLastMaze;
+		
 		void loadTexture( irr::video::IVideoDriver* driver );
 		void loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t size );
+		
 		void moveX( int_fast8_t val );
 		void moveY( int_fast8_t val );
+		
 		void reset();
+		
 		uint_fast16_t stepsTakenLastMaze;
 		uint_fast16_t stepsTakenThisMaze;
+		
 		uint_fast32_t timeTakenLastMaze;
 		uint_fast32_t timeTakenThisMaze;
 	protected:

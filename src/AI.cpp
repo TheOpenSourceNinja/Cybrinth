@@ -266,7 +266,7 @@ void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > currentPositio
 	}
 }
 
-//TODO: Find some way to make IDDFS faster, possibly using a caching mechanism
+//TODO: Find some way to make IDDFS faster, possibly using a caching mechanism or dead-end filling.
 void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > currentPosition, uint_fast16_t depthLimit ) {
 	try {
 		if( gm->getDebugStatus() ) {

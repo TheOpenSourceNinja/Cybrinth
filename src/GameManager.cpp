@@ -42,6 +42,7 @@ enum user_event_t { USER_EVENT_WINDOW_RESIZE, USER_EVENT_JOYSTICK_UP, USER_EVENT
 //TODO: Add more backgrounds.
 //TODO: Support video as backgrounds?
 //TODO: Add theme support (theme = (zipped?) set of backgrounds, player images, collectable images)
+//TODO: Add a progress bar to the loading screen, and text explaining what is happening.
 
 using namespace irr;
 
@@ -537,7 +538,7 @@ void GameManager::drawLoadingScreen() {
 
 /**
  * Should only be called from drawLoadingScreen(). Just putting it here for code separation/readability.
- * //TODO: Add more stats (number of keys collected, estimated difficulty of maze, number of cells backtracked, etc) to loading screen.
+ * //TODO: Add more stats (estimated difficulty of maze, number of cells backtracked, etc) to loading screen.
  */
 void GameManager::drawStats( int_fast16_t textY ) {
 	if( !isNotNull( statsFont ) ) {
@@ -549,11 +550,12 @@ void GameManager::drawStats( int_fast16_t textY ) {
 	int_fast16_t textYOriginal = textY;
 	int_fast16_t textYSteps = textYOriginal;
 	int_fast16_t textYTimes = textYOriginal;
+	int_fast16_t textYKeys = textYOriginal;
 	//To determine how tall each row of text is, we draw the row labels first (their text could conceivably have hangy-down bits like a lower-case y)
 	{
-		core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( stats ) );
+		core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( winnersLabel ) );
 		core::rect< int > tempRectangle = core::rect< int >( textXOriginal, textY, tempDimensions.Width + textXOriginal, tempDimensions.Height + textY );
-		statsFont->draw( stats, tempRectangle, WHITE, true, true, &tempRectangle );
+		statsFont->draw( winnersLabel, tempRectangle, WHITE, true, true, &tempRectangle );
 		
 		if( tempDimensions.Width + textXOriginal > textX ) {
 			textX = tempDimensions.Width + textXOriginal;
@@ -580,13 +582,23 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		if( tempDimensions.Width + textXOriginal > textX ) {
 			textX = tempDimensions.Width + textXOriginal;
 		}
+		textYKeys = textYTimes + tempDimensions.Height;
+	}
+	
+	{
+		core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( keysFoundPerPlayer ) );
+		core::rect< int > tempRectangle = core::rect< int >( textXOriginal, textYKeys, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYKeys );
+		statsFont->draw( keysFoundPerPlayer, tempRectangle, WHITE, true, true, &tempRectangle );
+		
+		if( tempDimensions.Width + textXOriginal > textX ) {
+			textX = tempDimensions.Width + textXOriginal;
+		}
 		//textYTime = textYSteps + tempDimensions.Height;
 	}
 	
 	textY = textYOriginal;
 	//Now we go through and draw the actual player stats
 	for( uint_fast8_t p = 0; p < winnersLoadingScreen.size(); ++p ) {
-	//uint_fast8_t p = 0;
 		int_fast16_t textXOld = textX;
 		{ //First we identify the players
 			core::stringw text( p );
@@ -614,6 +626,15 @@ void GameManager::drawStats( int_fast16_t textY ) {
 			core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
 			core::rect< int > tempRectangle = core::rect< int >( textXOld, textYTimes, tempDimensions.Width + textXOld, tempDimensions.Height + textYTimes );
 			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
+			if( tempDimensions.Width + textXOld > textX ) {
+				textX = tempDimensions.Width + textXOld;
+			}
+		}
+		{ //Now we show how many keys each player collected
+			core::stringw text( player.at( winnersLoadingScreen.at( p ) ).keysCollectedLastMaze );
+			core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+			core::rect< int > tempRectangle = core::rect< int >( textXOld, textYKeys, tempDimensions.Width + textXOld, tempDimensions.Height + textYKeys );
+			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
 			if( tempDimensions.Width + textXOld > textX ) {
 				textX = tempDimensions.Width + textXOld;
 			}
@@ -667,9 +688,10 @@ GameManager::GameManager() {
 
 		loading = L"Loading...";
 		proTipPrefix = L"Pro tip: ";
-		stats = L"Winners: ";
+		winnersLabel = L"Winners: ";
 		steps = L"Steps: ";
 		times = L"Times: ";
+		keysFoundPerPlayer = L"Keys found: ";
 		network.setGameManager( this );
 		mazeManager.setGameManager( this );
 		isServer = false;
@@ -696,9 +718,6 @@ GameManager::GameManager() {
 				std::wcout << L"Looking for fonts in folder " << fontFolders.at( o ) << std::endl;
 			}
 			for( boost::filesystem::recursive_directory_iterator i( fontFolders.at( o ) ); i != end; ++i ) {
-				if( debug ) {
-					std::wcout << L"Trying to load " << i->path() << L" as a font." << std::endl;
-				}
 				if( fontManager.canLoadFont( i->path() ) ) {
 					if( debug ) {
 						std::wcout << L"SUCCESS: " << i->path() << L" is a loadable font." << std::endl;
@@ -799,7 +818,7 @@ GameManager::GameManager() {
 		}
 
 		loadProTips();
-
+		
 		device->setWindowCaption( stringConverter.toWCharArray( PACKAGE_STRING ) );
 
 		if( debug ) {
@@ -1250,7 +1269,7 @@ void GameManager::loadFonts() {
 		{ //Load statsFont
 			core::dimension2d< uint_fast32_t > fontDimensions;
 			if( fontFile != "" ) {
-				uint_fast32_t size = windowSize.Width / numPlayers; //A quick approximation of the width we'll need the text to be.
+				uint_fast32_t size = windowSize.Width / numPlayers / 2; //A quick approximation of the width we'll need the text to be.
 				uint_fast32_t BuiltInFontWidth = gui->getBuiltInFont()->getDimension( L"ekphf" ).Width; //Why e? I ask why not e.
 				if( size > BuiltInFontWidth ) { //5 is the approximate width (I haven't measured it, just judged visually) of Irrlicht's built-in font. If the text needs to be that small, go with the built-in font because it's readable at that size.
 					do {
@@ -1266,7 +1285,7 @@ void GameManager::loadFonts() {
 							}
 							
 							fontDimensions = core::dimension2d< uint_fast32_t >( temp.Width * numPlayers, temp.Height );
-							temp = statsFont->getDimension( stringConverter.toWCharArray( stats ) );
+							temp = statsFont->getDimension( stringConverter.toWCharArray( winnersLabel ) );
 							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) );
 							size -= 2;
 						}
@@ -1287,7 +1306,7 @@ void GameManager::loadFonts() {
 							}
 							
 							fontDimensions = core::dimension2d< uint_fast32_t >( temp.Width * numPlayers, temp.Height );
-							temp = statsFont->getDimension( stringConverter.toWCharArray( stats ) );
+							temp = statsFont->getDimension( stringConverter.toWCharArray( winnersLabel ) );
 							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) );
 							size -= 1;
 						}
@@ -2809,6 +2828,7 @@ uint_fast8_t GameManager::run() {
 								switch( stuff.at( s ).getType() ) {
 									case Collectable::KEY: {
 										++numKeysFound;
+										player.at( p ).keysCollectedThisMaze += 1;
 										stuff.erase( stuff.begin() + s );
 										
 										if( numKeysFound >= numLocks ) {
@@ -3122,7 +3142,7 @@ void GameManager::setupBackground() {
 		uint_fast8_t availableBackgrounds = 3; //The number of different background animations to choose from
 
 		backgroundChosen = rand() % availableBackgrounds;
-		//backgroundChosen = 2;
+		//backgroundChosen = 3;
 		if( debug ) {
 			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;
 		}
@@ -3130,7 +3150,7 @@ void GameManager::setupBackground() {
 		backgroundTexture = nullptr;
 
 		switch( backgroundChosen ) {
-			case 0: {
+			case 0: { //Original starfield: just flies straight forward.
 				// create a particle system
 				scene::ICameraSceneNode* camera = bgscene->addCameraSceneNode();
 				camera->setPosition( core::vector3df( 0, 0, -150 ) );
@@ -3214,7 +3234,7 @@ void GameManager::setupBackground() {
 				ps->setMaterialTexture( 0, pixelTexture );
 				break;
 			}
-			case 1: {
+			case 1: { //New starfield: rotates the camera around.
 				// create a particle system
 				scene::ICameraSceneNode* camera = bgscene->addCameraSceneNode();
 				
@@ -3356,7 +3376,7 @@ void GameManager::setupBackground() {
 				ps->setMaterialTexture( 0, pixelTexture );
 				break;
 			}
-			case 2: {
+			case 2: { //Image files
 				std::vector< boost::filesystem::path > backgroundList;
 
 				boost::filesystem::path backgroundPath( boost::filesystem::current_path()/L"backgrounds" );
@@ -3430,6 +3450,7 @@ void GameManager::setupBackground() {
 				
 				break;
 			}
+			
 			default: {
 				std::wstring error = L"Background chosen is not in switch statement.";
 				throw error;

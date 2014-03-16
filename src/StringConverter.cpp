@@ -257,6 +257,10 @@ const wchar_t* StringConverter::toWCharArray( char* input ) {
 	return toStdWString( input ).c_str();
 }
 
+const wchar_t* StringConverter::toWCharArray( const char* input ) {
+	return toStdWString( input ).c_str();
+}
+
 StringConverter::~StringConverter() {
 	try {
 	} catch ( std::exception &e ) {

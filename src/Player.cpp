@@ -24,6 +24,8 @@ Player::Player() {
 		texture = nullptr;
 		isHuman = true;
 		timeTakenThisMaze = 0;
+		stepsTakenThisMaze = 0;
+		keysCollectedThisMaze = 0;
 		reset();
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::Player(): " << e.what() << std::endl;
@@ -135,6 +137,8 @@ void Player::reset() {
 		stepsTakenThisMaze = 0;
 		timeTakenLastMaze = timeTakenThisMaze;
 		timeTakenThisMaze = 0;
+		keysCollectedLastMaze = keysCollectedThisMaze;
+		keysCollectedThisMaze = 0;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::reset(): " << e.what() << std::endl;
 	}

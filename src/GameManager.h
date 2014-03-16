@@ -192,6 +192,9 @@ class GameManager : public IEventReceiver {
 
 		//wide character strings----------------------------------
 		core::stringw fontFile;
+		
+		core::stringw keysFoundPerPlayer;
+		
 		core::stringw loading;
 
 		core::stringw musicAlbum;
@@ -201,7 +204,7 @@ class GameManager : public IEventReceiver {
 		core::stringw proTipPrefix;
 		std::vector< core::stringw > proTips;
 
-		core::stringw stats;
+		core::stringw winnersLabel;
 		core::stringw steps;
 		
 		core::stringw times;

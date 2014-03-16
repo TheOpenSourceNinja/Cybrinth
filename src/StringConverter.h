@@ -46,6 +46,7 @@ class StringConverter
 		const wchar_t* toWCharArray( std::wstring input );
 		const wchar_t* toWCharArray( irr::core::stringw input );
 		const wchar_t* toWCharArray( char* input );
+		const wchar_t* toWCharArray( const char* input );
 	protected:
 	private:
 };
