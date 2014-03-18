@@ -127,10 +127,10 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 					u32 *texp = texd;
 					bool cflag = ( freetypeFont->Driver->getDriverType() == video::EDT_DIRECT3D8 );
 
-					for( int i = 0; i < bits.rows; ++i ) {
+					for( decltype( bits.rows ) i = 0; i < bits.rows; ++i ) {
 						u32 *rowp = texp;
 
-						for( int j = 0; j < bits.width; ++j ) {
+						for( decltype( bits.width ) j = 0; j < bits.width; ++j ) {
 							if( *pt ) {
 								if( cflag ) {
 									*rowp = *pt;
@@ -210,10 +210,10 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 			memset( texd16, 0, imgw16 * imgh16 * sizeof( u16 ) );
 			u16 *texp16 = texd16;
 
-			for( int y = 0; y < bits.rows; ++y ) {
+			for( decltype( bits.rows ) y = 0; y < bits.rows; ++y ) {
 				u16 *rowp = texp16;
 
-				for( int x = 0; x < bits.width; ++x ) {
+				for( decltype( bits.width ) x = 0; x < bits.width; ++x ) {
 					if( pt[ y * bits.pitch + ( x / 8 ) ] & ( 0x80 >> ( x % 8 ) ) ) {
 						*rowp = 0xffff;
 					}
@@ -376,7 +376,7 @@ bool CGUIFreetypeFont::attach( CGUITTFace *Face, u32 size ) {
 		Glyphs.reallocate( TrueTypeFace->face->num_glyphs );
 		Glyphs.set_used( TrueTypeFace->face->num_glyphs );
 
-		for( int i = 0; i < TrueTypeFace->face->num_glyphs; ++i ) {
+		for( decltype( TrueTypeFace->face->num_glyphs ) i = 0; i < TrueTypeFace->face->num_glyphs; ++i ) {
 			CGUITTGlyph * glyph = new CGUITTGlyph();
 
 			glyph->size = size;
@@ -413,7 +413,7 @@ bool CGUIFreetypeFont::attach( CGUITTFace *Face, u32 size ) {
 
 void CGUIFreetypeFont::clearGlyphs() {
 	try {
-		for( unsigned int i = 0; i < Glyphs.size(); ++i ) {
+		for( decltype( Glyphs.size() ) i = 0; i < Glyphs.size(); ++i ) {
 			if( Glyphs[ i ] ) {
 				Glyphs[ i ]->drop();
 			}
@@ -491,8 +491,8 @@ inline u32 CGUIFreetypeFont::getWidthFromCharacter( wchar_t c ) const {
 		u16 n = getGlyphByChar( c );
 
 		if( n > 0 ) {
-			int w = Glyphs[ n - 1 ]->texw;
-			int_fast16_t left = Glyphs[ n - 1 ]->left;
+			u32 w = Glyphs[ n - 1 ]->texw;
+			u32 left = Glyphs[ n - 1 ]->left;
 
 			if( w + left > 0 )
 				return w + left;
@@ -518,11 +518,6 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 
 		core::dimension2d< irr::s32 > textDimension;
 		core::position2d< irr::s32 > offset = position.UpperLeftCorner;
-		/*video::SColor colors[ 4 ];
-
-		for( int i = 0; i < 4; ++i ) {
-			colors[ i ] = color; //cppcheck alerted me to this: "Variable 'colors' is assigned a value that is never used.
-		}*/
 
 		const wchar_t * text = textstring.c_str();
 
@@ -562,8 +557,8 @@ void CGUIFreetypeFont::draw( const irr::core::stringw& textstring, const irr::co
 
 						if( !Transparency )	a = 255;
 
-						for( int y = 0; y < texh; ++y ) {
-							for( int x = 0; x < texw; ++x ) {
+						for( decltype( texh ) y = 0; y < texh; ++y ) {
+							for( decltype( texw ) x = 0; x < texw; ++x ) {
 								if( !clip || clip->isPointInside( core::position2d< irr::s32 >( offset.X + x + offx, offset.Y + y + offy ) ) ) {
 									if( *pt ) {
 										Driver->draw2DRectangle( video::SColor(( a * *pt ) / 255, r, g, b ), core::rect< irr::s32 >( offset.X + x + offx, offset.Y + y + offy, offset.X + x + offx + 1, offset.Y + y + offy + 1 ) );

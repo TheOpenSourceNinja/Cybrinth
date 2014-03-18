@@ -46,6 +46,8 @@ class GameManager : public IEventReceiver {
 		virtual ~GameManager();
 
 		void drawAll(); //Public because it's called by MazeManager. Otherwise the loading screen wouldn't get drawn during maze generation.
+		
+		void eraseCollectable( uint_fast8_t item );
 
 		Collectable* getCollectable( uint_fast8_t collectable );
 		bool getDebugStatus();

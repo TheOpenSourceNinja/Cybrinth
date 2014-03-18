@@ -307,6 +307,36 @@ void MazeManager::makeRandomLevel() {
 				deadEndsY.erase( deadEndsY.begin() + chosen );
 			}
 		}
+		
+		{
+			uint_fast8_t acidChance = 1; //Magic number: I just chose it randomly.
+			if( rand() % acidChance == 0 ) {
+				if( deadEndsX.empty() ) { //If all the dead ends have been filled with other collectables
+					Collectable temp;
+					temp.setX( rand() % cols );
+					temp.setY( rand() % rows );
+					temp.setType( Collectable::ACID );
+					temp.loadTexture( gameManager->driver );
+					gameManager->stuff.push_back( temp );
+				} else {
+					//Pick one of the dead ends randomly.
+					uint_fast8_t chosen = rand() % deadEndsX.size();
+
+					{ //Finally, create an acid and put it there.
+						Collectable temp;
+						temp.setX( deadEndsX.at( chosen ) );
+						temp.setY( deadEndsY.at( chosen ) );
+						temp.setType( Collectable::ACID );
+						temp.loadTexture( gameManager->driver );
+						gameManager->stuff.push_back( temp );
+					}
+
+					//Remove chosen from the list of dead ends so no other stuff goes there
+					deadEndsX.erase( deadEndsX.begin() + chosen );
+					deadEndsY.erase( deadEndsY.begin() + chosen );
+				}
+			}
+		}
 
 		for( uint_fast8_t p = 0; p < gameManager->numPlayers; ++p ) {
 			gameManager->player[ p ].setPos( gameManager->playerStart[ p ].getX(), gameManager->playerStart[ p ].getY() );
@@ -506,7 +536,7 @@ void MazeManager::resizeMaze( uint_fast8_t newCols, uint_fast8_t newRows ) {
 		uint_fast8_t oldRows = rows;
 
 		if( gameManager->getDebugStatus() && ( newCols < oldCols || newRows < oldRows ) ) {
-			std::wcerr << L"Warning: New maze size smaller than old in some dimension. newCols: " << static_cast<unsigned int>( newCols ) << L" oldCols: " << static_cast<unsigned int>( oldCols ) << L" newRows: " << static_cast<unsigned int>( newRows ) << L" oldRows: " << static_cast<unsigned int>( oldRows ) << std::endl;
+			std::wcerr << L"Warning: New maze size smaller than old in some dimension. newCols: " << static_cast< unsigned int >( newCols ) << L" oldCols: " << static_cast< unsigned int >( oldCols ) << L" newRows: " << static_cast< unsigned int >( newRows ) << L" oldRows: " << static_cast< unsigned int >( oldRows ) << std::endl;
 		}
 
 		MazeCell** newMaze = new MazeCell *[ newCols ];

@@ -29,12 +29,12 @@ std::wstring::size_type SpellChecker::DamerauLevenshteinDistance( std::wstring s
 			std::wstring::size_type infinity = source.size() + target.size(); //Okay, so this isn't really infinity. It's close enough.
 			score[ 0 ][ 0 ] = infinity;
 
-			for ( auto s = 0; s <= source.size(); ++s ) {
+			for ( decltype( source.size() ) s = 0; s <= source.size(); ++s ) {
 				score[ s + 1 ][ 1 ] = s;
 				score[ s + 1 ][ 0 ] = infinity;
 			}
 
-			for ( auto t = 0; t <= target.size(); ++t ) {
+			for ( decltype( target.size() ) t = 0; t <= target.size(); ++t ) {
 				score[ 1 ][ t + 1 ] = t;
 				score[ 0 ][ t + 1 ] = infinity;
 			}
@@ -49,9 +49,9 @@ std::wstring::size_type SpellChecker::DamerauLevenshteinDistance( std::wstring s
 				}
 			}
 
-			for ( auto s = 1; s <= source.size(); ++s ) {
+			for ( decltype( source.size() ) s = 1; s <= source.size(); ++s ) {
 				std::wstring::size_type DB = 0;
-				for ( auto t = 1; t <= target.size(); ++t ) {
+				for ( decltype( target.size() ) t = 1; t <= target.size(); ++t ) {
 					auto s1 = SortedDictionary[ target[ t - 1 ] ];
 					auto t1 = DB;
 
@@ -81,7 +81,7 @@ std::vector< std::wstring >::size_type SpellChecker::indexOfClosestString( std::
 		auto indexOfMinDistance = targets.max_size();
 		auto minDistance = source.max_size();
 
-		for( auto i = 0; i < targets.size(); ++i ) {
+		for( decltype( targets.size() ) i = 0; i < targets.size(); ++i ) {
 			auto distance = DamerauLevenshteinDistance( source, targets.at( i ) );
 			if( distance < minDistance ) {
 				minDistance = distance;

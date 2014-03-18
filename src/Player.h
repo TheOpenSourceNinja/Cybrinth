@@ -17,12 +17,21 @@
 #include "colors.h"
 #include "PreprocessorCommands.h"
 
+//#include "GameManager.h"
+class GameManager; //Avoids circular dependency
+
 class Player : public Object {
 	public:
 		Player();
 		virtual ~Player();
 		
 		void draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height );
+		
+		uint_fast8_t getItem();
+		void giveItem( uint_fast8_t item );
+		
+		bool hasItem();
+		bool hasItem( uint_fast8_t item );
 		
 		bool isHuman;
 		
@@ -35,7 +44,10 @@ class Player : public Object {
 		void moveX( int_fast8_t val );
 		void moveY( int_fast8_t val );
 		
+		void removeItem();
 		void reset();
+		
+		void setGM( GameManager* newGM );
 		
 		uint_fast16_t stepsTakenLastMaze;
 		uint_fast16_t stepsTakenThisMaze;
@@ -44,6 +56,8 @@ class Player : public Object {
 		uint_fast32_t timeTakenThisMaze;
 	protected:
 	private:
+		uint_fast8_t heldItem;
+		GameManager* gm;
 };
 
 #endif // PLAYER_H

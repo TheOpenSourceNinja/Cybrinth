@@ -15,7 +15,7 @@
 #include "PreprocessorCommands.h"
 
 #if HAVE_STDINT_H
-	#include <cstdint>
+	#include <stdint.h>
 #endif
 #if !defined UINT8_MAX && !defined uint8_t && !defined __uint8_t_defined
 	//! 8 bit unsigned variable.

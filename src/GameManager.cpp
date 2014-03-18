@@ -43,6 +43,8 @@ enum user_event_t { USER_EVENT_WINDOW_RESIZE, USER_EVENT_JOYSTICK_UP, USER_EVENT
 //TODO: Support video as backgrounds?
 //TODO: Add theme support (theme = (zipped?) set of backgrounds, player images, collectable images)
 //TODO: Add a progress bar to the loading screen, and text explaining what is happening.
+//TODO: Add scoring (sum of all loading screen stats). Get an achievement for a September score (where a player's score = the current day of Eternal September)
+//TODO: Add an option to use only the built-in font. This should greatly speed up loading on underpowered systems like the Pi.
 
 using namespace irr;
 
@@ -223,20 +225,21 @@ void GameManager::drawAll() {
 				playerStart.at( ps ).draw( driver, cellWidth, cellHeight );
 			}
 
-			//Because of a texture resizing bug in Irrlicht's software renderers, we draw the items (currently all keys, which use a large png as a texture) before the players (which generate their own texture at the correct size) and the maze walls. Otherwise the items could cover the players or maze walls.
-			for( uint_fast8_t i = 0; i < stuff.size(); ++i ) {
-				stuff.at( i ).draw( driver, cellWidth, cellHeight );
-			}
-
 			//Drawing bots before human players makes it easier to play against large numbers of bots
 			for( uint_fast8_t i = 0; i < numBots; ++i ) {
 				player.at( bot.at( i ).getPlayer() ).draw( driver, cellWidth, cellHeight );
 			}
-
+			
+			//Now we draw the players
 			for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
 				if( player.at( p ).isHuman ) {
 					player.at( p ).draw( driver, cellWidth, cellHeight );
 				}
+			}
+			
+			//We used to draw Collectables before the players due to a texture resizing bug in Irrlicht's software renderer (the bug still exists AFAIK). Collectables generally use pre-created images whereas players generally use dynamically generated images. This made players potentially get covered by Collectables and thus invisible. Now that players can hold Collectables, we want them drawn on top of the players.
+			for( uint_fast8_t i = 0; i < stuff.size(); ++i ) {
+				stuff.at( i ).draw( driver, cellWidth, cellHeight );
 			}
 
 			goal.draw( driver, cellWidth, cellHeight );
@@ -324,8 +327,8 @@ void GameManager::drawAll() {
 				core::stringw headfor( L"Head for" );
 				tempDimensions = textFont->getDimension( stringConverter.toWCharArray( headfor ) );
 				textY += tempDimensions.Height;
-				if( textY < (( windowSize.Height / 2 ) - tempDimensions.Height ) ) {
-					textY = (( windowSize.Height / 2 ) - tempDimensions.Height );
+				if( textY < ( ( windowSize.Height / 2 ) - tempDimensions.Height ) ) {
+					textY = ( ( windowSize.Height / 2 ) - tempDimensions.Height );
 				}
 				if( numKeysFound >= numLocks ) {
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
@@ -464,11 +467,12 @@ void GameManager::drawLoadingScreen() {
 				statsFont = gui->getBuiltInFont();
 			}
 
-			core::dimension2d< unsigned int > loadingDimensions = loadingFont->getDimension( stringConverter.toWCharArray( loading ) );
+			//core::dimension2d< unsigned int > loadingDimensions = loadingFont->getDimension( stringConverter.toWCharArray( loading ) );
+			auto loadingDimensions = loadingFont->getDimension( stringConverter.toWCharArray( loading ) );
 			int_fast16_t textY = 0;
 			{
 				int_fast16_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
-				core::rect< int > tempRectangle(textX, textY, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + textY );
+				core::rect< s32 > tempRectangle(textX, textY, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + textY );
 				loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
 
@@ -477,22 +481,22 @@ void GameManager::drawLoadingScreen() {
 					tipFont = gui->getBuiltInFont();
 				}
 				
-				unsigned int proTipHeight = 0;
+				u32 proTipHeight = 0;
 				
 				{
 					textY += loadingDimensions.Height + 1;
 					int_fast16_t textX = 0;
-					core::dimension2d< unsigned int > proTipPrefixDimensions = tipFont->getDimension( stringConverter.toWCharArray( proTipPrefix ) );
-					core::dimension2d< unsigned int > proTipDimensions = tipFont->getDimension( stringConverter.toWCharArray( proTips.at( currentProTip ) ) );
+					core::dimension2d< u32 > proTipPrefixDimensions = tipFont->getDimension( stringConverter.toWCharArray( proTipPrefix ) );
+					core::dimension2d< u32 > proTipDimensions = tipFont->getDimension( stringConverter.toWCharArray( proTips.at( currentProTip ) ) );
 					proTipHeight = std::max( proTipDimensions.Height, proTipPrefixDimensions.Height );
 					
 					{
-						core::rect< int > tempRectangle = core::rect< int >( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
+						core::rect< s32 > tempRectangle( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
 						tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
 					}
 					
 					{
-						core::rect< int > tempRectangle = core::rect< int >( textX + proTipPrefixDimensions.Width, textY, proTipDimensions.Width + textX + proTipPrefixDimensions.Width, proTipDimensions.Height + textY );
+						core::rect< s32 > tempRectangle( textX + proTipPrefixDimensions.Width, textY, proTipDimensions.Width + textX + proTipPrefixDimensions.Width, proTipDimensions.Height + textY );
 						tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
 					}
 					
@@ -553,8 +557,8 @@ void GameManager::drawStats( int_fast16_t textY ) {
 	int_fast16_t textYKeys = textYOriginal;
 	//To determine how tall each row of text is, we draw the row labels first (their text could conceivably have hangy-down bits like a lower-case y)
 	{
-		core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( winnersLabel ) );
-		core::rect< int > tempRectangle = core::rect< int >( textXOriginal, textY, tempDimensions.Width + textXOriginal, tempDimensions.Height + textY );
+		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( winnersLabel ) );
+		core::rect< s32 > tempRectangle( textXOriginal, textY, tempDimensions.Width + textXOriginal, tempDimensions.Height + textY );
 		statsFont->draw( winnersLabel, tempRectangle, WHITE, true, true, &tempRectangle );
 		
 		if( tempDimensions.Width + textXOriginal > textX ) {
@@ -564,8 +568,8 @@ void GameManager::drawStats( int_fast16_t textY ) {
 	}
 	
 	{
-		core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( steps ) );
-		core::rect< int > tempRectangle = core::rect< int >( textXOriginal, textYSteps, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYSteps );
+		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( steps ) );
+		core::rect< s32 > tempRectangle( textXOriginal, textYSteps, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYSteps );
 		statsFont->draw( steps, tempRectangle, WHITE, true, true, &tempRectangle );
 		
 		if( tempDimensions.Width + textXOriginal > textX ) {
@@ -575,8 +579,8 @@ void GameManager::drawStats( int_fast16_t textY ) {
 	}
 	
 	{
-		core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( times ) );
-		core::rect< int > tempRectangle = core::rect< int >( textXOriginal, textYTimes, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYTimes );
+		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( times ) );
+		core::rect< s32 > tempRectangle( textXOriginal, textYTimes, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYTimes );
 		statsFont->draw( times, tempRectangle, WHITE, true, true, &tempRectangle );
 		
 		if( tempDimensions.Width + textXOriginal > textX ) {
@@ -586,8 +590,8 @@ void GameManager::drawStats( int_fast16_t textY ) {
 	}
 	
 	{
-		core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( keysFoundPerPlayer ) );
-		core::rect< int > tempRectangle = core::rect< int >( textXOriginal, textYKeys, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYKeys );
+		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( keysFoundPerPlayer ) );
+		core::rect< s32 > tempRectangle( textXOriginal, textYKeys, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYKeys );
 		statsFont->draw( keysFoundPerPlayer, tempRectangle, WHITE, true, true, &tempRectangle );
 		
 		if( tempDimensions.Width + textXOriginal > textX ) {
@@ -605,8 +609,8 @@ void GameManager::drawStats( int_fast16_t textY ) {
 			text.append( L".P" );
 			text.append( core::stringw( winnersLoadingScreen.at( p ) ) );
 			text.append( L" " );
-			core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
-			core::rect< int > tempRectangle = core::rect< int >( textXOld, textY, tempDimensions.Width + textXOld, tempDimensions.Height + textY );
+			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+			core::rect< s32 > tempRectangle( textXOld, textY, tempDimensions.Width + textXOld, tempDimensions.Height + textY );
 			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
 			if( tempDimensions.Width + textXOld > textX ) {
 				textX = tempDimensions.Width + textXOld;
@@ -614,8 +618,8 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		}
 		{ //Now we show how many steps each player took
 			core::stringw text( player.at( winnersLoadingScreen.at( p ) ).stepsTakenLastMaze );
-			core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
-			core::rect< int > tempRectangle = core::rect< int >( textXOld, textYSteps, tempDimensions.Width + textXOld, tempDimensions.Height + textYSteps );
+			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+			core::rect< s32 > tempRectangle( textXOld, textYSteps, tempDimensions.Width + textXOld, tempDimensions.Height + textYSteps );
 			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
 			if( tempDimensions.Width + textXOld > textX ) {
 				textX = tempDimensions.Width + textXOld;
@@ -623,8 +627,8 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		}
 		{ //Now we show how long each player took in seconds
 			core::stringw text( player.at( winnersLoadingScreen.at( p ) ).timeTakenLastMaze / 1000 );
-			core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
-			core::rect< int > tempRectangle = core::rect< int >( textXOld, textYTimes, tempDimensions.Width + textXOld, tempDimensions.Height + textYTimes );
+			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+			core::rect< s32 > tempRectangle( textXOld, textYTimes, tempDimensions.Width + textXOld, tempDimensions.Height + textYTimes );
 			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
 			if( tempDimensions.Width + textXOld > textX ) {
 				textX = tempDimensions.Width + textXOld;
@@ -632,11 +636,25 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		}
 		{ //Now we show how many keys each player collected
 			core::stringw text( player.at( winnersLoadingScreen.at( p ) ).keysCollectedLastMaze );
-			core::dimension2d< unsigned int > tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
-			core::rect< int > tempRectangle = core::rect< int >( textXOld, textYKeys, tempDimensions.Width + textXOld, tempDimensions.Height + textYKeys );
+			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+			core::rect< s32 > tempRectangle( textXOld, textYKeys, tempDimensions.Width + textXOld, tempDimensions.Height + textYKeys );
 			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
 			if( tempDimensions.Width + textXOld > textX ) {
 				textX = tempDimensions.Width + textXOld;
+			}
+		}
+	}
+}
+
+/**
+ * Removes one item from stuff.
+ */
+void GameManager::eraseCollectable( uint_fast8_t item ) {
+	if( item < stuff.size() ) {
+		stuff.erase( stuff.begin() + item );
+		for( decltype( player.size() ) p = 0; p < player.size(); ++p ) {
+			if( player.at( p ).hasItem() && player.at( p ).getItem() > item ) {
+				player.at( p ).giveItem( player.at( p ).getItem() - 1 );
 			}
 		}
 	}
@@ -712,7 +730,7 @@ GameManager::GameManager() {
 		}
 		
 		//for( std::vector< boost::filesystem::path >::iterator o = fontFolders.begin(); o != fontFolders.end(); o++ ) {
-		for( std::vector< boost::filesystem::path >::size_type o = 0; o < fontFolders.size(); o++ ) {
+		for( decltype( fontFolders.size() ) o = 0; o < fontFolders.size(); o++ ) {
 			//for( boost::filesystem::recursive_directory_iterator i( *o ); i != end; ++i ) {
 			if( debug ) {
 				std::wcout << L"Looking for fonts in folder " << fontFolders.at( o ) << std::endl;
@@ -842,69 +860,72 @@ GameManager::GameManager() {
 				playMusic = false;
 			}
 
-			//Set the audio properties we hope to get: sample rate, channels, etc.
-			int audioRate = 44100; //44.1 KHz is the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
-			Uint16 audioFormat = AUDIO_S16SYS; //CDs use signed 16-bit audio. SYS means use the system's native endianness.
-			int audioChannels = 2; //Almost everything uses stereo. I wish surround sound were more common.
-			int audioBuffers = 4096; //Magic number! Change it if you dare, and see what happens.
+			{//Set the audio properties we hope to get: sample rate, channels, etc.
+				int audioRate = 44100; //44.1 KHz is the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
+				Uint16 audioFormat = AUDIO_S16SYS; //CDs use signed 16-bit audio. SYS means use the system's native endianness.
+				int audioChannels = 2; //Almost everything uses stereo. I wish surround sound were more common.
+				int audioBuffers = 4096; //Magic number! Change it if you dare, and see what happens.
 
-			if( Mix_OpenAudio( audioRate, audioFormat, audioChannels, audioBuffers ) != 0 ) {
-				std::wcerr << L"Unable to initialize audio: " << Mix_GetError() << std::endl;
-				playMusic = false;
-			} else if ( debug ) {
-				std::wcout << L"Initilized audio" << std::endl;
-			}
-
-			if( debug ) {
-				Mix_QuerySpec( &audioRate, &audioFormat, &audioChannels );//Don't assume we got everything we asked for above
-				std::wcout << L"Audio sample rate: " << audioRate << L" Hertz format: ";
-				// cppcheck-suppress duplicateIf
-				if( audioFormat == AUDIO_U16SYS ) {
-					std::wcout << L"AUDIO_U16SYS (equivalent to ";
-					//cppcheck-suppress duplicateIf
-					if( AUDIO_U16SYS == AUDIO_U16LSB ) {
-						std::wcout << L"AUDIO_U16LSB)";
-					} else if( AUDIO_U16SYS == AUDIO_U16MSB ) {
-						std::wcout << L"AUDIO_U16MSB)";
-					} else if( AUDIO_U16SYS == AUDIO_U16 ) {
-						std::wcout << L"AUDIO_U16)";
-					} else {
-						std::wcout << L"unknown)";
-					}
-				//cppcheck-suppress duplicateIf
-				} else if( audioFormat == AUDIO_S16SYS ) {
-					std::wcout << L"AUDIO_S16SYS (equivalent to ";
-					//cppcheck-suppress duplicateIf
-					if( AUDIO_S16SYS == AUDIO_S16LSB ) {
-						std::wcout << L"AUDIO_S16LSB)";
-					} else if( AUDIO_S16SYS == AUDIO_S16MSB ) {
-						std::wcout << L"AUDIO_S16MSB)";
-					} else if( AUDIO_S16SYS == AUDIO_S16 ) {
-						std::wcout << L"AUDIO_S16)";
-					} else {
-						std::wcout << L"unknown)";
-					}
-				} else if( audioFormat == AUDIO_U8 ) {
-					std::wcout << L"AUDIO_U8";
-				} else if( audioFormat == AUDIO_S8 ) {
-					std::wcout << L"AUDIO_S8";
-				} else if( audioFormat == AUDIO_U16LSB ) {
-					std::wcout << L"AUDIO_U16LSB";
-				} else if( audioFormat == AUDIO_S16LSB ) {
-					std::wcout << L"AUDIO_S16LSB";
-				} else if( audioFormat == AUDIO_U16MSB ) {
-					std::wcout << L"AUDIO_U16MSB";
-				} else if( audioFormat == AUDIO_S16MSB ) {
-					std::wcout << L"AUDIO_S16MSB";
-				} else if( audioFormat == AUDIO_U16 ) {
-					std::wcout << L"AUDIO_U16";
-				} else if( audioFormat == AUDIO_S16 ) {
-					std::wcout << L"AUDIO_S16";
-				} else {
-					std::wcout << L"unknown";
+				if( Mix_OpenAudio( audioRate, audioFormat, audioChannels, audioBuffers ) != 0 ) {
+					std::wcerr << L"Unable to initialize audio: " << Mix_GetError() << std::endl;
+					playMusic = false;
+				} else if ( debug ) {
+					std::wcout << L"Initilized audio" << std::endl;
 				}
 
-				std::wcout << " channels: " << audioChannels  << L" buffers: " << audioBuffers << std::endl;
+				if( debug ) {
+					Mix_QuerySpec( &audioRate, &audioFormat, &audioChannels );//Don't assume we got everything we asked for above
+					std::wcout << L"Audio sample rate: " << audioRate << L" Hertz format: ";
+					// cppcheck-suppress duplicateIf
+					if( audioFormat == AUDIO_U16SYS ) {
+						std::wcout << L"AUDIO_U16SYS (equivalent to ";
+						//cppcheck-suppress duplicateIf
+						if( AUDIO_U16SYS == AUDIO_U16LSB ) {
+							std::wcout << L"AUDIO_U16LSB";
+						} else if( AUDIO_U16SYS == AUDIO_U16MSB ) {
+							std::wcout << L"AUDIO_U16MSB";
+						} else if( AUDIO_U16SYS == AUDIO_U16 ) {
+							std::wcout << L"AUDIO_U16";
+						} else {
+							std::wcout << L"unknown";
+						}
+					std::wcout << L")";
+					//cppcheck-suppress duplicateIf
+					} else if( audioFormat == AUDIO_S16SYS ) {
+						std::wcout << L"AUDIO_S16SYS (equivalent to ";
+						//cppcheck-suppress duplicateIf
+						if( AUDIO_S16SYS == AUDIO_S16LSB ) {
+							std::wcout << L"AUDIO_S16LSB";
+						} else if( AUDIO_S16SYS == AUDIO_S16MSB ) {
+							std::wcout << L"AUDIO_S16MSB";
+						} else if( AUDIO_S16SYS == AUDIO_S16 ) {
+							std::wcout << L"AUDIO_S16";
+						} else {
+							std::wcout << L"unknown";
+						}
+					std::wcout << L")";
+					} else if( audioFormat == AUDIO_U8 ) {
+						std::wcout << L"AUDIO_U8";
+					} else if( audioFormat == AUDIO_S8 ) {
+						std::wcout << L"AUDIO_S8";
+					} else if( audioFormat == AUDIO_U16LSB ) {
+						std::wcout << L"AUDIO_U16LSB";
+					} else if( audioFormat == AUDIO_S16LSB ) {
+						std::wcout << L"AUDIO_S16LSB";
+					} else if( audioFormat == AUDIO_U16MSB ) {
+						std::wcout << L"AUDIO_U16MSB";
+					} else if( audioFormat == AUDIO_S16MSB ) {
+						std::wcout << L"AUDIO_S16MSB";
+					} else if( audioFormat == AUDIO_U16 ) {
+						std::wcout << L"AUDIO_U16";
+					} else if( audioFormat == AUDIO_S16 ) {
+						std::wcout << L"AUDIO_S16";
+					} else {
+						std::wcout << L"unknown";
+					}
+
+					std::wcout << " channels: " << audioChannels  << L" buffers: " << audioBuffers << std::endl;
+				}
 			}
 
 			music = nullptr;
@@ -958,6 +979,7 @@ GameManager::GameManager() {
 		for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
 			player.at( p ).setColorBasedOnNum( p );
 			player.at( p ).loadTexture( driver );
+			player.at( p ).setGM( this );
 		}
 
 		goal.loadTexture( driver );
@@ -1054,10 +1076,30 @@ Goal* GameManager::getGoal() {
  */
 Collectable* GameManager::getKey( uint_fast8_t key ) {
 	try {
-		//TODO: Update this function if/when we implement Collectables other than keys
-		return getCollectable( key );
+		if( key <= getNumKeys() ) {
+			Collectable* result = nullptr;
+			uint_fast8_t currentKey = 0;
+			
+			for( decltype( stuff.size() ) s = 0; s < stuff.size(); ++s ) {
+				if( stuff.at( s ).getType() == Collectable::KEY ) {
+					currentKey++;
+					if( currentKey == key ) {
+						result = &stuff.at( s );
+					}
+				}
+			}
+			
+			return result;
+		} else {
+			std::wstring error = L"Collectable ";
+			error += static_cast< unsigned int >( key );
+			error += L" is not a key.";
+			throw error;
+		}
 	} catch( std::exception &e ) {
 		std::wcout << L"Error in GameManager::getKey(): " << e.what() << std::endl;
+	} catch( std::wstring e ) {
+		std::wcout << L"Error in GameManager::getKey(): " << e << std::endl;
 	}
 }
 
@@ -1075,15 +1117,17 @@ MazeManager* GameManager::getMazeManager() {
 
 /**
  * Lets other objects know how many locks there are.
- * Returns: the number of keys (currently stuff.size()).
+ * Returns: the number of keys.
  */
 uint_fast8_t GameManager::getNumKeys() {
-	try { //TODO: Update this function if/when we implement Collectables other than keys
-		if( numLocks < stuff.size() ) {
-			return numLocks;
-		} else {
-			return stuff.size();
+	try {
+		uint_fast8_t result = 0;
+		for( decltype( stuff.size() ) s = 0; s < stuff.size(); ++s ) {
+			if( stuff.at( s ).getType() == Collectable::KEY ) {
+				result++;
+			}
 		}
+		return result;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getNumKeys(): " << e.what() << std::endl;
 		return UINT_FAST8_MAX;
@@ -1418,7 +1462,7 @@ void GameManager::loadNextSong() {
 
 		//Figure out where we are in the music list
 		std::vector<boost::filesystem::path>::size_type positionInList = 0;
-		for( auto i = 0; i < musicList.size(); ++i ) {
+		for( decltype( musicList.size() ) i = 0; i < musicList.size(); ++i ) {
 			if( musicList.at( i ) == currentMusic ) {
 				positionInList = i;
 				break;
@@ -1437,7 +1481,7 @@ void GameManager::loadNextSong() {
 		if( !isNotNull( music ) ) {
 			throw( std::wstring( L"Unable to load music file: " ) + stringConverter.toStdWString( Mix_GetError() ) );
 		} else {
-			int musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to *repeat* the music. -1 means infinite, 0 means don't repeat.
+			auto musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to *repeat* the music. -1 means infinite, 0 means don't repeat.
 
 			if( musicStatus == -1 ) {
 				throw( std::wstring( L"Unable to play music file: " ) + stringConverter.toStdWString( Mix_GetError() ) );
@@ -1695,11 +1739,25 @@ void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 	try {
 		if( numPlayers > p && mazeManager.cols > 0 ) {
 			if( direction < 0 ) {
+				if( player.at( p ).hasItem() && player.at( p ).getX() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() == MazeCell::WALL ) {
+					player.at( p ).removeItem();
+					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setLeft( MazeCell::NONE );
+					mazeManager.maze[ player.at( p ).getX() - 1 ][ player.at( p ).getY() ].setRight( MazeCell::NONE );
+				}
+				
 				if( player.at( p ).getX() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() == MazeCell::NONE ) {
 					player.at( p ).moveX( -1 );
 				}
-			} else if( player.at( p ).getX() < ( mazeManager.cols - 1 ) && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() == MazeCell::NONE ) {
-				player.at( p ).moveX( 1 );
+			} else {
+				if( player.at( p ).hasItem() && player.at( p ).getX() < ( mazeManager.cols - 1 ) && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() == MazeCell::WALL ) {
+					player.at( p ).removeItem();
+					mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].setLeft( MazeCell::NONE );
+					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setRight( MazeCell::NONE );
+				}
+				
+				if( player.at( p ).getX() < ( mazeManager.cols - 1 ) && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() == MazeCell::NONE ) {
+					player.at( p ).moveX( 1 );
+				}
 			}
 
 			network.sendPlayerPos( p, player.at( p ).getX(), player.at( p ).getY() );
@@ -1736,11 +1794,25 @@ void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 	try {
 		if( numPlayers > p && mazeManager.rows > 0 ) {
 			if( direction < 0 ) {
+				if( player.at( p ).hasItem() && player.at( p ).getY() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() == MazeCell::WALL ) {
+					player.at( p ).removeItem();
+					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setTop( MazeCell::NONE );
+					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() - 1 ].setBottom( MazeCell::NONE );
+				}
+				
 				if( player.at( p ).getY() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() == MazeCell::NONE ) {
 					player.at( p ).moveY( -1 );
 				}
-			} else if( player.at( p ).getY() < ( mazeManager.rows - 1 ) && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() == MazeCell::NONE ) {
-				player.at( p ).moveY( 1 );
+			} else {
+				if( player.at( p ).hasItem() && player.at( p ).getY() < ( mazeManager.rows - 1 ) && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() == MazeCell::WALL ) {
+					player.at( p ).removeItem();
+					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].setTop( MazeCell::NONE );
+					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setBottom( MazeCell::NONE );
+				}
+				
+				if( player.at( p ).getY() < ( mazeManager.rows - 1 ) && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() == MazeCell::NONE ) {
+					player.at( p ).moveY( 1 );
+				}
 			}
 
 			network.sendPlayerPos( p, player.at( p ).getX(), player.at( p ).getY() );
@@ -1812,7 +1884,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			case EET_KEY_INPUT_EVENT: {
 				if( event.KeyInput.PressedDown ) { //Don't react when the key is released, only when it's pressed.
 					if( !( showingMenu || showingLoadingScreen ) ) {
-						for( auto k = 0; k < keyMap.size(); ++k ) {
+						for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
 							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
 								if( doEventActions( k, event ) ) {
 									return true;
@@ -1821,7 +1893,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							}
 						}
 					} else if( showingMenu ) { //We only want certain actions to work if we're showing the menu
-						for( auto k = 0; k < keyMap.size(); ++k ) {
+						for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
 							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
 								switch( keyMap.at( k ).getAction() ) {
 									case KeyMapping::MENU:
@@ -1872,7 +1944,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						}
 				}
 
-				for( auto k = 0; k < keyMap.size(); ++k ) {
+				for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
 					if( event.MouseInput.Event == keyMap.at( k ).getMouseEvent() ) {
 						if( doEventActions( k, event ) ) {
 							return true;
@@ -2103,7 +2175,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 					}
 				
 					//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
-					for( auto loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
+					for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
 					
 						video::IImageLoader* loader = driver->getImageLoader( loaderNum );
 						io::IFileSystem* fileSystem = device->getFileSystem();
@@ -2824,12 +2896,28 @@ uint_fast8_t GameManager::run() {
 					//Check if any of the players have landed on a collectable item
 					for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
 						for( uint_fast8_t s = 0; s < stuff.size(); ++s ) {
-							if( player.at( p ).getX() == stuff.at( s ).getX() && player.at( p ).getY() == stuff.at( s ).getY() ) {
+							if( !stuff.at( s ).owned && player.at( p ).getX() == stuff.at( s ).getX() && player.at( p ).getY() == stuff.at( s ).getY() ) {
 								switch( stuff.at( s ).getType() ) {
+									case Collectable::ACID: {
+										bool anyPlayerHasItem = false;
+										for( decltype( player.size() ) someOtherPlayer = 0; someOtherPlayer < player.size(); ++someOtherPlayer ) {
+											if( player.at( someOtherPlayer ).hasItem( s ) ) {
+												anyPlayerHasItem = true;
+												break;
+											}
+										}
+										
+										if( !anyPlayerHasItem ) {
+											player.at( p ).giveItem( s );
+										}
+										
+										break;
+									}
 									case Collectable::KEY: {
 										++numKeysFound;
 										player.at( p ).keysCollectedThisMaze += 1;
-										stuff.erase( stuff.begin() + s );
+										eraseCollectable( s );
+										//stuff.erase( stuff.begin() + s );
 										
 										if( numKeysFound >= numLocks ) {
 											for( uint_fast8_t c = 0; c < mazeManager.cols; ++c ) {
@@ -3407,7 +3495,7 @@ void GameManager::setupBackground() {
 							}
 						
 							//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
-							for( auto loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
+							for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
 							
 								video::IImageLoader* loader = driver->getImageLoader( loaderNum );
 								io::IFileSystem* fileSystem = device->getFileSystem();

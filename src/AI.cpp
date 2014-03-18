@@ -15,6 +15,8 @@
 #include "Player.h"
 #include "StringConverter.h"
 
+//TODO: Update the AI to reflect the addition of a wall dissolver item (icon: spray can labeled 'ACID')
+
 AI::AI() : controlsPlayer(0) {
 	try {
 		setup( nullptr, 0, 0, nullptr, false, DEPTH_FIRST_SEARCH, 300 ); //setup( pointer to the maze, number of columns, number of rows, pointer to GameManager, whether to start solved, the algorithm to use, and the movement delay )
@@ -41,9 +43,9 @@ void AI::allKeysFound() { //Makes the bot 'forget' that it has visited certain m
 		}
 		core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 
-		for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
+		for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 
-			for( auto i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
+			for( decltype( pathsToLockedCells.at( o ).size() ) i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 
 				std::vector< core::position2d< uint_fast8_t > >::size_type j = 0;
 				while( j < cellsVisited.size() ) {
@@ -324,7 +326,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 				if( possibleDirections.size() == 0 && partialSolution.size() != 0 ) {
 					partialSolution.pop_back();
 				} else {
-					for( auto i = 0; ( i < possibleDirections.size() && solution.empty() ); ++i ) {
+					for( decltype( possibleDirections.size() ) i = 0; ( i < possibleDirections.size() && solution.empty() ); ++i ) {
 						direction_t choice = possibleDirections.at( i );
 						uint_fast16_t newDepthLimit = depthLimit - 1;
 						switch( choice ) {
@@ -470,7 +472,7 @@ void AI::move() {
 					if( possibleDirections.size() == 0 && pathTaken.size() != 0 && !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
 						pathTaken.pop_back();
 						core::position2d< uint_fast8_t > oldPosition = pathTaken.back();
-						for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
+						for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 							if( pathsToLockedCells.at( o ).back() != oldPosition ) {
 								pathsToLockedCells.at( o ).push_back( oldPosition );
 							}
@@ -491,7 +493,7 @@ void AI::move() {
 							case UP: {
 								core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y - 1 );
 								pathTaken.push_back( position );
-								for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
+								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 									//for( std::vector< core::dimension2d< uint_fast8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 										pathsToLockedCells.at( o ).push_back( position );
 									//}
@@ -501,7 +503,7 @@ void AI::move() {
 							case DOWN: {
 								core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y + 1 );
 								pathTaken.push_back( position );
-								for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
+								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 									//for( std::vector< core::dimension2d< uint_fast8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 										pathsToLockedCells.at( o ).push_back( position );
 									//}
@@ -511,7 +513,7 @@ void AI::move() {
 							case LEFT: {
 								core::position2d< uint_fast8_t > position( currentPosition.X - 1, currentPosition.Y );
 								pathTaken.push_back( position );
-								for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
+								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 									//for( std::vector< core::dimension2d< uint_fast8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 										pathsToLockedCells.at( o ).push_back( position );
 									//}
@@ -521,7 +523,7 @@ void AI::move() {
 							case RIGHT: {
 								core::position2d< uint_fast8_t > position( currentPosition.X + 1, currentPosition.Y );
 								pathTaken.push_back( position );
-								for( auto o = 0; o < pathsToLockedCells.size(); ++o ) {
+								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 									//for( std::vector< core::dimension2d< uint_fast8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 										pathsToLockedCells.at( o ).push_back( position );
 									//}
@@ -722,7 +724,7 @@ void AI::reset() {
 		solved = false;
 		DFSCellsVisited.clear();
 		IDDFSCellsVisited.clear();
-		for( auto i = 0; i < pathsToLockedCells.size(); ++i ) {
+		for( decltype( pathsToLockedCells.size() ) i = 0; i < pathsToLockedCells.size(); ++i ) {
 			pathsToLockedCells.at( i ).clear();
 		}
 		pathsToLockedCells.clear();

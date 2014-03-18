@@ -9,7 +9,7 @@
 		<Option compiler="gcc" />
 		<Option show_notes="0">
 			<notes>
-				<![CDATA[Cybrinth created by James Dearing, copyright 2012-2013 and licensed under the GNU AGPL (see the file COPYING)]]>
+				<![CDATA[Cybrinth created by James Dearing, copyright 2012-2014 and licensed under the GNU AGPL (see the file COPYING)]]>
 			</notes>
 		</Option>
 		<MakeCommands>
@@ -62,8 +62,10 @@
 		<Linker>
 			<Add directory="$(Boost)/lib" />
 		</Linker>
-		<Unit filename="compiled-images/key.c">
-			<Option compilerVar="CC" />
+		<Unit filename="compiled-images/acid.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="compiled-images/key.cpp">
 			<Option target="cybrinth" />
 		</Unit>
 		<Unit filename="controls.cfg">

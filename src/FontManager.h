@@ -31,12 +31,12 @@ class FontManager {
 	public:
 		FontManager();
 		~FontManager();
-		irr::gui::IGUIFont* GetTtFont( irr::video::IVideoDriver* driver, irr::core::stringw filename_, unsigned int size_, bool antiAlias_ = true, bool transparency_ = true );
+		irr::gui::IGUIFont* GetTtFont( irr::video::IVideoDriver* driver, irr::core::stringw filename_, irr::u32 size_, bool antiAlias_ = true, bool transparency_ = true );
 		bool canLoadFont( irr::core::stringw filename_ );
 		bool canLoadFont( boost::filesystem::path filename_ );
 
 	protected:
-		irr::core::stringw MakeFontIdentifier( irr::core::stringw filename_, unsigned int size_, bool antiAlias_, bool transparency_ );
+		irr::core::stringw MakeFontIdentifier( irr::core::stringw filename_, irr::u32 size_, bool antiAlias_, bool transparency_ );
 
 	private:
 		typedef std::map<irr::core::stringw, CGUITTFace*> FaceMap;

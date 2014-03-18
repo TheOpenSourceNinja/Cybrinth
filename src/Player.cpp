@@ -13,6 +13,8 @@
 #include <iostream>
 #include "colors.h"
 
+#include "GameManager.h"
+
 Player::Player() {
 	try {
 		x = 0;
@@ -27,6 +29,7 @@ Player::Player() {
 		stepsTakenThisMaze = 0;
 		keysCollectedThisMaze = 0;
 		reset();
+		setGM( nullptr );
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::Player(): " << e.what() << std::endl;
 	}
@@ -113,10 +116,34 @@ void Player::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_f
 	}
 }
 
+uint_fast8_t Player::getItem() {
+	return heldItem;
+}
+
+void Player::giveItem( uint_fast8_t item ) {
+	heldItem = item;
+	if( hasItem() && gm != nullptr ) {
+		gm->getCollectable( heldItem )->setX( x );
+		gm->getCollectable( heldItem )->setY( y );
+		gm->getCollectable( heldItem )->owned = true;
+	}
+}
+
+bool Player::hasItem() {
+	return heldItem != UINT_FAST8_MAX;
+}
+
+bool Player::hasItem( uint_fast8_t item ) {
+	return heldItem == item;
+}
+
 void Player::moveX( int_fast8_t val ) {
 	try {
 		Object::moveX( val );
 		stepsTakenThisMaze += 1;
+		if( hasItem() && gm != nullptr ) {
+			gm->getCollectable( heldItem )->moveX( val );
+		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::moveX(): " << e.what() << std::endl;
 	}
@@ -126,8 +153,18 @@ void Player::moveY( int_fast8_t val ) {
 	try {
 		Object::moveY( val );
 		stepsTakenThisMaze += 1;
+		if( hasItem() && gm != nullptr ) {
+			gm->getCollectable( heldItem )->moveY( val );
+		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::moveY(): " << e.what() << std::endl;
+	}
+}
+
+void Player::removeItem() {
+	if( hasItem() ) {
+		gm->eraseCollectable( heldItem );
+		heldItem = UINT_FAST8_MAX;
 	}
 }
 
@@ -139,7 +176,12 @@ void Player::reset() {
 		timeTakenThisMaze = 0;
 		keysCollectedLastMaze = keysCollectedThisMaze;
 		keysCollectedThisMaze = 0;
+		heldItem = UINT_FAST8_MAX;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::reset(): " << e.what() << std::endl;
 	}
+}
+
+void Player::setGM( GameManager* newGM ) {
+	gm = newGM;
 }
