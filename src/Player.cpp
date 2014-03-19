@@ -120,9 +120,14 @@ uint_fast8_t Player::getItem() {
 	return heldItem;
 }
 
-void Player::giveItem( uint_fast8_t item ) {
+Collectable::type_t Player::getItemType() {
+	return heldItemType;
+}
+
+void Player::giveItem( uint_fast8_t item, Collectable::type_t type ) {
 	heldItem = item;
-	if( hasItem() && gm != nullptr ) {
+	heldItemType = type;
+	if( gm != nullptr ) {
 		gm->getCollectable( heldItem )->setX( x );
 		gm->getCollectable( heldItem )->setY( y );
 		gm->getCollectable( heldItem )->owned = true;

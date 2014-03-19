@@ -13,6 +13,7 @@
 #define PLAYER_H
 
 #include <irrlicht.h>
+#include "Collectable.h"
 #include "Object.h"
 #include "colors.h"
 #include "PreprocessorCommands.h"
@@ -28,7 +29,8 @@ class Player : public Object {
 		void draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height );
 		
 		uint_fast8_t getItem();
-		void giveItem( uint_fast8_t item );
+		Collectable::type_t getItemType();
+		void giveItem( uint_fast8_t item, Collectable::type_t type );
 		
 		bool hasItem();
 		bool hasItem( uint_fast8_t item );
@@ -57,6 +59,7 @@ class Player : public Object {
 	protected:
 	private:
 		uint_fast8_t heldItem;
+		Collectable::type_t heldItemType;
 		GameManager* gm;
 };
 

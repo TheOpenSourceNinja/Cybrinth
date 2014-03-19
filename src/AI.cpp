@@ -36,18 +36,12 @@ void AI::allKeysFound() { //Makes the bot 'forget' that it has visited certain m
 	try {
 		noKeysLeft = true;
 		findSolution();
-		//pathTaken.clear();
-		//cellsVisited.clear();
-		if( gm->getDebugStatus() ) {
-			//std::wcout << L"Bot " << controlsPlayer << L" acknowledging all keys found" << std::endl;
-		}
-		core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 
 		for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 
 			for( decltype( pathsToLockedCells.at( o ).size() ) i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
 
-				std::vector< core::position2d< uint_fast8_t > >::size_type j = 0;
+				decltype( cellsVisited.size() ) j = 0;
 				while( j < cellsVisited.size() ) {
 
 					if( ( cellsVisited.at( j ).X == pathsToLockedCells.at( o )[ i ].X && cellsVisited.at( j ).Y == pathsToLockedCells.at( o )[ i ].Y ) ) {
@@ -128,7 +122,8 @@ bool AI::alreadyVisitedIDDFS( irr::core::position2d< uint_fast8_t > position ) {
 
 bool AI::atGoal() {
 	try {
-		core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
+		Player* p = gm->getPlayer( controlsPlayer );
+		core::position2d< uint_fast8_t > currentPosition( p->getX(), p->getY() );
 		Goal* goal = gm->getGoal();
 		if( currentPosition.X == goal->getX() && currentPosition.Y == goal->getY() ) {
 			return true;
@@ -160,37 +155,40 @@ void AI::findSolution() {
 		//numKeysInSolution = 0;
 		keyImSeeking = 0;
 		solution.clear();
-		irr::core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
-		switch( algorithm ) {
-			case DEPTH_FIRST_SEARCH: {
-				DFSCellsVisited.clear();
-				findSolutionDFS( currentPosition );
-				solved = true;
-				break;
+		{
+			Player* p = gm->getPlayer( controlsPlayer );
+			irr::core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
+			switch( algorithm ) {
+				case DEPTH_FIRST_SEARCH: {
+					DFSCellsVisited.clear();
+					findSolutionDFS( currentPosition );
+					solved = true;
+					break;
+				}
+				case ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH: {
+					DFSCellsVisited.clear();
+					findSolutionIDDFS( currentPosition );
+					solved = true;
+					break;
+				}
+				case RIGHT_HAND_RULE: 
+				case LEFT_HAND_RULE: {
+					//These two algorithms would work the same as if startSolved were false (i.e. bots dont' know the solution). So, instead of adding needless code, we just set startSolved to false.
+					solved = false;
+					startSolved = false;
+					break;
+				}
+				default: {
+					StringConverter sc;
+					throw( std::wstring( L"Algorithm " ) + sc.toStdWString( algorithm ) + L" not yet added to findSolution()." );
+				}
 			}
-			case ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH: {
-				DFSCellsVisited.clear();
-				findSolutionIDDFS( currentPosition );
-				solved = true;
-				break;
-			}
-			case RIGHT_HAND_RULE: 
-			case LEFT_HAND_RULE: {
-				//These two algorithms would work the same as if startSolved were false (i.e. bots dont' know the solution). So, instead of adding needless code, we just set startSolved to false.
-				solved = false;
-				startSolved = false;
-				break;
-			}
-			default: {
-				StringConverter sc;
-				throw( std::wstring( L"Algorithm " ) + sc.toStdWString( algorithm ) + L" not yet added to findSolution()." );
-			}
-		}
 
-		if( !solution.empty() ) {
-			//while( solution.back().X == currentPosition.X && solution.back().Y == currentPosition.Y ) {
-			while( solution.back() == currentPosition ) {
-				solution.pop_back();
+			if( !solution.empty() ) {
+				//while( solution.back().X == currentPosition.X && solution.back().Y == currentPosition.Y ) {
+				while( solution.back() == currentPosition ) {
+					solution.pop_back();
+				}
 			}
 		}
 	} catch( std::exception &e ) {
@@ -454,16 +452,16 @@ void AI::move() {
 						}
 
 						//See which direction(s) the bot can move
-						if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+						if( currentPosition.Y > 0 && ( maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y ].getTop() != MazeCell::ACIDPROOFWALL && gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 							possibleDirections.push_back( UP );
 						}
-						if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X > 0 && ( maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOFWALL && gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( LEFT );
 						}
-						if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+						if( currentPosition.Y < (rows - 1) && ( maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() != MazeCell::ACIDPROOFWALL && gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 							possibleDirections.push_back( DOWN );
 						}
-						if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X < (cols - 1) && ( maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE || ( maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOFWALL && gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( RIGHT );
 						}
 					}
@@ -552,16 +550,16 @@ void AI::move() {
 					if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
 
 						//See which direction(s) the bot can move
-						if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+						if( currentPosition.Y > 0 && ( maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y ].getTop() != MazeCell::ACIDPROOFWALL && ( gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 							possibleDirections.push_back( UP );
 						}
-						if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X > 0 && ( maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOFWALL && ( gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( LEFT );
 						}
-						if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+						if( currentPosition.Y < (rows - 1) && ( maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() != MazeCell::ACIDPROOFWALL && ( gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 							possibleDirections.push_back( DOWN );
 						}
-						if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X < (cols - 1) && ( maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE || ( maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOFWALL && ( gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( RIGHT );
 						}
 					}

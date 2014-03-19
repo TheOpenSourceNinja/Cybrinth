@@ -72,8 +72,10 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, ui
 	try {
 		video::SColor wallColor = WHITE;
 		video::SColor lockColor = BROWN;
+		video::SColor acidProofWallColor = GREEN;
 		video::SColor wallShadowColor = BLACK;
 		video::SColor lockShadowColor = BLACK;
+		video::SColor acidProofWallShadowColor = BLACK;
 		core::position2d< s32 > shadowOffset( 1, 1 );
 
 		for( uint_fast8_t x = 0; x < cols; ++x ) {
@@ -82,6 +84,9 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, ui
 					if( maze[ x ][ y ].getTop() == MazeCell::WALL ) {
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), wallShadowColor );
 						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), wallColor );
+					} else if( maze[ x ][ y ].getTop() == MazeCell::ACIDPROOFWALL ) {
+						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), acidProofWallShadowColor );
+						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), acidProofWallColor );
 					} else if( maze[ x ][ y ].getTop() == MazeCell::LOCK ) {
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), lockShadowColor );
 						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), lockColor );
@@ -90,20 +95,23 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, ui
 					if( maze[ x ][ y ].getLeft() == MazeCell::WALL ) {
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), wallShadowColor );
 						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), wallColor );
+					} else if( maze[ x ][ y ].getLeft() == MazeCell::ACIDPROOFWALL ) {
+						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), acidProofWallShadowColor );
+						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), acidProofWallColor );
 					} else if( maze[ x ][ y ].getLeft() == MazeCell::LOCK ) {
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), lockShadowColor );
 						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), lockColor );
 					}
 
 					//Only cells on the right or bottom edge of the maze should have anything other than NONE as right or bottom, and then it should only be a solid WALL
-					if( maze[ x ][ y ].getRight() == MazeCell::WALL ) {
+					if( maze[ x ][ y ].getRight() == MazeCell::ACIDPROOFWALL ) {
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * y ), shadowOffset + core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallShadowColor );
-						driver->draw2DLine( core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * y ), core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallColor );
+						driver->draw2DLine( core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * y ), core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), acidProofWallColor );
 					}
 
-					if( maze[ x ][ y ].getBottom() == MazeCell::WALL ) {
+					if( maze[ x ][ y ].getBottom() == MazeCell::ACIDPROOFWALL ) {
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), shadowOffset + core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallShadowColor );
-						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallColor );
+						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), acidProofWallColor );
 					}
 				}
 			}
@@ -205,25 +213,34 @@ void MazeManager::makeRandomLevel() {
 		for( uint_fast8_t p = 0; p < gameManager->numPlayers; ++p ) {
 			gameManager->playerStart[ p ].reset();
 		}
-
-		//do {
-		//player.setX(rand() % cols);
-		//player.setY(rand() % rows);
-		gameManager->goal.setX( rand() % cols );
-		gameManager->goal.setY( rand() % rows );
-		//} while (player.getX() == gameManager->goal.getX() && player.getY() == gameManager->goal.getY());
-
-		recurseRandom( gameManager->goal.getX(), gameManager->goal.getY(), 0, 0 ); //Start recursion from the gameManager->goal; for some reason that makes the mazes harder than if we started recursion from the player's starting point.
-
+		
+		{
+			uint_fast8_t goalX = rand() % cols;
+			uint_fast8_t goalY = rand() % rows;
+			gameManager->goal.setX( goalX );
+			gameManager->goal.setY( goalY );
+			//Make the goal inaccessible unless we've found all the keys (locks are place elsewhere in the code but one lock does get placed at the goal)
+			maze[ goalX ][ goalY ].setTop( MazeCell::ACIDPROOFWALL );
+			maze[ goalX ][ goalY ].setLeft( MazeCell::ACIDPROOFWALL );
+			if( goalX < ( cols - 1 ) ) {
+				maze[ goalX + 1 ][ goalY ].setLeft( MazeCell::ACIDPROOFWALL );
+			}
+			if( goalY < ( rows - 1 ) ) {
+				maze[ goalX ][ goalY + 1 ].setTop( MazeCell::ACIDPROOFWALL );
+			}
+			
+			recurseRandom( goalX, goalY, 0, 0 ); //Start recursion from the goal's position; for some reason that makes the mazes harder than if we started recursion from the player's starting point.
+		}
+		
 		//Add walls at maze borders
 		for( uint_fast8_t x = 0; x < cols; ++x ) {
-			maze[ x ][ 0 ].setTop( MazeCell::WALL );
-			maze[ x ][ rows-1 ].setBottom( MazeCell::WALL );
+			maze[ x ][ 0 ].setTop( MazeCell::ACIDPROOFWALL );
+			maze[ x ][ rows-1 ].setBottom( MazeCell::ACIDPROOFWALL );
 		}
 
 		for( uint_fast8_t y = 0; y < rows; ++y ) {
-			maze[ 0 ][ y ].setLeft( MazeCell::WALL );
-			maze[ cols-1 ][ y ].setRight( MazeCell::WALL );
+			maze[ 0 ][ y ].setLeft( MazeCell::ACIDPROOFWALL );
+			maze[ cols-1 ][ y ].setRight( MazeCell::ACIDPROOFWALL );
 		}
 
 		for( uint_fast8_t x = 1; x < cols; ++x ) {
@@ -261,7 +278,7 @@ void MazeManager::makeRandomLevel() {
 			}
 		}
 
-		//Remove gameManager->goal from list of dead ends
+		//Remove goal from list of dead ends
 		for( uint_fast16_t i = 0; i < deadEndsX.size(); ++i ) {
 			if( gameManager->goal.getX() == deadEndsX.at( i ) && gameManager->goal.getY() == deadEndsY.at( i ) ) {
 				deadEndsX.erase( deadEndsX.begin() + i );

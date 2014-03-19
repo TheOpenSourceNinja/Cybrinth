@@ -15,6 +15,7 @@
 #include <irrlicht.h>
 #include <string>
 #include <vector>
+#include "Collectable.h"
 #include "MazeCell.h"
 #include "PreprocessorCommands.h"
 

@@ -19,8 +19,8 @@ MenuOption::MenuOption() {
 	try {
 		x = 0;
 		y = 0;
-		setText( "" );
 		font = nullptr;
+		setText( L"" );
 		setDimension();
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::MenuOption(): " << e.what() << std::endl;
