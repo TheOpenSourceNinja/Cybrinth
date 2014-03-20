@@ -1116,6 +1116,14 @@ MazeManager* GameManager::getMazeManager() {
 }
 
 /**
+ * Lets other objects know how many collectables there are.
+ * Returns: the number of Collectables.
+ */
+ uint_fast8_t GameManager::getNumCollectables() {
+	return stuff.size();
+ }
+
+/**
  * Lets other objects know how many locks there are.
  * Returns: the number of keys.
  */
@@ -1739,7 +1747,7 @@ void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 	try {
 		if( numPlayers > p && mazeManager.cols > 0 ) {
 			if( direction < 0 ) {
-				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getX() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() != MazeCell::ACIDPROOFWALL && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() != MazeCell::LOCK  && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() != MazeCell::NONE ) {
+				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getX() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() != MazeCell::ACIDPROOF && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() != MazeCell::LOCK  && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() != MazeCell::NONE ) {
 					player.at( p ).removeItem();
 					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setLeft( MazeCell::NONE );
 					mazeManager.maze[ player.at( p ).getX() - 1 ][ player.at( p ).getY() ].setRight( MazeCell::NONE );
@@ -1749,7 +1757,7 @@ void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 					player.at( p ).moveX( -1 );
 				}
 			} else {
-				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getX() < ( mazeManager.cols - 1 ) && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() != MazeCell::ACIDPROOFWALL && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() != MazeCell::LOCK && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() != MazeCell::NONE ) {
+				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getX() < ( mazeManager.cols - 1 ) && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() != MazeCell::ACIDPROOF && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() != MazeCell::LOCK && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() != MazeCell::NONE ) {
 					player.at( p ).removeItem();
 					mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].setLeft( MazeCell::NONE );
 					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setRight( MazeCell::NONE );
@@ -1794,7 +1802,7 @@ void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 	try {
 		if( numPlayers > p && mazeManager.rows > 0 ) {
 			if( direction < 0 ) {
-				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getY() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() != MazeCell::ACIDPROOFWALL && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() != MazeCell::LOCK && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() != MazeCell::NONE ) {
+				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getY() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() != MazeCell::ACIDPROOF && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() != MazeCell::LOCK && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() != MazeCell::NONE ) {
 					player.at( p ).removeItem();
 					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setTop( MazeCell::NONE );
 					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() - 1 ].setBottom( MazeCell::NONE );
@@ -1804,7 +1812,7 @@ void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 					player.at( p ).moveY( -1 );
 				}
 			} else {
-				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getY() < ( mazeManager.rows - 1 ) && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() != MazeCell::ACIDPROOFWALL && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() != MazeCell::LOCK && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() != MazeCell::NONE ) {
+				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getY() < ( mazeManager.rows - 1 ) && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() != MazeCell::ACIDPROOF && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() != MazeCell::LOCK && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() != MazeCell::NONE ) {
 					player.at( p ).removeItem();
 					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].setTop( MazeCell::NONE );
 					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setBottom( MazeCell::NONE );

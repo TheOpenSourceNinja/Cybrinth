@@ -46,9 +46,8 @@ class AI {
 		bool alreadyVisitedIDDFS( irr::core::position2d< uint_fast8_t > position );
 		void findSolution();
 		void findSolutionDFS( irr::core::position2d< uint_fast8_t > currentPosition );
-		void findSolutionDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > currentPosition );
 		void findSolutionIDDFS( irr::core::position2d< uint_fast8_t > currentPosition );
-		void findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > currentPosition, uint_fast16_t depthLimit );
+		void findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > currentPosition, uint_fast16_t depthLimit, bool canDissolveWalls );
 
 		algorithm_t algorithm;
 		std::vector< irr::core::position2d< uint_fast8_t > > cellsVisited;
