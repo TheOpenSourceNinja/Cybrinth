@@ -32,8 +32,12 @@
 
 #include <irrlicht.h>
 #include <SDL_mixer.h>
+#ifdef HAVE_STRING
 #include <string>
+#endif //HAVE_STRING
+#ifdef HAVE_VECTOR
 #include <vector>
+#endif //HAVE_VECTOR
 
 using namespace irr;
 
@@ -208,6 +212,8 @@ class GameManager : public IEventReceiver {
 		std::vector< core::stringw > proTips;
 
 		core::stringw winnersLabel;
+		core::stringw scores;
+		core::stringw scoresTotal;
 		core::stringw steps;
 		
 		core::stringw times;

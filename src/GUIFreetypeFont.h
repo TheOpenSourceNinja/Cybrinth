@@ -21,7 +21,9 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <irrlicht.h>
+#ifdef HAVE_STRING
 #include <string>
+#endif //HAVE_STRING
 
 class CGUITTFace : public irr::IReferenceCounted {
 	public:

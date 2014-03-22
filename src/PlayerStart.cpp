@@ -10,7 +10,9 @@
 */
 #include "PlayerStart.h"
 #include "colors.h"
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
 
 PlayerStart::PlayerStart() {
 	try {

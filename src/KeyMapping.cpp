@@ -1,6 +1,8 @@
 #include "KeyMapping.h"
 #include <algorithm/string.hpp>
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
 
 KeyMapping::action_t KeyMapping::getAction() {
 	try {

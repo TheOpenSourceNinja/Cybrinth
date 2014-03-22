@@ -2,7 +2,9 @@
 #define KEYMAPPING_H
 
 #include <irrlicht.h>
+#ifdef HAVE_STRING
 #include <string>
+#endif //HAVE_STRING
 #include "Integers.h"
 #include "PreprocessorCommands.h"
 

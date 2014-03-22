@@ -3,8 +3,12 @@
 
 #include "Integers.h"
 #include "PreprocessorCommands.h"
+#ifdef HAVE_VECTOR
 #include <vector>
+#endif //HAVE_VECTOR
+#ifdef HAVE_STRING
 #include <string>
+#endif //HAVE_STRING
 
 class SpellChecker {
 	public:

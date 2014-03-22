@@ -1,7 +1,9 @@
 #include "ImageModifier.h"
 #include "StringConverter.h"
 
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
 
 ImageModifier::ImageModifier() {
 	//ctor

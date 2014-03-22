@@ -30,6 +30,8 @@ class Player : public Object {
 		
 		uint_fast8_t getItem();
 		Collectable::type_t getItemType();
+		intmax_t getScoreLastMaze();
+		intmax_t getScoreTotal();
 		void giveItem( uint_fast8_t item, Collectable::type_t type );
 		
 		bool hasItem();
@@ -50,6 +52,7 @@ class Player : public Object {
 		void reset();
 		
 		void setGM( GameManager* newGM );
+		void setScore( intmax_t newScore );
 		
 		uint_fast16_t stepsTakenLastMaze;
 		uint_fast16_t stepsTakenThisMaze;
@@ -61,6 +64,9 @@ class Player : public Object {
 		uint_fast8_t heldItem;
 		Collectable::type_t heldItemType;
 		GameManager* gm;
+		
+		intmax_t scoreLastMaze;
+		intmax_t scoreTotal;
 };
 
 #endif // PLAYER_H

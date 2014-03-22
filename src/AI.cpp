@@ -73,7 +73,7 @@ bool AI::alreadyVisited( irr::core::position2d< uint_fast8_t > position ) {
 	try {
 		bool result = false;
 
-		std::vector< core::position2d< uint_fast8_t > >::size_type i = 0;
+		decltype( cellsVisited.size() ) i = 0;
 		while( i < cellsVisited.size() && result != true ) {
 			if( cellsVisited.at( i ).X == position.X && cellsVisited.at( i ).Y == position.Y ) {
 				result = true;
@@ -91,7 +91,7 @@ bool AI::alreadyVisitedDFS( irr::core::position2d< uint_fast8_t > position ) {
 	try {
 		bool result = false;
 
-		std::vector< core::position2d< uint_fast8_t > >::size_type i = 0;
+		decltype( DFSCellsVisited.size() ) i = 0;
 		while( i < DFSCellsVisited.size() && result != true ) {
 			if( DFSCellsVisited.at( i ).X == position.X && DFSCellsVisited.at( i ).Y == position.Y ) {
 				result = true;
@@ -109,7 +109,7 @@ bool AI::alreadyVisitedIDDFS( irr::core::position2d< uint_fast8_t > position ) {
 	try {
 		bool result = false;
 
-		std::vector< core::position2d< uint_fast8_t > >::size_type i = 0;
+		decltype( IDDFSCellsVisited.size() ) i = 0;
 		while( i < IDDFSCellsVisited.size() && result != true ) {
 			if( IDDFSCellsVisited.at( i ).X == position.X && IDDFSCellsVisited.at( i ).Y == position.Y ) {
 				result = true;
@@ -152,6 +152,30 @@ bool AI::doneWaiting() {
 	}
 }
 
+bool AI::effectivelyNoTopWall( uint_fast8_t x, uint_fast8_t y ) {
+	return effectivelyNoTopWall( x, y, ( gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) );
+}
+
+bool AI::effectivelyNoTopWall( uint_fast8_t x, uint_fast8_t y, bool canDissolveWalls ) {
+	if( gm != nullptr && maze != nullptr ) {
+		return ( maze[ x ][ y ].getTop() == MazeCell::NONE || ( maze[ x ][ y ].getTop() != MazeCell::ACIDPROOF && canDissolveWalls ) );
+	} else {
+		return false;
+	}
+}
+
+bool AI::effectivelyNoLeftWall( uint_fast8_t x, uint_fast8_t y ) {
+	return effectivelyNoLeftWall( x, y, ( gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) );
+}
+
+bool AI::effectivelyNoLeftWall( uint_fast8_t x, uint_fast8_t y, bool canDissolveWalls ) {
+	if( gm != nullptr && maze != nullptr ) {
+		return( maze[ x ][ y ].getLeft() == MazeCell::NONE || ( maze[ x ][ y ].getLeft() != MazeCell::ACIDPROOF && canDissolveWalls ) );
+	} else {
+		return false;
+	}
+}
+
 void AI::findSolution() {
 	try {
 		solved = false;
@@ -160,7 +184,7 @@ void AI::findSolution() {
 		solution.clear();
 		{
 			Player* p = gm->getPlayer( controlsPlayer );
-			irr::core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
+			core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 			switch( algorithm ) {
 				case DEPTH_FIRST_SEARCH: {
 					DFSCellsVisited.clear();
@@ -275,7 +299,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 				solution = partialSolution;
 				return;
 			} else {
-				for( uint_fast8_t c = 0; c < gm->getNumCollectables(); ++c ) {
+				for( decltype( gm->getNumCollectables() ) c = 0; c < gm->getNumCollectables(); ++c ) {
 					if( ( currentPosition.X == gm->getCollectable( c )->getX() && currentPosition.Y == gm->getCollectable( c )->getY() ) ) {
 						switch( gm->getCollectable( c )->getType() ) {
 							case Collectable::ACID: {
@@ -301,19 +325,8 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 			partialSolution.push_back( currentPosition );
 			std::vector< direction_t > possibleDirections;
 			if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
-
-				/*for( uint_fast8_t k = 0; k < gm->getNumKeys(); ++k ) {
-					if( currentPosition.X == gm->getKey( k )->getX() && currentPosition.Y == gm->getKey( k )->getY() ) {
-						
-						solution = partialSolution;
-						
-						keyImSeeking = k;
-						
-						break;
-					}
-				}*/
 				
-				for( uint_fast8_t c = 0; c < gm->getNumCollectables(); ++c ) {
+				for( decltype( gm->getNumCollectables() ) c = 0; c < gm->getNumCollectables(); ++c ) {
 					if( currentPosition.X == gm->getCollectable( c )->getX() && currentPosition.Y == gm->getCollectable( c )->getY() ) {
 						switch( gm->getCollectable( c )->getType() ) {
 							case Collectable::ACID: {
@@ -332,16 +345,16 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 				}
 
 				//See which direction(s) the bot can move
-				if( currentPosition.Y > 0 && ( maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y ].getTop() != MazeCell::ACIDPROOF && canDissolveWalls ) ) && !alreadyVisitedIDDFS( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+				if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedIDDFS( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 					possibleDirections.push_back( UP );
 				}
-				if( currentPosition.X > 0 && ( maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOF && canDissolveWalls ) ) && !alreadyVisitedIDDFS( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+				if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedIDDFS( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 					possibleDirections.push_back( LEFT );
 				}
-				if( currentPosition.Y < (rows - 1) && ( maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() != MazeCell::ACIDPROOF && canDissolveWalls ) ) && !alreadyVisitedIDDFS( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+				if( currentPosition.Y < (rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1, canDissolveWalls ) && !alreadyVisitedIDDFS( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 					possibleDirections.push_back( DOWN );
 				}
-				if( currentPosition.X < (cols - 1) && ( maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE || ( maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOF && canDissolveWalls ) ) && !alreadyVisitedIDDFS( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+				if( currentPosition.X < (cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedIDDFS( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 					possibleDirections.push_back( RIGHT );
 				}
 
@@ -492,16 +505,16 @@ void AI::move() {
 						}
 
 						//See which direction(s) the bot can move
-						if( currentPosition.Y > 0 && ( maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y ].getTop() != MazeCell::ACIDPROOF && gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+						if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 							possibleDirections.push_back( UP );
 						}
-						if( currentPosition.X > 0 && ( maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOF && gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( LEFT );
 						}
-						if( currentPosition.Y < (rows - 1) && ( maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() != MazeCell::ACIDPROOF && gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+						if( currentPosition.Y < (rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1 ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 							possibleDirections.push_back( DOWN );
 						}
-						if( currentPosition.X < (cols - 1) && ( maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE || ( maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOF && gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X < (cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( RIGHT );
 						}
 					}
@@ -525,7 +538,7 @@ void AI::move() {
 							gm->movePlayerOnY( controlsPlayer, 1 );
 						}
 					} else if ( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) { //Go to next position
-						//uint_fast8_t choiceNum = rand() % possibleDirections.size();
+						
 						direction_t choice = possibleDirections.at( rand() % possibleDirections.size() );
 						switch( choice ) {
 							case UP: {
@@ -590,16 +603,16 @@ void AI::move() {
 					if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
 
 						//See which direction(s) the bot can move
-						if( currentPosition.Y > 0 && ( maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y ].getTop() != MazeCell::ACIDPROOF && ( gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+						if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 							possibleDirections.push_back( UP );
 						}
-						if( currentPosition.X > 0 && ( maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOF && ( gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( LEFT );
 						}
-						if( currentPosition.Y < (rows - 1) && ( maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE || ( maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() != MazeCell::ACIDPROOF && ( gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+						if( currentPosition.Y < (rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1 ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 							possibleDirections.push_back( DOWN );
 						}
-						if( currentPosition.X < (cols - 1) && ( maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE || ( maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOF && ( gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) ) ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X < (cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( RIGHT );
 						}
 					}
@@ -651,53 +664,48 @@ void AI::move() {
 					break;
 				}
 				case RIGHT_HAND_RULE: {
-					/*if( !alreadyVisited( currentPosition ) ) {
+					
+					if( !alreadyVisited( currentPosition ) ) {
 						cellsVisited.push_back( currentPosition );
-					} else { //This should ensure the maze is solvable even if one wall gets removed due to acid
-						algorithm = LEFT_HAND_RULE;
-					}*/
+					}
 					
 					switch( hand ) {
 						case RIGHT: {
-							if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE ) {
+							if( currentPosition.Y > 0 && noOriginalTopWall( currentPosition.X, currentPosition.Y ) ) {
 								gm->movePlayerOnY( controlsPlayer, -1 );
 								hand = DOWN;
 							} else {
 								hand = UP;
-								//cellsVisited.pop_back();
 								move();
 							}
 							break;
 						}
 						case UP: {
-							if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE ) {
+							if( currentPosition.X > 0 && noOriginalLeftWall( currentPosition.X, currentPosition.Y ) ) {
 								gm->movePlayerOnX( controlsPlayer, -1 );
 								hand = RIGHT;
 							} else {
 								hand = LEFT;
-								//cellsVisited.pop_back();
 								move();
 							}
 							break;
 						}
 						case LEFT: {
-							if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE ) {
+							if( currentPosition.Y < ( rows - 1 ) && noOriginalTopWall( currentPosition.X, currentPosition.Y + 1 ) ) {
 								gm->movePlayerOnY( controlsPlayer, 1 );
 								hand = UP;
 							} else {
 								hand = DOWN;
-								//cellsVisited.pop_back();
 								move();
 							}
 							break;
 						}
 						case DOWN: {
-							if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE ) {
+							if( currentPosition.X < ( cols - 1 ) && noOriginalLeftWall( currentPosition.X + 1, currentPosition.Y ) ) {
 								gm->movePlayerOnX( controlsPlayer, 1 );
 								hand = LEFT;
 							} else {
 								hand = RIGHT;
-								//cellsVisited.pop_back();
 								move();
 							}
 							break;
@@ -706,53 +714,48 @@ void AI::move() {
 					break;
 				}
 				case LEFT_HAND_RULE: {
-					/*if( !alreadyVisited( currentPosition ) ) {
+									
+					if( !alreadyVisited( currentPosition ) ) {
 						cellsVisited.push_back( currentPosition );
-					} else { //This should ensure the maze is solvable even if one wall gets removed due to acid
-						algorithm = RIGHT_HAND_RULE;
-					}*/
+					}
 					
 					switch( hand ) {
 						case RIGHT: {
-							if( currentPosition.Y > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getTop() == MazeCell::NONE ) {
+							if( currentPosition.Y > 0 && noOriginalTopWall( currentPosition.X, currentPosition.Y ) ) {
 								gm->movePlayerOnY( controlsPlayer, -1 );
 								hand = UP;
 							} else {
 								hand = DOWN;
-								//cellsVisited.pop_back();
 								move();
 							}
 							break;
 						}
 						case UP: {
-							if( currentPosition.X > 0 && maze[ currentPosition.X ][ currentPosition.Y ].getLeft() == MazeCell::NONE ) {
+							if( currentPosition.X > 0 && noOriginalLeftWall( currentPosition.X, currentPosition.Y ) ) {
 								gm->movePlayerOnX( controlsPlayer, -1 );
 								hand = LEFT;
 							} else {
 								hand = RIGHT;
-								//cellsVisited.pop_back();
 								move();
 							}
 							break;
 						}
 						case LEFT: {
-							if( currentPosition.Y < (rows - 1) && maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() == MazeCell::NONE ) {
+							if( currentPosition.Y < (rows - 1) && noOriginalTopWall( currentPosition.X, currentPosition.Y + 1 ) ) {
 								gm->movePlayerOnY( controlsPlayer, 1 );
 								hand = DOWN;
 							} else {
 								hand = UP;
-								//cellsVisited.pop_back();
 								move();
 							}
 							break;
 						}
 						case DOWN: {
-							if( currentPosition.X < (cols - 1) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() == MazeCell::NONE ) {
+							if( currentPosition.X < (cols - 1) && noOriginalLeftWall( currentPosition.X + 1, currentPosition.Y ) ) {
 								gm->movePlayerOnX( controlsPlayer, 1 );
 								hand = RIGHT;
 							} else {
 								hand = LEFT;
-								//cellsVisited.pop_back();
 								move();
 							}
 							break;
@@ -771,12 +774,20 @@ void AI::move() {
 	}
 }
 
+bool AI::noOriginalLeftWall( uint_fast8_t x, uint_fast8_t y ) {
+	return( maze[ x ][ y ].getOriginalLeft() == MazeCell::NONE || ( maze[ x ][ y ].getOriginalLeft() == MazeCell::LOCK && maze[ x ][ y ].getLeft() == MazeCell::NONE ) );
+}
+
+bool AI::noOriginalTopWall( uint_fast8_t x, uint_fast8_t y ) {
+	return( maze[ x ][ y ].getOriginalTop() == MazeCell::NONE || ( maze[ x ][ y ].getOriginalTop() == MazeCell::LOCK && maze[ x ][ y ].getTop() == MazeCell::NONE ) );
+}
+
 void AI::reset() {
 	try {
 		noKeysLeft = false;
 		keyImSeeking = 0;
 		IDDFSDepthLimit = 1;
-		hand = RIGHT;
+		hand = RIGHT; //Arbitrarily chosen direction
 		lastTimeMoved = 0;
 		solution.clear();
 		solved = false;

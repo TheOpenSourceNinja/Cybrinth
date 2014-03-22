@@ -1,4 +1,4 @@
-Cybrinth created by James Dearing, copyright 2012-2013 and licensed under the GNU AGPL (see the file COPYING)
+Cybrinth created by James Dearing, copyright 2012-2014 and licensed under the GNU AGPL (see the file COPYING)
 Uses the following libraries:
 
 - Irrlicht by Nikolaus Gebhardt and others, see http://irrlicht.sourceforge.net/authors/

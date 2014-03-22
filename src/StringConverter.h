@@ -16,7 +16,9 @@
 
 #include <irrString.h>
 #include <taglib/taglib.h>
+#ifdef HAVE_STRING
 #include <string>
+#endif //HAVE_STRING
 
 class StringConverter
 {

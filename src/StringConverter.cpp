@@ -9,7 +9,9 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "StringConverter.h"
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
 
 /**
 This class exists just to convert between Irrlicht's wide character strings and TagLib's wide character strings. I have no idea whether I'm doing it right. I just want to make sure this program can work with non-English characters. If anyone can suggest a way to improve my code, fix any bugs, or whatever, PLEASE send in a patch!

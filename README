@@ -1,4 +1,4 @@
-Cybrinth created by James Dearing, copyright 2012-2013 and licensed under the GNU AGPL (see the file COPYING). Fonts, music, and images distributed with Cybrinth may be licensed under separate licenses.
+Cybrinth created by James Dearing, copyright 2012-2014 and licensed under the GNU AGPL (see the file COPYING). Fonts, music, and images distributed with Cybrinth may be licensed under separate licenses.
 
 Cybrinth is a simple game. You play a circle (Maybe you're from Flatland or something; make up your own story). You must find your way through the maze to the goal (a white & gray diamond). But to get there, you've got to unlock the gates, and to do that you need keys. The keys, scattered throughout the maze, don't unlock specific gates. The gates will be automatically unlocked if and only if all the keys have been collected. If you're playing with friends or AI bots, it doesn't matter who gets each key.
 

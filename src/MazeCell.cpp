@@ -9,7 +9,9 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "MazeCell.h"
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
 #include "colors.h"
 
 
@@ -19,6 +21,8 @@ MazeCell::MazeCell() {
 		left = NONE;
 		bottom = NONE;
 		right = NONE;
+		originalTop = NONE;
+		originalLeft = NONE;
 		visited = false;
 		distanceFromStart = 999;
 		id = 0;
@@ -62,11 +66,38 @@ MazeCell::border_t MazeCell::getTop() {
 	}
 }
 
+MazeCell::border_t MazeCell::getOriginalTop() {
+	try {
+		return originalTop;
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in MazeCell::getOriginalTop(): " << e.what() << std::endl;
+		return NONE;
+	}
+}
+
 void MazeCell::setTop( border_t val )  {
 	try {
 		top = val;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::setTop(): " << e.what() << std::endl;
+	}
+}
+
+void MazeCell::setOriginalTop( border_t val ) {
+	try {
+		originalTop = val;
+		setTop( val );
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in MazeCell::setOriginalTop(): " << e.what() << std::endl;
+	}
+}
+
+MazeCell::border_t MazeCell::getOriginalLeft() {
+	try {
+		return originalLeft;
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in MazeCell::getOriginalLeft(): " << e.what() << std::endl;
+		return NONE;
 	}
 }
 
@@ -87,6 +118,15 @@ void MazeCell::setLeft( border_t val ) {
 	}
 }
 
+void MazeCell::setOriginalLeft( border_t val ) {
+	try {
+		originalLeft = val;
+		setLeft( val );
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in MazeCell::setOriginalLeft(): " << e.what() << std::endl;
+	}
+}
+
 MazeCell::border_t MazeCell::getBottom() {
 	try {
 		return bottom;
@@ -96,7 +136,7 @@ MazeCell::border_t MazeCell::getBottom() {
 	}
 }
 
-void MazeCell::setBottom( border_t val ) {
+void MazeCell::setOriginalBottom( border_t val ) {
 	try {
 		bottom = val;
 	} catch ( std::exception &e ) {
@@ -113,7 +153,7 @@ MazeCell::border_t MazeCell::getRight() {
 	}
 }
 
-void MazeCell::setRight( border_t val ) {
+void MazeCell::setOriginalRight( border_t val ) {
 	try {
 		right = val;
 	} catch ( std::exception &e ) {

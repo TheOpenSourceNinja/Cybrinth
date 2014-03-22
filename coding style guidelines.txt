@@ -1,7 +1,11 @@
 I don't really care about coding style in general. As long as the code works, fine. However, there are a few things that can really bug me if noticed. Check your IDE or text editor's settings for the following:
 
-1- Line endings. For cross-platform readability, all line endings should be in the CRLF format. My copy of CodeBlocks is set to automatically enforce this
-2- Indent using tabs, not spaces. Tabs have adjustable widths.
-3- Text encoding. Use Unicode for all text files unless you have a reason not to. UTF-8 is preferred. (If you don't notice what encoding your editor uses, don't worry about it because chances are I won't notice either - and if I do, I'll just fix it for you). Okay, so this has nothing to do with coding style, but I had to put it somewhere.
-4- Braces. Not a huge deal, but do try to use the 1TBS: http://catb.org/jargon/html/0/one-TBS.html
+//Actual coding style stuff
+1- Indent using tabs, not spaces. Tabs have adjustable widths.
+2- Braces. Not a huge deal, but do try to use the 1TBS: http://catb.org/jargon/html/0/one-TBS.html
 
+//Other stuff I just feel like mentioning
+1- Line endings. For cross-platform readability, all line endings should be in the CRLF format. My copy of CodeBlocks is set to automatically enforce this.
+2- Text encoding. Use Unicode for all text files. UTF-8 is preferred. (If you don't notice what encoding your editor uses, don't worry about it because chances are I won't notice either - and if I do, I'll just fix it for you).
+
+Just remember this: If there's a bug in the program, or if we disagree on coding style, or one of us just makes some bone-headed mistake, nobody's going to die because of it. This is a game, not a pacemaker or bomb defuser.

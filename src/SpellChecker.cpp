@@ -1,9 +1,15 @@
 #include "SpellChecker.h"
 
 #include <array>
+#ifdef HAVE_VECTOR
 #include <vector>
+#endif //HAVE_VECTOR
+#ifdef HAVE_MAP
 #include <map>
+#endif //HAVE_MAP
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
 
 SpellChecker::SpellChecker() {
 	//ctor

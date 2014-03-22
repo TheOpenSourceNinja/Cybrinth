@@ -69,16 +69,16 @@ bool GameManager::allHumansAtGoal() {
 	try {
 		std::vector< uint_fast8_t > humanPlayers; //Get a list of players
 
-		for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
+		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 			humanPlayers.push_back( p );
 		}
 
 		bool result = false;
 
-		for( uint_fast8_t b = 0; b < numBots; ++b ) { //Remove bots from the list
-			uint_fast8_t botPlayer = bot.at( b ).getPlayer();
+		for( decltype( numBots ) b = 0; b < numBots; ++b ) { //Remove bots from the list
+			decltype( bot.at( b ).getPlayer() ) botPlayer = bot.at( b ).getPlayer();
 
-			for( uint_fast8_t p = 0; p < humanPlayers.size(); ++p ) {
+			for( decltype( humanPlayers.size() ) p = 0; p < humanPlayers.size(); ++p ) {
 				if( humanPlayers.at( p ) == botPlayer ) {
 					humanPlayers.erase( humanPlayers.begin() + p );
 				}
@@ -88,7 +88,7 @@ bool GameManager::allHumansAtGoal() {
 		if( humanPlayers.size() > 0 ) {
 			result = true;
 
-			for( uint_fast8_t p = 0; ( p < humanPlayers.size() && result == true ); ++p ) {
+			for( decltype( humanPlayers.size() ) p = 0; ( p < humanPlayers.size() && result == true ); ++p ) {
 				if( !( player.at( humanPlayers.at( p ) ).getX() == goal.getX() && player.at( humanPlayers.at( p ) ).getY() == goal.getY() ) ) {
 					result = false;
 				}
@@ -148,7 +148,7 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 			}
 			default: {
 				bool ignoreKey = false;
-				for( uint_fast8_t b = 0; !ignoreKey && b < numBots; ++b ) { //Ignore controls that affect bots
+				for( decltype( numBots ) b = 0; !ignoreKey && b < numBots; ++b ) { //Ignore controls that affect bots
 					if( keyMap.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
 						ignoreKey = true;
 					}
@@ -206,10 +206,10 @@ void GameManager::drawAll() {
 
 			//Draws player trails ("footprints")
 			if( markTrails ) {
-				for( uint_fast8_t x = 0; x < mazeManager.cols; ++x ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
-					for( uint_fast8_t y = 0; y < mazeManager.rows; ++y ) {
+				for( decltype( mazeManager.cols ) x = 0; x < mazeManager.cols; ++x ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
+					for( decltype( mazeManager.rows ) y = 0; y < mazeManager.rows; ++y ) {
 						if( mazeManager.maze[ x ][ y ].visited ) {
-							int_fast16_t dotSize = cellWidth / 5;
+							auto dotSize = cellWidth / 5;
 
 							if( dotSize < 2 ) {
 								dotSize = 2;
@@ -221,24 +221,24 @@ void GameManager::drawAll() {
 				}
 			}
 
-			for( uint_fast8_t ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts.
+			for( decltype( playerStart.size() ) ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts.
 				playerStart.at( ps ).draw( driver, cellWidth, cellHeight );
 			}
 
 			//Drawing bots before human players makes it easier to play against large numbers of bots
-			for( uint_fast8_t i = 0; i < numBots; ++i ) {
+			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
 				player.at( bot.at( i ).getPlayer() ).draw( driver, cellWidth, cellHeight );
 			}
 			
 			//Now we draw the players
-			for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
+			for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 				if( player.at( p ).isHuman ) {
 					player.at( p ).draw( driver, cellWidth, cellHeight );
 				}
 			}
 			
 			//We used to draw Collectables before the players due to a texture resizing bug in Irrlicht's software renderer (the bug still exists AFAIK). Collectables generally use pre-created images whereas players generally use dynamically generated images. This made players potentially get covered by Collectables and thus invisible. Now that players can hold Collectables, we want them drawn on top of the players.
-			for( uint_fast8_t i = 0; i < stuff.size(); ++i ) {
+			for( decltype( stuff.size() ) i = 0; i < stuff.size(); ++i ) {
 				stuff.at( i ).draw( driver, cellWidth, cellHeight );
 			}
 
@@ -550,11 +550,13 @@ void GameManager::drawStats( int_fast16_t textY ) {
 	}
 	
 	int_fast16_t textX = 0;
-	int_fast16_t textXOriginal = textX;
-	int_fast16_t textYOriginal = textY;
-	int_fast16_t textYSteps = textYOriginal;
-	int_fast16_t textYTimes = textYOriginal;
-	int_fast16_t textYKeys = textYOriginal;
+	decltype( textX ) textXOriginal = textX;
+	decltype( textY ) textYOriginal = textY;
+	decltype( textYOriginal ) textYSteps = textYOriginal;
+	decltype( textYOriginal ) textYTimes = textYOriginal;
+	decltype( textYOriginal ) textYKeys = textYOriginal;
+	decltype( textYOriginal ) textYScores = textYOriginal;
+	decltype( textYOriginal ) textYScoresTotal = textYOriginal;
 	//To determine how tall each row of text is, we draw the row labels first (their text could conceivably have hangy-down bits like a lower-case y)
 	{
 		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( winnersLabel ) );
@@ -597,12 +599,34 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		if( tempDimensions.Width + textXOriginal > textX ) {
 			textX = tempDimensions.Width + textXOriginal;
 		}
-		//textYTime = textYSteps + tempDimensions.Height;
+		textYScores = textYKeys + tempDimensions.Height;
+	}
+	
+	{
+		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( scores ) );
+		core::rect< s32 > tempRectangle( textXOriginal, textYScores, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYScores );
+		statsFont->draw( scores, tempRectangle, WHITE, true, true, &tempRectangle );
+		
+		if( tempDimensions.Width + textXOriginal > textX ) {
+			textX = tempDimensions.Width + textXOriginal;
+		}
+		textYScoresTotal = textYScores + tempDimensions.Height;
+	}
+	
+	{
+		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( scoresTotal ) );
+		core::rect< s32 > tempRectangle( textXOriginal, textYScoresTotal, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYScoresTotal );
+		statsFont->draw( scoresTotal, tempRectangle, WHITE, true, true, &tempRectangle );
+		
+		if( tempDimensions.Width + textXOriginal > textX ) {
+			textX = tempDimensions.Width + textXOriginal;
+		}
+		//textYScoresTotal = textYScores + tempDimensions.Height;
 	}
 	
 	textY = textYOriginal;
 	//Now we go through and draw the actual player stats
-	for( uint_fast8_t p = 0; p < winnersLoadingScreen.size(); ++p ) {
+	for( decltype( winnersLoadingScreen.size() ) p = 0; p < winnersLoadingScreen.size(); ++p ) {
 		int_fast16_t textXOld = textX;
 		{ //First we identify the players
 			core::stringw text( p );
@@ -638,6 +662,24 @@ void GameManager::drawStats( int_fast16_t textY ) {
 			core::stringw text( player.at( winnersLoadingScreen.at( p ) ).keysCollectedLastMaze );
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
 			core::rect< s32 > tempRectangle( textXOld, textYKeys, tempDimensions.Width + textXOld, tempDimensions.Height + textYKeys );
+			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
+			if( tempDimensions.Width + textXOld > textX ) {
+				textX = tempDimensions.Width + textXOld;
+			}
+		}
+		{ //Finally, each player's score is shown...
+			core::stringw text( player.at( winnersLoadingScreen.at( p ) ).getScoreLastMaze() );
+			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+			core::rect< s32 > tempRectangle( textXOld, textYScores, tempDimensions.Width + textXOld, tempDimensions.Height + textYScores );
+			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
+			if( tempDimensions.Width + textXOld > textX ) {
+				textX = tempDimensions.Width + textXOld;
+			}
+		}
+		{ //...followed by the totals.
+			core::stringw text( player.at( winnersLoadingScreen.at( p ) ).getScoreTotal() );
+			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+			core::rect< s32 > tempRectangle( textXOld, textYScoresTotal, tempDimensions.Width + textXOld, tempDimensions.Height + textYScoresTotal );
 			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
 			if( tempDimensions.Width + textXOld > textX ) {
 				textX = tempDimensions.Width + textXOld;
@@ -710,6 +752,8 @@ GameManager::GameManager() {
 		steps = L"Steps: ";
 		times = L"Times: ";
 		keysFoundPerPlayer = L"Keys found: ";
+		scores = L"Scores: ";
+		scoresTotal = L"Total scores: ";
 		network.setGameManager( this );
 		mazeManager.setGameManager( this );
 		isServer = false;
@@ -969,14 +1013,14 @@ GameManager::GameManager() {
 
 			bot.resize( numBots );
 
-			for( uint_fast8_t i = 0; i < numBots; ++i ) {
+			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
 				bot.at( i ).setPlayer( numPlayers - ( i + 1 ) ) ;
 				player.at( bot.at( i ).getPlayer() ).isHuman = false;
 				bot.at( i ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm, botMovementDelay );
 			}
 		}
 
-		for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
+		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 			player.at( p ).setColorBasedOnNum( p );
 			player.at( p ).loadTexture( driver );
 			player.at( p ).setGM( this );
@@ -1078,7 +1122,7 @@ Collectable* GameManager::getKey( uint_fast8_t key ) {
 	try {
 		if( key <= getNumKeys() ) {
 			Collectable* result = nullptr;
-			uint_fast8_t currentKey = 0;
+			decltype( key ) currentKey = 0;
 			
 			for( decltype( stuff.size() ) s = 0; s < stuff.size(); ++s ) {
 				if( stuff.at( s ).getType() == Collectable::KEY ) {
@@ -1678,10 +1722,10 @@ void GameManager::makeMusicList() {
 
 		if( debug ) {
 			std::wcout << L"makeMusicList() called" << std::endl;
-			uint_fast8_t numMusicDecoders = Mix_GetNumMusicDecoders();
+			decltype( Mix_GetNumMusicDecoders() ) numMusicDecoders = Mix_GetNumMusicDecoders();
 			std::wcout << L"There are " << numMusicDecoders << L" music decoders available. They are:" << std::endl;
 
-			for( uint_fast8_t decoder = 0; decoder < numMusicDecoders; ++decoder ) {
+			for( decltype( numMusicDecoders ) decoder = 0; decoder < numMusicDecoders; ++decoder ) {
 				std::wcout << decoder << L": " << Mix_GetMusicDecoder( decoder ) << std::endl;
 			}
 		}
@@ -1750,7 +1794,6 @@ void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getX() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() != MazeCell::ACIDPROOF && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() != MazeCell::LOCK  && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() != MazeCell::NONE ) {
 					player.at( p ).removeItem();
 					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setLeft( MazeCell::NONE );
-					mazeManager.maze[ player.at( p ).getX() - 1 ][ player.at( p ).getY() ].setRight( MazeCell::NONE );
 				}
 				
 				if( player.at( p ).getX() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() == MazeCell::NONE ) {
@@ -1760,7 +1803,6 @@ void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getX() < ( mazeManager.cols - 1 ) && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() != MazeCell::ACIDPROOF && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() != MazeCell::LOCK && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() != MazeCell::NONE ) {
 					player.at( p ).removeItem();
 					mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].setLeft( MazeCell::NONE );
-					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setRight( MazeCell::NONE );
 				}
 				
 				if( player.at( p ).getX() < ( mazeManager.cols - 1 ) && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() == MazeCell::NONE ) {
@@ -1805,7 +1847,6 @@ void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getY() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() != MazeCell::ACIDPROOF && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() != MazeCell::LOCK && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() != MazeCell::NONE ) {
 					player.at( p ).removeItem();
 					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setTop( MazeCell::NONE );
-					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() - 1 ].setBottom( MazeCell::NONE );
 				}
 				
 				if( player.at( p ).getY() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() == MazeCell::NONE ) {
@@ -1815,7 +1856,6 @@ void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getY() < ( mazeManager.rows - 1 ) && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() != MazeCell::ACIDPROOF && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() != MazeCell::LOCK && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() != MazeCell::NONE ) {
 					player.at( p ).removeItem();
 					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].setTop( MazeCell::NONE );
-					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setBottom( MazeCell::NONE );
 				}
 				
 				if( player.at( p ).getY() < ( mazeManager.rows - 1 ) && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() == MazeCell::NONE ) {
@@ -1872,7 +1912,7 @@ void GameManager::newMaze( boost::filesystem::path src ) {
 		}
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
-		for( uint_fast8_t b = 0; b < numBots; ++b ) {
+		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
 			bot.at( b ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm, botMovementDelay );
 		}
 	} catch( std::exception &e ) {
@@ -2281,7 +2321,7 @@ void GameManager::readPrefs() {
 
 				if( prefsFile.is_open() ) {
 					std::wstring line;
-					uint_fast8_t lineNum = 0;
+					uintmax_t lineNum = 0; //This used to be a uint_fast8_t, which should be good enough. However, when dealing with user input (such as a file), we don't want to make assumptions.
 
 					while( prefsFile.good() ) {
 						++lineNum;
@@ -2365,7 +2405,7 @@ void GameManager::readPrefs() {
 									}
 								} else if( preference == possiblePrefs.at( 2 ) ) { //L"number of bots"
 									try {
-										uint_fast8_t choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
+										decltype( numBots ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
 
 										if( choiceAsInt <= numPlayers ) {
 											numBots = choiceAsInt;
@@ -2523,7 +2563,7 @@ void GameManager::readPrefs() {
 
 								} else if( preference == possiblePrefs.at( 10 ) ) { //L"number of players"
 									try {
-										uint_fast8_t choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
+										decltype( numPlayers ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
 
 										if( choiceAsInt <= 4 && choiceAsInt > 0 ) {
 											numPlayers = choiceAsInt;
@@ -2806,7 +2846,7 @@ void GameManager::resetThings() {
 		if( !haveShownLogo ) {
 			loadingDelay = 6000;
 		} else {
-			loadingDelay = 1000 + ( rand() % 5000 ); //Adds some randomness just to make it seem less artificial.6
+			loadingDelay = 1000 + ( rand() % 5000 ); //Adds some randomness just to make it seem less artificial.
 		}
 		
 		winnersLoadingScreen = winners;
@@ -2817,21 +2857,50 @@ void GameManager::resetThings() {
 		numLocks = 0;
 		donePlaying = false;
 
-		for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
+		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 			playerStart.at( p ).reset();
-			player.at( p ).reset();//stepsTaken = 0;
+			player.at( p ).reset();
+		}
+		
+		//Calculate players' total scores
+		for( decltype( winnersLoadingScreen.size() ) w = 0; w < winnersLoadingScreen.size(); ++w ) {
+			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) score = 0;
+			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) additiveMultiplier = 10; //So the scores don't get too negative, numbers that add to the score get multiplied by a magic number.
+			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) subtractiveDivisor = 10; //Likewise, numbers that subtract from the score get divided by a magic number.
+			
+			if( debug ) {
+				std::wcout << L"Setting player " << winnersLoadingScreen.at( w ) << L"'s score to ";
+			}
+			score += ( winners.size() - w ) * additiveMultiplier;
+			if( debug ) {
+				std::wcout << ( winners.size() - w ) * additiveMultiplier;
+			}
+			score -= ( player.at( winnersLoadingScreen.at( w ) ).stepsTakenLastMaze ) / subtractiveDivisor;
+			if( debug ) {
+				std::wcout << L" - " << player.at( winnersLoadingScreen.at( w ) ).stepsTakenLastMaze / subtractiveDivisor;
+			}
+			score -= player.at( winnersLoadingScreen.at( w ) ).timeTakenLastMaze / 1000 / subtractiveDivisor; //The 1000 is for converting the time to seconds
+			if( debug ) {
+				std::wcout << L" - " << player.at( winnersLoadingScreen.at( w ) ).timeTakenLastMaze / 1000 / subtractiveDivisor;
+			}
+			score += player.at( winnersLoadingScreen.at( w ) ).keysCollectedLastMaze * additiveMultiplier;
+			if( debug ) {
+				std::wcout << L" + " << player.at( winnersLoadingScreen.at( w ) ).keysCollectedLastMaze * additiveMultiplier << L" for a total of " << score << std::endl;
+			}
+			
+			player.at( winnersLoadingScreen.at( w ) ).setScore( score );
 		}
 
-		for( uint_fast8_t b = 0; b < numBots; ++b ) {
+		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
 			bot.at( b ).reset();
 		}
 
-		for( uint_fast8_t i = 0; i < stuff.size(); ++i ) {
+		for( decltype( stuff.size() ) i = 0; i < stuff.size(); ++i ) {
 			stuff.at( i ).loadTexture( driver );
 		}
 
-		for( uint_fast8_t x = 0; x < mazeManager.cols; ++x ) {
-			for( uint_fast8_t y = 0; y < mazeManager.rows; ++y ) {
+		for( decltype( mazeManager.cols ) x = 0; x < mazeManager.cols; ++x ) {
+			for( decltype( mazeManager.rows ) y = 0; y < mazeManager.rows; ++y ) {
 				mazeManager.maze[ x ][ y ].visited = false;
 			}
 		}
@@ -2891,7 +2960,7 @@ uint_fast8_t GameManager::run() {
 				if( ( !showingLoadingScreen && device->isWindowActive() ) || debug ) {
 					//It's the bots' turn to move now.
 					if( !( showingMenu || showingLoadingScreen ) && numBots > 0 ) {
-						for( uint_fast8_t i = 0; i < numBots; ++i ) {
+						for( decltype( numBots ) i = 0; i < numBots; ++i ) {
 							if( !bot.at( i ).atGoal() && ( allHumansAtGoal() || bot.at( i ).doneWaiting() ) ) {
 								bot.at( i ).move();
 							}
@@ -2902,8 +2971,8 @@ uint_fast8_t GameManager::run() {
 					drawAll();
 
 					//Check if any of the players have landed on a collectable item
-					for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
-						for( uint_fast8_t s = 0; s < stuff.size(); ++s ) {
+					for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
+						for( decltype( stuff.size() ) s = 0; s < stuff.size(); ++s ) {
 							if( !stuff.at( s ).owned && player.at( p ).getX() == stuff.at( s ).getX() && player.at( p ).getY() == stuff.at( s ).getY() ) {
 								switch( stuff.at( s ).getType() ) {
 									case Collectable::ACID: {
@@ -2929,17 +2998,17 @@ uint_fast8_t GameManager::run() {
 										//stuff.erase( stuff.begin() + s );
 										
 										if( numKeysFound >= numLocks ) {
-											for( uint_fast8_t c = 0; c < mazeManager.cols; ++c ) {
-												for( uint_fast8_t r = 0; r < mazeManager.rows; ++r ) {
+											for( decltype( mazeManager.cols ) c = 0; c < mazeManager.cols; ++c ) {
+												for( decltype( mazeManager.rows ) r = 0; r < mazeManager.rows; ++r ) {
 													mazeManager.maze[ c ][ r ].removeLocks();
 												}
 											}
 
-											for( uint_fast8_t b = 0; b < numBots; ++b ) {
+											for( decltype( numBots ) b = 0; b < numBots; ++b ) {
 												bot.at( b ).allKeysFound();
 											}
 										} else {
-											for( uint_fast8_t b = 0; b < numBots; ++b ) {
+											for( decltype( numBots ) b = 0; b < numBots; ++b ) {
 												bot.at( b ).keyFound( s );
 											}
 										}
@@ -2954,11 +3023,11 @@ uint_fast8_t GameManager::run() {
 					}
 
 
-					for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
+					for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 						if( ( player.at( p ).getX() == goal.getX() ) && player.at( p ).getY() == goal.getY() ) { //Make a list of who finished in what order
 							bool alreadyFinished = false; //Indicates whether the player is already on the winners list
 
-							for( uint_fast8_t i = 0; i < winners.size() && !alreadyFinished; ++i ) {
+							for( decltype( winners.size() ) i = 0; i < winners.size() && !alreadyFinished; ++i ) {
 								if( p == winners.at( i ) ) {
 									alreadyFinished = true;
 								}
@@ -3025,7 +3094,7 @@ uint_fast8_t GameManager::run() {
 					std::wcout << L"On to the next level!" << std::endl;
 					std::wcout << L"Winners:";
 
-					for( uint_fast8_t i = 0; i < winners.size(); ++i ) {
+					for( decltype( winners.size() ) i = 0; i < winners.size(); ++i ) {
 						std::wcout << L" " << winners.at( i );
 					}
 
@@ -3051,7 +3120,7 @@ void GameManager::setControls() {
 		keyMap.resize( 4 * ( numPlayers - numBots ) + nonPlayerActions );
 
 		//set defaults
-		for( uint_fast8_t i = 0; i < keyMap.size() - nonPlayerActions; i += 4 ) {
+		for( decltype( keyMap.size() ) i = 0; i < keyMap.size() - nonPlayerActions; i += 4 ) {
 			if ( debug ) {
 				std::wcout << L"keyMap.size(): " << keyMap.size() << "\ti: " << i << std::endl;
 			}
@@ -3096,7 +3165,7 @@ void GameManager::setControls() {
 				controlsFile.open( controlsPath );
 
 				if( controlsFile.is_open() ) {
-					uint_fast8_t lineNum = 0; //I'm assuming here that the file will never exceed 255 lines.
+					uintmax_t lineNum = 0; //This used to be a uint_fast8_t, which should be enough, but when dealing with user input we don't want to make any assumptions.
 
 					while( controlsFile.good() ) {
 						++lineNum;
@@ -3182,7 +3251,7 @@ void GameManager::setControls() {
 									preference = preference.substr( 7 );
 									std::wstring playerNumStr = boost::algorithm::trim_copy( preference.substr( 0, preference.find( L' ' ) ) );
 									std::wstring actionStr = boost::algorithm::trim_copy( preference.substr( preference.find( L' ' ) ) );
-									uint_fast8_t playerNum = boost::lexical_cast< uint_fast16_t >( playerNumStr ); //Boost doesn't like casting to uint_fast8_t
+									decltype( numPlayers ) playerNum = boost::lexical_cast< unsigned short int >( playerNumStr ); //Boost doesn't like casting to uint_fast8_t
 
 									if( playerNum < numPlayers ) {
 										keyMap.back().setPlayer( playerNum );

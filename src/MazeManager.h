@@ -32,9 +32,10 @@ class MazeManager
 		bool loadFromFile( boost::filesystem::path src );
 
 		void makeRandomLevel();
+		
+		void newMaze( uint_fast8_t newCols, uint_fast8_t newRows );
 
 		void recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t depth, uint_fast16_t numSoFar );
-		void resizeMaze( uint_fast8_t newCols, uint_fast8_t newRows );
 
 		bool saveToFile();
 		bool saveToFile( boost::filesystem::path dest );

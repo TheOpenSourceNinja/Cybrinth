@@ -13,8 +13,12 @@
 #define AI_H
 
 #include <irrlicht.h>
+#ifdef HAVE_STRING
 #include <string>
+#endif //HAVE_STRING
+#ifdef HAVE_VECTOR
 #include <vector>
+#endif //HAVE_VECTOR
 #include "Collectable.h"
 #include "MazeCell.h"
 #include "PreprocessorCommands.h"
@@ -32,11 +36,17 @@ class AI {
 		enum algorithm_t{ DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH, RIGHT_HAND_RULE, LEFT_HAND_RULE };
 		void allKeysFound();
 		bool atGoal();
+		
 		bool doneWaiting();
+		
 		uint_fast8_t getPlayer();
+		
 		void keyFound( uint_fast8_t s );
+		
 		void move(); //Needs to call GameManager's movePlayerOnX and movePlayerOnY functions.
+		
 		void reset();
+		
 		void setPlayer( uint_fast8_t newPlayer );
 		void setup( MazeCell ** newMaze, uint_fast8_t newCols, uint_fast8_t newRows,  GameManager * newGM, bool newStartSolved, algorithm_t newAlgorithm, uint_fast16_t newMovementDelay ); //Provides the AI with whatever info it needs to work.
 	protected:
@@ -44,30 +54,49 @@ class AI {
 		bool alreadyVisited( irr::core::position2d< uint_fast8_t > position );
 		bool alreadyVisitedDFS( irr::core::position2d< uint_fast8_t > position );
 		bool alreadyVisitedIDDFS( irr::core::position2d< uint_fast8_t > position );
+		
 		void findSolution();
 		void findSolutionDFS( irr::core::position2d< uint_fast8_t > currentPosition );
 		void findSolutionIDDFS( irr::core::position2d< uint_fast8_t > currentPosition );
 		void findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > currentPosition, uint_fast16_t depthLimit, bool canDissolveWalls );
 
 		algorithm_t algorithm;
+		
 		std::vector< irr::core::position2d< uint_fast8_t > > cellsVisited;
 		uint_fast8_t cols;
 		uint_fast8_t controlsPlayer;
+		
 		enum direction_t{ UP, DOWN, LEFT, RIGHT };
 		std::vector< irr::core::position2d< uint_fast8_t > > DFSCellsVisited;
+		
+		GameManager * gm;
+		
+		bool effectivelyNoTopWall( uint_fast8_t x, uint_fast8_t y );
+		bool effectivelyNoTopWall( uint_fast8_t x, uint_fast8_t y, bool canDissolveWalls );
+		bool effectivelyNoLeftWall( uint_fast8_t x, uint_fast8_t y );
+		bool effectivelyNoLeftWall( uint_fast8_t x, uint_fast8_t y, bool canDissolveWalls );
+		
 		direction_t hand; //Used in Right Hand Rule and Left Hand Rule
+		
 		std::vector< irr::core::position2d< uint_fast8_t > > IDDFSCellsVisited;
 		uint_fast16_t IDDFSDepthLimit; //For use only when the bots don't know the solution.
-		GameManager * gm;
+		
 		uint_fast8_t keyImSeeking;
-		bool noKeysLeft; //the IDDFS algorithm uses this to determine whether it should really deepen or just start with the max depth like DFS.
+		
 		uint_fast32_t lastTimeMoved;
+		
 		MazeCell ** maze;
 		uint_fast16_t movementDelay; //How long to delay between movements
-		//uint_fast8_t numKeysInSolution;
+		
+		bool noKeysLeft; //the IDDFS algorithm uses this to determine whether it should really deepen or just start with the max depth like DFS.
+		bool noOriginalLeftWall( uint_fast8_t x, uint_fast8_t y );
+		bool noOriginalTopWall( uint_fast8_t x, uint_fast8_t y );
+		
 		std::vector< std::vector< irr::core::position2d< uint_fast8_t > > > pathsToLockedCells;
 		std::vector< irr::core::position2d< uint_fast8_t > > pathTaken;
+		
 		uint_fast8_t rows;
+		
 		std::vector< irr::core::position2d< uint_fast8_t > > solution;
 		bool solved;
 		bool startSolved;

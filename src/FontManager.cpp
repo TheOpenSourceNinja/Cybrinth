@@ -15,7 +15,9 @@
 #include "StringConverter.h"
 
 #include <irrlicht.h>
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
 #include <algorithm/string.hpp>
 #include <filesystem/operations.hpp>
 

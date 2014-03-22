@@ -16,7 +16,9 @@
 #include "Integers.h"
 #include "PreprocessorCommands.h"
 
+#ifdef HAVE_MAP
 #include <map>
+#endif //HAVE_MAP
 #include <irrlicht.h>
 #include <filesystem/path.hpp>
 

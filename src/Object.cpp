@@ -10,7 +10,9 @@
 */
 #include "Object.h"
 #include "colors.h"
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
 
 
 

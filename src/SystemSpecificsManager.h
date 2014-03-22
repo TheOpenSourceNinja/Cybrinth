@@ -13,7 +13,9 @@
 #define SYSTEMSPECIFICSMANAGER_H
 
 #include <filesystem.hpp>
+#ifdef HAVE_VECTOR
 #include <vector>
+#endif //HAVE_VECTOR
 
 #include "PreprocessorCommands.h"
 #include "StringConverter.h"

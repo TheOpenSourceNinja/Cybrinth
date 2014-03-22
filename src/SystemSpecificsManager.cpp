@@ -9,7 +9,9 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif //HAVE_STDLIB_H. I don't know what we'll do if we don't have this header.
 
 #include "SystemSpecificsManager.h"
 

@@ -11,8 +11,12 @@
 #include "NetworkManager.h"
 #include "GameManager.h"
 #include <algorithm/string.hpp>
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
+#ifdef HAVE_STRING
 #include <string>
+#endif //HAVE_STRING
 
 // get sockaddr, IPv4 or IPv6:
 void *NetworkManager::get_in_addr( struct sockaddr *sa ) {
@@ -278,7 +282,7 @@ bool NetworkManager::hasNewPlayerConnected() {
 void NetworkManager::sendMaze( MazeCell ** maze, uint_fast8_t cols, uint_fast8_t rows ) {
 	try {
 		//char buffer[sizeof(cols) + sizeof(rows) + (cols * rows) ];
-		std::vector<uint_fast8_t> toSend;
+		std::vector< decltype( cols ) > toSend;
 		toSend.reserve( 9 + 7 + 2 + ( cols * rows * 4 ) );
 		toSend.push_back( 'S' );
 		toSend.push_back( 'T' );
@@ -292,8 +296,8 @@ void NetworkManager::sendMaze( MazeCell ** maze, uint_fast8_t cols, uint_fast8_t
 		toSend.push_back( cols );
 		toSend.push_back( rows );
 
-		for( uint_fast8_t c = 0; c < cols; ++c ) {
-			for( uint_fast8_t r = 0; r < rows; ++r ) {
+		for( decltype( cols ) c = 0; c < cols; ++c ) {
+			for( decltype( rows ) r = 0; r < rows; ++r ) {
 				toSend.push_back( maze[c ][r ].getTop() );
 				toSend.push_back( maze[c ][r ].getLeft() );
 				toSend.push_back( maze[c ][r ].getBottom() );
@@ -332,7 +336,7 @@ void NetworkManager::sendPlayerPos( uint_fast8_t player, uint_fast8_t x, uint_fa
 	try {
 		//std::wcout << L"Sending player " << player << L" position " << x << L"," << y << std::endl;
 
-		std::vector<uint_fast8_t> toSend;
+		std::vector< decltype( x ) > toSend;
 		toSend.reserve( 6 + 3 + 4 );
 		toSend.push_back( 'S' );
 		toSend.push_back( 'T' );
@@ -369,7 +373,7 @@ void NetworkManager::sendPlayerPos( uint_fast8_t player, uint_fast8_t x, uint_fa
 
 void NetworkManager::sendGoal( Goal goal ) {
 	try {
-		std::vector<uint_fast8_t> toSend;
+		std::vector< decltype( goal.getX() ) > toSend;
 		toSend.reserve( 6 + 2 + 4 );
 		toSend.push_back( 'S' );
 		toSend.push_back( 'T' );
@@ -407,7 +411,7 @@ void NetworkManager::sendGoal( Goal goal ) {
 
 void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 	try {
-		std::vector<uint_fast8_t> toSend;
+		std::vector< uint_fast8_t > toSend;
 		toSend.reserve( 7 + starts.size() + 5 );
 		toSend.push_back( 'S' );
 		toSend.push_back( 'T' );
@@ -418,7 +422,7 @@ void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 		toSend.push_back( 'S' );
 		toSend.push_back( starts.size() );
 
-		for( uint_fast8_t i = 0; i < starts.size(); ++i ) {
+		for( decltype( starts.size() ) i = 0; i < starts.size(); ++i ) {
 			toSend.push_back( i );
 			toSend.push_back( starts.at( i ).getX() );
 			toSend.push_back( starts.at( i ).getY() );
@@ -454,7 +458,7 @@ void NetworkManager::sendU8( uint_fast8_t num, std::wstring desc ) {
 	try {
 		std::wcout << L"Sending uint_fast8_t " << desc << L": " << num << std::endl;
 
-		std::vector<uint_fast8_t> toSend;
+		std::vector< decltype( num ) > toSend;
 		toSend.reserve( 5 + ( desc.size() * 2 ) + 1 + 3 );
 		toSend.push_back( 'S' );
 		toSend.push_back( 'T' );
@@ -463,8 +467,8 @@ void NetworkManager::sendU8( uint_fast8_t num, std::wstring desc ) {
 		toSend.push_back( 'T' );
 		boost::algorithm::to_upper( desc );
 
-		for( uint_fast8_t i = 0; i < desc.size(); ++i ) {
-			toSend.push_back( desc[i ] );
+		for( decltype( desc.size() ) i = 0; i < desc.size(); ++i ) {
+			toSend.push_back( desc[ i ] );
 		}
 
 		toSend.push_back( num );
@@ -473,8 +477,8 @@ void NetworkManager::sendU8( uint_fast8_t num, std::wstring desc ) {
 		toSend.push_back( 'N' );
 		toSend.push_back( 'D' );
 
-		for( uint_fast8_t i = 0; i < desc.size(); ++i ) {
-			toSend.push_back( desc[i ] );
+		for( decltype( desc.size() ) i = 0; i < desc.size(); ++i ) {
+			toSend.push_back( desc[ i ] );
 		}
 
 		for( int j = 0; j <= fdmax; ++j ) {
@@ -496,9 +500,9 @@ void NetworkManager::sendU8( uint_fast8_t num, std::wstring desc ) {
 	}
 }
 
-void NetworkManager::sendCollectables( std::vector<Collectable> stuff ) {
+void NetworkManager::sendCollectables( std::vector< Collectable > stuff ) {
 	try {
-		std::vector<uint_fast8_t> toSend;
+		std::vector< uint_fast8_t > toSend;
 		toSend.reserve( 6 + stuff.size() + 4 );
 		toSend.push_back( 'S' );
 		toSend.push_back( 'T' );
@@ -507,7 +511,7 @@ void NetworkManager::sendCollectables( std::vector<Collectable> stuff ) {
 		toSend.push_back( 'T' );
 		toSend.push_back( 'C' );
 
-		for( uint_fast8_t i = 0; i < stuff.size(); ++i ) {
+		for( decltype( stuff.size() ) i = 0; i < stuff.size(); ++i ) {
 			toSend.push_back( i );
 			toSend.push_back( stuff.at( i ).getType() ); //Will this work? GetType() returns an enum, not a char or int.
 			toSend.push_back( stuff.at( i ).getX() );

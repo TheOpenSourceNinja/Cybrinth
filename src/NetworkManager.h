@@ -18,8 +18,12 @@
 #include "Collectable.h"
 #include "PreprocessorCommands.h"
 #include <irrlicht.h>
+#ifdef HAVE_SSTREAM
 #include <sstream>
+#endif //HAVE_SSTREAM
+#ifdef HAVE_VECTOR
 #include <vector>
+#endif //HAVE_VECTOR
 
 #if defined WINDOWS
 #include <winsock2.h>

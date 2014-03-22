@@ -10,7 +10,9 @@
 */
 #include "colors.h"
 #include "Goal.h"
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
 
 
 

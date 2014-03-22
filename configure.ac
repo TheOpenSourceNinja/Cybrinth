@@ -7,6 +7,7 @@ AC_INIT([Cybrinth], m4_esyscmd_s(date -uI), [dearingj@lifetime.oregonstate.edu],
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_FILES([stamp-h], [date -uI > stamp-h])
 
 # Enable automake to simplify creating makefiles:
 AM_INIT_AUTOMAKE([subdir-objects -Wall -Werror])

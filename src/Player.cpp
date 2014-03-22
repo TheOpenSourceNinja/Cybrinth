@@ -10,7 +10,9 @@
 */
 #include "Player.h"
 #include <irrlicht.h>
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
 #include "colors.h"
 
 #include "GameManager.h"
@@ -28,6 +30,7 @@ Player::Player() {
 		timeTakenThisMaze = 0;
 		stepsTakenThisMaze = 0;
 		keysCollectedThisMaze = 0;
+		scoreTotal = 0;
 		reset();
 		setGM( nullptr );
 	} catch( std::exception &e ) {
@@ -40,6 +43,59 @@ Player::~Player() {
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::~Player(): " << e.what() << std::endl;
 	}
+}
+
+void Player::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height ) {
+	try {
+		uint_fast16_t size;
+
+		if( width < height ) {
+			size = width;
+		} else {
+			size = height;
+		}
+
+		if( texture->getSize().Width != size ) {
+			loadTexture( driver, size );
+		}
+
+		Object::draw( driver, width, height );
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in Player::draw(): " << e.what() << std::endl;
+	}
+}
+
+uint_fast8_t Player::getItem() {
+	return heldItem;
+}
+
+Collectable::type_t Player::getItemType() {
+	return heldItemType;
+}
+
+intmax_t Player::getScoreLastMaze() {
+	return scoreLastMaze;
+}
+intmax_t Player::getScoreTotal() {
+	return scoreTotal;
+}
+
+void Player::giveItem( uint_fast8_t item, Collectable::type_t type ) {
+	heldItem = item;
+	heldItemType = type;
+	if( gm != nullptr ) {
+		gm->getCollectable( heldItem )->setX( x );
+		gm->getCollectable( heldItem )->setY( y );
+		gm->getCollectable( heldItem )->owned = true;
+	}
+}
+
+bool Player::hasItem() {
+	return heldItem != UINT_FAST8_MAX;
+}
+
+bool Player::hasItem( uint_fast8_t item ) {
+	return heldItem == item;
 }
 
 void Player::loadTexture( irr::video::IVideoDriver* driver ) {
@@ -96,52 +152,6 @@ void Player::loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t size )
 	}
 }
 
-void Player::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height ) {
-	try {
-		uint_fast16_t size;
-
-		if( width < height ) {
-			size = width;
-		} else {
-			size = height;
-		}
-
-		if( texture->getSize().Width != size ) {
-			loadTexture( driver, size );
-		}
-
-		Object::draw( driver, width, height );
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in Player::draw(): " << e.what() << std::endl;
-	}
-}
-
-uint_fast8_t Player::getItem() {
-	return heldItem;
-}
-
-Collectable::type_t Player::getItemType() {
-	return heldItemType;
-}
-
-void Player::giveItem( uint_fast8_t item, Collectable::type_t type ) {
-	heldItem = item;
-	heldItemType = type;
-	if( gm != nullptr ) {
-		gm->getCollectable( heldItem )->setX( x );
-		gm->getCollectable( heldItem )->setY( y );
-		gm->getCollectable( heldItem )->owned = true;
-	}
-}
-
-bool Player::hasItem() {
-	return heldItem != UINT_FAST8_MAX;
-}
-
-bool Player::hasItem( uint_fast8_t item ) {
-	return heldItem == item;
-}
-
 void Player::moveX( int_fast8_t val ) {
 	try {
 		Object::moveX( val );
@@ -182,6 +192,7 @@ void Player::reset() {
 		keysCollectedLastMaze = keysCollectedThisMaze;
 		keysCollectedThisMaze = 0;
 		heldItem = UINT_FAST8_MAX;
+		scoreLastMaze = 0;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::reset(): " << e.what() << std::endl;
 	}
@@ -189,4 +200,9 @@ void Player::reset() {
 
 void Player::setGM( GameManager* newGM ) {
 	gm = newGM;
+}
+
+void Player::setScore( intmax_t newScore ) {
+	scoreTotal += newScore;
+	scoreLastMaze = newScore;
 }

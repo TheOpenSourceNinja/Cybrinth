@@ -11,7 +11,9 @@
 #include "MenuOption.h"
 #include "colors.h"
 #include "StringConverter.h"
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
 
 #include <irrlicht.h>
 

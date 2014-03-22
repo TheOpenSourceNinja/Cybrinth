@@ -26,9 +26,13 @@ class MazeCell {
 		border_t getLeft();
 		void setLeft( border_t val );
 		border_t getBottom();
-		void setBottom( border_t val );
+		void setOriginalBottom( border_t val );
 		border_t getRight();
-		void setRight( border_t val );
+		void setOriginalRight( border_t val );
+		void setOriginalTop( border_t val );
+		void setOriginalLeft( border_t val );
+		border_t getOriginalTop(); //For those solving algorithms that absolutely cannot be used on mazes that are no longer simply connected.
+		border_t getOriginalLeft();
 		void removeLocks();
 		bool visited; //Used by the maze generation algorithm to ensure there are no loops, by canGetTo() to indicate which cells it's already look at, and during play for the players' own use.
 		uint_fast16_t distanceFromStart;
@@ -46,6 +50,8 @@ class MazeCell {
 		border_t left;
 		border_t bottom; //Useless except on maze borders and when checking if it's a dead end. Do not rely on this to be accurate.
 		border_t right; //Ditto.
+		border_t originalTop;
+		border_t originalLeft;
 		irr::video::SColor visitorColor;
 };
 

@@ -3,7 +3,9 @@
 #include "GameManager.h"
 
 #include <filesystem/fstream.hpp>
+#ifdef HAVE_IOSTREAM
 #include <iostream>
+#endif //HAVE_IOSTREAM
 
 
 //Recursively searches the maze to see if it can get from start to end
@@ -45,11 +47,11 @@ bool MazeManager::canGetToAllCollectables( uint_fast8_t startX, uint_fast8_t sta
 	try {
 		bool result = true;
 
-		for( uint_fast16_t i = 0; ( i < gameManager->stuff.size() && result == true ); ++i ) {
+		for( decltype( gameManager->stuff.size() ) i = 0; ( i < gameManager->stuff.size() && result == true ); ++i ) {
 
 			//Do this here because canGetTo() uses the visited variable
-			for( uint_fast8_t x = 0; x < cols; ++x ) {
-				for( uint_fast8_t y = 0; y < rows; ++y ) {
+			for( decltype( cols ) x = 0; x < cols; ++x ) {
+				for( decltype( rows ) y = 0; y < rows; ++y ) {
 					maze[ x ][ y ].visited = false;
 				}
 			}
@@ -78,8 +80,8 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, ui
 		video::SColor acidProofWallShadowColor = BLACK;
 		core::position2d< s32 > shadowOffset( 1, 1 );
 
-		for( uint_fast8_t x = 0; x < cols; ++x ) {
-			for( uint_fast8_t y = 0; y < rows; ++y ) {
+		for( decltype( cols ) x = 0; x < cols; ++x ) {
+			for( decltype( rows ) y = 0; y < rows; ++y ) {
 				if( maze[ x ][ y ].visible ) {
 					if( maze[ x ][ y ].getTop() == MazeCell::WALL ) {
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), wallShadowColor );
@@ -195,72 +197,72 @@ void MazeManager::makeRandomLevel() {
 
 		srand( gameManager->randomSeed ); //randomSeed is set either by resetThings() or by loadFromFile()
 		{
-			uint_fast8_t tempCols = rand() % 28 + 2;
-			uint_fast8_t tempRows = tempCols + ( rand() % 5 );
-			resizeMaze( tempCols, tempRows );
+			decltype( cols ) tempCols = rand() % 28 + 2; //I don't remember where I got the 28. The 2 is so there's some minimum amount.
+			decltype( rows ) tempRows = tempCols + ( rand() % 5 ); //Again, no idea where the 5 came from.
+			newMaze( tempCols, tempRows );
 		}
 
-		for( uint_fast8_t x = 0; x < cols; ++x ) {
-			for( uint_fast8_t y = 0; y < rows; ++y ) {
-				maze[ x ][ y ].setTop( MazeCell::WALL );
-				maze[ x ][ y ].setLeft( MazeCell::WALL );
-				maze[ x ][ y ].setRight( MazeCell::NONE );
-				maze[ x ][ y ].setBottom( MazeCell::NONE );
+		for( decltype( cols ) x = 0; x < cols; ++x ) {
+			for( decltype( rows ) y = 0; y < rows; ++y ) {
+				maze[ x ][ y ].setOriginalTop( MazeCell::WALL );
+				maze[ x ][ y ].setOriginalLeft( MazeCell::WALL );
+				maze[ x ][ y ].setOriginalRight( MazeCell::NONE );
+				maze[ x ][ y ].setOriginalBottom( MazeCell::NONE );
 				maze[ x ][ y ].visited = false;
 			}
 		}
 
-		for( uint_fast8_t p = 0; p < gameManager->numPlayers; ++p ) {
+		for( decltype( gameManager->numPlayers ) p = 0; p < gameManager->numPlayers; ++p ) {
 			gameManager->playerStart[ p ].reset();
 		}
 		
 		{
-			uint_fast8_t goalX = rand() % cols;
-			uint_fast8_t goalY = rand() % rows;
+			decltype( cols ) goalX = rand() % cols;
+			decltype( rows ) goalY = rand() % rows;
 			gameManager->goal.setX( goalX );
 			gameManager->goal.setY( goalY );
 			//Make the goal inaccessible unless we've found all the keys (locks are place elsewhere in the code but one lock does get placed at the goal)
-			maze[ goalX ][ goalY ].setTop( MazeCell::ACIDPROOF );
-			maze[ goalX ][ goalY ].setLeft( MazeCell::ACIDPROOF );
+			maze[ goalX ][ goalY ].setOriginalTop( MazeCell::ACIDPROOF );
+			maze[ goalX ][ goalY ].setOriginalLeft( MazeCell::ACIDPROOF );
 			if( goalX < ( cols - 1 ) ) {
-				maze[ goalX + 1 ][ goalY ].setLeft( MazeCell::ACIDPROOF );
+				maze[ goalX + 1 ][ goalY ].setOriginalLeft( MazeCell::ACIDPROOF );
 			}
 			if( goalY < ( rows - 1 ) ) {
-				maze[ goalX ][ goalY + 1 ].setTop( MazeCell::ACIDPROOF );
+				maze[ goalX ][ goalY + 1 ].setOriginalTop( MazeCell::ACIDPROOF );
 			}
 			
 			recurseRandom( goalX, goalY, 0, 0 ); //Start recursion from the goal's position; for some reason that makes the mazes harder than if we started recursion from the player's starting point.
 		}
 		
 		//Add walls at maze borders
-		for( uint_fast8_t x = 0; x < cols; ++x ) {
-			maze[ x ][ 0 ].setTop( MazeCell::ACIDPROOF );
-			maze[ x ][ rows-1 ].setBottom( MazeCell::ACIDPROOF );
+		for( decltype( cols ) x = 0; x < cols; ++x ) {
+			maze[ x ][ 0 ].setOriginalTop( MazeCell::ACIDPROOF );
+			maze[ x ][ rows-1 ].setOriginalBottom( MazeCell::ACIDPROOF );
 		}
 
-		for( uint_fast8_t y = 0; y < rows; ++y ) {
-			maze[ 0 ][ y ].setLeft( MazeCell::ACIDPROOF );
-			maze[ cols-1 ][ y ].setRight( MazeCell::ACIDPROOF );
+		for( decltype( rows ) y = 0; y < rows; ++y ) {
+			maze[ 0 ][ y ].setOriginalLeft( MazeCell::ACIDPROOF );
+			maze[ cols-1 ][ y ].setOriginalRight( MazeCell::ACIDPROOF );
 		}
 
-		for( uint_fast8_t x = 1; x < cols; ++x ) {
-			for( uint_fast8_t y = 0; y < rows; ++y ) {
-				maze[ x-1 ][ y ].setRight( maze[ x ][ y ].getLeft() );
+		for( decltype( cols ) x = 1; x < cols; ++x ) {
+			for( decltype( rows ) y = 0; y < rows; ++y ) {
+				maze[ x-1 ][ y ].setOriginalRight( maze[ x ][ y ].getLeft() );
 			}
 		}
 
-		for( uint_fast8_t x = 0; x < cols; ++x ) {
-			for( uint_fast8_t y = 1; y < rows; ++y ) {
-				maze[ x ][ y-1 ].setBottom( maze[ x ][ y ].getTop() );
+		for( decltype( cols ) x = 0; x < cols; ++x ) {
+			for( decltype( rows ) y = 1; y < rows; ++y ) {
+				maze[ x ][ y-1 ].setOriginalBottom( maze[ x ][ y ].getTop() );
 			}
 		}
 
 		//Find all dead ends. I'm sure it would be more efficient to do this during maze generation rather than going back through afterward, but I can't be bothered with that now.
-		std::vector<uint_fast8_t> deadEndsX;
-		std::vector<uint_fast8_t> deadEndsY;
+		std::vector< decltype( cols ) > deadEndsX;
+		std::vector< decltype( rows ) > deadEndsY;
 
-		for( uint_fast8_t x = 0; x < cols; ++x ) {
-			for( uint_fast8_t y = 0; y < rows; ++y ) {
+		for( decltype( cols ) x = 0; x < cols; ++x ) {
+			for( decltype( rows ) y = 0; y < rows; ++y ) {
 				if( maze[ x ][ y ].isDeadEnd() ) {
 					deadEndsX.push_back( x );
 					deadEndsY.push_back( y );
@@ -269,8 +271,8 @@ void MazeManager::makeRandomLevel() {
 		}
 
 		//Remove player starts from list of dead ends
-		for( uint_fast8_t p = 0; p < gameManager->numPlayers; ++p ) {
-			for( uint_fast16_t i = 0; i < deadEndsX.size(); ++i ) {
+		for( decltype( gameManager->numPlayers ) p = 0; p < gameManager->numPlayers; ++p ) {
+			for( decltype( deadEndsX.size() ) i = 0; i < deadEndsX.size(); ++i ) {
 				if( gameManager->playerStart.at( p ).getX() == deadEndsX.at( i ) && gameManager->playerStart.at( p ).getY() == deadEndsY.at( i ) ) {
 					deadEndsX.erase( deadEndsX.begin() + i );
 					deadEndsY.erase( deadEndsY.begin() + i );
@@ -279,7 +281,7 @@ void MazeManager::makeRandomLevel() {
 		}
 
 		//Remove goal from list of dead ends
-		for( uint_fast16_t i = 0; i < deadEndsX.size(); ++i ) {
+		for( decltype( deadEndsX.size() ) i = 0; i < deadEndsX.size(); ++i ) {
 			if( gameManager->goal.getX() == deadEndsX.at( i ) && gameManager->goal.getY() == deadEndsY.at( i ) ) {
 				deadEndsX.erase( deadEndsX.begin() + i );
 				deadEndsY.erase( deadEndsY.begin() + i );
@@ -287,7 +289,7 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		{ //Decide how many keys/locks to use (# of keys = # of locks)
-			uint_fast8_t temp = rand() % cols;
+			decltype( gameManager->numLocks ) temp = rand() % cols;
 			if( deadEndsX.size() > 0 ) {
 				temp = temp % deadEndsX.size();
 			}
@@ -296,11 +298,10 @@ void MazeManager::makeRandomLevel() {
 
 		//gameManager->numLocks = rand() % ( cols * rows ); //Uncomment this for a crazy number of keys!
 
-		uint_fast8_t numKeys = gameManager->numLocks;
+		decltype( gameManager->numLocks ) numKeys = gameManager->numLocks;
 
 		//Place keys in dead ends
-		for( uint_fast8_t k = 0; k < numKeys; ++k ) {
-			//vector<uint_fast8_t> chosenPlaces;
+		for( decltype( numKeys ) k = 0; k < numKeys; ++k ) {
 
 			if( deadEndsX.size() == 0 ) {
 				deadEndsX.push_back( gameManager->playerStart.at( 0 ).getX() );
@@ -308,7 +309,7 @@ void MazeManager::makeRandomLevel() {
 			}
 			
 			{ //Pick one of the dead ends randomly.
-				uint_fast8_t chosen = rand() % deadEndsX.size();
+				decltype( deadEndsX.size() ) chosen = rand() % deadEndsX.size();
 
 				{ //Finally, create a key and put it there.
 					Collectable temp;
@@ -326,7 +327,10 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		{
-			uint_fast8_t acidChance = 1; //Magic number: I just chose it randomly.
+			uint_fast8_t acidChance = UINT_FAST8_MAX; //Acid is supposed to be really rare.
+			if( gameManager->getDebugStatus() ) {
+				acidChance = 1; //If the game is being debugged, ensure the acid is always there - it may be what's being debugged.
+			}
 			if( rand() % acidChance == 0 ) {
 				if( deadEndsX.empty() ) { //If all the dead ends have been filled with other collectables
 					Collectable temp;
@@ -337,7 +341,7 @@ void MazeManager::makeRandomLevel() {
 					gameManager->stuff.push_back( temp );
 				} else {
 					//Pick one of the dead ends randomly.
-					uint_fast8_t chosen = rand() % deadEndsX.size();
+					decltype( deadEndsX.size() ) chosen = rand() % deadEndsX.size();
 
 					{ //Finally, create an acid and put it there.
 						Collectable temp;
@@ -355,7 +359,7 @@ void MazeManager::makeRandomLevel() {
 			}
 		}
 
-		for( uint_fast8_t p = 0; p < gameManager->numPlayers; ++p ) {
+		for( decltype( gameManager->numPlayers ) p = 0; p < gameManager->numPlayers; ++p ) {
 			gameManager->player[ p ].setPos( gameManager->playerStart[ p ].getX(), gameManager->playerStart[ p ].getY() );
 		}
 
@@ -363,23 +367,23 @@ void MazeManager::makeRandomLevel() {
 			//Place locks
 			//Place first lock at the gameManager->goal
 			if( maze[ gameManager->goal.getX() ][ gameManager->goal.getY() ].getTop() == MazeCell::NONE ) {
-				maze[ gameManager->goal.getX() ][ gameManager->goal.getY() ].setTop( MazeCell::LOCK );
+				maze[ gameManager->goal.getX() ][ gameManager->goal.getY() ].setOriginalTop( MazeCell::LOCK );
 			} else if( maze[ gameManager->goal.getX() ][ gameManager->goal.getY() ].getLeft() == MazeCell::NONE ) {
-				maze[ gameManager->goal.getX() ][ gameManager->goal.getY() ].setLeft( MazeCell::LOCK );
+				maze[ gameManager->goal.getX() ][ gameManager->goal.getY() ].setOriginalLeft( MazeCell::LOCK );
 			} else if( maze[ gameManager->goal.getX() ][ gameManager->goal.getY() + 1 ].getTop() == MazeCell::NONE ) {
-				maze[ gameManager->goal.getX() ][ gameManager->goal.getY() + 1 ].setTop( MazeCell::LOCK );
+				maze[ gameManager->goal.getX() ][ gameManager->goal.getY() + 1 ].setOriginalTop( MazeCell::LOCK );
 			} else if( maze[ gameManager->goal.getX() + 1 ][ gameManager->goal.getY() ].getLeft() == MazeCell::NONE ) {
-				maze[ gameManager->goal.getX() + 1 ][ gameManager->goal.getY() ].setLeft( MazeCell::LOCK );
+				maze[ gameManager->goal.getX() + 1 ][ gameManager->goal.getY() ].setOriginalLeft( MazeCell::LOCK );
 			}
 
-			uint_fast8_t numLocksPlaced = 1;
+			decltype( gameManager->numLocks ) numLocksPlaced = 1;
 
 			while( gameManager->device->run() != false && numLocksPlaced < gameManager->numLocks && gameManager->timer->getTime() < gameManager->timeStartedLoading + gameManager->loadingDelay ) {
-				uint_fast8_t tempX = rand() % cols;
-				uint_fast8_t tempY = rand() % rows;
+				decltype( cols ) tempX = rand() % cols;
+				decltype( rows ) tempY = rand() % rows;
 
 				if( maze[ tempX ][ tempY ].getTop() == MazeCell::NONE ) {
-					maze[ tempX ][ tempY ].setTop( MazeCell::LOCK );
+					maze[ tempX ][ tempY ].setOriginalTop( MazeCell::LOCK );
 
 					if( canGetToAllCollectables( gameManager->playerStart[ 0 ].getX(), gameManager->playerStart[ 0 ].getY() ) ) {
 						numLocksPlaced += 1;
@@ -387,10 +391,10 @@ void MazeManager::makeRandomLevel() {
 							std::wcout << L"Placed lock " << numLocksPlaced << L" at " << tempX << L"x" << tempY << std::endl;
 						}
 					} else {
-						maze[ tempX ][ tempY ].setTop( MazeCell::NONE );
+						maze[ tempX ][ tempY ].setOriginalTop( MazeCell::NONE );
 					}
 				} else if( maze[ tempX ][ tempY ].getLeft() == MazeCell::NONE ) {
-					maze[ tempX ][ tempY ].setLeft( MazeCell::LOCK );
+					maze[ tempX ][ tempY ].setOriginalLeft( MazeCell::LOCK );
 
 					if( canGetToAllCollectables( gameManager->playerStart[ 0 ].getX(), gameManager->playerStart[ 0 ].getY() ) ) {
 						numLocksPlaced += 1;
@@ -398,7 +402,7 @@ void MazeManager::makeRandomLevel() {
 							std::wcout << L"Placed lock " << numLocksPlaced << L" at " << tempX << L"x" << tempY << std::endl;
 						}
 					} else {
-						maze[ tempX ][ tempY ].setLeft( MazeCell::NONE );
+						maze[ tempX ][ tempY ].setOriginalLeft( MazeCell::NONE );
 					}
 				}
 			}
@@ -410,7 +414,7 @@ void MazeManager::makeRandomLevel() {
 			}
 
 			if( numLocksPlaced < gameManager->numLocks ) {
-				uint_fast8_t keysToRemove = gameManager->numLocks - numLocksPlaced;
+				decltype( numLocksPlaced ) keysToRemove = gameManager->numLocks - numLocksPlaced;
 
 				for( uint_fast16_t i = 0; ( i < gameManager->stuff.size() && keysToRemove > 0 ); ++i ) {
 					if( gameManager->getDebugStatus() ) {
@@ -428,13 +432,13 @@ void MazeManager::makeRandomLevel() {
 			numKeys = gameManager->numLocks = numLocksPlaced;
 		}
 
-		for( uint_fast8_t x = 0; x < cols; ++x ) {
-			for( uint_fast8_t y = 0; y < rows; ++y ) {
+		for( decltype( cols ) x = 0; x < cols; ++x ) {
+			for( decltype( rows ) y = 0; y < rows; ++y ) {
 				maze[ x ][ y ].visited = false;
 			}
 		}
 
-		for( uint_fast8_t p = 0; p < gameManager->numPlayers; ++p ) {
+		for( decltype( gameManager->numPlayers ) p = 0; p < gameManager->numPlayers; ++p ) {
 			maze[ gameManager->playerStart[ p ].getX() ][ gameManager->playerStart[ p ].getY() ].visited = true;
 			maze[ gameManager->playerStart[ p ].getX() ][ gameManager->playerStart[ p ].getY() ].setVisitorColor( gameManager->player[ p ].getColorTwo() );
 		}
@@ -457,13 +461,39 @@ MazeManager::MazeManager() {
 
 MazeManager::~MazeManager() {
 	try {
-		for( uint_fast8_t i = 0 ; i < cols ; ++i ) {
+		for( decltype( cols ) i = 0 ; i < cols ; ++i ) {
 			delete [ ] maze[ i ];
 		}
 
 		delete [ ] maze ;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::~MazeManager(): " << e.what() << std::endl;
+	}
+}
+
+//Creates a new maze of the desired size, then deletes old maze
+void MazeManager::newMaze( uint_fast8_t newCols, uint_fast8_t newRows ) {
+	try {
+		decltype( cols ) oldCols = cols;
+
+		MazeCell** newMaze = new MazeCell *[ newCols ];
+
+		for( decltype( newCols ) i = 0 ; i < newCols ; ++i ) {
+			newMaze[ i ] = new MazeCell[ newRows ];
+		}
+
+		for( decltype( oldCols ) i = 0 ; i < oldCols ; ++i ) {
+			delete [ ] maze[ i ];
+		}
+
+		delete [ ] maze ;
+
+		cols = newCols;
+		rows = newRows;
+
+		maze = newMaze;
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in MazeManager::resizeMaze(): " << e.what() << std::endl;
 	}
 }
 
@@ -477,7 +507,7 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 		maze[ x ][ y ].visited = true;
 		maze[ x ][ y ].id = numSoFar;
 
-		for( uint_fast8_t p = 0; p < gameManager->numPlayers; ++p ) {
+		for( decltype( gameManager->numPlayers ) p = 0; p < gameManager->numPlayers; ++p ) {
 			if( depth >= gameManager->playerStart[ p ].distanceFromExit ) {
 				gameManager->playerStart[ p ].setPos( x, y );
 				gameManager->playerStart[ p ].distanceFromExit = depth;
@@ -493,7 +523,7 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 				case 0: //Left
 
 					if( x > 0 && maze[ x-1 ][ y ].visited == false ) {
-						maze[ x ][ y ].setLeft( MazeCell::NONE );
+						maze[ x ][ y ].setOriginalLeft( MazeCell::NONE );
 
 						recurseRandom( x - 1, y, depth + 1, numSoFar );
 					}
@@ -503,7 +533,7 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 				case 1: //Right
 
 					if( x < cols - 1 && maze[ x+1 ][ y ].visited == false ) {
-						maze[ x+1 ][ y ].setLeft( MazeCell::NONE );
+						maze[ x+1 ][ y ].setOriginalLeft( MazeCell::NONE );
 
 						recurseRandom( x + 1, y, depth + 1, numSoFar );
 					}
@@ -513,7 +543,7 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 				case 2: //Up
 
 					if( y > 0 && maze[ x ][ y-1 ].visited == false ) {
-						maze[ x ][ y ].setTop( MazeCell::NONE );
+						maze[ x ][ y ].setOriginalTop( MazeCell::NONE );
 
 						recurseRandom( x, y - 1, depth + 1, numSoFar );
 					}
@@ -523,7 +553,7 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 				case 3: //Down
 
 					if( y < rows - 1 && maze[ x ][ y+1 ].visited == false ) {
-						maze[ x ][ y+1 ].setTop( MazeCell::NONE );
+						maze[ x ][ y+1 ].setOriginalTop( MazeCell::NONE );
 
 						recurseRandom( x, y + 1, depth + 1, numSoFar );
 					}
@@ -543,61 +573,6 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::recurseRandom(): " << e.what() << std::endl;
-	}
-}
-
-//Creates a new maze of the desired size, copies from old maze to new, then deletes old maze
-void MazeManager::resizeMaze( uint_fast8_t newCols, uint_fast8_t newRows ) {
-	try {
-		uint_fast8_t oldCols = cols;
-		uint_fast8_t oldRows = rows;
-
-		if( gameManager->getDebugStatus() && ( newCols < oldCols || newRows < oldRows ) ) {
-			std::wcerr << L"Warning: New maze size smaller than old in some dimension. newCols: " << static_cast< unsigned int >( newCols ) << L" oldCols: " << static_cast< unsigned int >( oldCols ) << L" newRows: " << static_cast< unsigned int >( newRows ) << L" oldRows: " << static_cast< unsigned int >( oldRows ) << std::endl;
-		}
-
-		MazeCell** newMaze = new MazeCell *[ newCols ];
-
-		for( uint_fast8_t i = 0 ; i < newCols ; ++i ) {
-			newMaze[ i ] = new MazeCell[ newRows ];
-		}
-
-		{
-			uint_fast8_t colsToCopy;
-
-			if( newCols > oldCols ) {
-				colsToCopy = oldCols;
-			} else {
-				colsToCopy = newCols;
-			}
-
-			uint_fast8_t rowsToCopy;
-
-			if( newRows > oldRows ) {
-				rowsToCopy = oldRows;
-			} else {
-				rowsToCopy = newRows;
-			}
-
-			for( uint_fast8_t x = 0; x < colsToCopy; ++x ) {
-				for( uint_fast8_t y = 0; y < rowsToCopy; ++y ) {
-					newMaze[ x ][ y ] = maze[ x ][ y ];
-				}
-			}
-		}
-
-		for( uint_fast8_t i = 0 ; i < oldCols ; ++i ) {
-			delete [ ] maze[ i ];
-		}
-
-		delete [ ] maze ;
-
-		cols = newCols;
-		rows = newRows;
-
-		maze = newMaze;
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in MazeManager::resizeMaze(): " << e.what() << std::endl;
 	}
 }
 
