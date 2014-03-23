@@ -76,7 +76,7 @@ bool FontManager::canLoadFont( boost::filesystem::path filename_ ) {
 
 irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, irr::core::stringw filename_, irr::u32 size_, bool antiAlias_, bool transparency_ ) {
 	try {
-		if( filename_.empty() ) {
+		if( filename_.size() == 0 ) {//filename_.empty() ) { Irrlicht 1.8+ has .empty() but Raspbian only has 1.7 in its repositories
 			return nullptr;
 		}
 

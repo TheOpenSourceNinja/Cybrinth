@@ -229,14 +229,14 @@ void GameManager::drawAll() {
 			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
 				player.at( bot.at( i ).getPlayer() ).draw( driver, cellWidth, cellHeight );
 			}
-			
+
 			//Now we draw the players
 			for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 				if( player.at( p ).isHuman ) {
 					player.at( p ).draw( driver, cellWidth, cellHeight );
 				}
 			}
-			
+
 			//We used to draw Collectables before the players due to a texture resizing bug in Irrlicht's software renderer (the bug still exists AFAIK). Collectables generally use pre-created images whereas players generally use dynamically generated images. This made players potentially get covered by Collectables and thus invisible. Now that players can hold Collectables, we want them drawn on top of the players.
 			for( decltype( stuff.size() ) i = 0; i < stuff.size(); ++i ) {
 				stuff.at( i ).draw( driver, cellWidth, cellHeight );
@@ -269,7 +269,7 @@ void GameManager::drawAll() {
 				core::rect< s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				clockFont->draw( clockTime, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
 			}
-			
+
 			{
 				core::stringw timeLabel( L"Time:" );
 				textY += tempDimensions.Height;
@@ -277,7 +277,7 @@ void GameManager::drawAll() {
 				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( L"Time:", tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
-			
+
 			{
 				core::stringw timerStr( "" );
 				timerStr += ( timer->getTime() / 1000 );
@@ -287,7 +287,7 @@ void GameManager::drawAll() {
 				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( timerStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
-			
+
 			{
 				core::stringw keysFoundStr( L"Keys found:" );
 				textY += tempDimensions.Height;
@@ -306,7 +306,7 @@ void GameManager::drawAll() {
 				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( keyStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
-			
+
 			{
 				core::stringw seedLabel( L"Random seed:" );
 				textY += tempDimensions.Height;
@@ -314,7 +314,7 @@ void GameManager::drawAll() {
 				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( seedLabel, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
-			
+
 			{
 				core::stringw seedStr( randomSeed );
 				textY += tempDimensions.Height;
@@ -322,7 +322,7 @@ void GameManager::drawAll() {
 				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( seedStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
-			
+
 			{
 				core::stringw headfor( L"Head for" );
 				tempDimensions = textFont->getDimension( stringConverter.toWCharArray( headfor ) );
@@ -354,14 +354,14 @@ void GameManager::drawAll() {
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( nowplaying, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
-				
+
 				{
 					textY += tempDimensions.Height;
 					tempDimensions = musicTagFont->getDimension( stringConverter.toWCharArray( musicTitle ) );
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					musicTagFont->draw( musicTitle, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
 				}
-				
+
 				{
 					core::stringw by( L"by" );
 					textY += tempDimensions.Height;
@@ -369,14 +369,14 @@ void GameManager::drawAll() {
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( by, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
-				
+
 				{
 					textY += tempDimensions.Height;
 					tempDimensions = musicTagFont->getDimension( stringConverter.toWCharArray( musicArtist ) );
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					musicTagFont->draw( musicArtist, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
 				}
-				
+
 				{
 					core::stringw fromalbum( L"from album" );
 					textY += tempDimensions.Height;
@@ -384,14 +384,14 @@ void GameManager::drawAll() {
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( fromalbum, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
-				
+
 				{
 					textY += tempDimensions.Height;
 					tempDimensions = musicTagFont->getDimension( stringConverter.toWCharArray( musicAlbum ) );
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					musicTagFont->draw( musicAlbum, tempRectangle, LIGHTGRAY, true, true, &tempRectangle );
 				}
-				
+
 				{
 					core::stringw volume( L"Volume:" );
 					textY += tempDimensions.Height;
@@ -399,7 +399,7 @@ void GameManager::drawAll() {
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( volume, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
-				
+
 				{
 					core::stringw volumeNumber( musicVolume );
 					volumeNumber.append( L"%" );
@@ -480,30 +480,30 @@ void GameManager::drawLoadingScreen() {
 				if( !isNotNull( tipFont ) ) {
 					tipFont = gui->getBuiltInFont();
 				}
-				
+
 				u32 proTipHeight = 0;
-				
+
 				{
 					textY += loadingDimensions.Height + 1;
 					int_fast16_t textX = 0;
 					core::dimension2d< u32 > proTipPrefixDimensions = tipFont->getDimension( stringConverter.toWCharArray( proTipPrefix ) );
 					core::dimension2d< u32 > proTipDimensions = tipFont->getDimension( stringConverter.toWCharArray( proTips.at( currentProTip ) ) );
 					proTipHeight = std::max( proTipDimensions.Height, proTipPrefixDimensions.Height );
-					
+
 					{
 						core::rect< s32 > tempRectangle( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
 						tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
 					}
-					
+
 					{
 						core::rect< s32 > tempRectangle( textX + proTipPrefixDimensions.Width, textY, proTipDimensions.Width + textX + proTipPrefixDimensions.Width, proTipDimensions.Height + textY );
 						tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
 					}
-					
+
 					textY += proTipHeight;
 				}
 			}
-			
+
 			drawStats( textY );
 		}
 	} catch( std::exception &e ) {
@@ -516,17 +516,17 @@ void GameManager::drawLoadingScreen() {
  */
  void GameManager::drawLogo() {
 	try {
-	
+
 		if( !isNotNull( logoTexture ) ) {
 			std::wstring error = L"drawLogo() called but logoTexture is null.";
 			throw error;
 		}
-		
+
 		if( logoTexture->getSize() != windowSize ) {
 			std::wcout << L"Resizing texture from " << logoTexture->getSize().Width << L"x" << logoTexture->getSize().Height << L" to " << windowSize.Width << L"x" << windowSize.Height << std::endl;
 			logoTexture = resizer.resize( logoTexture, windowSize.Width, windowSize.Height, driver );
 		}
-		
+
 		if( !isNotNull( logoTexture ) ) {
 			std::wstring error = L"Cannot resize logo texture.";
 			throw error;
@@ -548,7 +548,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 	if( !isNotNull( statsFont ) ) {
 		statsFont = gui->getBuiltInFont();
 	}
-	
+
 	int_fast16_t textX = 0;
 	decltype( textX ) textXOriginal = textX;
 	decltype( textY ) textYOriginal = textY;
@@ -562,68 +562,68 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( winnersLabel ) );
 		core::rect< s32 > tempRectangle( textXOriginal, textY, tempDimensions.Width + textXOriginal, tempDimensions.Height + textY );
 		statsFont->draw( winnersLabel, tempRectangle, WHITE, true, true, &tempRectangle );
-		
+
 		if( tempDimensions.Width + textXOriginal > textX ) {
 			textX = tempDimensions.Width + textXOriginal;
 		}
 		textYSteps = textYOriginal + tempDimensions.Height;
 	}
-	
+
 	{
 		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( steps ) );
 		core::rect< s32 > tempRectangle( textXOriginal, textYSteps, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYSteps );
 		statsFont->draw( steps, tempRectangle, WHITE, true, true, &tempRectangle );
-		
+
 		if( tempDimensions.Width + textXOriginal > textX ) {
 			textX = tempDimensions.Width + textXOriginal;
 		}
 		textYTimes = textYSteps + tempDimensions.Height;
 	}
-	
+
 	{
 		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( times ) );
 		core::rect< s32 > tempRectangle( textXOriginal, textYTimes, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYTimes );
 		statsFont->draw( times, tempRectangle, WHITE, true, true, &tempRectangle );
-		
+
 		if( tempDimensions.Width + textXOriginal > textX ) {
 			textX = tempDimensions.Width + textXOriginal;
 		}
 		textYKeys = textYTimes + tempDimensions.Height;
 	}
-	
+
 	{
 		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( keysFoundPerPlayer ) );
 		core::rect< s32 > tempRectangle( textXOriginal, textYKeys, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYKeys );
 		statsFont->draw( keysFoundPerPlayer, tempRectangle, WHITE, true, true, &tempRectangle );
-		
+
 		if( tempDimensions.Width + textXOriginal > textX ) {
 			textX = tempDimensions.Width + textXOriginal;
 		}
 		textYScores = textYKeys + tempDimensions.Height;
 	}
-	
+
 	{
 		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( scores ) );
 		core::rect< s32 > tempRectangle( textXOriginal, textYScores, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYScores );
 		statsFont->draw( scores, tempRectangle, WHITE, true, true, &tempRectangle );
-		
+
 		if( tempDimensions.Width + textXOriginal > textX ) {
 			textX = tempDimensions.Width + textXOriginal;
 		}
 		textYScoresTotal = textYScores + tempDimensions.Height;
 	}
-	
+
 	{
 		decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( scoresTotal ) );
 		core::rect< s32 > tempRectangle( textXOriginal, textYScoresTotal, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYScoresTotal );
 		statsFont->draw( scoresTotal, tempRectangle, WHITE, true, true, &tempRectangle );
-		
+
 		if( tempDimensions.Width + textXOriginal > textX ) {
 			textX = tempDimensions.Width + textXOriginal;
 		}
 		//textYScoresTotal = textYScores + tempDimensions.Height;
 	}
-	
+
 	textY = textYOriginal;
 	//Now we go through and draw the actual player stats
 	for( decltype( winnersLoadingScreen.size() ) p = 0; p < winnersLoadingScreen.size(); ++p ) {
@@ -668,7 +668,8 @@ void GameManager::drawStats( int_fast16_t textY ) {
 			}
 		}
 		{ //Finally, each player's score is shown...
-			core::stringw text( player.at( winnersLoadingScreen.at( p ) ).getScoreLastMaze() );
+			core::stringw text;
+			text.append( player.at( winnersLoadingScreen.at( p ) ).getScoreLastMaze() );
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
 			core::rect< s32 > tempRectangle( textXOld, textYScores, tempDimensions.Width + textXOld, tempDimensions.Height + textYScores );
 			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
@@ -677,7 +678,8 @@ void GameManager::drawStats( int_fast16_t textY ) {
 			}
 		}
 		{ //...followed by the totals.
-			core::stringw text( player.at( winnersLoadingScreen.at( p ) ).getScoreTotal() );
+			core::stringw text;
+			text.append( player.at( winnersLoadingScreen.at( p ) ).getScoreTotal() );
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
 			core::rect< s32 > tempRectangle( textXOld, textYScoresTotal, tempDimensions.Width + textXOld, tempDimensions.Height + textYScoresTotal );
 			statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
@@ -768,11 +770,11 @@ GameManager::GameManager() {
 		fontFile = "";
 		boost::filesystem::recursive_directory_iterator end;
 		std::vector< boost::filesystem::path > fontFolders = system.getFontFolders();
-		
+
 		if( debug ) {
 			std::wcout << L"fontFolders.size(): " << fontFolders.size() << std::endl;
 		}
-		
+
 		//for( std::vector< boost::filesystem::path >::iterator o = fontFolders.begin(); o != fontFolders.end(); o++ ) {
 		for( decltype( fontFolders.size() ) o = 0; o < fontFolders.size(); o++ ) {
 			//for( boost::filesystem::recursive_directory_iterator i( *o ); i != end; ++i ) {
@@ -817,11 +819,11 @@ GameManager::GameManager() {
 		}
 
 		viewportSize.set( windowSize.Width - ( windowSize.Width / sideDisplaySizeDenominator ), windowSize.Height - 1 );
-		
+
 		device->closeDevice(); //Signals to the existing device that it needs to close itself on next run() so that we can create a new device
 		device->run(); //This is next run()
 		device->drop(); //Cleans up after the device
-		
+
 		bool sbuffershadows = false; //Would not be visible anyway since this game is 2D
 		IEventReceiver* receiver = this;
 
@@ -837,7 +839,7 @@ GameManager::GameManager() {
 		} else if ( debug ) {
 			std::wcout << L"Got the new device" << std::endl;
 		}
-		
+
 		driver = device->getVideoDriver(); //Not sure if this would be possible with a null device, which is why we don't exit
 		if( !isNotNull( driver ) ) {
 			throw( std::wstring( L"Cannot get video driver" ) );
@@ -860,7 +862,7 @@ GameManager::GameManager() {
 		driver->beginScene( false, false ); //These falses specify whether the back buffer and z buffer should be cleared. Since this is the first time drawing anything, there's no need to clear anything beforehand.
 		drawLogo(); //Why the fuck isn't this working consistently? Sometimes it draws, sometimes it only thinks it draws. Had to hack the drawLoadingScreen() function (which gets called several times, therefore is likely to work at least once).
 		driver->endScene();
-		
+
 		/*if( !debug ) { //Ensures the logo will be visible. I don't like just stopping like this but I haven't thought of a good, satisfying way to keep the program running and also continue drawing the logo.
 			device->sleep( 5000 ); //<=5 seconds. "It may not wait the full given time, as sleep may be interrupted." (Quote from the Irrlicht documentation)
 		}*/
@@ -880,7 +882,7 @@ GameManager::GameManager() {
 		}
 
 		loadProTips();
-		
+
 		device->setWindowCaption( stringConverter.toWCharArray( PACKAGE_STRING ) );
 
 		if( debug ) {
@@ -1123,7 +1125,7 @@ Collectable* GameManager::getKey( uint_fast8_t key ) {
 		if( key <= getNumKeys() ) {
 			Collectable* result = nullptr;
 			decltype( key ) currentKey = 0;
-			
+
 			for( decltype( stuff.size() ) s = 0; s < stuff.size(); ++s ) {
 				if( stuff.at( s ).getType() == Collectable::KEY ) {
 					currentKey++;
@@ -1132,7 +1134,7 @@ Collectable* GameManager::getKey( uint_fast8_t key ) {
 					}
 				}
 			}
-			
+
 			return result;
 		} else {
 			std::wstring error = L"Collectable ";
@@ -1245,7 +1247,7 @@ void GameManager::loadFonts() {
 		//These were split off into separate functions because they are needed more often than loadFonts()
 		loadTipFont();
 		loadMusicFont();
-		
+
 		{ //Load loadingFont
 			core::dimension2d< uint_fast32_t > fontDimensions;
 			uint_fast32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
@@ -1278,8 +1280,8 @@ void GameManager::loadFonts() {
 				std::wcout << L"loadingFont is loaded" << std::endl;
 			}
 		}
-		
-		
+
+
 		{ //load textFont
 			core::dimension2d< uint_fast32_t > fontDimensions;
 			if( fontFile != "" ) {
@@ -1360,8 +1362,8 @@ void GameManager::loadFonts() {
 				std::wcout << L"clockFont is loaded" << std::endl;
 			}
 		}
-		
-		
+
+
 		{ //Load statsFont
 			core::dimension2d< uint_fast32_t > fontDimensions;
 			if( fontFile != "" ) {
@@ -1379,7 +1381,7 @@ void GameManager::loadFonts() {
 							} else {
 								temp = statsFont->getDimension( L"000.P000" );
 							}
-							
+
 							fontDimensions = core::dimension2d< uint_fast32_t >( temp.Width * numPlayers, temp.Height );
 							temp = statsFont->getDimension( stringConverter.toWCharArray( winnersLabel ) );
 							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) );
@@ -1400,7 +1402,7 @@ void GameManager::loadFonts() {
 							} else {
 								temp = statsFont->getDimension( L"000.P000" );
 							}
-							
+
 							fontDimensions = core::dimension2d< uint_fast32_t >( temp.Width * numPlayers, temp.Height );
 							temp = statsFont->getDimension( stringConverter.toWCharArray( winnersLabel ) );
 							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) );
@@ -1425,7 +1427,7 @@ void GameManager::loadFonts() {
 		exitGame.setFont( clockFont );
 		backToGame.setFont( clockFont );
 		freedom.setFont( clockFont );
-		
+
 		uint_fast32_t size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect readability on large or small screens, but it's better on large screens than the built-in font.
 		gui->getSkin()->setFont( fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts ) );
 	} catch( std::exception &e ) {
@@ -1633,7 +1635,7 @@ void GameManager::loadProTips() {
 					while( proTipsFile.good() ) {
 						++lineNum;
 						getline( proTipsFile, line );
-						
+
 						if( !line.empty() ) {
 							proTips.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
 
@@ -1795,7 +1797,7 @@ void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 					player.at( p ).removeItem();
 					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setLeft( MazeCell::NONE );
 				}
-				
+
 				if( player.at( p ).getX() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() == MazeCell::NONE ) {
 					player.at( p ).moveX( -1 );
 				}
@@ -1804,7 +1806,7 @@ void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 					player.at( p ).removeItem();
 					mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].setLeft( MazeCell::NONE );
 				}
-				
+
 				if( player.at( p ).getX() < ( mazeManager.cols - 1 ) && mazeManager.maze[ player.at( p ).getX() + 1 ][ player.at( p ).getY() ].getLeft() == MazeCell::NONE ) {
 					player.at( p ).moveX( 1 );
 				}
@@ -1848,7 +1850,7 @@ void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 					player.at( p ).removeItem();
 					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setTop( MazeCell::NONE );
 				}
-				
+
 				if( player.at( p ).getY() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() == MazeCell::NONE ) {
 					player.at( p ).moveY( -1 );
 				}
@@ -1857,7 +1859,7 @@ void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 					player.at( p ).removeItem();
 					mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].setTop( MazeCell::NONE );
 				}
-				
+
 				if( player.at( p ).getY() < ( mazeManager.rows - 1 ) && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() + 1 ].getTop() == MazeCell::NONE ) {
 					player.at( p ).moveY( 1 );
 				}
@@ -1968,7 +1970,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							if( debug ) {
 								std::wcout << L"Current working directory: " << currentDirectory << std::endl;
 							}
-							
+
 							fileChooser = gui->addFileOpenDialog( L"Select a Maze", true, 0, -1 );
 							return true;
 						} else if( saveMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
@@ -1984,7 +1986,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							std::wstring message = stringConverter.toStdWString( PACKAGE_NAME );
 							message += L" is copyright 2012-2014 by James Dearing. Licensed under the GNU Affero General Public License, version 3.0 or (at your option) any later version, as published by the Free Software Foundation. See the file \"COPYING\" or https://www.gnu.org/licenses/agpl.html.\n\nThis means you're free to do what you want with this game: mod it, give copies to friends, sell it if you want. Whatever. It's Free software, Free as in Freedom. You should have received the program's source code with this copy; if you don't have it, you can get it from ";
 							message += stringConverter.toStdWString( PACKAGE_URL );
-							message += L".\n\n"; 
+							message += L".\n\n";
 							message += stringConverter.toStdWString( PACKAGE_NAME );
 							message += L" is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.";
 							gui->addMessageBox( L"Freedom", stringConverter.toWCharArray( message ) );
@@ -2036,9 +2038,9 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							if( isNotNull( camera ) ) {
 								camera->setAspectRatio( static_cast< float >( windowSize.Width ) / windowSize.Height );
 							}
-							
+
 							if( isNotNull( backgroundTexture ) && backgroundTexture->getSize() != windowSize ) {
-								if( !backgroundFilePath.empty() ) {
+								if( backgroundFilePath.size() > 0 ) {// !backgroundFilePath.empty() ) { Irrlicht 1.8+ has .empty() but Raspbian only has 1.7 in its repositories
 									backgroundTexture = driver->getTexture( backgroundFilePath );
 								}
 								if( isNotNull( backgroundTexture ) && backgroundTexture->getSize() != windowSize ) {
@@ -2070,7 +2072,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				}
 			}
 			break;
-			
+
 			case EET_JOYSTICK_INPUT_EVENT: {
 				if( event.JoystickEvent.Joystick == joystickChosen ) {
 					core::array<int_fast16_t> verticalAxes;
@@ -2096,7 +2098,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							joystickMovedDown = true;
 						}
 					}
-					
+
 					for( uint_fast16_t i = 0; i < horizontalAxes.size(); ++i ) {
 						if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
 							if( debug ) {
@@ -2137,7 +2139,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				}
 			}
 			break;
-			
+
 			case EET_GUI_EVENT: {
 				switch( event.GUIEvent.EventType ) {
 					case gui::EGET_FILE_SELECTED: {
@@ -2198,9 +2200,9 @@ bool GameManager::OnEvent( const SEvent& event ) {
  void GameManager::pickLogo() {
 	try {
 		std::vector< boost::filesystem::path > logoList;
-		
+
 		boost::filesystem::path logoPath( boost::filesystem::current_path()/L"logos" );
-		
+
 		//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
 		logoPath = system_complete( logoPath );
 		//logoPath = absolute( logoPath );
@@ -2209,26 +2211,26 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			if( debug ) {
 				std::wcout << L"Path " << logoPath.wstring() << L" does not exist or is not a directory. Checking parent path " << logoPath.parent_path().wstring() << std::endl;
 			}
-			
+
 			logoPath = logoPath.parent_path();
 		}
-		
+
 		if( exists( logoPath ) ) {
 			boost::filesystem::recursive_directory_iterator end;
-			
+
 			for( boost::filesystem::recursive_directory_iterator i( logoPath ); i != end; ++i ) {
 				if( !is_directory( i->path() ) ) { //We've found a file
 					if( debug ) {
 						std::wcout << i->path().wstring() << std::endl;
 					}
-				
+
 					//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
 					for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
-					
+
 						video::IImageLoader* loader = driver->getImageLoader( loaderNum );
 						io::IFileSystem* fileSystem = device->getFileSystem();
 						io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
-						
+
 						//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
 							io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
 							if( loader->isALoadableFileFormat( file ) ) {
@@ -2248,11 +2250,11 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				}
 			}
 		}
-		
+
 		if( logoList.size() > 0 ) {
 			std::vector< boost::filesystem::path >::iterator newEnd = std::unique( logoList.begin(), logoList.end() ); //unique "removes all but the first element from every consecutive group of equivalent elements in the range [first,last)." (source: http://www.cplusplus.com/reference/algorithm/unique/ )
 			logoList.resize( std::distance( logoList.begin(), newEnd ) );
-			
+
 			//Pick a random logo and load it
 			auto logoChosen = rand() % logoList.size();
 			if( debug ) {
@@ -2338,26 +2340,26 @@ void GameManager::readPrefs() {
 							try {
 								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
 								std::wstring choice = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
-								
+
 								if( debug ) {
 									std::wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< std::endl;
 								}
-								
+
 								std::vector< std::wstring > possiblePrefs = { L"bots' solving algorithm", L"volume", L"number of bots", L"show backgrounds",
 									L"fullscreen", L"mark player trails", L"debug", L"bits per pixel", L"wait for vertical sync", L"driver type", L"number of players",
 									L"window size", L"play music", L"network port", L"enable joystick", L"joystick number", L"always server", L"bots know the solution", L"bot movement delay" };
-								
+
 								preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
-								
+
 								if( debug ) {
 									std::wcout << L"Preference after spellchecking \"" << preference << std::endl;
 								}
 
 								if( preference == possiblePrefs.at( 0 ) ) { //L"bots' solving algorithm"
-									
+
 									std::vector< std::wstring > possibleChoices = { L"depth-first search", L"iterative deepening depth-first search", L"right hand rule", L"left hand rule" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
+
 									if( choice == possibleChoices.at( 0 ) ) { //DFS
 										if( debug ) {
 											std::wcout << L"Bots will use Depth-First Search" << std::endl;
@@ -2379,7 +2381,7 @@ void GameManager::readPrefs() {
 										}
 										botAlgorithm = AI::LEFT_HAND_RULE;
 									}
-									
+
 								} else if( preference == possiblePrefs.at( 1 ) ) { //L"volume"
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
@@ -2420,10 +2422,10 @@ void GameManager::readPrefs() {
 										std::wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								} else if( preference == possiblePrefs.at( 3 ) ) { //L"show backgrounds"
-									
+
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
+
 									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Show backgrounds is ON" << std::endl;
@@ -2435,9 +2437,9 @@ void GameManager::readPrefs() {
 										}
 										showBackgrounds = false;
 									}
-									
+
 								} else if( preference == possiblePrefs.at( 4 ) ) { //L"fullscreen"
-									
+
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 
@@ -2452,9 +2454,9 @@ void GameManager::readPrefs() {
 										}
 										fullscreen = false;
 									}
-									
+
 								} else if( preference == possiblePrefs.at( 5 ) ) { //L"mark player trails"
-									
+
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 
@@ -2469,13 +2471,13 @@ void GameManager::readPrefs() {
 										}
 										markTrails = false;
 									}
-									
+
 								} else if( preference == possiblePrefs.at( 6 ) ) { //L"debug"
 
 									#ifndef DEBUG
 										std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 										choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-										
+
 										if( choice == possibleChoices.at( 0 ) ) {
 											debug = true;
 										} else {
@@ -2504,7 +2506,7 @@ void GameManager::readPrefs() {
 									}
 
 								} else if( preference == possiblePrefs.at( 8 ) ) { //L"wait for vertical sync"
-									
+
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 
@@ -2521,7 +2523,7 @@ void GameManager::readPrefs() {
 									}
 
 								} else if( preference == possiblePrefs.at( 9 ) ) { //L"driver type"
-									
+
 									std::vector< std::wstring > possibleChoices = { L"opengl", L"direct3d9", L"direct3d8", L"burning's video", L"software", L"null" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 
@@ -2541,7 +2543,7 @@ void GameManager::readPrefs() {
 
 									if( !device->isDriverSupported( driverType ) ) {
 										std::wcerr << L"Warning: Chosen driver type " << choice << L" is not supported on this system. Auto-picking a new type.";
-										
+
 										driverType = video::EDT_NULL;
 										//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
 										for( uint_fast8_t i = ( uint_fast8_t ) video::EDT_COUNT; i != ( uint_fast8_t ) video::EDT_NULL; i-- ) {
@@ -2550,7 +2552,7 @@ void GameManager::readPrefs() {
 												break;
 											}
 										}
-										
+
 										if( driverType == video::EDT_NULL ) {
 											std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
 											debug = true;
@@ -2601,10 +2603,10 @@ void GameManager::readPrefs() {
 									}
 
 								} else if( preference == possiblePrefs.at( 12 ) ) { //L"play music"
-									
+
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
+
 									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Play music is ON" << std::endl;
@@ -2629,10 +2631,10 @@ void GameManager::readPrefs() {
 										std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								} else if( preference == possiblePrefs.at( 14 ) ) { //L"enable joystick"
-									
+
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
+
 									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Joystick is ENABLED" << std::endl;
@@ -2644,7 +2646,7 @@ void GameManager::readPrefs() {
 										}
 										enableJoystick = false;
 									}
-									
+
 								} else if( preference == possiblePrefs.at( 15 ) ) { //L"joystick number"
 									if( debug ) {
 										std::wcout << L"Joystick number: " << choice << std::endl;
@@ -2656,10 +2658,10 @@ void GameManager::readPrefs() {
 										std::wcerr << L"Error reading joystick number (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								} else if( preference == possiblePrefs.at( 16 ) ) { //L"always server"
-									
+
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
+
 									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"This is always a server" << std::endl;
@@ -2671,12 +2673,12 @@ void GameManager::readPrefs() {
 										}
 										isServer = false;
 									}
-									
+
 								} else if( preference == possiblePrefs.at( 17 ) ) { //L"bots know the solution"
-									
+
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
+
 									if( choice == possibleChoices.at( 0 ) ) { //L"true"
 										if( debug ) {
 											std::wcout << L"Bots DO know the solution" << std::endl;
@@ -2688,7 +2690,7 @@ void GameManager::readPrefs() {
 										}
 										botsKnowSolution = false;
 									}
-									
+
 								} else if( preference == possiblePrefs.at( 18 ) ) { //L"bot movement delay"
 									try {
 										botMovementDelay = boost::lexical_cast< uint_fast16_t >( choice );
@@ -2696,13 +2698,13 @@ void GameManager::readPrefs() {
 										std::wcerr << L"Error reading botMovementDelay preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								}
-								
+
 							} catch ( std::exception &e ) {
 								std::wcout << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << std::endl;
 							}
 						}
 					}
-					
+
 					if( debug ) {
 						botMovementDelay = 0;
 					}
@@ -2841,14 +2843,14 @@ void GameManager::readPrefs() {
 void GameManager::resetThings() {
 	try {
 		randomSeed = time( nullptr );
-		
+
 		//The delay exists so that people can admire the logo artwork or read the pro tips on the loading screen. Actual loading happens in the blink of an eye on my computer.
 		if( !haveShownLogo ) {
 			loadingDelay = 6000;
 		} else {
 			loadingDelay = 1000 + ( rand() % 5000 ); //Adds some randomness just to make it seem less artificial.
 		}
-		
+
 		winnersLoadingScreen = winners;
 		winners.clear();
 		stuff.clear();
@@ -2861,13 +2863,13 @@ void GameManager::resetThings() {
 			playerStart.at( p ).reset();
 			player.at( p ).reset();
 		}
-		
+
 		//Calculate players' total scores
 		for( decltype( winnersLoadingScreen.size() ) w = 0; w < winnersLoadingScreen.size(); ++w ) {
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) score = 0;
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) additiveMultiplier = 10; //So the scores don't get too negative, numbers that add to the score get multiplied by a magic number.
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) subtractiveDivisor = 10; //Likewise, numbers that subtract from the score get divided by a magic number.
-			
+
 			if( debug ) {
 				std::wcout << L"Setting player " << winnersLoadingScreen.at( w ) << L"'s score to ";
 			}
@@ -2887,7 +2889,7 @@ void GameManager::resetThings() {
 			if( debug ) {
 				std::wcout << L" + " << player.at( winnersLoadingScreen.at( w ) ).keysCollectedLastMaze * additiveMultiplier << L" for a total of " << score << std::endl;
 			}
-			
+
 			player.at( winnersLoadingScreen.at( w ) ).setScore( score );
 		}
 
@@ -2984,11 +2986,11 @@ uint_fast8_t GameManager::run() {
 											}
 										}*/
 										anyPlayerHasItem = stuff.at( s ).owned;
-										
+
 										if( !anyPlayerHasItem ) {
 											player.at( p ).giveItem( s, stuff.at( s ).getType() );
 										}
-										
+
 										break;
 									}
 									case Collectable::KEY: {
@@ -2996,7 +2998,7 @@ uint_fast8_t GameManager::run() {
 										player.at( p ).keysCollectedThisMaze += 1;
 										eraseCollectable( s );
 										//stuff.erase( stuff.begin() + s );
-										
+
 										if( numKeysFound >= numLocks ) {
 											for( decltype( mazeManager.cols ) c = 0; c < mazeManager.cols; ++c ) {
 												for( decltype( mazeManager.rows ) r = 0; r < mazeManager.rows; ++r ) {
@@ -3193,25 +3195,25 @@ void GameManager::setControls() {
 
 								if( choiceStr.substr( 0, 5 ) != L"mouse" ) {
 									EKEY_CODE choice;
-									
+
 									choice = static_cast< EKEY_CODE >( boost::lexical_cast< int >( choiceStr ) ); //Boost lexical cast can't convert directly to enumerated types
 
 									keyMap.back().setKey( choice );
 								} else {
-									
+
 									choiceStr = choiceStr.substr( 5, choiceStr.length() - 5 ); //5 = length of the word "mouse"
-									
+
 									if( debug ) {
 										std::wcout << L"choiceStr before spell checking: " << choiceStr;
 									}
-									
+
 									std::vector< std::wstring > possibleChoices = { L"wheelup", L"wheeldown", L"leftdown", L"rightdown", L"middledown", L"leftup", L"rightup", L"middleup", L"moved", L"leftdoubleclick", L"rightdoubleclick", L"middledoubleclick", L"lefttripleclick", L"righttripleclick", L"middletripleclick" };
 									choiceStr = possibleChoices.at( spellChecker.indexOfClosestString( choiceStr, possibleChoices ) );
-									
+
 									if( debug ) {
 										std::wcout  << "\tand after: " << choiceStr << std::endl;
 									}
-									
+
 									if( choiceStr == possibleChoices.at( 0 ) ) { //L"wheelup"
 										keyMap.back().setMouseWheelUp( true );
 										keyMap.back().setMouseEvent( EMIE_MOUSE_WHEEL );
@@ -3264,14 +3266,14 @@ void GameManager::setControls() {
 									if( debug ) {
 										std::wcout << L"preference before spell checking: " << preference;
 									}
-									
+
 									std::vector< std::wstring > possiblePrefs = { L"menu", L"screenshot", L"volumeup", L"volumedown", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l" };
 									preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
-									
+
 									if( debug ) {
 										std::wcout  << "\tand after: " << preference << std::endl;
 									}
-									
+
 									keyMap.back().setActionFromString( preference );
 								}
 
@@ -3312,7 +3314,7 @@ void GameManager::setupBackground() {
 		if( debug ) {
 			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;
 		}
-		
+
 		backgroundTexture = nullptr;
 
 		switch( backgroundChosen ) {
@@ -3324,7 +3326,7 @@ void GameManager::setupBackground() {
 
 				irr::video::SColor darkStarColor;
 				irr::video::SColor lightStarColor;
-				
+
 				switch( rand() % 8 ) { //Not a magic number: count the cases
 					case 0: {
 						darkStarColor = BLACK;
@@ -3403,7 +3405,7 @@ void GameManager::setupBackground() {
 			case 1: { //New starfield: rotates the camera around.
 				// create a particle system
 				scene::ICameraSceneNode* camera = bgscene->addCameraSceneNode();
-				
+
 				//Decide which direction to rotate
 				float x, y, z;
 				float magnitude = 0.02;
@@ -3449,7 +3451,7 @@ void GameManager::setupBackground() {
 						break;
 					}
 				}
-				
+
 				//Create rotation animator and bind it to the camera
 				scene::ISceneNodeAnimator* rotator = bgscene->createRotationAnimator( core::vector3df( x, y, z ) );
 				if( rotator ) {
@@ -3460,13 +3462,13 @@ void GameManager::setupBackground() {
 					}
 					rotator->drop();
 				}
-				
+
 				camera->setPosition( core::vector3df( 0, 0, -150 ) );
 				scene::IParticleSystemSceneNode* ps = bgscene->addParticleSystemSceneNode( false );
 
 				irr::video::SColor darkStarColor;
 				irr::video::SColor lightStarColor;
-				
+
 				switch( rand() % 8 ) { //Not a magic number: count the cases
 					case 0: {
 						darkStarColor = BLACK;
@@ -3571,14 +3573,14 @@ void GameManager::setupBackground() {
 							if( debug ) {
 								std::wcout << i->path().wstring() << std::endl;
 							}
-						
+
 							//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
 							for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
-							
+
 								video::IImageLoader* loader = driver->getImageLoader( loaderNum );
 								io::IFileSystem* fileSystem = device->getFileSystem();
 								io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
-								
+
 								//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
 									io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
 									if( loader->isALoadableFileFormat( file ) ) {
@@ -3602,7 +3604,7 @@ void GameManager::setupBackground() {
 				if( backgroundList.size() > 0 ) {
 					std::vector< boost::filesystem::path >::iterator newEnd = std::unique( backgroundList.begin(), backgroundList.end() ); //unique "removes all but the first element from every consecutive group of equivalent elements in the range [first,last)." (source: http://www.cplusplus.com/reference/algorithm/unique/ )
 					backgroundList.resize( std::distance( backgroundList.begin(), newEnd ) );
-				
+
 					//Pick a random background and load it
 					backgroundFilePath = stringConverter.toIrrlichtStringW( backgroundList.at( rand() % backgroundList.size() ).wstring() );
 					backgroundTexture = driver->getTexture( backgroundFilePath );
@@ -3613,10 +3615,10 @@ void GameManager::setupBackground() {
 				} else {
 					std::wcout << L"Could not find any background images." << std::endl;
 				}
-				
+
 				break;
 			}
-			
+
 			default: {
 				std::wstring error = L"Background chosen is not in switch statement.";
 				throw error;
