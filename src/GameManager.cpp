@@ -76,9 +76,9 @@ bool GameManager::allHumansAtGoal() {
 		bool result = false;
 
 		for( decltype( numBots ) b = 0; b < numBots; ++b ) { //Remove bots from the list
-			decltype( bot.at( b ).getPlayer() ) botPlayer = bot.at( b ).getPlayer();
+			decltype( numPlayers ) botPlayer = bot.at( b ).getPlayer(); //changed decltype( bot.at( b ).getPlayer() ) to decltype( numPlayers ) because getPlayer can never exceed numPlayers, and this avoids needless function calls.
 
-			for( decltype( humanPlayers.size() ) p = 0; p < humanPlayers.size(); ++p ) {
+			for( decltype( numPlayers ) p = 0; p < humanPlayers.size(); ++p ) { //changed decltype( humanPlayers.size() ) to decltype( numPlayers ) because humanPlayers.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 				if( humanPlayers.at( p ) == botPlayer ) {
 					humanPlayers.erase( humanPlayers.begin() + p );
 				}
@@ -88,7 +88,7 @@ bool GameManager::allHumansAtGoal() {
 		if( humanPlayers.size() > 0 ) {
 			result = true;
 
-			for( decltype( humanPlayers.size() ) p = 0; ( p < humanPlayers.size() && result == true ); ++p ) {
+			for( decltype( numPlayers ) p = 0; ( p < humanPlayers.size() && result == true ); ++p ) { //changed decltype( humanPlayers.size() ) to decltype( numPlayers ) because humanPlayers.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 				if( !( player.at( humanPlayers.at( p ) ).getX() == goal.getX() && player.at( humanPlayers.at( p ) ).getY() == goal.getY() ) ) {
 					result = false;
 				}
@@ -221,7 +221,7 @@ void GameManager::drawAll() {
 				}
 			}
 
-			for( decltype( playerStart.size() ) ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts.
+			for( decltype( numPlayers ) ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts. Changed decltype( playerStart.size() ) to decltype( numPlayers ) because playerStart.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 				playerStart.at( ps ).draw( driver, cellWidth, cellHeight );
 			}
 
@@ -626,7 +626,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 
 	textY = textYOriginal;
 	//Now we go through and draw the actual player stats
-	for( decltype( winnersLoadingScreen.size() ) p = 0; p < winnersLoadingScreen.size(); ++p ) {
+	for( decltype( numPlayers ) p = 0; p < winnersLoadingScreen.size(); ++p ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 		int_fast16_t textXOld = textX;
 		{ //First we identify the players
 			core::stringw text( p );
@@ -696,7 +696,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 void GameManager::eraseCollectable( uint_fast8_t item ) {
 	if( item < stuff.size() ) {
 		stuff.erase( stuff.begin() + item );
-		for( decltype( player.size() ) p = 0; p < player.size(); ++p ) {
+		for( decltype( numPlayers ) p = 0; p < player.size(); ++p ) {
 			if( player.at( p ).hasItem() && player.at( p ).getItem() > item ) {
 				player.at( p ).giveItem( player.at( p ).getItem() - 1, player.at( p ).getItemType() );
 			}
@@ -831,10 +831,24 @@ GameManager::GameManager() {
 
 		if( !isNotNull( device ) ) {
 			std::wcerr << L"Error: Cannot create device. Trying software renderer." << std::endl;
-			device = createDevice( video::EDT_SOFTWARE, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
+			/*device = createDevice( video::EDT_SOFTWARE, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
 
 			if( !device ) {
 				throw( std::wstring( L"Even the software renderer didn't work." ) );
+			}*/
+			//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
+			for( uint_fast8_t i = ( uint_fast8_t ) video::EDT_COUNT; !isNotNull( device ) && i != ( uint_fast8_t ) video::EDT_NULL; i-- ) {
+				if( device->isDriverSupported( ( video::E_DRIVER_TYPE ) i ) ) {
+					driverType = ( video::E_DRIVER_TYPE ) i;
+					device = createDevice( driverType, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
+					break;
+				}
+			}
+			
+			if( !isNotNull( device ) ) {
+				std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
+				device = createDevice( video::EDT_NULL, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
+				debug = true;
 			}
 		} else if ( debug ) {
 			std::wcout << L"Got the new device" << std::endl;
@@ -907,21 +921,21 @@ GameManager::GameManager() {
 			}
 
 			{//Set the audio properties we hope to get: sample rate, channels, etc.
-				int audioRate = 44100; //44.1 KHz is the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
-				Uint16 audioFormat = AUDIO_S16SYS; //CDs use signed 16-bit audio. SYS means use the system's native endianness.
-				int audioChannels = 2; //Almost everything uses stereo. I wish surround sound were more common.
-				int audioBuffers = 4096; //Magic number! Change it if you dare, and see what happens.
+				int audioRate = MIX_DEFAULT_FREQUENCY; //MIX_DEFAULT_FREQUENCY is 22050 Hz, half the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
+				Uint16 audioFormat = MIX_DEFAULT_FORMAT; //AUDIO_S16SYS according to documentation. CDs use signed 16-bit audio. SYS means use the system's native endianness.
+				int audioChannels = MIX_DEFAULT_CHANNELS; //2 according to documentation. Almost everything uses stereo. I wish surround sound were more common.
+				int audioChunkSize = 4096; //Magic number! Change it if you dare, and see what happens. There is no default, but SDL_Mixer's documentation says 4096 is good if all we're playing is music. Too small and sound may skip on a slow system, too large and sound effects may lag behind the action.
 
-				if( Mix_OpenAudio( audioRate, audioFormat, audioChannels, audioBuffers ) != 0 ) {
+				if( Mix_OpenAudio( audioRate, audioFormat, audioChannels, audioChunkSize ) != 0 ) {
 					std::wcerr << L"Unable to initialize audio: " << Mix_GetError() << std::endl;
 					playMusic = false;
-				} else if ( debug ) {
-					std::wcout << L"Initilized audio" << std::endl;
+				} else if( debug ) {
+					std::wcout << L"Initialized audio" << std::endl;
 				}
 
 				if( debug ) {
 					Mix_QuerySpec( &audioRate, &audioFormat, &audioChannels );//Don't assume we got everything we asked for above
-					std::wcout << L"Audio sample rate: " << audioRate << L" Hertz format: ";
+					std::wcout << L"Audio sample rate: " << audioRate << L" Hertz. Format: ";
 					// cppcheck-suppress duplicateIf
 					if( audioFormat == AUDIO_U16SYS ) {
 						std::wcout << L"AUDIO_U16SYS (equivalent to ";
@@ -970,7 +984,7 @@ GameManager::GameManager() {
 						std::wcout << L"unknown";
 					}
 
-					std::wcout << " channels: " << audioChannels  << L" buffers: " << audioBuffers << std::endl;
+					std::wcout << " channels: " << audioChannels  << L" chunk size: " << audioChunkSize << std::endl;
 				}
 			}
 
@@ -2552,6 +2566,8 @@ void GameManager::readPrefs() {
 												break;
 											}
 										}
+										
+										//Note: Just because the library supports a driver type doesn't mean we can actually use it. A loop similar to the above is used in the GameManager constructor where we call createDevice(). Therefore, the final driverType may not be what is set here.
 
 										if( driverType == video::EDT_NULL ) {
 											std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
@@ -2865,7 +2881,7 @@ void GameManager::resetThings() {
 		}
 
 		//Calculate players' total scores
-		for( decltype( winnersLoadingScreen.size() ) w = 0; w < winnersLoadingScreen.size(); ++w ) {
+		for( decltype( numPlayers ) w = 0; w < winnersLoadingScreen.size(); ++w ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) score = 0;
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) additiveMultiplier = 10; //So the scores don't get too negative, numbers that add to the score get multiplied by a magic number.
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) subtractiveDivisor = 10; //Likewise, numbers that subtract from the score get divided by a magic number.
@@ -2979,7 +2995,7 @@ uint_fast8_t GameManager::run() {
 								switch( stuff.at( s ).getType() ) {
 									case Collectable::ACID: {
 										bool anyPlayerHasItem = false;
-										/*for( decltype( player.size() ) someOtherPlayer = 0; someOtherPlayer < player.size(); ++someOtherPlayer ) {
+										/*for( decltype( numPlayers ) someOtherPlayer = 0; someOtherPlayer < player.size(); ++someOtherPlayer ) {
 											if( player.at( someOtherPlayer ).hasItem( s ) ) {
 												anyPlayerHasItem = true;
 												break;
@@ -3029,7 +3045,7 @@ uint_fast8_t GameManager::run() {
 						if( ( player.at( p ).getX() == goal.getX() ) && player.at( p ).getY() == goal.getY() ) { //Make a list of who finished in what order
 							bool alreadyFinished = false; //Indicates whether the player is already on the winners list
 
-							for( decltype( winners.size() ) i = 0; i < winners.size() && !alreadyFinished; ++i ) {
+							for( decltype( numPlayers ) i = 0; i < winners.size() && !alreadyFinished; ++i ) { //changed decltype( winners.size() ) to decltype( numPlayers ) because winners.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 								if( p == winners.at( i ) ) {
 									alreadyFinished = true;
 								}
@@ -3096,7 +3112,7 @@ uint_fast8_t GameManager::run() {
 					std::wcout << L"On to the next level!" << std::endl;
 					std::wcout << L"Winners:";
 
-					for( decltype( winners.size() ) i = 0; i < winners.size(); ++i ) {
+					for( decltype( numPlayers ) i = 0; i < winners.size(); ++i ) { //changed decltype( winners.size() ) to decltype( numPlayers ) because winners.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 						std::wcout << L" " << winners.at( i );
 					}
 

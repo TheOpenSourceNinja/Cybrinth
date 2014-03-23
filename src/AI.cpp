@@ -361,7 +361,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 				if( possibleDirections.size() == 0 && partialSolution.size() != 0 ) {
 					partialSolution.pop_back();
 				} else {
-					for( decltype( possibleDirections.size() ) i = 0; ( i < possibleDirections.size() && solution.empty() ); ++i ) {
+					for( uint_fast8_t i = 0; ( i < possibleDirections.size() && solution.empty() ); ++i ) { //changed decltype( possibleDirections.size() ) to uint_fast8_t because the size of possibleDirections can never exceed 4 but could be stored in a needlessly large integer type.
 						direction_t choice = possibleDirections.at( i );
 						uint_fast16_t newDepthLimit = depthLimit - 1;
 						switch( choice ) {
