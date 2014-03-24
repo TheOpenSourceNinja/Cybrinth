@@ -116,7 +116,7 @@ class GameManager : public IEventReceiver {
 		
 		bool haveShownLogo;
 		
-		bool isNotNull( void* ptr );
+		bool isNull( void* ptr );
 
 		void loadFonts();
 		void loadMusicFont();
