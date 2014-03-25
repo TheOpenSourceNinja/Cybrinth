@@ -3384,7 +3384,7 @@ void GameManager::setControls() {
 								}
 
 								if( choiceStr.substr( 0, 3 ) == L"key" ) {
-									choiceStr = choiceStr.substr( 3, shoiceStr.length() - 3 ); //3 = length of the word "key"
+									choiceStr = choiceStr.substr( 3, choiceStr.length() - 3 ); //3 = length of the word "key"
 									EKEY_CODE choice;
 
 									choice = static_cast< EKEY_CODE >( boost::lexical_cast< int >( choiceStr ) ); //Boost lexical cast can't convert directly to enumerated types
