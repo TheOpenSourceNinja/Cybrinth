@@ -727,8 +727,8 @@ void GameManager::drawStats( int_fast16_t textY ) {
 				}
 			}
 			{ //Finally, each player's score is shown...
-				core::stringw text;
-				text.append( player.at( winnersLoadingScreen.at( p ) ).getScoreLastMaze() );
+				core::stringw text = stringConverter.toIrrlichtStringW( player.at( winnersLoadingScreen.at( p ) ).getScoreLastMaze() );
+				//text.append( player.at( winnersLoadingScreen.at( p ) ).getScoreLastMaze() );
 				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
 				core::rect< s32 > tempRectangle( textXOld, textYScores, tempDimensions.Width + textXOld, tempDimensions.Height + textYScores );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
@@ -737,8 +737,8 @@ void GameManager::drawStats( int_fast16_t textY ) {
 				}
 			}
 			{ //...followed by the totals.
-				core::stringw text;
-				text.append( player.at( winnersLoadingScreen.at( p ) ).getScoreTotal() );
+				core::stringw text = stringConverter.toIrrlichtStringW( player.at( winnersLoadingScreen.at( p ) ).getScoreTotal() );
+				//text.append( player.at( winnersLoadingScreen.at( p ) ).getScoreTotal() );
 				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
 				core::rect< s32 > tempRectangle( textXOld, textYScoresTotal, tempDimensions.Width + textXOld, tempDimensions.Height + textYScoresTotal );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
@@ -859,6 +859,8 @@ GameManager::GameManager() {
 		minHeight = 480;
 		currentDirectory = boost::filesystem::current_path();
 		haveShownLogo = false;
+		showingMenu = false;
+		donePlaying = false;
 
 		fontFile = "";
 		boost::filesystem::recursive_directory_iterator end;
@@ -1403,7 +1405,7 @@ void GameManager::loadFonts() {
 
 		{ //Load loadingFont
 			core::dimension2d< uint_fast32_t > fontDimensions;
-			uint_fast8_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
+			uint_fast32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
 
 			if( fontFile != "" ) {
 				do { //Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
@@ -1438,7 +1440,7 @@ void GameManager::loadFonts() {
 		{ //load textFont
 			core::dimension2d< uint_fast32_t > fontDimensions;
 			if( fontFile != "" ) {
-				uint_fast8_t size = ( windowSize.Width / sideDisplaySizeDenominator ) / 6; //found through experimentation, adjust it however you like and see how many times the font gets loaded
+				uint_fast32_t size = ( windowSize.Width / sideDisplaySizeDenominator ) / 6; //found through experimentation, adjust it however you like and see how many times the font gets loaded
 
 				do {
 					textFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
@@ -1486,7 +1488,7 @@ void GameManager::loadFonts() {
 		{ //Load clockFont
 			core::dimension2d< uint_fast32_t > fontDimensions;
 			if( fontFile != "" ) {
-				uint_fast8_t size = ( windowSize.Width / sideDisplaySizeDenominator );
+				uint_fast32_t size = ( windowSize.Width / sideDisplaySizeDenominator );
 
 				do {
 					clockFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
@@ -1520,7 +1522,7 @@ void GameManager::loadFonts() {
 		{ //Load statsFont
 			core::dimension2d< uint_fast32_t > fontDimensions;
 			if( fontFile != "" ) {
-				uint_fast8_t size = windowSize.Width / numPlayers / 2; //A quick approximation of the size we'll need the text to be.
+				uint_fast32_t size = windowSize.Width / numPlayers / 2; //A quick approximation of the size we'll need the text to be.
 				uint_fast8_t BuiltInFontWidth = gui->getBuiltInFont()->getDimension( L"e" ).Width; //Why e? I ask why not e.
 				if( size > BuiltInFontWidth ) { //If the text needs to be that small, go with the built-in font because it's readable at that size.
 					do {
@@ -1581,7 +1583,7 @@ void GameManager::loadFonts() {
 		backToGame.setFont( clockFont );
 		freedom.setFont( clockFont );
 
-		uint_fast8_t size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect readability on large or small screens, but it's better on large screens than the built-in font.
+		uint_fast32_t size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect readability on large or small screens, but it's better on large screens than the built-in font.
 		gui->getSkin()->setFont( fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts ) );
 		
 		if( debug ) {
@@ -1604,7 +1606,7 @@ void GameManager::loadMusicFont() {
 		if( playMusic ) {
 			if( fontFile != "" ) {
 				uint_fast8_t maxWidth = ( windowSize.Width / sideDisplaySizeDenominator );
-				uint_fast8_t size = 0;
+				uint_fast32_t size = 0;
 				uint_fast8_t numerator = 2.5 * maxWidth; //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
 
 				//I felt it looked best if all three (artist, album, and title) had the same font size, so we're picking the longest of the three and basing the font size on its length.
@@ -1848,8 +1850,8 @@ void GameManager::loadTipFont() {
 		}
 
 		if( fontFile != "" ) {
-			uint_fast8_t maxWidth = windowSize.Width;
-			uint_fast8_t size;
+			uint_fast32_t maxWidth = windowSize.Width;
+			uint_fast32_t size;
 			core::stringw tipIncludingPrefix = proTipPrefix;
 
 			if( proTips.size() > 0 ) { //If pro tips have been loaded, guess size based on tip length.
@@ -2145,6 +2147,7 @@ void GameManager::newMaze( boost::filesystem::path src ) {
  * --- const SEvent& event: an object representing the event that happened.
  * Returns: True if the event was handled by this function, false if Irrlicht should handle the event.
  */
+//cppcheck-suppress unusedFunction
 bool GameManager::OnEvent( const SEvent& event ) {
 	try {
 		if( debug ) {
@@ -2169,9 +2172,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 								switch( keyMap.at( k ).getAction() ) {
 									case KeyMapping::MENU:
 									case KeyMapping::SCREENSHOT: {
-										if( doEventActions( k, event ) ) {
-											return true;
-										}
+										return doEventActions( k, event );
 									}
 								}
 								break;
@@ -2528,8 +2529,6 @@ void GameManager::readPrefs() {
 		windowSize = core::dimension2d< uint_fast16_t >( minWidth, minHeight );
 		allowSmallSize = false;
 		playMusic = true;
-		enableJoystick = false;
-		joystickChosen = 1;
 		numBots = 0;
 		numPlayers = 1;
 		markTrails = false;
@@ -2579,7 +2578,7 @@ void GameManager::readPrefs() {
 
 								std::vector< std::wstring > possiblePrefs = { L"bots' solving algorithm", L"volume", L"number of bots", L"show backgrounds",
 									L"fullscreen", L"mark player trails", L"debug", L"bits per pixel", L"wait for vertical sync", L"driver type", L"number of players",
-									L"window size", L"play music", L"network port", L"enable joystick", L"joystick number", L"always server", L"bots know the solution", L"bot movement delay" };
+									L"window size", L"play music", L"network port", L"always server", L"bots know the solution", L"bot movement delay" };
 
 								preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
 
@@ -2864,34 +2863,7 @@ void GameManager::readPrefs() {
 									} catch( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
-								} else if( preference == possiblePrefs.at( 14 ) ) { //L"enable joystick"
-
-									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
-									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-
-									if( choice == possibleChoices.at( 0 ) ) {
-										if( debug ) {
-											std::wcout << L"Joystick is ENABLED" << std::endl;
-										}
-										enableJoystick = true;
-									} else {
-										if( debug ) {
-											std::wcout << L"Joystick is DISABLED" << std::endl;
-										}
-										enableJoystick = false;
-									}
-
-								} else if( preference == possiblePrefs.at( 15 ) ) { //L"joystick number"
-									if( debug ) {
-										std::wcout << L"Joystick number: " << choice << std::endl;
-									}
-									try {
-										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-										joystickChosen = choiceAsInt;
-									} catch (boost::bad_lexical_cast &e ) {
-										std::wcerr << L"Error reading joystick number (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-									}
-								} else if( preference == possiblePrefs.at( 16 ) ) { //L"always server"
+								} else if( preference == possiblePrefs.at( 14 ) ) { //L"always server"
 
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
@@ -2908,7 +2880,7 @@ void GameManager::readPrefs() {
 										isServer = false;
 									}
 
-								} else if( preference == possiblePrefs.at( 17 ) ) { //L"bots know the solution"
+								} else if( preference == possiblePrefs.at( 15 ) ) { //L"bots know the solution"
 
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
@@ -2925,7 +2897,7 @@ void GameManager::readPrefs() {
 										botsKnowSolution = false;
 									}
 
-								} else if( preference == possiblePrefs.at( 18 ) ) { //L"bot movement delay"
+								} else if( preference == possiblePrefs.at( 16 ) ) { //L"bot movement delay"
 									try {
 										botMovementDelay = boost::lexical_cast< uint_fast16_t >( choice );
 									} catch( boost::bad_lexical_cast &e ) {
@@ -3228,14 +3200,7 @@ uint_fast8_t GameManager::run() {
 							if( !stuff.at( s ).owned && player.at( p ).getX() == stuff.at( s ).getX() && player.at( p ).getY() == stuff.at( s ).getY() ) {
 								switch( stuff.at( s ).getType() ) {
 									case Collectable::ACID: {
-										bool anyPlayerHasItem = false;
-										/*for( decltype( numPlayers ) someOtherPlayer = 0; someOtherPlayer < player.size(); ++someOtherPlayer ) {
-											if( player.at( someOtherPlayer ).hasItem( s ) ) {
-												anyPlayerHasItem = true;
-												break;
-											}
-										}*/
-										anyPlayerHasItem = stuff.at( s ).owned;
+										bool anyPlayerHasItem = stuff.at( s ).owned;
 
 										if( !anyPlayerHasItem ) {
 											player.at( p ).giveItem( s, stuff.at( s ).getType() );
@@ -3305,7 +3270,8 @@ uint_fast8_t GameManager::run() {
 					timer->start();
 				}
 
-				if( isServer ) {
+				//TODO: add networking stuff here
+				/*if( isServer ) {
 					if( network.checkForConnections() != 0 ) {
 						std::wcerr << L"Networking error." << std::endl;
 					} else {
@@ -3323,7 +3289,6 @@ uint_fast8_t GameManager::run() {
 					}
 				}
 
-				//TODO: add networking stuff here
 				if( network.checkForConnections() < 0 ) {
 					std::wcerr << L"Networking error." << std::endl;
 				} else {
@@ -3336,7 +3301,7 @@ uint_fast8_t GameManager::run() {
 							//std::wcout << L"Did not receive data" << std::endl;
 						}
 					}
-				}
+				}*/
 			}
 
 			timer->stop();
@@ -3376,6 +3341,11 @@ void GameManager::setControls() {
 			std::wcout << L"setControls() called" << std::endl;
 		}
 		
+		//Yeah, these are the only defaults so far.
+		//TODO: Add default controls.
+		enableJoystick = false;
+		joystickChosen = 1;
+		
 		boost::filesystem::path controlsPath( boost::filesystem::current_path()/L"controls.cfg" );
 
 		if( exists( controlsPath ) ) {
@@ -3413,13 +3383,14 @@ void GameManager::setControls() {
 									keyMap.push_back( temp );
 								}
 
-								if( choiceStr.substr( 0, 5 ) != L"mouse" ) {
+								if( choiceStr.substr( 0, 3 ) == L"key" ) {
+									choiceStr = choiceStr.substr( 3, shoiceStr.length() - 3 ); //3 = length of the word "key"
 									EKEY_CODE choice;
 
 									choice = static_cast< EKEY_CODE >( boost::lexical_cast< int >( choiceStr ) ); //Boost lexical cast can't convert directly to enumerated types
 
 									keyMap.back().setKey( choice );
-								} else {
+								} else if( choiceStr.substr( 0, 5 ) == L"mouse" ) {
 
 									choiceStr = choiceStr.substr( 5, choiceStr.length() - 5 ); //5 = length of the word "mouse"
 
@@ -3470,31 +3441,65 @@ void GameManager::setControls() {
 								}
 
 								if( preference.substr( 0, 6 ) == L"player" ) {
-									preference = preference.substr( 7 );
-									std::wstring playerNumStr = boost::algorithm::trim_copy( preference.substr( 0, preference.find( L' ' ) ) );
-									std::wstring actionStr = boost::algorithm::trim_copy( preference.substr( preference.find( L' ' ) ) );
-									decltype( numPlayers ) playerNum = boost::lexical_cast< unsigned short int >( playerNumStr ); //Boost doesn't like casting to uint_fast8_t
+									try {
+										preference = preference.substr( 7 );
+										std::wstring playerNumStr = boost::algorithm::trim_copy( preference.substr( 0, preference.find( L' ' ) ) );
+										std::wstring actionStr = boost::algorithm::trim_copy( preference.substr( preference.find( L' ' ) ) );
+										decltype( numPlayers ) playerNum = boost::lexical_cast< unsigned short int >( playerNumStr ); //Boost doesn't like casting to uint_fast8_t
 
-									if( playerNum < numPlayers ) {
-										keyMap.back().setPlayer( playerNum );
-										//wchar_t action = actionStr.at( 0 );
-										keyMap.back().setActionFromString( actionStr );
-									} else { //We ignore that player number because we don't have that many players
-										keyMap.pop_back();
+										if( playerNum < numPlayers ) {
+											keyMap.back().setPlayer( playerNum );
+											//wchar_t action = actionStr.at( 0 );
+											keyMap.back().setActionFromString( actionStr );
+										} else { //We ignore that player number because we don't have that many players
+											keyMap.pop_back();
+										}
+									} catch ( boost::bad_lexical_cast &e ) {
+										std::wcerr << L"Error reading player number (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								} else {
 									if( debug ) {
 										std::wcout << L"preference before spell checking: " << preference;
 									}
 
-									std::vector< std::wstring > possiblePrefs = { L"menu", L"screenshot", L"volumeup", L"volumedown", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l" };
+									std::vector< std::wstring > possiblePrefs = { L"menu", L"screenshot", L"volumeup", L"volumedown", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l", L"enable gamepad", L"gamepad number" };
 									preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
 
 									if( debug ) {
 										std::wcout  << "\tand after: " << preference << std::endl;
 									}
+									
+									if( preference == possiblePrefs.at( 12 ) ) { //L"enable gamepad"
+										std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+										choiceStr = possibleChoices.at( spellChecker.indexOfClosestString( choiceStr, possibleChoices ) );
 
-									keyMap.back().setActionFromString( preference );
+										if( choiceStr == possibleChoices.at( 0 ) ) {
+											if( debug ) {
+												std::wcout << L"Joystick is ENABLED" << std::endl;
+											}
+											enableJoystick = true;
+										} else {
+											if( debug ) {
+												std::wcout << L"Joystick is DISABLED" << std::endl;
+											}
+											enableJoystick = false;
+										}
+									} else if( preference == possiblePrefs.at( 13 ) ) { //L"gamepad number"
+										if( debug ) {
+											std::wcout << L"Joystick number: " << choiceStr << std::endl;
+										}
+										try {
+											
+											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choiceStr );
+											joystickChosen = choiceAsInt;
+											
+										} catch ( boost::bad_lexical_cast &e ) {
+											std::wcerr << L"Error reading joystick number (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+										}
+										
+									} else {
+										keyMap.back().setActionFromString( preference );
+									}
 								}
 
 							} catch( std::exception &e ) {
@@ -3623,7 +3628,7 @@ void GameManager::setupBackground() {
 				//ps->setMaterialTexture( 0, driver->getTexture( "star.png" ) );
 				ps->setMaterialType( video::EMT_TRANSPARENT_ALPHA_CHANNEL );
 
-				video::IImage* pixelImage = driver->createImage( video::ECF_A8R8G8B8, core::dimension2d< u32 >( 1, 1 ) );
+				video::IImage* pixelImage = driver->createImage( video::ECF_A1R5G5B5, core::dimension2d< u32 >( 1, 1 ) );
 				//pixelImage->fill( WHITE );
 				pixelImage->setPixel( 0, 0, WHITE, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
 				video::ITexture* pixelTexture = driver->addTexture( "pixel", pixelImage );

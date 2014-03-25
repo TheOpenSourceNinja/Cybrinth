@@ -123,7 +123,7 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, ui
 	}
 }
 
-bool MazeManager::existsAnythingAt( uint_fast8_t x, uint_fast8_t y ) {
+/*bool MazeManager::existsAnythingAt( uint_fast8_t x, uint_fast8_t y ) {
 	try {
 		bool result = false;
 
@@ -142,7 +142,7 @@ bool MazeManager::existsAnythingAt( uint_fast8_t x, uint_fast8_t y ) {
 		std::wcerr << L"Error in MazeManager::existsAnythingAt(): " << e.what() << std::endl;
 		return false;
 	}
-}
+}*/
 
 bool MazeManager::loadFromFile() {
 	try {

@@ -57,6 +57,10 @@ irr::core::stringw StringConverter::toIrrlichtStringW( std::wstring input ) {
 	}
 }
 
+irr::core::stringw StringConverter::toIrrlichtStringW( long int input ) {
+	return toIrrlichtStringW( toStdWString( input ) );
+}
+
 TagLib::wstring StringConverter::toTaglibWString ( irr::core::stringw input ) {
 	try {
 		TagLib::wstring result;

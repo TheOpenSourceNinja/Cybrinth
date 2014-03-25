@@ -87,7 +87,7 @@ bool AI::alreadyVisited( irr::core::position2d< uint_fast8_t > position ) {
 	}
 }
 
-bool AI::alreadyVisitedDFS( irr::core::position2d< uint_fast8_t > position ) {
+/*bool AI::alreadyVisitedDFS( irr::core::position2d< uint_fast8_t > position ) {
 	try {
 		bool result = false;
 
@@ -103,7 +103,7 @@ bool AI::alreadyVisitedDFS( irr::core::position2d< uint_fast8_t > position ) {
 		std::wcerr << L"Error in AI::alreadyVisitedDFS(): " << e.what() << std::endl;
 		return false;
 	}
-}
+}*/
 
 bool AI::alreadyVisitedIDDFS( irr::core::position2d< uint_fast8_t > position ) {
 	try {
@@ -184,7 +184,7 @@ void AI::findSolution() {
 		solution.clear();
 		{
 			Player* p = gm->getPlayer( controlsPlayer );
-			core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
+			core::position2d< uint_fast8_t > currentPosition( p->getX(), p->getY() );
 			switch( algorithm ) {
 				case DEPTH_FIRST_SEARCH: {
 					DFSCellsVisited.clear();
@@ -211,11 +211,8 @@ void AI::findSolution() {
 				}
 			}
 
-			if( !solution.empty() ) {
-				//while( solution.back().X == currentPosition.X && solution.back().Y == currentPosition.Y ) {
-				while( solution.back() == currentPosition ) {
-					solution.pop_back();
-				}
+			while( !solution.empty() && solution.back() == currentPosition ) {
+				solution.pop_back();
 			}
 		}
 	} catch( std::exception &e ) {

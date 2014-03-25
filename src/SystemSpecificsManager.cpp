@@ -17,6 +17,7 @@
 
 std::wstring SystemSpecificsManager::getEnvironmentVariable( std::string name ) {
 	char * result = getenv( name.c_str() );
+	//cppcheck-suppress duplicateExpression
 	if( result != 0 && result != NULL && result != nullptr ) {
 		return sc.toStdWString( result );
 	} else {
@@ -31,11 +32,9 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 	std::vector< boost::filesystem::path > fontFolders;
 	fontFolders.push_back( boost::filesystem::current_path() );
 	#if defined WINDOWS
-		std::wcout << L"Running Windows" << std::endl;
 		fontFolders.push_back( L"C:\Windows\Fonts");
 		fontFolders.push_back( L"C:\WINNT\Fonts");
 	#elif defined LINUX
-		std::wcout << L"Running Linux" << std::endl;
 		fontFolders.push_back( L"/usr/share/X11/fonts/" );
 		fontFolders.push_back( L"/usr/share/fonts/" );
 		try {
@@ -44,7 +43,6 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#elif defined MACOSX
-		std::wcout << L"Running Mac" << std::endl;
 		fontFolders.push_back( L"/Library/Fonts/" );
 		fontFolders.push_back( L"/Network/Library/Fonts/" );
 		fontFolders.push_back( L"/System/Library/Fonts/" );
@@ -55,7 +53,6 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#else
-		std::wcout << L"Running something else" << std::endl;
 		fontFolders.push_back( L"/usr/X11R6/lib/X11/fonts/" ); //OpenBSD documentation suggests fonts may be stored in these two locations
 		fontFolders.push_back( L"/usr/local/lib/X11/fonts/" );
 	#endif //What about other operating systems? I don't know where BSD etc. put their font files.

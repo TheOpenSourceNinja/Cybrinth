@@ -14,15 +14,18 @@
 #endif //HAVE_IOSTREAM
 
 int main() {
+	//PACKAGE_NAME, PACKAGE_VERSION, and PACKAGE_BUGREPORT are defined by Autoconf and passed to the compiler by command line arguments - you won't find them in any header. The same goes for HAVE_IOSTREAM above.
 	std::wcout << L"Now starting " << PACKAGE_NAME << L" version " << PACKAGE_VERSION << L". Please report bugs to " << PACKAGE_BUGREPORT << L". Enjoy!" << std::endl;
 	try {
-		GameManager* gm = new GameManager();
+		/*GameManager* gm = new GameManager();
 		int exitValue = gm->run();
 		delete gm;
-		exit( exitValue );
+		exit( exitValue );*/
+		GameManager gm; //Lots of stuff gets set up in the GameManager constructor
+		return gm.run(); //Now that everything's set up, transfer control to GameManager.run()
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error caught by main(): " << e.what() << std::endl;
-		exit( EXIT_FAILURE );
+		return EXIT_FAILURE;
 	}
 	return EXIT_FAILURE;
 }

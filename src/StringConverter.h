@@ -27,6 +27,7 @@ class StringConverter
 		virtual ~StringConverter();
 		//irr::core::stringw toIrrlichtStringW( TagLib::wstring input );
 		irr::core::stringw toIrrlichtStringW( std::wstring input );
+		irr::core::stringw toIrrlichtStringW( long int input );
 		TagLib::wstring toTaglibWString( irr::core::stringw input );
 		TagLib::wstring toTaglibWString( std::wstring input );
 		std::wstring toStdWString( irr::core::stringw input );

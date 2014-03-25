@@ -1,3 +1,6 @@
+// *** ADDED BY HEADER FIXUP ***
+#include <cstdlib>
+// *** END ***
 /**
  * Copyright © 2012-2014 James Dearing.
  * This file is part of Cybrinth.

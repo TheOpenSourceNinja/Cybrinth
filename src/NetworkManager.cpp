@@ -318,7 +318,7 @@ void NetworkManager::sendMaze( MazeCell ** maze, uint_fast8_t cols, uint_fast8_t
 			if( FD_ISSET( i, &master ) && i != listener ) {
 				size_t size = toSend.size();
 
-				if( sendData( i, &toSend.at( 0 ), &size ) < 0 ) {
+				if( !sendData( i, &toSend.at( 0 ), &size ) ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 
@@ -357,7 +357,7 @@ void NetworkManager::sendPlayerPos( uint_fast8_t player, uint_fast8_t x, uint_fa
 			if( FD_ISSET( j, &master ) && j != listener ) {
 				size_t size = toSend.size();
 
-				if( sendData( j, &toSend.at( 0 ), &size ) < 0 ) {
+				if( !sendData( j, &toSend.at( 0 ), &size ) ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 
@@ -395,7 +395,7 @@ void NetworkManager::sendGoal( Goal goal ) {
 			if( FD_ISSET( j, &master ) && j != listener ) {
 				size_t size = toSend.size();
 
-				if( sendData( j, &toSend.at( 0 ), &size ) < 0 ) {
+				if( !sendData( j, &toSend.at( 0 ), &size ) ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 
@@ -440,7 +440,7 @@ void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 			if( FD_ISSET( j, &master ) && j != listener ) {
 				size_t size = toSend.size();
 
-				if( sendData( j, &toSend.at( 0 ), &size ) < 0 ) {
+				if( !sendData( j, &toSend.at( 0 ), &size ) ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 
@@ -486,7 +486,7 @@ void NetworkManager::sendU8( uint_fast8_t num, std::wstring desc ) {
 			if( FD_ISSET( j, &master ) && j != listener ) {
 				size_t size = toSend.size();
 
-				if( sendData( j, &toSend.at( 0 ), &size ) < 0 ) {
+				if( !sendData( j, &toSend.at( 0 ), &size ) ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 
@@ -529,7 +529,7 @@ void NetworkManager::sendCollectables( std::vector< Collectable > stuff ) {
 			if( FD_ISSET( j, &master ) && j != listener ) {
 				size_t size = toSend.size();
 
-				if( sendData( j, &toSend[0 ], &size ) < 0 ) {
+				if( !sendData( j, &toSend[0 ], &size ) ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 

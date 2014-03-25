@@ -68,14 +68,15 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 	try {
 		assert( freetypeFont );
 
-		FT_Face face = freetypeFont->TrueTypeFace->face;
+		auto face = freetypeFont->TrueTypeFace->face;
 
 		if( FT_Set_Pixel_Sizes( face, 0, size ) ) {
 			throw( std::wstring( L"Cannot set pixel size to " + std::to_wstring( size ) ) );
 		}
 
-		if( size > freetypeFont->LargestGlyph.Height )
+		if( size > freetypeFont->LargestGlyph.Height ) {
 			freetypeFont->LargestGlyph.Height = size;
+		}
 
 		if( !FT_Load_Glyph( face, idx_, FT_LOAD_DEFAULT ) ) { //FT_LOAD_NO_HINTING | FT_LOAD_NO_BITMAP ) ) {
 			FT_GlyphSlot glyph = face->glyph;
@@ -94,21 +95,13 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 					imgh = 1;
 					texw = bits.width;
 					texh = bits.rows;
-
-					for( ;; ) {
-						if( imgw > texw ) {
-							break;
-						} else {
-							imgw <<= 1;
-						}
+					
+					while( imgw <= texw ) {
+						imgw <<= 1;
 					}
-
-					for( ;; ) {
-						if( imgh > texh ) {
-							break;
-						} else {
-							imgh <<= 1;
-						}
+					
+					while( imgh <= texh ) {
+						imgh <<= 1;
 					}
 
 					if( imgw > imgh ) {
@@ -120,11 +113,13 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 					s32 offx = left;
 					s32 offy = size - top;
 
-					if( offx + texw > freetypeFont->LargestGlyph.Width )
+					if( offx + texw > freetypeFont->LargestGlyph.Width ) {
 						freetypeFont->LargestGlyph.Width = offx + texw;
+					}
 
-					if( offy + texh > freetypeFont->LargestGlyph.Height )
+					if( offy + texh > freetypeFont->LargestGlyph.Height ) {
 						freetypeFont->LargestGlyph.Height = offy + texh;
+					}
 
 					u32 *texd = new u32[ imgw*imgh ];
 					memset( texd, 0, imgw * imgh * sizeof( u32 ) );
@@ -177,21 +172,13 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 			imgh16 = 1;
 			texw16 = bits.width;
 			texh16 = bits.rows;
-
-			for( ;; ) {
-				if( imgw16 >= texw16 ) {
-					break;
-				} else {
-					imgw16 <<= 1;
-				}
+			
+			while( imgw16 < texw16 ) {
+				imgw16 <<= 1;
 			}
-
-			for( ;; ) {
-				if( imgh16 >= texh16 ) {
-					break;
-				} else {
-					imgh16 <<= 1;
-				}
+			
+			while( imgh16 < texh16 ) {
+				imgh16 <<= 1;
 			}
 
 			if( imgw16 > imgh16 ) {
@@ -203,11 +190,13 @@ void CGUITTGlyph::cache( u32 idx_, const CGUIFreetypeFont * freetypeFont ) {
 			s32 offx = left;
 			s32 offy = size - top;
 
-			if( offx + texw > freetypeFont->LargestGlyph.Width )
+			if( offx + texw > freetypeFont->LargestGlyph.Width ) {
 				freetypeFont->LargestGlyph.Width = offx + texw;
+			}
 
-			if( offy + texh > freetypeFont->LargestGlyph.Height )
+			if( offy + texh > freetypeFont->LargestGlyph.Height ) {
 				freetypeFont->LargestGlyph.Height = offy + texh;
+			}
 
 
 			u16 *texd16 = new u16[ imgw16*imgh16 ];
