@@ -24,6 +24,14 @@ class KeyMapping
 		 * \param val New value to set
 		 */
 		void setKey( irr::EKEY_CODE val );
+		/** Access gamepadButton
+		 * \return The current value of gamepadButton
+		 */
+		uint_fast8_t getGamepadButton();
+		/** Set gamepadButton
+		 * \param val New value to set
+		 */
+		void setGamepadButton( uint_fast8_t val );
 		/** Access action
 		 * \return The current value of action
 		 */
@@ -69,6 +77,7 @@ class KeyMapping
 	private:
 		irr::EKEY_CODE key;
 		irr::EMOUSE_INPUT_EVENT mouseEvent;
+		uint_fast8_t gamepadButton;
 		bool mouseWheelUp;
 		action_t action;
 		uint_fast8_t player;

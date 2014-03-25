@@ -142,7 +142,7 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 				return true;
 			}
 			case KeyMapping::VOLUME_UP: {
-				if( event.MouseInput.Wheel > 0 ) {
+				if( ( event.EventType == EET_JOYSTICK_INPUT_EVENT && event.JoystickEvent.IsButtonPressed( keyMap.at( k ).getGamepadButton() ) ) || ( keyMap.at( k ).getMouseWheelUp() && event.EventType == EET_MOUSE_INPUT_EVENT && event.MouseInput.Wheel > 0 ) ) {
 					musicVolume += 5;
 
 					if( musicVolume > 100 ) {
@@ -155,7 +155,7 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 				break;
 			}
 			case KeyMapping::VOLUME_DOWN: {
-				if( event.MouseInput.Wheel <= 0 ) {
+				if( ( event.EventType == EET_JOYSTICK_INPUT_EVENT && event.JoystickEvent.IsButtonPressed( keyMap.at( k ).getGamepadButton() ) ) || ( !keyMap.at( k ).getMouseWheelUp() && event.EventType == EET_MOUSE_INPUT_EVENT && event.MouseInput.Wheel <= 0 ) ) {
 					if( musicVolume >= 5 ) {
 						musicVolume -= 5;
 					} else {
@@ -2087,6 +2087,8 @@ void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::movePlayerOnY(): " << e.what() << std::endl;
+	} catch( std::wstring &e ) {
+		std::wcerr << L"Error in GameManager::movePlayerOnY(): " << e << std::endl;
 	}
 }
 
@@ -2217,7 +2219,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				}
 
 				for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
-					if( event.MouseInput.Event == keyMap.at( k ).getMouseEvent() ) {
+					if( event.MouseInput.Event == keyMap.at( k ).getMouseEvent() && ( ( event.MouseInput.Wheel > 0 && keyMap.at( k ).getMouseWheelUp() ) || ( event.MouseInput.Wheel <= 0 && !keyMap.at( k ).getMouseWheelUp() ) ) ) {
 						if( doEventActions( k, event ) ) {
 							return true;
 						}
@@ -2277,16 +2279,16 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						if( debug ) {
 							std::wcout << L"Joystick moved up" << std::endl;
 						}
-						movePlayerOnY( myPlayer, -1 );
-						return true;
+						/*movePlayerOnY( myPlayer, -1 );
+						return true;*/
 					}
 					break;
 					case USER_EVENT_JOYSTICK_DOWN: {
 						if( debug ) {
 							std::wcout << L"Joystick moved down" << std::endl;
 						}
-						movePlayerOnY( myPlayer, 1 );
-						return true;
+						/*movePlayerOnY( myPlayer, 1 );
+						return true;*/
 					}
 					break;
 					default:
@@ -2297,67 +2299,98 @@ bool GameManager::OnEvent( const SEvent& event ) {
 
 			case EET_JOYSTICK_INPUT_EVENT: {
 				if( event.JoystickEvent.Joystick == joystickChosen ) {
-					core::array<int_fast16_t> verticalAxes;
-					verticalAxes.push_back( SEvent::SJoystickEvent::AXIS_Y );
-					core::array<int_fast16_t> horizontalAxes;
-					horizontalAxes.push_back( SEvent::SJoystickEvent::AXIS_X );
+					{ //Handle joystick axes
+						core::array< int_fast16_t > verticalAxes;
+						verticalAxes.push_back( SEvent::SJoystickEvent::AXIS_Y );
+						core::array< int_fast16_t > horizontalAxes;
+						horizontalAxes.push_back( SEvent::SJoystickEvent::AXIS_X );
 
-					bool joystickMovedUp = false;
-					bool joystickMovedDown = false;
-					bool joystickMovedRight = false;
-					bool joystickMovedLeft = false;
+						bool joystickMovedUp = false;
+						bool joystickMovedDown = false;
+						bool joystickMovedRight = false;
+						bool joystickMovedLeft = false;
 
-					for( uint_fast16_t i = 0; i < verticalAxes.size(); ++i ) {
-						if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
-							if( debug ) {
-								std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
+						for( uint_fast16_t i = 0; i < verticalAxes.size(); ++i ) {
+							if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
+								if( debug ) {
+									std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
+								}
+								joystickMovedUp = true;
+							} else if( event.JoystickEvent.Axis[ i ] <= ( SHRT_MIN / 2 ) ) {
+								if( debug ) {
+									std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
+								}
+								joystickMovedDown = true;
 							}
-							joystickMovedUp = true;
-						} else if( event.JoystickEvent.Axis[ i ] <= ( SHRT_MIN / 2 ) ) {
-							if( debug ) {
-								std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
+						}
+
+						for( uint_fast16_t i = 0; i < horizontalAxes.size(); ++i ) {
+							if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
+								if( debug ) {
+									std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
+								}
+								joystickMovedRight = true;
+							} else if( event.JoystickEvent.Axis[ i ] <= ( SHRT_MIN / 2 ) ) {
+								if( debug ) {
+									std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
+								}
+								joystickMovedLeft = true;
 							}
-							joystickMovedDown = true;
+						}
+
+						if( joystickMovedUp ) {
+							SEvent temp;
+							temp.EventType = EET_USER_EVENT;
+							temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_UP;
+							device->postEventFromUser( temp );
+							return true;
+						} else if( joystickMovedDown ) {
+							SEvent temp;
+							temp.EventType = EET_USER_EVENT;
+							temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_DOWN;
+							device->postEventFromUser( temp );
+							return true;
+						} else if( joystickMovedRight ) {
+							SEvent temp;
+							temp.EventType = EET_USER_EVENT;
+							temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_RIGHT;
+							device->postEventFromUser( temp );
+							return true;
+						} else if( joystickMovedLeft ) {
+							SEvent temp;
+							temp.EventType = EET_USER_EVENT;
+							temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_LEFT;
+							device->postEventFromUser( temp );
+							return true;
 						}
 					}
-
-					for( uint_fast16_t i = 0; i < horizontalAxes.size(); ++i ) {
-						if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
-							if( debug ) {
-								std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
+					
+					{ //Handle gamepad buttons
+						for( uint_fast8_t button = 0; button < event.JoystickEvent.NUMBER_OF_BUTTONS; ++button ) {
+							if( event.JoystickEvent.IsButtonPressed( button ) ) {
+								std::wcout << L"Button #" << button << L" is pressed" << std::endl;
+								if( !( showingMenu || showingLoadingScreen ) ) {
+									for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
+										if( button == keyMap.at( k ).getGamepadButton() ) {
+											return doEventActions( k, event );
+										}
+									}
+								} else if( showingMenu ) { //We only want certain actions to work if we're showing the menu
+									for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
+										if( button == keyMap.at( k ).getGamepadButton() ) {
+											switch( keyMap.at( k ).getAction() ) {
+												case KeyMapping::MENU:
+												case KeyMapping::SCREENSHOT: {
+													return doEventActions( k, event );
+												}
+											}
+											break;
+										}
+									}
+								}
 							}
-							joystickMovedRight = true;
-						} else if( event.JoystickEvent.Axis[ i ] <= ( SHRT_MIN / 2 ) ) {
-							if( debug ) {
-								std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
-							}
-							joystickMovedLeft = true;
 						}
 					}
-
-					if( joystickMovedUp ) {
-						SEvent temp;
-						temp.EventType = EET_USER_EVENT;
-						temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_UP;
-						device->postEventFromUser( temp );
-					} else if( joystickMovedDown ) {
-						SEvent temp;
-						temp.EventType = EET_USER_EVENT;
-						temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_DOWN;
-						device->postEventFromUser( temp );
-					} else if( joystickMovedRight ) {
-						SEvent temp;
-						temp.EventType = EET_USER_EVENT;
-						temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_RIGHT;
-						device->postEventFromUser( temp );
-					} else if( joystickMovedLeft ) {
-						SEvent temp;
-						temp.EventType = EET_USER_EVENT;
-						temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_LEFT;
-						device->postEventFromUser( temp );
-					}
-
-					return true;
 				}
 			}
 			break;
@@ -3375,7 +3408,7 @@ void GameManager::setControls() {
 								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
 								std::wstring choiceStr = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
 								if( debug ) {
-									std::wcout << L"Preference \"" << preference << L"\" choiceStr \"" << choiceStr << L"\""<< std::endl;
+									std::wcout << L"Control preference \"" << preference << L"\" choiceStr \"" << choiceStr << L"\""<< std::endl;
 								}
 
 								{
@@ -3383,7 +3416,14 @@ void GameManager::setControls() {
 									keyMap.push_back( temp );
 								}
 
-								if( choiceStr.substr( 0, 3 ) == L"key" ) {
+								if( choiceStr.substr( 0, 13 ) == L"gamepadbutton" ) {
+									choiceStr = choiceStr.substr( 13, choiceStr.length() - 13 ); //13 = length of the words "GamepadButton"
+									uint_fast8_t choice;
+
+									choice = static_cast< uint_fast8_t >( boost::lexical_cast< unsigned short int >( choiceStr ) ); //Boost lexical cast can't convert directly to uint_fast8_t, at least on my computer
+
+									keyMap.back().setGamepadButton( choice );
+								} else if( choiceStr.substr( 0, 3 ) == L"key" ) {
 									choiceStr = choiceStr.substr( 3, choiceStr.length() - 3 ); //3 = length of the word "key"
 									EKEY_CODE choice;
 
