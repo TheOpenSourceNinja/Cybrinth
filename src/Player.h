@@ -61,9 +61,10 @@ class Player : public Object {
 		uint_fast32_t timeTakenThisMaze;
 	protected:
 	private:
+		GameManager* gm;
+		
 		uint_fast8_t heldItem;
 		Collectable::type_t heldItemType;
-		GameManager* gm;
 		
 		intmax_t scoreLastMaze;
 		intmax_t scoreTotal;

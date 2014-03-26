@@ -33,11 +33,11 @@
 #endif //What about other operating systems? I don't know what to include for BSD etc.
 
 //Custom user events for Irrlicht
-enum user_event_t { USER_EVENT_WINDOW_RESIZE, USER_EVENT_JOYSTICK_UP, USER_EVENT_JOYSTICK_LEFT, USER_EVENT_JOYSTICK_DOWN, USER_EVENT_JOYSTICK_RIGHT };
+enum user_event_t { USER_EVENT_WINDOW_RESIZE };
 
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
 //TODO: Get multiplayer working online
-//TODO: Improve AI. Add any solving algorithms I can think of.
+//TODO: Improve AI. Add any solving algorithms we can think of.
 //TODO: Possible idea: Hide parts of the maze that are inaccessible due to locks.
 //TODO: Possible idea: Hide parts of the maze not seen yet (seen means line-of-sight to any visited cell)
 //TODO: Add shader to simulate old monitor?
@@ -45,8 +45,8 @@ enum user_event_t { USER_EVENT_WINDOW_RESIZE, USER_EVENT_JOYSTICK_UP, USER_EVENT
 //TODO: Support video as backgrounds?
 //TODO: Add theme support (theme = (zipped?) set of backgrounds, player images, collectable images)
 //TODO: Add a progress bar to the loading screen, and text explaining what is happening.
-//TODO: Add scoring (sum of all loading screen stats). Get an achievement for a September score (where a player's score = the current day of Eternal September)
-//TODO: Add an option to use only the built-in font. This should greatly speed up loading on underpowered systems like the Pi.
+//TODO: If we ever add achievements, players should get an achievement for a September score (where a player's score = the current day of Eternal September)
+//TODO: Add an option to use only the built-in font. This should greatly speed up loading on underpowered systems like the Pi. Is this really necessary though? All you have to do currently is delete the font file in the working directory, right?
 
 using namespace irr;
 
@@ -129,82 +129,40 @@ bool GameManager::allHumansAtGoal() {
 * --- std::vector< KeyMapping >::size_type k: which key in keyMap to use.
 * Returns: Whether or not the event was handled.
 */
-bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const SEvent& event ) {
+/*bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const SEvent& event ) {
 	try {
 		if( debug ) {
 			std::wcout << L"doEventActions() called" << std::endl;
 		}
-		switch( keyMap.at( k ).getAction() ) {
-			case KeyMapping::MENU: {
-				showingMenu = !showingMenu;
-				return true;
-			}
-			case KeyMapping::SCREENSHOT: {
-				takeScreenShot();
-				return true;
-			}
-			case KeyMapping::VOLUME_UP: {
-				if( ( event.EventType == EET_JOYSTICK_INPUT_EVENT && event.JoystickEvent.IsButtonPressed( keyMap.at( k ).getGamepadButton() ) ) || ( keyMap.at( k ).getMouseWheelUp() && event.EventType == EET_MOUSE_INPUT_EVENT && event.MouseInput.Wheel > 0 ) ) {
-					musicVolume += 5;
-
-					if( musicVolume > 100 ) {
-						musicVolume = 100;
-					}
-
-					Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+		
+		switch( event.EventType ) {
+			case EET_JOYSTICK_INPUT_EVENT: {
+				if( event.JoystickEvent.IsButtonPressed( keyMap.at( k ).getGamepadButton() ) ) {
+					keyMap.at( k ).activated = true;
 					return true;
 				}
 				break;
 			}
-			case KeyMapping::VOLUME_DOWN: {
-				if( ( event.EventType == EET_JOYSTICK_INPUT_EVENT && event.JoystickEvent.IsButtonPressed( keyMap.at( k ).getGamepadButton() ) ) || ( !keyMap.at( k ).getMouseWheelUp() && event.EventType == EET_MOUSE_INPUT_EVENT && event.MouseInput.Wheel <= 0 ) ) {
-					if( musicVolume >= 5 ) {
-						musicVolume -= 5;
-					} else {
-						musicVolume = 0;
-					}
-
-					Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+			case EET_MOUSE_INPUT_EVENT: {
+				if( ( keyMap.at( k ).getMouseWheelUp() && event.MouseInput.Wheel > 0 ) || ( !keyMap.at( k ).getMouseWheelUp() && event.MouseInput.Wheel <= 0 ) ) {
+					keyMap.at( k ).activated = true;
 					return true;
 				}
 				break;
 			}
-			default: {
+			case EET_KEY_INPUT_EVENT: {
 				bool ignoreKey = false;
 				for( decltype( numBots ) b = 0; !ignoreKey && b < numBots; ++b ) { //Ignore controls that affect bots
 					if( keyMap.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
 						ignoreKey = true;
+						return true;
 					}
 				}
-
+				
 				if( !ignoreKey ) {
-					switch( keyMap.at( k ).getAction() ) {
-						case KeyMapping::UP: {
-							movePlayerOnY( keyMap.at( k ).getPlayer(), -1);
-							return true;
-						}
-						case KeyMapping::DOWN: {
-							movePlayerOnY( keyMap.at( k ).getPlayer(), 1);
-							return true;
-						}
-						case KeyMapping::RIGHT: {
-							movePlayerOnX( keyMap.at( k ).getPlayer(), 1);
-							return true;
-						}
-						case KeyMapping::LEFT: {
-							movePlayerOnX( keyMap.at( k ).getPlayer(), -1);
-							return true;
-						}
-						default: {
-							std::wcerr << "k is " << k << std::endl;
-							std::wcerr << "keyMap size is " << keyMap.size() << std::endl;
-							std::wstring actionStr = keyMap.at( k ).getActionAsString();
-							std::wcerr << actionStr << std::endl;
-							//throw std::wstring( L"Unrecognized key action: " ) + actionStr;
-						}
-					}
+					keyMap.at( k ).activated = true;
+					return true;
 				}
-				break;
 			}
 		}
 		
@@ -217,6 +175,96 @@ bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const 
 
 	return false;
 }
+*/
+
+/**
+* Should be called only by run().
+* Arguments:
+* --- std::vector< KeyMapping >::size_type k: which key in keyMap to use.
+*/
+void GameManager::doStuff() {
+	try {
+		if( debug ) {
+			std::wcout << L"doStuff() called" << std::endl;
+		}
+		
+		for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
+			if( keyMap.at( k ).activated ) {
+				switch( keyMap.at( k ).getAction() ) {
+					case KeyMapping::ACTION_MENU: {
+						showingMenu = !showingMenu;
+					}
+					case KeyMapping::ACTION_SCREENSHOT: {
+						takeScreenShot();
+					}
+					case KeyMapping::ACTION_VOLUME_UP: {
+						musicVolume += 5;
+						
+						if( musicVolume > 100 ) {
+							musicVolume = 100;
+						}
+						
+						Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+						break;
+					}
+					case KeyMapping::ACTION_VOLUME_DOWN: {
+						if( musicVolume >= 5 ) {
+							musicVolume -= 5;
+						} else {
+							musicVolume = 0;
+						}
+						
+						Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+						break;
+					}
+					default: {
+						bool ignoreKey = false;
+						for( decltype( numBots ) b = 0; !ignoreKey && b < numBots; ++b ) { //Ignore controls that affect bots
+							if( keyMap.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
+								ignoreKey = true;
+							}
+						}
+
+						if( !ignoreKey ) {
+							switch( keyMap.at( k ).getAction() ) {
+								case KeyMapping::ACTION_UP: {
+									movePlayerOnY( keyMap.at( k ).getPlayer(), -1);
+									break;
+								}
+								case KeyMapping::ACTION_DOWN: {
+									movePlayerOnY( keyMap.at( k ).getPlayer(), 1);
+									break;
+								}
+								case KeyMapping::ACTION_RIGHT: {
+									movePlayerOnX( keyMap.at( k ).getPlayer(), 1);
+									break;
+								}
+								case KeyMapping::ACTION_LEFT: {
+									movePlayerOnX( keyMap.at( k ).getPlayer(), -1);
+									break;
+								}
+								default: {
+									std::wcerr << "k is " << k << std::endl;
+									std::wcerr << "keyMap size is " << keyMap.size() << std::endl;
+									std::wstring actionStr = keyMap.at( k ).getActionAsString();
+									std::wcerr << actionStr << std::endl;
+								}
+							}
+						}
+						break;
+					}
+				}
+			}
+		}
+		
+		if( debug ) {
+			std::wcout << L"end of doStuff()" << std::endl;
+		}
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in GameManager::doStuff(): " << e.what() << std::endl;
+	}
+}
+
 
 /**
  * Draws everything onto the screen. Calls other draw functions, including those of objects.
@@ -863,6 +911,8 @@ GameManager::GameManager() {
 		haveShownLogo = false;
 		showingMenu = false;
 		donePlaying = false;
+		lastTimeControlsProcessed = 0;
+		controlProcessDelay = 100;
 
 		fontFile = "";
 		boost::filesystem::recursive_directory_iterator end;
@@ -2160,13 +2210,17 @@ bool GameManager::OnEvent( const SEvent& event ) {
 		
 		switch( event.EventType ) {
 			case EET_KEY_INPUT_EVENT: {
-				if( event.KeyInput.PressedDown ) { //Don't react when the key is released, only when it's pressed.
+				for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
+					if( keyMap.at( k ).getKey() == event.KeyInput.Key ) {
+						keyMap.at( k ).activated = event.KeyInput.PressedDown;
+						return true;
+					}
+				}
+				/*if( event.KeyInput.PressedDown ) { //Don't react when the key is released, only when it's pressed.
 					if( !( showingMenu || showingLoadingScreen ) ) {
 						for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
 							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
-								if( doEventActions( k, event ) ) {
-									return true;
-								}
+								return doEventActions( k, event );
 								break;
 							}
 						}
@@ -2183,7 +2237,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							}
 						}
 					}
-				}
+				}*/
 			}
 			break;
 
@@ -2221,10 +2275,9 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				}
 
 				for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
-					if( event.MouseInput.Event == keyMap.at( k ).getMouseEvent() && ( ( event.MouseInput.Wheel > 0 && keyMap.at( k ).getMouseWheelUp() ) || ( event.MouseInput.Wheel <= 0 && !keyMap.at( k ).getMouseWheelUp() ) ) ) {
-						if( doEventActions( k, event ) ) {
-							return true;
-						}
+					if( event.MouseInput.Event == keyMap.at( k ).getMouseEvent() ) {
+						keyMap.at( k ).activated = ( ( event.MouseInput.Wheel > 0 && keyMap.at( k ).getMouseWheelUp() ) || ( event.MouseInput.Wheel <= 0 && !keyMap.at( k ).getMouseWheelUp() ) );
+						return true;
 					}
 				}
 			}
@@ -2277,22 +2330,6 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						return true;
 					}
 					break;
-					case USER_EVENT_JOYSTICK_UP: {
-						if( debug ) {
-							std::wcout << L"Joystick moved up" << std::endl;
-						}
-						/*movePlayerOnY( myPlayer, -1 );
-						return true;*/
-					}
-					break;
-					case USER_EVENT_JOYSTICK_DOWN: {
-						if( debug ) {
-							std::wcout << L"Joystick moved down" << std::endl;
-						}
-						/*movePlayerOnY( myPlayer, 1 );
-						return true;*/
-					}
-					break;
 					default:
 						break;
 				}
@@ -2340,48 +2377,50 @@ bool GameManager::OnEvent( const SEvent& event ) {
 									joystickMovedLeft = true;
 								}
 							}
-
-							if( joystickMovedUp ) {
-								//TODO: joystick stuff
-								//return true;
-							} else if( joystickMovedDown ) {
-								//TODO: joystick stuff
-								//return true;
-							} else if( joystickMovedRight ) {
-								//TODO: joystick stuff
-								//return true;
-							} else if( joystickMovedLeft ) {
-								//TODO: joystick stuff
-								//return true;
-							}
-						}
-						
-						{ //Handle gamepad buttons
-							for( uint_fast8_t button = 0; button < event.JoystickEvent.NUMBER_OF_BUTTONS; ++button ) {
-								if( event.JoystickEvent.IsButtonPressed( button ) ) {
-									std::wcout << L"Button #" << button << L" is pressed" << std::endl;
-									if( !( showingMenu || showingLoadingScreen ) ) {
-										//for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
-											if( button == keyMap.at( k ).getGamepadButton() ) {
-												return doEventActions( k, event );
-											}
-										//}
-									} else if( showingMenu ) { //We only want certain actions to work if we're showing the menu
-										//for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
-											if( button == keyMap.at( k ).getGamepadButton() ) {
-												switch( keyMap.at( k ).getAction() ) {
-													case KeyMapping::MENU:
-													case KeyMapping::SCREENSHOT: {
-														return doEventActions( k, event );
-													}
-												}
-												break;
-											}
-										//}
-									}
+							
+							switch( keyMap.at( k ).getJoystickDirection() ) {
+								case KeyMapping::JOYSTICK_UP: {
+									keyMap.at( k ).activated = joystickMovedUp;
+									break;
+								}
+								case KeyMapping::JOYSTICK_DOWN: {
+									keyMap.at( k ).activated = joystickMovedDown;
+									break;
+								}
+								case KeyMapping::JOYSTICK_RIGHT: {
+									keyMap.at( k ).activated = joystickMovedRight;
+									break;
+								}
+								case KeyMapping::JOYSTICK_LEFT: {
+									keyMap.at( k ).activated = joystickMovedLeft;
+									break;
 								}
 							}
 						}
+						
+						if( keyMap.at( k ).getGamepadButton() != UINT_FAST8_MAX ) {
+							keyMap.at( k ).activated = event.JoystickEvent.IsButtonPressed( keyMap.at( k ).getGamepadButton() );
+						}
+						
+						/*{ //Handle gamepad buttons
+							for( uint_fast8_t button = 0; button < event.JoystickEvent.NUMBER_OF_BUTTONS; ++button ) {
+								//if( !( showingMenu || showingLoadingScreen ) ) {
+									if( button == keyMap.at( k ).getGamepadButton() ) {
+										keyMap.at( k ).activated = event.JoystickEvent.IsButtonPressed( button );
+										return true;
+									}
+								//} else if( showingMenu ) { //We only want certain actions to work if we're showing the menu
+								if( button == keyMap.at( k ).getGamepadButton() ) {
+									switch( keyMap.at( k ).getAction() ) {
+										case KeyMapping::MENU:
+										case KeyMapping::SCREENSHOT: {
+											return doEventActions( k, event );
+										}
+									}
+									break;
+								}
+							}
+						}*/
 					}
 				}
 			}
@@ -3147,6 +3186,7 @@ void GameManager::resetThings() {
 		currentProTip = ( currentProTip + 1 ) % proTips.size();
 		loadTipFont();
 		startLoadingScreen();
+		lastTimeControlsProcessed = timer->getTime();
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::resetThings(): " << e.what() << std::endl;
 	}
@@ -3195,7 +3235,16 @@ uint_fast8_t GameManager::run() {
 				if( playMusic && !Mix_PlayingMusic() ) {
 					loadNextSong();
 				}
-
+				
+				{
+					auto time = timer->getTime();
+					if( time >= lastTimeControlsProcessed + controlProcessDelay ) {
+						doStuff();
+						lastTimeControlsProcessed = time;
+					}
+				}
+				
+				
 				if( ( !showingLoadingScreen && device->isWindowActive() ) || debug ) {
 					//It's the bots' turn to move now.
 					if( !( showingMenu || showingLoadingScreen ) && numBots > 0 ) {
@@ -3388,9 +3437,9 @@ void GameManager::setControls() {
 							try {
 								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
 								std::wstring choiceStr = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
-								//if( debug ) {
+								if( debug ) {
 									std::wcout << L"Control preference \"" << preference << L"\" choiceStr \"" << choiceStr << L"\""<< std::endl;
-								//}
+								}
 
 								{
 									KeyMapping temp;
@@ -3406,9 +3455,9 @@ void GameManager::setControls() {
 									{
 										std::wstring gamepadNumStr = boost::algorithm::trim_copy( choiceStr.substr( 0, choiceStr.find( L' ' ) ) );
 										
-										//if( debug ) {
+										if( debug ) {
 											std::wcout << L"Gamepad number (string) \"" << gamepadNumStr << L"\"" << std::endl;
-										//}
+										}
 										
 										uint_fast8_t choice;
 										
@@ -3416,9 +3465,9 @@ void GameManager::setControls() {
 										
 										keyMap.back().setGamepadNumber( choice );
 										
-										//if( debug ) {
+										if( debug ) {
 											std::wcout << L" converts to integer " << choice << std::endl;
-										//}
+										}
 									}
 									
 									{
@@ -3446,7 +3495,6 @@ void GameManager::setControls() {
 									}
 									
 								} else if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 1 ).length() ), possibleChoiceStarts.at( 1 ) ) <= 1 ) {//if( spellChecker.indexOfClosestString( choiceStr.substr( 0, 3 ), possibleChoiceStarts )  == 1  ) { //L"key"
-									std::wcout << L"test" << std::endl;
 									choiceStr = choiceStr.substr( 3, choiceStr.length() - 3 ); //3 = length of the word "key"
 									EKEY_CODE choice;
 									
@@ -3513,7 +3561,6 @@ void GameManager::setControls() {
 
 										if( playerNum < numPlayers ) {
 											keyMap.back().setPlayer( playerNum );
-											//wchar_t action = actionStr.at( 0 );
 											keyMap.back().setActionFromString( actionStr );
 										} else { //We ignore that player number because we don't have that many players
 											keyMap.pop_back();
@@ -3522,16 +3569,16 @@ void GameManager::setControls() {
 										std::wcerr << L"Error reading player number (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								} else {
-									//if( debug ) {
+									if( debug ) {
 										std::wcout << L"preference before spell checking: " << preference;
-									//}
+									}
 
 									std::vector< std::wstring > possiblePrefs = { L"menu", L"screenshot", L"volumeup", L"volumedown", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l", L"enable gamepad" };
 									preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
 
-									//if( debug ) {
+									if( debug ) {
 										std::wcout  << "\tand after: " << preference << std::endl;
-									//}
+									}
 									
 									if( preference == possiblePrefs.at( 12 ) ) { //L"enable gamepad"
 										std::vector< std::wstring > possibleChoices = { L"true", L"false" };

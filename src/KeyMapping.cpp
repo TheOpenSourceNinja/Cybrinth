@@ -9,35 +9,35 @@ KeyMapping::action_t KeyMapping::getAction() {
 		return action;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::getAction(): " << e.what() << std::endl;
-		return ERROR_DO_NOT_USE;
+		return ACTION_DO_NOT_USE;
 	}
 }
 
 std::wstring KeyMapping::getActionAsString() {
 	try {
 		switch( action ) {
-			case MENU: {
+			case ACTION_MENU: {
 				return L"menu";
 			}
-			case SCREENSHOT: {
+			case ACTION_SCREENSHOT: {
 				return L"screenshot";
 			}
-			case VOLUME_UP: {
+			case ACTION_VOLUME_UP: {
 				return L"volumeup";
 			}
-			case VOLUME_DOWN: {
+			case ACTION_VOLUME_DOWN: {
 				return L"volumedown";
 			}
-			case UP: {
+			case ACTION_UP: {
 				return L"up";
 			}
-			case DOWN: {
+			case ACTION_DOWN: {
 				return L"down";
 			}
-			case RIGHT: {
+			case ACTION_RIGHT: {
 				return L"right";
 			}
-			case LEFT: {
+			case ACTION_LEFT: {
 				return L"left";
 			}
 			default: {
@@ -53,31 +53,31 @@ std::wstring KeyMapping::getActionAsString() {
 void KeyMapping::setActionFromString( std::wstring val ) {
 	try {
 		if( boost::iequals( val, L"menu" ) ) {
-			action = MENU;
+			action = ACTION_MENU;
 		} else if( boost::iequals( val, L"screenshot" ) ) {
-			action = SCREENSHOT;
+			action = ACTION_SCREENSHOT;
 		} else if( boost::iequals( val, L"volumeup" ) ) {
-			action = VOLUME_UP;
+			action = ACTION_VOLUME_UP;
 		} else if( boost::iequals( val, L"volumedown" ) ) {
-			action = VOLUME_DOWN;
+			action = ACTION_VOLUME_DOWN;
 		} else if( boost::iequals( val, L"u" ) or boost::iequals( val, L"up" ) ) {
-			action = UP;
+			action = ACTION_UP;
 		} else if( boost::iequals( val, L"d" ) or boost::iequals( val, L"down" ) ) {
-			action = DOWN;
+			action = ACTION_DOWN;
 		} else if( boost::iequals( val, L"r" ) or boost::iequals( val, L"right" ) ) {
-			action = RIGHT;
+			action = ACTION_RIGHT;
 		} else if( boost::iequals( val, L"l" ) or boost::iequals( val, L"left" ) ) {
-			action = LEFT;
+			action = ACTION_LEFT;
 		} else {
 			std::wstring error = L"Action string not recognized: " + val;
 			throw error;
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::setActionFromString(): " << e.what() << std::endl;
-		action = ERROR_DO_NOT_USE;
+		action = ACTION_DO_NOT_USE;
 	} catch( std::wstring &e ) {
 		std::wcerr << L"Error in KeyMapping::setActionFromString(): " << e << std::endl;
-		action = ERROR_DO_NOT_USE;
+		action = ACTION_DO_NOT_USE;
 	}
 }
 
@@ -136,7 +136,7 @@ void KeyMapping::setAction( action_t val ) {
 		action = val;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::setAction(): " << e.what() << std::endl;
-		action = ERROR_DO_NOT_USE;
+		action = ACTION_DO_NOT_USE;
 	}
 }
 
@@ -186,14 +186,24 @@ void KeyMapping::setPlayer( uint_fast8_t val ) {
 	}
 }
 
+KeyMapping::joystickDirection_t KeyMapping::getJoystickDirection() {
+	return joystickDirection;
+}
+
+void KeyMapping::setJoystickDirection( joystickDirection_t val ) {
+	joystickDirection = val;
+}
+
 KeyMapping::KeyMapping() {
 	try {
 		mouseWheelUp = false;
 		mouseEvent = irr::EMIE_COUNT;
 		key = irr::KEY_KEY_CODES_COUNT;
-		setAction( ERROR_DO_NOT_USE );
+		setAction( ACTION_DO_NOT_USE );
 		gamepadButton = UINT_FAST8_MAX;
 		gamepadNumber = UINT_FAST8_MAX;
+		joystickDirection = JOYSTICK_DO_NOT_USE;
+		activated = false;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::KeyMapping(): " << e.what() << std::endl;
 	}

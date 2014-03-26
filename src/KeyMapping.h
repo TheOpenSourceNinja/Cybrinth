@@ -11,7 +11,8 @@
 class KeyMapping
 {
 	public:
-		enum action_t { MENU, SCREENSHOT, VOLUME_UP, VOLUME_DOWN, UP, DOWN, RIGHT, LEFT, ERROR_DO_NOT_USE };
+		enum joystickDirection_t { JOYSTICK_UP, JOYSTICK_DOWN, JOYSTICK_LEFT, JOYSTICK_RIGHT, JOYSTICK_DO_NOT_USE };
+		enum action_t { ACTION_MENU, ACTION_SCREENSHOT, ACTION_VOLUME_UP, ACTION_VOLUME_DOWN, ACTION_UP, ACTION_DOWN, ACTION_RIGHT, ACTION_LEFT, ACTION_DO_NOT_USE };
 		/** Default constructor */
 		KeyMapping();
 		/** Default destructor */
@@ -81,6 +82,17 @@ class KeyMapping
 		 * \param val New value to set
 		 */
 		void setMouseWheelUp( bool val );
+		
+		/** Access joystickDirection
+		 * \return The current value of joystickDirection
+		 */
+		joystickDirection_t getJoystickDirection();
+		/** Set joystickDirection
+		 * \param val New value to set
+		 */
+		void setJoystickDirection( joystickDirection_t val );
+		
+		bool activated; //To be set, unset, and accessed by GameManager. Indicates whether the relevant button has been pressed, or joystick moved, etc. Ensures smooth player movements.
 	protected:
 	private:
 		irr::EKEY_CODE key;
@@ -90,6 +102,7 @@ class KeyMapping
 		bool mouseWheelUp;
 		action_t action;
 		uint_fast8_t player;
+		joystickDirection_t joystickDirection;
 };
 
 #endif // KEYMAPPING_H

@@ -110,8 +110,8 @@ class GameManager : public IEventReceiver {
 		//Functions----------------------------------
 		void adjustMenu();
 		bool allHumansAtGoal();
-
-		bool doEventActions( std::vector< KeyMapping >::size_type k, const SEvent& event );
+		
+		void doStuff();
 		void drawBackground();
 		void drawLoadingScreen();
 		void drawLogo();
@@ -194,6 +194,8 @@ class GameManager : public IEventReceiver {
 
 
 		//unsigned 32-bit integers----------------------------------
+		uint_fast32_t lastTimeControlsProcessed;
+		uint_fast32_t controlProcessDelay;
 		uint_fast32_t minWidth;
 		uint_fast32_t minHeight;
 
