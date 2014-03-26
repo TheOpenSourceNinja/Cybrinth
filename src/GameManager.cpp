@@ -19,6 +19,8 @@
 #include "GameManager.h"
 #include <filesystem/fstream.hpp>
 #include <algorithm/string.hpp>
+#include <algorithm/string/trim.hpp>
+#include <algorithm/string/trim_all.hpp>
 #include <boost/lexical_cast.hpp>
 #include <SDL/SDL.h>
 #include <taglib/fileref.h>
@@ -2298,94 +2300,84 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			break;
 
 			case EET_JOYSTICK_INPUT_EVENT: {
-				if( event.JoystickEvent.Joystick == joystickChosen ) {
-					{ //Handle joystick axes
-						core::array< int_fast16_t > verticalAxes;
-						verticalAxes.push_back( SEvent::SJoystickEvent::AXIS_Y );
-						core::array< int_fast16_t > horizontalAxes;
-						horizontalAxes.push_back( SEvent::SJoystickEvent::AXIS_X );
+				for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
+					if( event.JoystickEvent.Joystick == keyMap.at( k ).getGamepadNumber() ) {
+						{ //Handle joystick axes
+							core::array< int_fast16_t > verticalAxes;
+							verticalAxes.push_back( SEvent::SJoystickEvent::AXIS_Y );
+							core::array< int_fast16_t > horizontalAxes;
+							horizontalAxes.push_back( SEvent::SJoystickEvent::AXIS_X );
 
-						bool joystickMovedUp = false;
-						bool joystickMovedDown = false;
-						bool joystickMovedRight = false;
-						bool joystickMovedLeft = false;
+							bool joystickMovedUp = false;
+							bool joystickMovedDown = false;
+							bool joystickMovedRight = false;
+							bool joystickMovedLeft = false;
 
-						for( uint_fast16_t i = 0; i < verticalAxes.size(); ++i ) {
-							if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
-								if( debug ) {
-									std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
-								}
-								joystickMovedUp = true;
-							} else if( event.JoystickEvent.Axis[ i ] <= ( SHRT_MIN / 2 ) ) {
-								if( debug ) {
-									std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
-								}
-								joystickMovedDown = true;
-							}
-						}
-
-						for( uint_fast16_t i = 0; i < horizontalAxes.size(); ++i ) {
-							if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
-								if( debug ) {
-									std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
-								}
-								joystickMovedRight = true;
-							} else if( event.JoystickEvent.Axis[ i ] <= ( SHRT_MIN / 2 ) ) {
-								if( debug ) {
-									std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
-								}
-								joystickMovedLeft = true;
-							}
-						}
-
-						if( joystickMovedUp ) {
-							SEvent temp;
-							temp.EventType = EET_USER_EVENT;
-							temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_UP;
-							device->postEventFromUser( temp );
-							return true;
-						} else if( joystickMovedDown ) {
-							SEvent temp;
-							temp.EventType = EET_USER_EVENT;
-							temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_DOWN;
-							device->postEventFromUser( temp );
-							return true;
-						} else if( joystickMovedRight ) {
-							SEvent temp;
-							temp.EventType = EET_USER_EVENT;
-							temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_RIGHT;
-							device->postEventFromUser( temp );
-							return true;
-						} else if( joystickMovedLeft ) {
-							SEvent temp;
-							temp.EventType = EET_USER_EVENT;
-							temp.UserEvent.UserData1 = USER_EVENT_JOYSTICK_LEFT;
-							device->postEventFromUser( temp );
-							return true;
-						}
-					}
-					
-					{ //Handle gamepad buttons
-						for( uint_fast8_t button = 0; button < event.JoystickEvent.NUMBER_OF_BUTTONS; ++button ) {
-							if( event.JoystickEvent.IsButtonPressed( button ) ) {
-								std::wcout << L"Button #" << button << L" is pressed" << std::endl;
-								if( !( showingMenu || showingLoadingScreen ) ) {
-									for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
-										if( button == keyMap.at( k ).getGamepadButton() ) {
-											return doEventActions( k, event );
-										}
+							for( uint_fast16_t i = 0; i < verticalAxes.size(); ++i ) {
+								if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
+									if( debug ) {
+										std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
 									}
-								} else if( showingMenu ) { //We only want certain actions to work if we're showing the menu
-									for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
-										if( button == keyMap.at( k ).getGamepadButton() ) {
-											switch( keyMap.at( k ).getAction() ) {
-												case KeyMapping::MENU:
-												case KeyMapping::SCREENSHOT: {
-													return doEventActions( k, event );
-												}
+									joystickMovedUp = true;
+								} else if( event.JoystickEvent.Axis[ i ] <= ( SHRT_MIN / 2 ) ) {
+									if( debug ) {
+										std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
+									}
+									joystickMovedDown = true;
+								}
+							}
+
+							for( uint_fast16_t i = 0; i < horizontalAxes.size(); ++i ) {
+								if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
+									if( debug ) {
+										std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
+									}
+									joystickMovedRight = true;
+								} else if( event.JoystickEvent.Axis[ i ] <= ( SHRT_MIN / 2 ) ) {
+									if( debug ) {
+										std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
+									}
+									joystickMovedLeft = true;
+								}
+							}
+
+							if( joystickMovedUp ) {
+								//TODO: joystick stuff
+								//return true;
+							} else if( joystickMovedDown ) {
+								//TODO: joystick stuff
+								//return true;
+							} else if( joystickMovedRight ) {
+								//TODO: joystick stuff
+								//return true;
+							} else if( joystickMovedLeft ) {
+								//TODO: joystick stuff
+								//return true;
+							}
+						}
+						
+						{ //Handle gamepad buttons
+							for( uint_fast8_t button = 0; button < event.JoystickEvent.NUMBER_OF_BUTTONS; ++button ) {
+								if( event.JoystickEvent.IsButtonPressed( button ) ) {
+									std::wcout << L"Button #" << button << L" is pressed" << std::endl;
+									if( !( showingMenu || showingLoadingScreen ) ) {
+										//for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
+											if( button == keyMap.at( k ).getGamepadButton() ) {
+												return doEventActions( k, event );
 											}
-											break;
-										}
+										//}
+									} else if( showingMenu ) { //We only want certain actions to work if we're showing the menu
+										//for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
+											if( button == keyMap.at( k ).getGamepadButton() ) {
+												switch( keyMap.at( k ).getAction() ) {
+													case KeyMapping::MENU:
+													case KeyMapping::SCREENSHOT: {
+														return doEventActions( k, event );
+													}
+												}
+												break;
+											}
+										//}
 									}
 								}
 							}
@@ -2593,7 +2585,7 @@ void GameManager::readPrefs() {
 						++lineNum;
 						getline( prefsFile, line );
 						line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
-						boost::algorithm::trim( line ); //Removes trailing and leading spaces
+						boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
 						boost::algorithm::to_lower( line );
 						if( debug ) {
 							std::wcout << L"Line " << lineNum << L": \"" << line << "\"" << std::endl;
@@ -3041,16 +3033,6 @@ void GameManager::readPrefs() {
 
 				prefsFile << L"network port\t" << network.getPort() << std::endl;
 
-				prefsFile << L"enable joystick\t";
-				if( enableJoystick ) {
-					prefsFile << L"true";
-				} else {
-					prefsFile << L"false";
-				}
-				prefsFile << std::endl;
-
-				prefsFile << L"joystick number\t" << joystickChosen << std::endl;
-
 				prefsFile << L"always server\t";
 				if( isServer ) {
 					prefsFile << L"true";
@@ -3377,7 +3359,6 @@ void GameManager::setControls() {
 		//Yeah, these are the only defaults so far.
 		//TODO: Add default controls.
 		enableJoystick = false;
-		joystickChosen = 1;
 		
 		boost::filesystem::path controlsPath( boost::filesystem::current_path()/L"controls.cfg" );
 
@@ -3397,7 +3378,7 @@ void GameManager::setControls() {
 						std::wstring line;
 						getline( controlsFile, line );
 						line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
-						boost::algorithm::trim( line ); //Removes trailing and leading spaces
+						boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
 						boost::algorithm::to_lower( line ); //Converts to lower case
 						if( debug ) {
 							std::wcout << L"Line " << lineNum << L": \"" << line << "\"" << std::endl;
@@ -3407,33 +3388,76 @@ void GameManager::setControls() {
 							try {
 								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
 								std::wstring choiceStr = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
-								if( debug ) {
+								//if( debug ) {
 									std::wcout << L"Control preference \"" << preference << L"\" choiceStr \"" << choiceStr << L"\""<< std::endl;
-								}
+								//}
 
 								{
 									KeyMapping temp;
 									keyMap.push_back( temp );
 								}
+								
+								std::vector< std::wstring > possibleChoiceStarts = { L"gamepad", L"key", L"mouse" };
 
-								if( choiceStr.substr( 0, 13 ) == L"gamepadbutton" ) {
-									choiceStr = choiceStr.substr( 13, choiceStr.length() - 13 ); //13 = length of the words "GamepadButton"
-									uint_fast8_t choice;
-
-									choice = static_cast< uint_fast8_t >( boost::lexical_cast< unsigned short int >( choiceStr ) ); //Boost lexical cast can't convert directly to uint_fast8_t, at least on my computer
-
-									keyMap.back().setGamepadButton( choice );
-								} else if( choiceStr.substr( 0, 3 ) == L"key" ) {
+								//if( spellChecker.indexOfClosestString( choiceStr.substr( 0, 7 ), possibleChoiceStarts )  == 0 ) { //L"gamepad"
+								if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 0 ).length() ), possibleChoiceStarts.at( 0 ) ) <= 1 ) {
+									choiceStr = choiceStr.substr( 7, choiceStr.length() - 7 ); //7 = length of the word "Gamepad"
+									boost::algorithm::trim( choiceStr ); //Remove trailing and leading spaces
+									{
+										std::wstring gamepadNumStr = boost::algorithm::trim_copy( choiceStr.substr( 0, choiceStr.find( L' ' ) ) );
+										
+										//if( debug ) {
+											std::wcout << L"Gamepad number (string) \"" << gamepadNumStr << L"\"" << std::endl;
+										//}
+										
+										uint_fast8_t choice;
+										
+										choice = static_cast< uint_fast8_t >( boost::lexical_cast< unsigned short int >( gamepadNumStr ) ); //Boost lexical cast can't convert directly to uint_fast8_t, at least on my computer
+										
+										keyMap.back().setGamepadNumber( choice );
+										
+										//if( debug ) {
+											std::wcout << L" converts to integer " << choice << std::endl;
+										//}
+									}
+									
+									{
+										choiceStr = boost::algorithm::trim_copy( choiceStr.substr( choiceStr.find( L' ' ) ) );
+										std::wstring gamepadButtonOrJoystick = choiceStr.substr( 0, choiceStr.find( L' ' ) );
+										std::vector< std::wstring > possibleChoices = { L"button", L"joystick" };
+										gamepadButtonOrJoystick = possibleChoices.at( spellChecker.indexOfClosestString( gamepadButtonOrJoystick, possibleChoices ) );
+										
+										if( gamepadButtonOrJoystick == possibleChoices.at( 0 ) ) { //L"button"
+											std::wstring gamepadButtonStr = boost::algorithm::trim_copy( choiceStr.substr( gamepadButtonOrJoystick.length() ) );
+											uint_fast8_t choice;
+											
+											if( debug ) {
+												std::wcout << L"Gamepad button number (string) \"" << gamepadButtonStr << L"\"" << std::endl;
+											}
+											
+											choice = static_cast< uint_fast8_t >( boost::lexical_cast< unsigned short int >( gamepadButtonStr ) ); //Boost lexical cast can't convert directly to uint_fast8_t, at least on my computer
+											
+											keyMap.back().setGamepadButton( choice );
+											
+											if( debug ) {
+												std::wcout << L" converts to integer " << choice << std::endl;
+											}
+										}
+									}
+									
+								} else if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 1 ).length() ), possibleChoiceStarts.at( 1 ) ) <= 1 ) {//if( spellChecker.indexOfClosestString( choiceStr.substr( 0, 3 ), possibleChoiceStarts )  == 1  ) { //L"key"
+									std::wcout << L"test" << std::endl;
 									choiceStr = choiceStr.substr( 3, choiceStr.length() - 3 ); //3 = length of the word "key"
 									EKEY_CODE choice;
-
+									
 									choice = static_cast< EKEY_CODE >( boost::lexical_cast< int >( choiceStr ) ); //Boost lexical cast can't convert directly to enumerated types
-
+									
 									keyMap.back().setKey( choice );
-								} else if( choiceStr.substr( 0, 5 ) == L"mouse" ) {
-
+									
+								} if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 2 ).length() ), possibleChoiceStarts.at( 2 ) ) <= 1 ) {//else if( spellChecker.indexOfClosestString( choiceStr.substr( 0, 5 ), possibleChoiceStarts )  == 2 ) { //L"mouse"
+									
 									choiceStr = choiceStr.substr( 5, choiceStr.length() - 5 ); //5 = length of the word "mouse"
-
+									
 									if( debug ) {
 										std::wcout << L"choiceStr before spell checking: " << choiceStr;
 									}
@@ -3498,16 +3522,16 @@ void GameManager::setControls() {
 										std::wcerr << L"Error reading player number (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								} else {
-									if( debug ) {
+									//if( debug ) {
 										std::wcout << L"preference before spell checking: " << preference;
-									}
+									//}
 
-									std::vector< std::wstring > possiblePrefs = { L"menu", L"screenshot", L"volumeup", L"volumedown", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l", L"enable gamepad", L"gamepad number" };
+									std::vector< std::wstring > possiblePrefs = { L"menu", L"screenshot", L"volumeup", L"volumedown", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l", L"enable gamepad" };
 									preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
 
-									if( debug ) {
+									//if( debug ) {
 										std::wcout  << "\tand after: " << preference << std::endl;
-									}
+									//}
 									
 									if( preference == possiblePrefs.at( 12 ) ) { //L"enable gamepad"
 										std::vector< std::wstring > possibleChoices = { L"true", L"false" };
@@ -3524,19 +3548,6 @@ void GameManager::setControls() {
 											}
 											enableJoystick = false;
 										}
-									} else if( preference == possiblePrefs.at( 13 ) ) { //L"gamepad number"
-										if( debug ) {
-											std::wcout << L"Joystick number: " << choiceStr << std::endl;
-										}
-										try {
-											
-											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choiceStr );
-											joystickChosen = choiceAsInt;
-											
-										} catch ( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading joystick number (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-										}
-										
 									} else {
 										keyMap.back().setActionFromString( preference );
 									}

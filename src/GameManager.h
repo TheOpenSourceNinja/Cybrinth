@@ -190,8 +190,6 @@ class GameManager : public IEventReceiver {
 		uint_fast16_t cellWidth;
 		uint_fast16_t cellHeight;
 
-		uint_fast16_t joystickChosen;
-
 		uint_fast16_t musicVolume;
 
 

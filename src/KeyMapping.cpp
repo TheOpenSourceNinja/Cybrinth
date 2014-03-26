@@ -90,6 +90,15 @@ uint_fast8_t KeyMapping::getGamepadButton() {
 	}
 }
 
+uint_fast8_t KeyMapping::getGamepadNumber() {
+	try {
+		return gamepadNumber;
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in KeyMapping::getGamepadNumber(): " << e.what() << std::endl;
+		return UINT_FAST8_MAX;
+	}
+}
+
 irr::EKEY_CODE KeyMapping::getKey() {
 	try {
 		return key;
@@ -139,6 +148,14 @@ void KeyMapping::setGamepadButton( uint_fast8_t val ) {
 	}
 }
 
+void KeyMapping::setGamepadNumber( uint_fast8_t val ) {
+	try {
+		gamepadNumber = val;
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in KeyMapping::setGamepadNumber(): " << e.what() << std::endl;
+	}
+}
+
 void KeyMapping::setKey( irr::EKEY_CODE val ) {
 	try {
 		key = val;
@@ -176,6 +193,7 @@ KeyMapping::KeyMapping() {
 		key = irr::KEY_KEY_CODES_COUNT;
 		setAction( ERROR_DO_NOT_USE );
 		gamepadButton = UINT_FAST8_MAX;
+		gamepadNumber = UINT_FAST8_MAX;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::KeyMapping(): " << e.what() << std::endl;
 	}
