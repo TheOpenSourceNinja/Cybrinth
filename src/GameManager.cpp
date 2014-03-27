@@ -59,13 +59,14 @@ void GameManager::adjustMenu() {
 				std::wcout << L"adjustMenu() called" << std::endl;
 		}
 		
-		uint_fast8_t numMenuOptions = 6;
-		newGame.setY( 0 );
-		loadMaze.setY( 1 * windowSize.Height / numMenuOptions );
-		saveMaze.setY( 2 * windowSize.Height / numMenuOptions );
-		exitGame.setY( 3 * windowSize.Height / numMenuOptions );
-		backToGame.setY( 4 * windowSize.Height / numMenuOptions );
-		freedom.setY( 5 * windowSize.Height / numMenuOptions );
+		uint_fast8_t numMenuOptions = 7;
+		nextMaze.setY( 0 );
+		restartMaze.setY( 1 * windowSize.Height / numMenuOptions );
+		loadMaze.setY( 2 * windowSize.Height / numMenuOptions );
+		saveMaze.setY( 3 * windowSize.Height / numMenuOptions );
+		exitGame.setY( 4 * windowSize.Height / numMenuOptions );
+		backToGame.setY( 5 * windowSize.Height / numMenuOptions );
+		freedom.setY( 6 * windowSize.Height / numMenuOptions );
 		
 		if( debug ) {
 				std::wcout << L"end of adjustMenu()" << std::endl;
@@ -126,7 +127,7 @@ bool GameManager::allHumansAtGoal() {
 /**
 * Should be called only by run().
 * Arguments:
-* --- std::vector< KeyMapping >::size_type k: which key in keyMap to use.
+* None.
 */
 void GameManager::processControls() {
 	try {
@@ -134,18 +135,18 @@ void GameManager::processControls() {
 			std::wcout << L"processControls() called" << std::endl;
 		}
 		
-		for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
-			if( keyMap.at( k ).activated ) {
-				switch( keyMap.at( k ).getAction() ) {
-					case KeyMapping::ACTION_MENU: {
+		for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
+			if( controls.at( k ).activated ) {
+				switch( controls.at( k ).getAction() ) {
+					case ControlMapping::ACTION_MENU: {
 						showingMenu = !showingMenu;
 						break;
 					}
-					case KeyMapping::ACTION_SCREENSHOT: {
+					case ControlMapping::ACTION_SCREENSHOT: {
 						takeScreenShot();
 						break;
 					}
-					case KeyMapping::ACTION_VOLUME_UP: {
+					case ControlMapping::ACTION_VOLUME_UP: {
 						musicVolume += 5;
 						
 						if( musicVolume > 100 ) {
@@ -155,7 +156,7 @@ void GameManager::processControls() {
 						Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
 						break;
 					}
-					case KeyMapping::ACTION_VOLUME_DOWN: {
+					case ControlMapping::ACTION_VOLUME_DOWN: {
 						if( musicVolume >= 5 ) {
 							musicVolume -= 5;
 						} else {
@@ -168,33 +169,33 @@ void GameManager::processControls() {
 					default: {
 						bool ignoreKey = false;
 						for( decltype( numBots ) b = 0; !ignoreKey && b < numBots; ++b ) { //Ignore controls that affect bots
-							if( keyMap.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
+							if( controls.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
 								ignoreKey = true;
 							}
 						}
 
 						if( !ignoreKey ) {
-							switch( keyMap.at( k ).getAction() ) {
-								case KeyMapping::ACTION_UP: {
-									movePlayerOnY( keyMap.at( k ).getPlayer(), -1);
+							switch( controls.at( k ).getAction() ) {
+								case ControlMapping::ACTION_UP: {
+									movePlayerOnY( controls.at( k ).getPlayer(), -1);
 									break;
 								}
-								case KeyMapping::ACTION_DOWN: {
-									movePlayerOnY( keyMap.at( k ).getPlayer(), 1);
+								case ControlMapping::ACTION_DOWN: {
+									movePlayerOnY( controls.at( k ).getPlayer(), 1);
 									break;
 								}
-								case KeyMapping::ACTION_RIGHT: {
-									movePlayerOnX( keyMap.at( k ).getPlayer(), 1);
+								case ControlMapping::ACTION_RIGHT: {
+									movePlayerOnX( controls.at( k ).getPlayer(), 1);
 									break;
 								}
-								case KeyMapping::ACTION_LEFT: {
-									movePlayerOnX( keyMap.at( k ).getPlayer(), -1);
+								case ControlMapping::ACTION_LEFT: {
+									movePlayerOnX( controls.at( k ).getPlayer(), -1);
 									break;
 								}
 								default: {
 									std::wcerr << "k is " << k << std::endl;
-									std::wcerr << "keyMap size is " << keyMap.size() << std::endl;
-									std::wstring actionStr = keyMap.at( k ).getActionAsString();
+									std::wcerr << "controls size is " << controls.size() << std::endl;
+									std::wstring actionStr = controls.at( k ).getActionAsString();
 									std::wcerr << actionStr << std::endl;
 								}
 							}
@@ -273,7 +274,8 @@ void GameManager::drawAll() {
 			mazeManager.draw( driver, cellWidth, cellHeight );
 
 			if( showingMenu ) {
-				newGame.draw( driver );
+				nextMaze.draw( driver );
+				restartMaze.draw( driver );
 				loadMaze.draw( driver );
 				saveMaze.draw( driver );
 				exitGame.draw( driver );
@@ -1095,7 +1097,8 @@ GameManager::GameManager() {
 
 		loadFonts();
 
-		newGame.setText( L"New maze" );
+		nextMaze.setText( L"Next maze" );
+		restartMaze.setText( L"Restart maze" );
 		loadMaze.setText( L"Load maze" );
 		saveMaze.setText( L"Save maze" );
 		exitGame.setText( L"Exit game" );
@@ -1427,7 +1430,7 @@ void GameManager::loadFonts() {
 				} while( !isNull( loadingFont ) && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 			}
 
-			if( fontFile == "" || isNull( loadingFont ) ) {
+			if( fontFile == "" || isNull( loadingFont ) || size <= gui->getBuiltInFont()->getDimension( L"(ygj*^" ).Height ) {
 				loadingFont = gui->getBuiltInFont();
 			}
 
@@ -1475,7 +1478,7 @@ void GameManager::loadFonts() {
 				} while( !isNull( textFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
 			}
 
-			if( fontFile == "" || isNull( textFont ) ) {
+			if( fontFile == "" || isNull( textFont ) || textFont->getDimension( L"(ygj*^" ).Height <= gui->getBuiltInFont()->getDimension( L"(ygj*^" ).Height ) {
 				textFont = gui->getBuiltInFont();
 			}
 
@@ -1509,7 +1512,7 @@ void GameManager::loadFonts() {
 				} while( !isNull( clockFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 			}
 
-			if( fontFile == "" || isNull( clockFont ) ) {
+			if( fontFile == "" || isNull( clockFont ) || clockFont->getDimension( L"(ygj*^" ).Height <= gui->getBuiltInFont()->getDimension( L"(ygj*^" ).Height ) {
 				clockFont = gui->getBuiltInFont();
 			}
 
@@ -1567,7 +1570,7 @@ void GameManager::loadFonts() {
 				}
 			}
 
-			if( fontFile == "" || isNull( statsFont ) ) {
+			if( fontFile == "" || isNull( statsFont ) || statsFont->getDimension( L"(ygj*^" ).Height <= gui->getBuiltInFont()->getDimension( L"(ygj*^" ).Height ) {
 				statsFont = gui->getBuiltInFont();
 			}
 
@@ -1576,7 +1579,8 @@ void GameManager::loadFonts() {
 			}
 		}
 
-		newGame.setFont( clockFont );
+		nextMaze.setFont( clockFont );
+		restartMaze.setFont( clockFont );
 		loadMaze.setFont( clockFont );
 		saveMaze.setFont( clockFont );
 		exitGame.setFont( clockFont );
@@ -1602,12 +1606,14 @@ void GameManager::loadMusicFont() {
 		if( debug ) {
 			std::wcout << L"loadMusicFont() called" << std::endl;
 		}
-
+		
+		uint_fast32_t size = 0; //The height (I think) of the font to be loaded
+		
 		if( playMusic ) {
 			if( fontFile != "" ) {
-				uint_fast8_t maxWidth = ( windowSize.Width / sideDisplaySizeDenominator );
-				uint_fast32_t size = 0;
-				uint_fast8_t numerator = 2.5 * maxWidth; //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
+				uint_fast32_t maxWidth = ( windowSize.Width / sideDisplaySizeDenominator );
+				
+				uint_fast32_t numerator = 2.5 * maxWidth; //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
 
 				//I felt it looked best if all three (artist, album, and title) had the same font size, so we're picking the longest of the three and basing the font size on its length.
 				if( musicArtist.size() >= musicAlbum.size() && musicArtist.size() > 0 ) {
@@ -1655,7 +1661,7 @@ void GameManager::loadMusicFont() {
 				} while( !isNull( musicTagFont ) && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
 			}
 
-			if( fontFile == "" || isNull( musicTagFont ) ) {
+			if( fontFile == "" || isNull( musicTagFont ) || musicTagFont->getDimension( L"(ygj*^" ).Height <= gui->getBuiltInFont()->getDimension( L"(ygj*^" ).Height ) {
 				musicTagFont = gui->getBuiltInFont();
 			}
 		}
@@ -1848,10 +1854,12 @@ void GameManager::loadTipFont() {
 		if( debug ) {
 			std::wcout << L"loadTipFont() called" << std::endl;
 		}
-
+		
+		uint_fast32_t size; //The height (I think) of the font to be loaded
+		
 		if( fontFile != "" ) {
 			uint_fast32_t maxWidth = windowSize.Width;
-			uint_fast32_t size;
+			
 			core::stringw tipIncludingPrefix = proTipPrefix;
 
 			if( proTips.size() > 0 ) { //If pro tips have been loaded, guess size based on tip length.
@@ -1882,7 +1890,7 @@ void GameManager::loadTipFont() {
 			} while( !isNull( tipFont ) && ( tipDimensions.Width > maxWidth ) );
 		}
 
-		if( fontFile == "" || isNull( tipFont ) ) {
+		if( fontFile == "" || isNull( tipFont ) || tipFont->getDimension( L"(ygj*^" ).Height <= gui->getBuiltInFont()->getDimension( L"(ygj*^" ).Height ) {
 			tipFont = gui->getBuiltInFont();
 		}
 		
@@ -2101,8 +2109,7 @@ void GameManager::newMaze() {
 			std::wcout << L"newMaze() called with no arguments" << std::endl;
 		}
 		
-		boost::filesystem::path p;
-		newMaze( p );
+		newMaze( rand() );
 		
 		if( debug ) {
 			std::wcout << L"end of newMaze() with no arguments" << std::endl;
@@ -2120,15 +2127,56 @@ void GameManager::newMaze() {
 void GameManager::newMaze( boost::filesystem::path src ) {
 	try {
 		if( debug ) {
+			std::wcout << L"Trying to load from file " << src.wstring() << std::endl;
+		}
+		
+		if( !exists( src ) ) {
+			throw( std::wstring( L"File not found: " ) + src.wstring() );
+		} else if( is_directory( src ) ) {
+			throw( std::wstring( L"Directory specified, file needed: " ) + src.wstring() );
+		}
+		
+		boost::filesystem::wifstream file; //Identical to a standard C++ fstream, except it takes Boost paths
+		file.open( src );
+
+		if( file.is_open() ) {
+			uint_fast16_t newRandomSeed;
+			file >> newRandomSeed;
+			file.close();
+			newMaze( newRandomSeed );
+			return;
+		} else {
+			throw( std::wstring( L"Cannot open file: " ) + src.wstring() );
+		}
+	} catch( const boost::filesystem::filesystem_error &e ) {
+		std::wcerr << L"Boost Filesystem error in GameManager::newMaze(): " << e.what() << std::endl;
+	} catch( std::exception &e ) {
+		std::wcerr << L"non-Boost-Filesystem error in GameManager::newMaze(): " << e.what() << std::endl;
+	} catch( std::wstring &e ) {
+		std::wcerr << L"non-Boost-Filesystem error in GameManager::newMaze(): " << e << std::endl;
+	}
+	
+	//If we get this far, it's an error. Probably a file not found. Fail gracefully by starting a new maze anyway.
+	newMaze( rand() );
+}
+
+/**
+ * Calls resetThings(), makes the maze manager load a maze from a file, then adjusts cellWidth and cellHeight.
+ * Arguments:
+ * --- uint_fast16_t newRandomSeed: The random seed to use.
+ */
+void GameManager::newMaze( uint_fast16_t newRandomSeed ) {
+	try {
+		if( debug ) {
 			std::wcout << L"newMaze() called with an argument" << std::endl;
 		}
 		
 		resetThings();
-		if( src.empty() ) {
-			mazeManager.makeRandomLevel();
-		} else {
-			mazeManager.loadFromFile( src );
-		}
+		randomSeed = newRandomSeed;
+		srand( randomSeed );
+		
+		mazeManager.makeRandomLevel();
+		
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
@@ -2158,26 +2206,26 @@ bool GameManager::OnEvent( const SEvent& event ) {
 		
 		switch( event.EventType ) {
 			case EET_KEY_INPUT_EVENT: {
-				for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
-					if( keyMap.at( k ).getKey() == event.KeyInput.Key ) {
-						keyMap.at( k ).activated = event.KeyInput.PressedDown;
+				for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
+					if( controls.at( k ).getKey() == event.KeyInput.Key ) {
+						controls.at( k ).activated = event.KeyInput.PressedDown;
 						return true;
 					}
 				}
 				/*if( event.KeyInput.PressedDown ) { //Don't react when the key is released, only when it's pressed.
 					if( !( showingMenu || showingLoadingScreen ) ) {
-						for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
-							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
+						for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
+							if( event.KeyInput.Key == controls.at( k ).getKey() ) {
 								return doEventActions( k, event );
 								break;
 							}
 						}
 					} else if( showingMenu ) { //We only want certain actions to work if we're showing the menu
-						for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
-							if( event.KeyInput.Key == keyMap.at( k ).getKey() ) {
-								switch( keyMap.at( k ).getAction() ) {
-									case KeyMapping::MENU:
-									case KeyMapping::SCREENSHOT: {
+						for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
+							if( event.KeyInput.Key == controls.at( k ).getKey() ) {
+								switch( controls.at( k ).getAction() ) {
+									case ControlMapping::MENU:
+									case ControlMapping::SCREENSHOT: {
 										return doEventActions( k, event );
 									}
 								}
@@ -2198,14 +2246,17 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							if( debug ) {
 								std::wcout << L"Current working directory: " << currentDirectory << std::endl;
 							}
-
+							
 							fileChooser = gui->addFileOpenDialog( L"Select a Maze", true, 0, -1 );
 							return true;
 						} else if( saveMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
 							mazeManager.saveToFile();
 							return true;
-						} else if( newGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
+						} else if( nextMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
 							newMaze();
+							return true;
+						} else if( restartMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
+							newMaze( randomSeed );
 							return true;
 						} else if( backToGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
 							showingMenu = false;
@@ -2222,9 +2273,9 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						}
 				}
 
-				for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
-					if( event.MouseInput.Event == keyMap.at( k ).getMouseEvent() ) {
-						keyMap.at( k ).activated = ( ( event.MouseInput.Wheel > 0 && keyMap.at( k ).getMouseWheelUp() ) || ( event.MouseInput.Wheel <= 0 && !keyMap.at( k ).getMouseWheelUp() ) );
+				for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
+					if( event.MouseInput.Event == controls.at( k ).getMouseEvent() ) {
+						controls.at( k ).activated = ( ( event.MouseInput.Wheel > 0 && controls.at( k ).getMouseWheelUp() ) || ( event.MouseInput.Wheel <= 0 && !controls.at( k ).getMouseWheelUp() ) );
 						return true;
 					}
 				}
@@ -2285,28 +2336,28 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			break;
 
 			case EET_JOYSTICK_INPUT_EVENT: {
-				for( uint_fast8_t k = 0; k < keyMap.size(); ++k ) {
-					if( event.JoystickEvent.Joystick == keyMap.at( k ).getControllerNumber() ) {
+				for( uint_fast8_t k = 0; k < controls.size(); ++k ) {
+					if( event.JoystickEvent.Joystick == controls.at( k ).getControllerNumber() ) {
 						{ //Handle controller axes
-							if( debug && keyMap.at( k ).getControllerAxis() != UINT_FAST8_MAX ) {
-								std:: wcout << L"Keymap " << k << L" axis " << keyMap.at( k ).getControllerAxis() << L", ";
-								if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+							if( debug && controls.at( k ).getControllerAxis() != UINT_FAST8_MAX ) {
+								std:: wcout << L"Keymap " << k << L" axis " << controls.at( k ).getControllerAxis() << L", ";
+								if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
 									std:: wcout << L"equivalent to axis X";
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
 									std:: wcout << L"equivalent to axis Y";
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
 									std:: wcout << L"equivalent to axis Z";
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
 									std:: wcout << L"equivalent to axis R";
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
 									std:: wcout << L"equivalent to axis U";
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
 									std:: wcout << L"equivalent to axis V";
 								}
 								std::wcout << L", has controller direction ";
-								if( keyMap.at( k ).getControllerDirection() == KeyMapping::controller_INCREASE ) {
+								if( controls.at( k ).getControllerDirection() == ControlMapping::controller_INCREASE ) {
 									std::wcout << L"increase";
-								} else if( keyMap.at( k ).getControllerDirection() == KeyMapping::controller_DECREASE ) {
+								} else if( controls.at( k ).getControllerDirection() == ControlMapping::controller_DECREASE ) {
 									std::wcout << L"decrease";
 								} else {
 									std::wcout << L"other";
@@ -2314,54 +2365,56 @@ bool GameManager::OnEvent( const SEvent& event ) {
 								std::wcout << std::endl;
 							}
 							
-							int16_t controllerDeadZone = ( INT16_MAX / 2 ); //TODO: Make the dead zone user adjustable.
 							
-							if( keyMap.at( k ).getControllerDirection() == KeyMapping::controller_INCREASE ) {
-								if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
-									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] > controllerDeadZone );
+							int_fast16_t controllerDeadZone = ( INT16_MAX / 2 ); //TODO: Make the dead zone user adjustable.
+							
+							
+							if( controls.at( k ).getControllerDirection() == ControlMapping::controller_INCREASE ) {
+								if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] > controllerDeadZone );
 									
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
-									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] > controllerDeadZone );
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] > controllerDeadZone );
 									
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
-									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] > controllerDeadZone );
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] > controllerDeadZone );
 									
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
-									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] > controllerDeadZone );
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] > controllerDeadZone );
 									
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
-									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] > controllerDeadZone );
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] > controllerDeadZone );
 									
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
-									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] > controllerDeadZone );
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] > controllerDeadZone );
 									
 								}
-							} else if( keyMap.at( k ).getControllerDirection() == KeyMapping::controller_DECREASE ) {
-								if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
-									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] < -controllerDeadZone );
+							} else if( controls.at( k ).getControllerDirection() == ControlMapping::controller_DECREASE ) {
+								if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] < -controllerDeadZone );
 									
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
-									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] < -controllerDeadZone );
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] < -controllerDeadZone );
 									
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
-									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] < -controllerDeadZone );
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] < -controllerDeadZone );
 									
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
-									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] < -controllerDeadZone );
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] < -controllerDeadZone );
 									
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
-									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] < -controllerDeadZone );
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] < -controllerDeadZone );
 									
-								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
-									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] < -controllerDeadZone );
+								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] < -controllerDeadZone );
 									
 								}
 							}
 						}
 						
 						//Handle controller buttons
-						if( keyMap.at( k ).getControllerButton() != UINT_FAST8_MAX ) {
-							keyMap.at( k ).activated = event.JoystickEvent.IsButtonPressed( keyMap.at( k ).getControllerButton() );
+						if( controls.at( k ).getControllerButton() != UINT_FAST8_MAX ) {
+							controls.at( k ).activated = event.JoystickEvent.IsButtonPressed( controls.at( k ).getControllerButton() );
 						}
 					}
 				}
@@ -3384,8 +3437,8 @@ void GameManager::setControls() {
 								}
 
 								{
-									KeyMapping temp;
-									keyMap.push_back( temp );
+									ControlMapping temp;
+									controls.push_back( temp );
 								}
 								
 								std::vector< std::wstring > possibleChoiceStarts = { L"controller", L"key", L"mouse" };
@@ -3404,7 +3457,7 @@ void GameManager::setControls() {
 										
 										choice = static_cast< uint_fast8_t >( boost::lexical_cast< unsigned short int >( controllerNumStr ) ); //Boost lexical cast can't convert directly to uint_fast8_t, at least on my computer
 										
-										keyMap.back().setControllerNumber( choice );
+										controls.back().setControllerNumber( choice );
 										
 										if( debug ) {
 											std::wcout << L" converts to integer " << choice << std::endl;
@@ -3427,7 +3480,7 @@ void GameManager::setControls() {
 											
 											choice = static_cast< uint_fast8_t >( boost::lexical_cast< unsigned short int >( controllerButtonStr ) ); //Boost lexical cast can't convert directly to uint_fast8_t, at least on my computer
 											
-											keyMap.back().setControllerButton( choice );
+											controls.back().setControllerButton( choice );
 											
 											if( debug ) {
 												std::wcout << L" converts to integer " << choice << std::endl;
@@ -3448,17 +3501,17 @@ void GameManager::setControls() {
 												}
 												
 												if( choice == possibleChoices.at( 0 ) ) { //L"x"
-													keyMap.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X );
+													controls.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X );
 												} else if( choice == possibleChoices.at( 1 ) ) { //L"y"
-													keyMap.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y );
+													controls.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y );
 												} else if( choice == possibleChoices.at( 2 ) ) { //L"z"
-													keyMap.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z );
+													controls.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z );
 												} else if( choice == possibleChoices.at( 3 ) ) { //L"r"
-													keyMap.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R );
+													controls.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R );
 												} else if( choice == possibleChoices.at( 4 ) ) { //L"u"
-													keyMap.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U );
+													controls.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U );
 												} else if( choice == possibleChoices.at( 5 ) ) { //L"v"
-													keyMap.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V );
+													controls.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V );
 												}
 											}
 											
@@ -3467,9 +3520,9 @@ void GameManager::setControls() {
 												std::vector< std::wstring > possibleChoices = { L"increase", L"decrease" };
 												std::wstring choice = possibleChoices.at( spellChecker.indexOfClosestString( increaseOrDecrease, possibleChoices ) );
 												if( choice == possibleChoices.at( 0 ) ) { //L"increase"
-													keyMap.back().setControllerDirection( KeyMapping::controller_INCREASE );
+													controls.back().setControllerDirection( ControlMapping::controller_INCREASE );
 												} else if( choice == possibleChoices.at( 1 ) ) { //L"decrease"
-													keyMap.back().setControllerDirection( KeyMapping::controller_DECREASE );
+													controls.back().setControllerDirection( ControlMapping::controller_DECREASE );
 												}
 											}
 										}
@@ -3481,7 +3534,7 @@ void GameManager::setControls() {
 									
 									choice = static_cast< EKEY_CODE >( boost::lexical_cast< int >( choiceStr ) ); //Boost lexical cast can't convert directly to enumerated types
 									
-									keyMap.back().setKey( choice );
+									controls.back().setKey( choice );
 									
 								} else if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 2 ).length() ), possibleChoiceStarts.at( 2 ) ) <= 1 ) {//else if( spellChecker.indexOfClosestString( choiceStr.substr( 0, 5 ), possibleChoiceStarts )  == 2 ) { //L"mouse"
 									
@@ -3499,37 +3552,37 @@ void GameManager::setControls() {
 									}
 
 									if( choiceStr == possibleChoices.at( 0 ) ) { //L"wheelup"
-										keyMap.back().setMouseWheelUp( true );
-										keyMap.back().setMouseEvent( EMIE_MOUSE_WHEEL );
+										controls.back().setMouseWheelUp( true );
+										controls.back().setMouseEvent( EMIE_MOUSE_WHEEL );
 									} else if( choiceStr == possibleChoices.at( 1 ) ) { //L"wheeldown"
-										keyMap.back().setMouseWheelUp( false );
-										keyMap.back().setMouseEvent( EMIE_MOUSE_WHEEL );
+										controls.back().setMouseWheelUp( false );
+										controls.back().setMouseEvent( EMIE_MOUSE_WHEEL );
 									} else if( choiceStr == possibleChoices.at( 2 ) ) { //L"leftdown"
-										keyMap.back().setMouseEvent( EMIE_LMOUSE_PRESSED_DOWN );
+										controls.back().setMouseEvent( EMIE_LMOUSE_PRESSED_DOWN );
 									} else if( choiceStr == possibleChoices.at( 3 ) ) { //L"rightdown"
-										keyMap.back().setMouseEvent( EMIE_RMOUSE_PRESSED_DOWN );
+										controls.back().setMouseEvent( EMIE_RMOUSE_PRESSED_DOWN );
 									} else if( choiceStr == possibleChoices.at( 4 ) ) { //L"middledown"
-										keyMap.back().setMouseEvent( EMIE_MMOUSE_PRESSED_DOWN );
+										controls.back().setMouseEvent( EMIE_MMOUSE_PRESSED_DOWN );
 									} else if( choiceStr == possibleChoices.at( 5 ) ) { //L"leftup"
-										keyMap.back().setMouseEvent( EMIE_LMOUSE_LEFT_UP );
+										controls.back().setMouseEvent( EMIE_LMOUSE_LEFT_UP );
 									} else if( choiceStr == possibleChoices.at( 6 ) ) { //L"rightup"
-										keyMap.back().setMouseEvent( EMIE_RMOUSE_LEFT_UP );
+										controls.back().setMouseEvent( EMIE_RMOUSE_LEFT_UP );
 									} else if( choiceStr == possibleChoices.at( 7 ) ) { //L"middleup"
-										keyMap.back().setMouseEvent( EMIE_MMOUSE_LEFT_UP );
+										controls.back().setMouseEvent( EMIE_MMOUSE_LEFT_UP );
 									} else if( choiceStr == possibleChoices.at( 8 ) ) { //L"moved"
-										keyMap.back().setMouseEvent( EMIE_MOUSE_MOVED );
+										controls.back().setMouseEvent( EMIE_MOUSE_MOVED );
 									} else if( choiceStr == possibleChoices.at( 9 ) ) { //L"leftdoubleclick"
-										keyMap.back().setMouseEvent( EMIE_LMOUSE_DOUBLE_CLICK );
+										controls.back().setMouseEvent( EMIE_LMOUSE_DOUBLE_CLICK );
 									} else if( choiceStr == possibleChoices.at( 10 ) ) { //L"rightdoubleclick"
-										keyMap.back().setMouseEvent( EMIE_RMOUSE_DOUBLE_CLICK );
+										controls.back().setMouseEvent( EMIE_RMOUSE_DOUBLE_CLICK );
 									} else if( choiceStr == possibleChoices.at( 11 ) ) { //L"middledoubleclick"
-										keyMap.back().setMouseEvent( EMIE_MMOUSE_DOUBLE_CLICK );
+										controls.back().setMouseEvent( EMIE_MMOUSE_DOUBLE_CLICK );
 									} else if( choiceStr == possibleChoices.at( 12 ) ) { //L"lefttripleclick"
-										keyMap.back().setMouseEvent( EMIE_LMOUSE_TRIPLE_CLICK );
+										controls.back().setMouseEvent( EMIE_LMOUSE_TRIPLE_CLICK );
 									} else if( choiceStr == possibleChoices.at( 13 ) ) { //L"righttripleclick"
-										keyMap.back().setMouseEvent( EMIE_RMOUSE_TRIPLE_CLICK );
+										controls.back().setMouseEvent( EMIE_RMOUSE_TRIPLE_CLICK );
 									} else if( choiceStr == possibleChoices.at( 14 ) ) { //L"middletripleclick"
-										keyMap.back().setMouseEvent( EMIE_MMOUSE_TRIPLE_CLICK );
+										controls.back().setMouseEvent( EMIE_MMOUSE_TRIPLE_CLICK );
 									}
 								}
 
@@ -3541,10 +3594,10 @@ void GameManager::setControls() {
 										decltype( numPlayers ) playerNum = boost::lexical_cast< unsigned short int >( playerNumStr ); //Boost doesn't like casting to uint_fast8_t
 
 										if( playerNum < numPlayers ) {
-											keyMap.back().setPlayer( playerNum );
-											keyMap.back().setActionFromString( actionStr );
+											controls.back().setPlayer( playerNum );
+											controls.back().setActionFromString( actionStr );
 										} else { //We ignore that player number because we don't have that many players
-											keyMap.pop_back();
+											controls.pop_back();
 										}
 									} catch ( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading player number (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
@@ -3577,7 +3630,7 @@ void GameManager::setControls() {
 											enableController = false;
 										}
 									} else {
-										keyMap.back().setActionFromString( preference );
+										controls.back().setActionFromString( preference );
 									}
 								}
 

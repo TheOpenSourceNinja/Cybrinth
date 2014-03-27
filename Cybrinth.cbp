@@ -116,6 +116,12 @@
 		<Unit filename="src/Collectable.h">
 			<Option target="cybrinth" />
 		</Unit>
+		<Unit filename="src/ControlMapping.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/ControlMapping.h">
+			<Option target="cybrinth" />
+		</Unit>
 		<Unit filename="src/FontManager.cpp">
 			<Option target="cybrinth" />
 		</Unit>
@@ -147,12 +153,6 @@
 			<Option target="cybrinth" />
 		</Unit>
 		<Unit filename="src/Integers.h">
-			<Option target="cybrinth" />
-		</Unit>
-		<Unit filename="src/KeyMapping.cpp">
-			<Option target="cybrinth" />
-		</Unit>
-		<Unit filename="src/KeyMapping.h">
 			<Option target="cybrinth" />
 		</Unit>
 		<Unit filename="src/MazeCell.cpp">

@@ -22,7 +22,7 @@
 #include "GUIFreetypeFont.h"
 #include "ImageModifier.h"
 #include "Integers.h"
-#include "KeyMapping.h"
+#include "ControlMapping.h"
 #include "MazeManager.h"
 #include "MenuOption.h"
 #include "NetworkManager.h"
@@ -130,7 +130,9 @@ class GameManager : public IEventReceiver {
 		void makeMusicList();
 
 		void newMaze();
+		void newMaze( uint_fast16_t newRandomSeed );
 		void newMaze( boost::filesystem::path src );
+		
 		
 		void processControls();
 		
@@ -234,17 +236,18 @@ class GameManager : public IEventReceiver {
 
 		FontManager fontManager;
 
-		std::vector< KeyMapping > keyMap;
+		std::vector< ControlMapping > controls;
 
 		MenuOption loadMaze;
 
 		MazeManager mazeManager;
 
 		NetworkManager network;
-		MenuOption newGame;
+		MenuOption nextMaze;
 
 		ImageModifier resizer;
-
+		MenuOption restartMaze;
+		
 		MenuOption saveMaze;
 		SpellChecker spellChecker;
 		

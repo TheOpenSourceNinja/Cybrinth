@@ -8,13 +8,13 @@
 #include "Integers.h"
 #include "PreprocessorCommands.h"
 
-class KeyMapping
+class ControlMapping
 {
 	public:
 		enum controllerDirection_t { controller_INCREASE, controller_DECREASE, controller_DO_NOT_USE };
 		enum action_t { ACTION_MENU, ACTION_SCREENSHOT, ACTION_VOLUME_UP, ACTION_VOLUME_DOWN, ACTION_UP, ACTION_DOWN, ACTION_RIGHT, ACTION_LEFT, ACTION_DO_NOT_USE };
-		KeyMapping();
-		virtual ~KeyMapping();
+		ControlMapping();
+		virtual ~ControlMapping();
 		irr::EKEY_CODE getKey();
 		void setKey( irr::EKEY_CODE val );
 		uint_fast8_t getControllerButton();

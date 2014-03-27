@@ -18,7 +18,7 @@
 //TODO: Update the AI to reflect the addition of a wall dissolver item (icon: spray can labeled 'ACID')
 /* Progress report:
  * DFS and IDDFS can use acid.
- * Wall-following algorithms not updated yet because the maze may not be simply connected anymore. */
+ * Wall-following algorithms not updated yet because the maze may not be simply connected anymore. I've given up on them for now, but I'm leaving this todo note here. */
 
 AI::AI() : controlsPlayer(0) {
 	try {

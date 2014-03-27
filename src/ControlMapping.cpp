@@ -1,19 +1,19 @@
-#include "KeyMapping.h"
+#include "ControlMapping.h"
 #include <algorithm/string.hpp>
 #ifdef HAVE_IOSTREAM
 #include <iostream>
 #endif //HAVE_IOSTREAM
 
-KeyMapping::action_t KeyMapping::getAction() {
+ControlMapping::action_t ControlMapping::getAction() {
 	try {
 		return action;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::getAction(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::getAction(): " << e.what() << std::endl;
 		return ACTION_DO_NOT_USE;
 	}
 }
 
-std::wstring KeyMapping::getActionAsString() {
+std::wstring ControlMapping::getActionAsString() {
 	try {
 		switch( action ) {
 			case ACTION_MENU: {
@@ -45,12 +45,12 @@ std::wstring KeyMapping::getActionAsString() {
 			}
 		}
 	} catch( std::exception &e ) {
-		std::wcout << L"Error in KeyMapping::getActionAsString(): " << e.what() << std::endl;
+		std::wcout << L"Error in ControlMapping::getActionAsString(): " << e.what() << std::endl;
 		return L"ERROR";
 	}
 }
 
-void KeyMapping::setActionFromString( std::wstring val ) {
+void ControlMapping::setActionFromString( std::wstring val ) {
 	try {
 		if( boost::iequals( val, L"menu" ) ) {
 			action = ACTION_MENU;
@@ -73,37 +73,37 @@ void KeyMapping::setActionFromString( std::wstring val ) {
 			throw error;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::setActionFromString(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::setActionFromString(): " << e.what() << std::endl;
 		action = ACTION_DO_NOT_USE;
 	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in KeyMapping::setActionFromString(): " << e << std::endl;
+		std::wcerr << L"Error in ControlMapping::setActionFromString(): " << e << std::endl;
 		action = ACTION_DO_NOT_USE;
 	}
 }
 
-uint_fast8_t KeyMapping::getControllerButton() {
+uint_fast8_t ControlMapping::getControllerButton() {
 	try {
 		return controllerButton;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::getControllerButton(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::getControllerButton(): " << e.what() << std::endl;
 		return UINT_FAST8_MAX;
 	}
 }
 
-uint_fast8_t KeyMapping::getControllerNumber() {
+uint_fast8_t ControlMapping::getControllerNumber() {
 	try {
 		return controllerNumber;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::getControllerNumber(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::getControllerNumber(): " << e.what() << std::endl;
 		return UINT_FAST8_MAX;
 	}
 }
 
-irr::EKEY_CODE KeyMapping::getKey() {
+irr::EKEY_CODE ControlMapping::getKey() {
 	try {
 		return key;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::getKey(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::getKey(): " << e.what() << std::endl;
 		return irr::KEY_KEY_CODES_COUNT;
 	}
 }
@@ -111,97 +111,97 @@ irr::EKEY_CODE KeyMapping::getKey() {
 /** Access mouseWheelUp
 * \return The current value of mouseWheelUp
 */
-bool KeyMapping::getMouseWheelUp() {
+bool ControlMapping::getMouseWheelUp() {
 	return mouseWheelUp;
 }
 
 /** Access mouseEvent
 * \return The current value of mouseEvent
 */
-irr::EMOUSE_INPUT_EVENT KeyMapping::getMouseEvent() {
+irr::EMOUSE_INPUT_EVENT ControlMapping::getMouseEvent() {
 	return mouseEvent;
 }
 
-uint_fast8_t KeyMapping::getPlayer() {
+uint_fast8_t ControlMapping::getPlayer() {
 	try {
 		return player;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::getPlayer(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::getPlayer(): " << e.what() << std::endl;
 		return UINT_FAST8_MAX;
 	}
 }
 
-void KeyMapping::setAction( action_t val ) {
+void ControlMapping::setAction( action_t val ) {
 	try {
 		action = val;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::setAction(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::setAction(): " << e.what() << std::endl;
 		action = ACTION_DO_NOT_USE;
 	}
 }
 
-void KeyMapping::setControllerButton( uint_fast8_t val ) {
+void ControlMapping::setControllerButton( uint_fast8_t val ) {
 	try {
 		controllerButton = val;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::setControllerButton(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::setControllerButton(): " << e.what() << std::endl;
 	}
 }
 
-void KeyMapping::setControllerNumber( uint_fast8_t val ) {
+void ControlMapping::setControllerNumber( uint_fast8_t val ) {
 	try {
 		controllerNumber = val;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::setControllerNumber(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::setControllerNumber(): " << e.what() << std::endl;
 	}
 }
 
-void KeyMapping::setKey( irr::EKEY_CODE val ) {
+void ControlMapping::setKey( irr::EKEY_CODE val ) {
 	try {
 		key = val;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::setKey(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::setKey(): " << e.what() << std::endl;
 	}
 }
 
 /** Set mouse event
 * \param val New value to set
 */
-void KeyMapping::setMouseEvent( irr::EMOUSE_INPUT_EVENT val ) {
+void ControlMapping::setMouseEvent( irr::EMOUSE_INPUT_EVENT val ) {
 	mouseEvent = val;
 }
 
 /** Set mouseWheelUp
 * \param val New value to set
 */
-void KeyMapping::setMouseWheelUp( bool val ) {
+void ControlMapping::setMouseWheelUp( bool val ) {
 	mouseWheelUp = val;
 }
 
-void KeyMapping::setPlayer( uint_fast8_t val ) {
+void ControlMapping::setPlayer( uint_fast8_t val ) {
 	try {
 		player = val;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::setPlayer(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::setPlayer(): " << e.what() << std::endl;
 	}
 }
 
-KeyMapping::controllerDirection_t KeyMapping::getControllerDirection() {
+ControlMapping::controllerDirection_t ControlMapping::getControllerDirection() {
 	return controllerDirection;
 }
 
-void KeyMapping::setControllerDirection( controllerDirection_t val ) {
+void ControlMapping::setControllerDirection( controllerDirection_t val ) {
 	controllerDirection = val;
 }
 
-uint_fast8_t KeyMapping::getControllerAxis() {
+uint_fast8_t ControlMapping::getControllerAxis() {
 	return controllerAxis;
 }
-void KeyMapping::setControllerAxis( uint_fast8_t val ) {
+void ControlMapping::setControllerAxis( uint_fast8_t val ) {
 	controllerAxis = val;
 }
 
-KeyMapping::KeyMapping() {
+ControlMapping::ControlMapping() {
 	try {
 		mouseWheelUp = false;
 		mouseEvent = irr::EMIE_COUNT;
@@ -213,13 +213,13 @@ KeyMapping::KeyMapping() {
 		activated = false;
 		controllerAxis = UINT_FAST8_MAX;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::KeyMapping(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::ControlMapping(): " << e.what() << std::endl;
 	}
 }
 
-KeyMapping::~KeyMapping() {
+ControlMapping::~ControlMapping() {
 	try {
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::~KeyMapping(): " << e.what() << std::endl;
+		std::wcerr << L"Error in ControlMapping::~ControlMapping(): " << e.what() << std::endl;
 	}
 }

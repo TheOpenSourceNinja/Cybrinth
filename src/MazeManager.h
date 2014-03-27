@@ -26,11 +26,6 @@ class MazeManager
 
 		void draw( irr::video::IVideoDriver* driver, uint_fast16_t cellWidth, uint_fast16_t cellHeight );
 
-		bool existsAnythingAt( uint_fast8_t x, uint_fast8_t y );
-
-		bool loadFromFile();
-		bool loadFromFile( boost::filesystem::path src );
-
 		void makeRandomLevel();
 		
 		void newMaze( uint_fast8_t newCols, uint_fast8_t newRows );
