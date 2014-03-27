@@ -111,7 +111,6 @@ class GameManager : public IEventReceiver {
 		void adjustMenu();
 		bool allHumansAtGoal();
 		
-		void doStuff();
 		void drawBackground();
 		void drawLoadingScreen();
 		void drawLogo();
@@ -132,7 +131,9 @@ class GameManager : public IEventReceiver {
 
 		void newMaze();
 		void newMaze( boost::filesystem::path src );
-
+		
+		void processControls();
+		
 		void readPrefs();
 
 		void setupBackground();
@@ -150,7 +151,7 @@ class GameManager : public IEventReceiver {
 		bool debug;
 		bool donePlaying;
 
-		bool enableJoystick;
+		bool enableController;
 
 		bool fullscreen;
 
@@ -279,7 +280,7 @@ class GameManager : public IEventReceiver {
 
 		gui::IGUIFileOpenDialog* fileChooser;
 
-		core::array<SJoystickInfo> joystickInfo;
+		core::array< SJoystickInfo > controllerInfo;
 
 		video::ITexture* logoTexture;
 

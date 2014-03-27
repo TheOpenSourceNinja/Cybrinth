@@ -81,20 +81,20 @@ void KeyMapping::setActionFromString( std::wstring val ) {
 	}
 }
 
-uint_fast8_t KeyMapping::getGamepadButton() {
+uint_fast8_t KeyMapping::getControllerButton() {
 	try {
-		return gamepadButton;
+		return controllerButton;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::getGamepadButton(): " << e.what() << std::endl;
+		std::wcerr << L"Error in KeyMapping::getControllerButton(): " << e.what() << std::endl;
 		return UINT_FAST8_MAX;
 	}
 }
 
-uint_fast8_t KeyMapping::getGamepadNumber() {
+uint_fast8_t KeyMapping::getControllerNumber() {
 	try {
-		return gamepadNumber;
+		return controllerNumber;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::getGamepadNumber(): " << e.what() << std::endl;
+		std::wcerr << L"Error in KeyMapping::getControllerNumber(): " << e.what() << std::endl;
 		return UINT_FAST8_MAX;
 	}
 }
@@ -140,19 +140,19 @@ void KeyMapping::setAction( action_t val ) {
 	}
 }
 
-void KeyMapping::setGamepadButton( uint_fast8_t val ) {
+void KeyMapping::setControllerButton( uint_fast8_t val ) {
 	try {
-		gamepadButton = val;
+		controllerButton = val;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::setGamepadButton(): " << e.what() << std::endl;
+		std::wcerr << L"Error in KeyMapping::setControllerButton(): " << e.what() << std::endl;
 	}
 }
 
-void KeyMapping::setGamepadNumber( uint_fast8_t val ) {
+void KeyMapping::setControllerNumber( uint_fast8_t val ) {
 	try {
-		gamepadNumber = val;
+		controllerNumber = val;
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in KeyMapping::setGamepadNumber(): " << e.what() << std::endl;
+		std::wcerr << L"Error in KeyMapping::setControllerNumber(): " << e.what() << std::endl;
 	}
 }
 
@@ -186,12 +186,19 @@ void KeyMapping::setPlayer( uint_fast8_t val ) {
 	}
 }
 
-KeyMapping::joystickDirection_t KeyMapping::getJoystickDirection() {
-	return joystickDirection;
+KeyMapping::controllerDirection_t KeyMapping::getControllerDirection() {
+	return controllerDirection;
 }
 
-void KeyMapping::setJoystickDirection( joystickDirection_t val ) {
-	joystickDirection = val;
+void KeyMapping::setControllerDirection( controllerDirection_t val ) {
+	controllerDirection = val;
+}
+
+uint_fast8_t KeyMapping::getControllerAxis() {
+	return controllerAxis;
+}
+void KeyMapping::setControllerAxis( uint_fast8_t val ) {
+	controllerAxis = val;
 }
 
 KeyMapping::KeyMapping() {
@@ -200,10 +207,11 @@ KeyMapping::KeyMapping() {
 		mouseEvent = irr::EMIE_COUNT;
 		key = irr::KEY_KEY_CODES_COUNT;
 		setAction( ACTION_DO_NOT_USE );
-		gamepadButton = UINT_FAST8_MAX;
-		gamepadNumber = UINT_FAST8_MAX;
-		joystickDirection = JOYSTICK_DO_NOT_USE;
+		controllerButton = UINT_FAST8_MAX;
+		controllerNumber = UINT_FAST8_MAX;
+		controllerDirection = controller_DO_NOT_USE;
 		activated = false;
+		controllerAxis = UINT_FAST8_MAX;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in KeyMapping::KeyMapping(): " << e.what() << std::endl;
 	}

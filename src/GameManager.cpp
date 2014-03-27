@@ -124,68 +124,14 @@ bool GameManager::allHumansAtGoal() {
 }
 
 /**
-* Should be called only by OnEvent().
-* Arguments:
-* --- std::vector< KeyMapping >::size_type k: which key in keyMap to use.
-* Returns: Whether or not the event was handled.
-*/
-/*bool GameManager::doEventActions( std::vector< KeyMapping >::size_type k, const SEvent& event ) {
-	try {
-		if( debug ) {
-			std::wcout << L"doEventActions() called" << std::endl;
-		}
-		
-		switch( event.EventType ) {
-			case EET_JOYSTICK_INPUT_EVENT: {
-				if( event.JoystickEvent.IsButtonPressed( keyMap.at( k ).getGamepadButton() ) ) {
-					keyMap.at( k ).activated = true;
-					return true;
-				}
-				break;
-			}
-			case EET_MOUSE_INPUT_EVENT: {
-				if( ( keyMap.at( k ).getMouseWheelUp() && event.MouseInput.Wheel > 0 ) || ( !keyMap.at( k ).getMouseWheelUp() && event.MouseInput.Wheel <= 0 ) ) {
-					keyMap.at( k ).activated = true;
-					return true;
-				}
-				break;
-			}
-			case EET_KEY_INPUT_EVENT: {
-				bool ignoreKey = false;
-				for( decltype( numBots ) b = 0; !ignoreKey && b < numBots; ++b ) { //Ignore controls that affect bots
-					if( keyMap.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
-						ignoreKey = true;
-						return true;
-					}
-				}
-				
-				if( !ignoreKey ) {
-					keyMap.at( k ).activated = true;
-					return true;
-				}
-			}
-		}
-		
-		if( debug ) {
-			std::wcout << L"end of doEventActions()" << std::endl;
-		}
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::doEventActions(): " << e.what() << std::endl;
-	}
-
-	return false;
-}
-*/
-
-/**
 * Should be called only by run().
 * Arguments:
 * --- std::vector< KeyMapping >::size_type k: which key in keyMap to use.
 */
-void GameManager::doStuff() {
+void GameManager::processControls() {
 	try {
 		if( debug ) {
-			std::wcout << L"doStuff() called" << std::endl;
+			std::wcout << L"processControls() called" << std::endl;
 		}
 		
 		for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
@@ -193,9 +139,11 @@ void GameManager::doStuff() {
 				switch( keyMap.at( k ).getAction() ) {
 					case KeyMapping::ACTION_MENU: {
 						showingMenu = !showingMenu;
+						break;
 					}
 					case KeyMapping::ACTION_SCREENSHOT: {
 						takeScreenShot();
+						break;
 					}
 					case KeyMapping::ACTION_VOLUME_UP: {
 						musicVolume += 5;
@@ -258,10 +206,10 @@ void GameManager::doStuff() {
 		}
 		
 		if( debug ) {
-			std::wcout << L"end of doStuff()" << std::endl;
+			std::wcout << L"end of processControls()" << std::endl;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::doStuff(): " << e.what() << std::endl;
+		std::wcerr << L"Error in GameManager::processControls(): " << e.what() << std::endl;
 	}
 }
 
@@ -1188,18 +1136,18 @@ GameManager::GameManager() {
 
 		goal.loadTexture( driver );
 
-		if( enableJoystick && device->activateJoysticks( joystickInfo ) && debug ) { //activateJoysticks fills joystickInfo with info about each joystick
-			std::wcout << L"Joystick support is enabled and " << joystickInfo.size() << L" joystick(s) are present." << std::endl;
+		if( enableController && device->activateJoysticks( controllerInfo ) && debug ) { //activatecontrollers fills controllerInfo with info about each controller
+			std::wcout << L"controller support is enabled and " << controllerInfo.size() << L" controller(s) are present." << std::endl;
 
-			for( uint_fast16_t joystick = 0; joystick < joystickInfo.size(); ++joystick ) {
-				std::wcout << L"Joystick " << joystick << L":" << std::endl;
-				std::wcout << L"\tName: '" << stringConverter.toWCharArray( joystickInfo[ joystick ].Name ) << L"'" << std::endl;
-				std::wcout << L"\tAxes: " << joystickInfo[ joystick ].Axes << std::endl;
-				std::wcout << L"\tButtons: " << joystickInfo[ joystick ].Buttons << std::endl;
+			for( uint_fast16_t controller = 0; controller < controllerInfo.size(); ++controller ) {
+				std::wcout << L"controller " << controller << L":" << std::endl;
+				std::wcout << L"\tName: '" << stringConverter.toWCharArray( controllerInfo[ controller ].Name ) << L"'" << std::endl;
+				std::wcout << L"\tAxes: " << controllerInfo[ controller ].Axes << std::endl;
+				std::wcout << L"\tButtons: " << controllerInfo[ controller ].Buttons << std::endl;
 
 				std::wcout << L"\tHat is: ";
 
-				switch( joystickInfo[joystick ].PovHat ) {
+				switch( controllerInfo[controller ].PovHat ) {
 					case SJoystickInfo::POV_HAT_PRESENT:
 						std::wcout << L"present" << std::endl;
 						break;
@@ -1215,7 +1163,7 @@ GameManager::GameManager() {
 				}
 			}
 		} else if( debug ) {
-			std::wcout << L"Joystick support is not enabled." << std::endl;
+			std::wcout << L"controller support is not enabled." << std::endl;
 		}
 
 		//Set up networking
@@ -2196,7 +2144,7 @@ void GameManager::newMaze( boost::filesystem::path src ) {
 }
 
 /**
- * Called by Irrlicht every time an event (keyboard, mouse, joystick, etc.) occurs.
+ * Called by Irrlicht every time an event (keyboard, mouse, controller, etc.) occurs.
  * Arguments:
  * --- const SEvent& event: an object representing the event that happened.
  * Returns: True if the event was handled by this function, false if Irrlicht should handle the event.
@@ -2337,90 +2285,84 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			break;
 
 			case EET_JOYSTICK_INPUT_EVENT: {
-				for( decltype( keyMap.size() ) k = 0; k < keyMap.size(); ++k ) {
-					if( event.JoystickEvent.Joystick == keyMap.at( k ).getGamepadNumber() ) {
-						{ //Handle joystick axes
-							core::array< int_fast16_t > verticalAxes;
-							verticalAxes.push_back( SEvent::SJoystickEvent::AXIS_Y );
-							core::array< int_fast16_t > horizontalAxes;
-							horizontalAxes.push_back( SEvent::SJoystickEvent::AXIS_X );
-
-							bool joystickMovedUp = false;
-							bool joystickMovedDown = false;
-							bool joystickMovedRight = false;
-							bool joystickMovedLeft = false;
-
-							for( uint_fast16_t i = 0; i < verticalAxes.size(); ++i ) {
-								if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
-									if( debug ) {
-										std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
-									}
-									joystickMovedUp = true;
-								} else if( event.JoystickEvent.Axis[ i ] <= ( SHRT_MIN / 2 ) ) {
-									if( debug ) {
-										std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
-									}
-									joystickMovedDown = true;
+				for( uint_fast8_t k = 0; k < keyMap.size(); ++k ) {
+					if( event.JoystickEvent.Joystick == keyMap.at( k ).getControllerNumber() ) {
+						{ //Handle controller axes
+							if( debug && keyMap.at( k ).getControllerAxis() != UINT_FAST8_MAX ) {
+								std:: wcout << L"Keymap " << k << L" axis " << keyMap.at( k ).getControllerAxis() << L", ";
+								if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+									std:: wcout << L"equivalent to axis X";
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+									std:: wcout << L"equivalent to axis Y";
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+									std:: wcout << L"equivalent to axis Z";
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+									std:: wcout << L"equivalent to axis R";
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+									std:: wcout << L"equivalent to axis U";
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+									std:: wcout << L"equivalent to axis V";
 								}
-							}
-
-							for( uint_fast16_t i = 0; i < horizontalAxes.size(); ++i ) {
-								if( event.JoystickEvent.Axis[ i ] >= ( SHRT_MAX / 2 ) ) { //See Irrlicht's <irrTypes.h>: Axes are represented by s16's, typedef'd in the current version (as of 2013-06-22) as signed short. SHRT_MAX comes from <climits>
-									if( debug ) {
-										std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
-									}
-									joystickMovedRight = true;
-								} else if( event.JoystickEvent.Axis[ i ] <= ( SHRT_MIN / 2 ) ) {
-									if( debug ) {
-										std::wcout << L"Axis value: " << event.JoystickEvent.Axis[ i ] << std::endl;
-									}
-									joystickMovedLeft = true;
+								std::wcout << L", has controller direction ";
+								if( keyMap.at( k ).getControllerDirection() == KeyMapping::controller_INCREASE ) {
+									std::wcout << L"increase";
+								} else if( keyMap.at( k ).getControllerDirection() == KeyMapping::controller_DECREASE ) {
+									std::wcout << L"decrease";
+								} else {
+									std::wcout << L"other";
 								}
+								std::wcout << std::endl;
 							}
 							
-							switch( keyMap.at( k ).getJoystickDirection() ) {
-								case KeyMapping::JOYSTICK_UP: {
-									keyMap.at( k ).activated = joystickMovedUp;
-									break;
+							int16_t controllerDeadZone = ( INT16_MAX / 2 ); //TODO: Make the dead zone user adjustable.
+							
+							if( keyMap.at( k ).getControllerDirection() == KeyMapping::controller_INCREASE ) {
+								if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] > controllerDeadZone );
+									
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] > controllerDeadZone );
+									
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] > controllerDeadZone );
+									
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] > controllerDeadZone );
+									
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] > controllerDeadZone );
+									
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] > controllerDeadZone );
+									
 								}
-								case KeyMapping::JOYSTICK_DOWN: {
-									keyMap.at( k ).activated = joystickMovedDown;
-									break;
-								}
-								case KeyMapping::JOYSTICK_RIGHT: {
-									keyMap.at( k ).activated = joystickMovedRight;
-									break;
-								}
-								case KeyMapping::JOYSTICK_LEFT: {
-									keyMap.at( k ).activated = joystickMovedLeft;
-									break;
+							} else if( keyMap.at( k ).getControllerDirection() == KeyMapping::controller_DECREASE ) {
+								if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] < -controllerDeadZone );
+									
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] < -controllerDeadZone );
+									
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] < -controllerDeadZone );
+									
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] < -controllerDeadZone );
+									
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] < -controllerDeadZone );
+									
+								} else if( keyMap.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+									keyMap.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] < -controllerDeadZone );
+									
 								}
 							}
 						}
 						
-						if( keyMap.at( k ).getGamepadButton() != UINT_FAST8_MAX ) {
-							keyMap.at( k ).activated = event.JoystickEvent.IsButtonPressed( keyMap.at( k ).getGamepadButton() );
+						//Handle controller buttons
+						if( keyMap.at( k ).getControllerButton() != UINT_FAST8_MAX ) {
+							keyMap.at( k ).activated = event.JoystickEvent.IsButtonPressed( keyMap.at( k ).getControllerButton() );
 						}
-						
-						/*{ //Handle gamepad buttons
-							for( uint_fast8_t button = 0; button < event.JoystickEvent.NUMBER_OF_BUTTONS; ++button ) {
-								//if( !( showingMenu || showingLoadingScreen ) ) {
-									if( button == keyMap.at( k ).getGamepadButton() ) {
-										keyMap.at( k ).activated = event.JoystickEvent.IsButtonPressed( button );
-										return true;
-									}
-								//} else if( showingMenu ) { //We only want certain actions to work if we're showing the menu
-								if( button == keyMap.at( k ).getGamepadButton() ) {
-									switch( keyMap.at( k ).getAction() ) {
-										case KeyMapping::MENU:
-										case KeyMapping::SCREENSHOT: {
-											return doEventActions( k, event );
-										}
-									}
-									break;
-								}
-							}
-						}*/
 					}
 				}
 			}
@@ -3239,7 +3181,7 @@ uint_fast8_t GameManager::run() {
 				{
 					auto time = timer->getTime();
 					if( time >= lastTimeControlsProcessed + controlProcessDelay ) {
-						doStuff();
+						processControls();
 						lastTimeControlsProcessed = time;
 					}
 				}
@@ -3407,7 +3349,7 @@ void GameManager::setControls() {
 		
 		//Yeah, these are the only defaults so far.
 		//TODO: Add default controls.
-		enableJoystick = false;
+		enableController = false;
 		
 		boost::filesystem::path controlsPath( boost::filesystem::current_path()/L"controls.cfg" );
 
@@ -3446,24 +3388,23 @@ void GameManager::setControls() {
 									keyMap.push_back( temp );
 								}
 								
-								std::vector< std::wstring > possibleChoiceStarts = { L"gamepad", L"key", L"mouse" };
+								std::vector< std::wstring > possibleChoiceStarts = { L"controller", L"key", L"mouse" };
 
-								//if( spellChecker.indexOfClosestString( choiceStr.substr( 0, 7 ), possibleChoiceStarts )  == 0 ) { //L"gamepad"
-								if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 0 ).length() ), possibleChoiceStarts.at( 0 ) ) <= 1 ) {
-									choiceStr = choiceStr.substr( 7, choiceStr.length() - 7 ); //7 = length of the word "Gamepad"
+								if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 0 ).length() ), possibleChoiceStarts.at( 0 ) ) <= 1 ) {//L"controller"
+									choiceStr = choiceStr.substr( possibleChoiceStarts.at( 0 ).length(), choiceStr.length() - possibleChoiceStarts.at( 0 ).length() ); //possibleChoiceStarts.at( 0 ).length() = length of the word "controller"
 									boost::algorithm::trim( choiceStr ); //Remove trailing and leading spaces
 									{
-										std::wstring gamepadNumStr = boost::algorithm::trim_copy( choiceStr.substr( 0, choiceStr.find( L' ' ) ) );
+										std::wstring controllerNumStr = boost::algorithm::trim_copy( choiceStr.substr( 0, choiceStr.find( L' ' ) ) );
 										
 										if( debug ) {
-											std::wcout << L"Gamepad number (string) \"" << gamepadNumStr << L"\"" << std::endl;
+											std::wcout << L"controller number (string) \"" << controllerNumStr << L"\"" << std::endl;
 										}
 										
 										uint_fast8_t choice;
 										
-										choice = static_cast< uint_fast8_t >( boost::lexical_cast< unsigned short int >( gamepadNumStr ) ); //Boost lexical cast can't convert directly to uint_fast8_t, at least on my computer
+										choice = static_cast< uint_fast8_t >( boost::lexical_cast< unsigned short int >( controllerNumStr ) ); //Boost lexical cast can't convert directly to uint_fast8_t, at least on my computer
 										
-										keyMap.back().setGamepadNumber( choice );
+										keyMap.back().setControllerNumber( choice );
 										
 										if( debug ) {
 											std::wcout << L" converts to integer " << choice << std::endl;
@@ -3472,37 +3413,77 @@ void GameManager::setControls() {
 									
 									{
 										choiceStr = boost::algorithm::trim_copy( choiceStr.substr( choiceStr.find( L' ' ) ) );
-										std::wstring gamepadButtonOrJoystick = choiceStr.substr( 0, choiceStr.find( L' ' ) );
+										std::wstring buttonOrJoystick = choiceStr.substr( 0, choiceStr.find( L' ' ) );
 										std::vector< std::wstring > possibleChoices = { L"button", L"joystick" };
-										gamepadButtonOrJoystick = possibleChoices.at( spellChecker.indexOfClosestString( gamepadButtonOrJoystick, possibleChoices ) );
+										buttonOrJoystick = possibleChoices.at( spellChecker.indexOfClosestString( buttonOrJoystick, possibleChoices ) );
 										
-										if( gamepadButtonOrJoystick == possibleChoices.at( 0 ) ) { //L"button"
-											std::wstring gamepadButtonStr = boost::algorithm::trim_copy( choiceStr.substr( gamepadButtonOrJoystick.length() ) );
+										if( buttonOrJoystick == possibleChoices.at( 0 ) ) { //L"button"
+											std::wstring controllerButtonStr = boost::algorithm::trim_copy( choiceStr.substr( buttonOrJoystick.length() ) );
 											uint_fast8_t choice;
 											
 											if( debug ) {
-												std::wcout << L"Gamepad button number (string) \"" << gamepadButtonStr << L"\"" << std::endl;
+												std::wcout << L"controller button number (string) \"" << controllerButtonStr << L"\"" << std::endl;
 											}
 											
-											choice = static_cast< uint_fast8_t >( boost::lexical_cast< unsigned short int >( gamepadButtonStr ) ); //Boost lexical cast can't convert directly to uint_fast8_t, at least on my computer
+											choice = static_cast< uint_fast8_t >( boost::lexical_cast< unsigned short int >( controllerButtonStr ) ); //Boost lexical cast can't convert directly to uint_fast8_t, at least on my computer
 											
-											keyMap.back().setGamepadButton( choice );
+											keyMap.back().setControllerButton( choice );
 											
 											if( debug ) {
 												std::wcout << L" converts to integer " << choice << std::endl;
+											}
+										} else { //L"joystick"
+											std::wstring controllerAxisStr = boost::algorithm::trim_copy( choiceStr.substr( buttonOrJoystick.length(), 2 ) );
+											
+											if( debug ) {
+												std::wcout << L"controller axis (string) \"" << controllerAxisStr << L"\"" << std::endl;
+											}
+											
+											{
+												std::vector< std::wstring > possibleChoices = { L"x", L"y", L"z", L"r", L"u", L"v" };
+												std::wstring choice = possibleChoices.at( spellChecker.indexOfClosestString( controllerAxisStr, possibleChoices ) );
+												
+												if( debug ) {
+													std::wcout << L" converts to string " << choice << std::endl;
+												}
+												
+												if( choice == possibleChoices.at( 0 ) ) { //L"x"
+													keyMap.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X );
+												} else if( choice == possibleChoices.at( 1 ) ) { //L"y"
+													keyMap.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y );
+												} else if( choice == possibleChoices.at( 2 ) ) { //L"z"
+													keyMap.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z );
+												} else if( choice == possibleChoices.at( 3 ) ) { //L"r"
+													keyMap.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R );
+												} else if( choice == possibleChoices.at( 4 ) ) { //L"u"
+													keyMap.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U );
+												} else if( choice == possibleChoices.at( 5 ) ) { //L"v"
+													keyMap.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V );
+												}
+											}
+											
+											{
+												std::wstring increaseOrDecrease = boost::algorithm::trim_copy( choiceStr.substr( 2 + buttonOrJoystick.length() + controllerAxisStr.length() ) );
+												std::vector< std::wstring > possibleChoices = { L"increase", L"decrease" };
+												std::wstring choice = possibleChoices.at( spellChecker.indexOfClosestString( increaseOrDecrease, possibleChoices ) );
+												if( choice == possibleChoices.at( 0 ) ) { //L"increase"
+													keyMap.back().setControllerDirection( KeyMapping::controller_INCREASE );
+												} else if( choice == possibleChoices.at( 1 ) ) { //L"decrease"
+													keyMap.back().setControllerDirection( KeyMapping::controller_DECREASE );
+												}
 											}
 										}
 									}
 									
 								} else if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 1 ).length() ), possibleChoiceStarts.at( 1 ) ) <= 1 ) {//if( spellChecker.indexOfClosestString( choiceStr.substr( 0, 3 ), possibleChoiceStarts )  == 1  ) { //L"key"
-									choiceStr = choiceStr.substr( 3, choiceStr.length() - 3 ); //3 = length of the word "key"
+									choiceStr = boost::algorithm::trim_copy( choiceStr.substr( possibleChoiceStarts.at( 1 ).length(), choiceStr.length() - possibleChoiceStarts.at( 1 ).length() ) ); //possibleChoiceStarts.at( 1 ).length() = length of the word "key"
 									EKEY_CODE choice;
 									
 									choice = static_cast< EKEY_CODE >( boost::lexical_cast< int >( choiceStr ) ); //Boost lexical cast can't convert directly to enumerated types
 									
 									keyMap.back().setKey( choice );
 									
-								} if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 2 ).length() ), possibleChoiceStarts.at( 2 ) ) <= 1 ) {//else if( spellChecker.indexOfClosestString( choiceStr.substr( 0, 5 ), possibleChoiceStarts )  == 2 ) { //L"mouse"
+								} else if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 2 ).length() ), possibleChoiceStarts.at( 2 ) ) <= 1 ) {//else if( spellChecker.indexOfClosestString( choiceStr.substr( 0, 5 ), possibleChoiceStarts )  == 2 ) { //L"mouse"
 									
 									choiceStr = choiceStr.substr( 5, choiceStr.length() - 5 ); //5 = length of the word "mouse"
 									
@@ -3573,27 +3554,27 @@ void GameManager::setControls() {
 										std::wcout << L"preference before spell checking: " << preference;
 									}
 
-									std::vector< std::wstring > possiblePrefs = { L"menu", L"screenshot", L"volumeup", L"volumedown", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l", L"enable gamepad" };
+									std::vector< std::wstring > possiblePrefs = { L"menu", L"screenshot", L"volumeup", L"volumedown", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l", L"enable controller" };
 									preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
 
 									if( debug ) {
 										std::wcout  << "\tand after: " << preference << std::endl;
 									}
 									
-									if( preference == possiblePrefs.at( 12 ) ) { //L"enable gamepad"
+									if( preference == possiblePrefs.at( 12 ) ) { //L"enable controller"
 										std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 										choiceStr = possibleChoices.at( spellChecker.indexOfClosestString( choiceStr, possibleChoices ) );
 
 										if( choiceStr == possibleChoices.at( 0 ) ) {
 											if( debug ) {
-												std::wcout << L"Joystick is ENABLED" << std::endl;
+												std::wcout << L"controller is ENABLED" << std::endl;
 											}
-											enableJoystick = true;
+											enableController = true;
 										} else {
 											if( debug ) {
-												std::wcout << L"Joystick is DISABLED" << std::endl;
+												std::wcout << L"controller is DISABLED" << std::endl;
 											}
-											enableJoystick = false;
+											enableController = false;
 										}
 									} else {
 										keyMap.back().setActionFromString( preference );

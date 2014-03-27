@@ -8,7 +8,7 @@ Controls:
 See the file controls.cfg.
 
 Multiplayer support:
-Currently Cybrinth supports up to 4 human players on one keyboard, but that can get pretty cramped so I'm working on adding gamepad support and LAN network play. You can also play against anywhere from 0 to 255 bots as long as the total number of players (human and bot) does not exceed 255. Don't want to actually play at all? Fine, just set the number of bots equal to the number of players and watch the game play itself.
+Currently Cybrinth supports any number of players using controllers, plus up to 4 human players on one keyboard. I'm working on adding LAN network play. You can also play against anywhere from 0 to 255 bots as long as the total number of players (human and bot) does not exceed 255. Don't want to actually play at all? Fine, just set the number of bots equal to the number of players and watch the game play itself.
 
 Configuration:
 The game stores all its settings in a file called prefs.cfg, except for controls which are stored in controls.cfg. It cannot yet modify those files itself, but they are standard text files editable with any text editor.
