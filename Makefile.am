@@ -1,5 +1,7 @@
 # Cybrinth created by James Dearing, copyright 2012-2014 and licensed under the GNU AGPL (see the file COPYING)
 
+DEB_BUILD_HARDENING = 1 #If you have hardening wrapper scripts installed (Ubuntu/Debian package "hardening-wrapper"), this should make them harden the program
+
 AM_CPPFLAGS = -std=c++0x -pg -lc $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS)
 AM_LDFLAGS = -pg
 bin_PROGRAMS = cybrinth

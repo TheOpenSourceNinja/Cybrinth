@@ -29,6 +29,7 @@ class SystemSpecificsManager
 		SystemSpecificsManager();
 		virtual ~SystemSpecificsManager();
 		std::vector< boost::filesystem::path > getFontFolders();
+		std::vector< boost::filesystem::path > getConfigFolders();
 	protected:
 		std::wstring getEnvironmentVariable( std::string name );
 	private:

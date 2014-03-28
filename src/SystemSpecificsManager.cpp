@@ -58,7 +58,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 	#endif //What about other operating systems? I don't know where BSD etc. put their font files.
 	
 	//for( std::vector< boost::filesystem::path >::iterator i = fontFolders.begin(); i != fontFolders.end(); i++ ) {
-	for( std::vector< boost::filesystem::path >::size_type i = 0; i < fontFolders.size(); i++ ) {
+	for( decltype( fontFolders.size() ) i = 0; i < fontFolders.size(); i++ ) {
 		//if( !exists( &i ) ) {
 		if( !exists( fontFolders.at( i ) ) ) {
 			//fontFolders.erase( i );
@@ -67,6 +67,69 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 	}
 	
 	return fontFolders;
+}
+
+std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders() {
+	std::vector< boost::filesystem::path > configFolders;
+	configFolders.push_back( boost::filesystem::current_path() );
+	std::wstring packageName = sc.toStdWString( PACKAGE_NAME );
+	packageName += L"/";
+	#if defined WINDOWS
+		try {
+			configFolders.push_back( getEnvironmentVariable( "%APPDATA%" ) + L"/" + packageName );
+		} catch( std::wstring error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		try {
+			configFolders.push_back( getEnvironmentVariable( "%LOCALAPPDATA%" ) + L"/" + packageName );
+		} catch( std::wstring error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		try {
+			configFolders.push_back( getEnvironmentVariable( "%PROGRAMDATA%" ) + L"/" + packageName );
+		} catch( std::wstring error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#elif defined LINUX
+		configFolders.push_back( L"/etc/" + sc.toStdWString( PACKAGE_NAME ) );
+		try {
+			configFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/." + packageName );
+		} catch( std::wstring error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		try {
+			configFolders.push_back( getEnvironmentVariable( "XDG_CONFIG_HOME" ) + L"/" + packageName );
+		} catch( std::wstring error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#elif defined MACOSX
+		try {
+			configFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/Library/Application Support/" + packageName );
+		} catch( std::wstring error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#else
+		//This section is just a copy of the Linux section above.
+		configFolders.push_back( L"/etc/" + packageName );
+		try {
+			configFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/." + packageName );
+		} catch( std::wstring error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		try {
+			configFolders.push_back( getEnvironmentVariable( "XDG_CONFIG_HOME" ) + L"/" + packageName );
+		} catch( std::wstring error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#endif //What about other operating systems? I don't know where BSD etc. put their config files.
+	
+	for( decltype( configFolders.size() ) i = 0; i < configFolders.size(); i++ ) {
+		if( !exists( configFolders.at( i ) ) ) {
+			configFolders.erase( configFolders.begin() + i );
+		}
+	}
+	
+	return configFolders;
 }
 
 SystemSpecificsManager::SystemSpecificsManager()
