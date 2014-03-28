@@ -2576,8 +2576,6 @@ void GameManager::readPrefs() {
 		if( debug ) {
 			std::wcout << L"readPrefs() called" << std::endl;
 		}
-		
-		boost::filesystem::path prefsPath( boost::filesystem::current_path()/L"prefs.cfg" );
 
 		//Set default prefs, in case we can't get them from the file
 		showBackgrounds = true;
@@ -2593,7 +2591,7 @@ void GameManager::readPrefs() {
 		markTrails = false;
 		musicVolume = 50;
 		network.setPort( 61187 );
-		isServer = false;
+		isServer = true;
 		botsKnowSolution = false;
 		botAlgorithm = AI::DEPTH_FIRST_SEARCH;
 		botMovementDelay = 300;
@@ -2602,19 +2600,25 @@ void GameManager::readPrefs() {
 		#else
 			debug = false;
 		#endif
-
-		if( exists( prefsPath ) ) {
-			if( !is_directory( prefsPath ) ) {
+		
+		std::vector< boost::filesystem::path > configFolders = system.getConfigFolders();
+		bool prefsFileFound = false;
+		
+		for( auto it = configFolders.begin(); it != configFolders.end(); ++it ) {
+			boost::filesystem::path prefsPath( *it/L"prefs.cfg" );
+			
+			if( exists( prefsPath ) && !is_directory( prefsPath ) ) {
 				if( debug ) {
 					std::wcout << L"Loading preferences from file " << prefsPath.wstring() << std::endl;
 				}
+				prefsFileFound = true;
 				boost::filesystem::wifstream prefsFile;
 				prefsFile.open( prefsPath );
-
+			
 				if( prefsFile.is_open() ) {
 					std::wstring line;
 					uintmax_t lineNum = 0; //This used to be a uint_fast8_t, which should be good enough. However, when dealing with user input (such as a file), we don't want to make assumptions.
-
+				
 					while( prefsFile.good() ) {
 						++lineNum;
 						getline( prefsFile, line );
@@ -2624,32 +2628,32 @@ void GameManager::readPrefs() {
 						if( debug ) {
 							std::wcout << L"Line " << lineNum << L": \"" << line << "\"" << std::endl;
 						}
-
-
+						
+						
 						if( !line.empty() ) {
 							try {
 								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
 								std::wstring choice = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
-
+								
 								if( debug ) {
 									std::wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< std::endl;
 								}
-
+								
 								std::vector< std::wstring > possiblePrefs = { L"bots' solving algorithm", L"volume", L"number of bots", L"show backgrounds",
 									L"fullscreen", L"mark player trails", L"debug", L"bits per pixel", L"wait for vertical sync", L"driver type", L"number of players",
 									L"window size", L"play music", L"network port", L"always server", L"bots know the solution", L"bot movement delay" };
-
+								
 								preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
-
+								
 								if( debug ) {
 									std::wcout << L"Preference after spellchecking \"" << preference << std::endl;
 								}
-
+								
 								if( preference == possiblePrefs.at( 0 ) ) { //L"bots' solving algorithm"
-
+								
 									std::vector< std::wstring > possibleChoices = { L"depth-first search", L"iterative deepening depth-first search", L"right hand rule", L"left hand rule" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-
+									
 									if( choice == possibleChoices.at( 0 ) ) { //DFS
 										if( debug ) {
 											std::wcout << L"Bots will use Depth-First Search" << std::endl;
@@ -2671,11 +2675,11 @@ void GameManager::readPrefs() {
 										}
 										botAlgorithm = AI::LEFT_HAND_RULE;
 									}
-
+									
 								} else if( preference == possiblePrefs.at( 1 ) ) { //L"volume"
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-
+										
 										if( choiceAsInt <= 100 && choiceAsInt >= 0 ) {
 											musicVolume = choiceAsInt;
 											Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
@@ -2698,7 +2702,7 @@ void GameManager::readPrefs() {
 								} else if( preference == possiblePrefs.at( 2 ) ) { //L"number of bots"
 									try {
 										decltype( numBots ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
-
+										
 										if( choiceAsInt <= numPlayers ) {
 											numBots = choiceAsInt;
 											if( debug ) {
@@ -2712,10 +2716,10 @@ void GameManager::readPrefs() {
 										std::wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								} else if( preference == possiblePrefs.at( 3 ) ) { //L"show backgrounds"
-
+									
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-
+									
 									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Show backgrounds is ON" << std::endl;
@@ -2727,12 +2731,12 @@ void GameManager::readPrefs() {
 										}
 										showBackgrounds = false;
 									}
-
+									
 								} else if( preference == possiblePrefs.at( 4 ) ) { //L"fullscreen"
-
+									
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-
+									
 									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Fullscreen is ON" << std::endl;
@@ -2744,12 +2748,12 @@ void GameManager::readPrefs() {
 										}
 										fullscreen = false;
 									}
-
+									
 								} else if( preference == possiblePrefs.at( 5 ) ) { //L"mark player trails"
-
+									
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-
+									
 									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Mark trails is ON" << std::endl;
@@ -2761,27 +2765,27 @@ void GameManager::readPrefs() {
 										}
 										markTrails = false;
 									}
-
+									
 								} else if( preference == possiblePrefs.at( 6 ) ) { //L"debug"
-
+								
 									#ifndef DEBUG
 										std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 										choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-
+										
 										if( choice == possibleChoices.at( 0 ) ) {
 											debug = true;
 										} else {
 											debug = false;
 										}
 									#endif
-
+									
 									if( debug ) {
 										std::wcout << L"Debug is ON" << std::endl;
 									}
 								} else if( preference == possiblePrefs.at( 7 ) ) { //L"bits per pixel"
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-
+										
 										if( choiceAsInt <= 16 ) {
 											bitsPerPixel = choiceAsInt;
 											if( debug ) {
@@ -2794,12 +2798,12 @@ void GameManager::readPrefs() {
 									} catch( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
-
+									
 								} else if( preference == possiblePrefs.at( 8 ) ) { //L"wait for vertical sync"
-
+								
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-
+									
 									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Vertical sync is ON" << std::endl;
@@ -2811,12 +2815,12 @@ void GameManager::readPrefs() {
 										}
 										vsync = false;
 									}
-
+									
 								} else if( preference == possiblePrefs.at( 9 ) ) { //L"driver type"
-
+									
 									std::vector< std::wstring > possibleChoices = { L"opengl", L"direct3d9", L"direct3d8", L"burning's video", L"software", L"null" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-
+									
 									if( choice == possibleChoices.at( 0 ) ) { //L"opengl"
 										driverType = video::EDT_OPENGL;
 									} else if( choice == possibleChoices.at( 1 ) ) { //L"direct3d9"
@@ -2830,10 +2834,10 @@ void GameManager::readPrefs() {
 									} else if( choice == possibleChoices.at( 5 ) ) { //L"null"
 										driverType = video::EDT_NULL;
 									}
-
+									
 									if( !device->isDriverSupported( driverType ) ) {
 										std::wcerr << L"Warning: Chosen driver type " << choice << L" is not supported on this system. Auto-picking a new type.";
-
+										
 										driverType = video::EDT_NULL;
 										//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
 										for( uint_fast8_t i = ( uint_fast8_t ) video::EDT_COUNT; i != ( uint_fast8_t ) video::EDT_NULL; i-- ) {
@@ -2844,21 +2848,20 @@ void GameManager::readPrefs() {
 										}
 										
 										//Note: Just because the library supports a driver type doesn't mean we can actually use it. A loop similar to the above is used in the GameManager constructor where we call createDevice(). Therefore, the final driverType may not be what is set here.
-
 										if( driverType == video::EDT_NULL ) {
 											std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
 											debug = true;
 										}
 									}
-
+									
 									if( debug ) {
 										std::wcout << L"Driver type is " << choice << std::endl;
 									}
-
+									
 								} else if( preference == possiblePrefs.at( 10 ) ) { //L"number of players"
 									try {
 										decltype( numPlayers ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
-
+										
 										if( choiceAsInt <= 4 && choiceAsInt > 0 ) {
 											numPlayers = choiceAsInt;
 											if( debug ) {
@@ -2873,7 +2876,7 @@ void GameManager::readPrefs() {
 									} catch( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
-
+									
 								} else if( preference == possiblePrefs.at( 11 ) ) { //L"window size"
 									size_t locationOfX = choice.find( L"x" );
 									std::wstring width = choice.substr( 0, locationOfX );
@@ -2881,10 +2884,10 @@ void GameManager::readPrefs() {
 									if( debug ) {
 										std::wcout << L"Window size: " << width << L"x" << height << std::endl;
 									}
-
+									
 									uint_fast16_t widthAsInt = boost::lexical_cast< uint_fast16_t >( width );
 									uint_fast16_t heightAsInt = boost::lexical_cast< uint_fast16_t >( height );
-
+									
 									if( widthAsInt < 160 || heightAsInt < 240 ) {
 										std::wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << std::endl;
 									} else if( widthAsInt == 160 && heightAsInt == 240 ) {
@@ -2893,12 +2896,12 @@ void GameManager::readPrefs() {
 									} else {
 										windowSize = core::dimension2d< uint_fast16_t >( widthAsInt, heightAsInt );
 									}
-
+									
 								} else if( preference == possiblePrefs.at( 12 ) ) { //L"play music"
-
+								
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-
+									
 									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"Play music is ON" << std::endl;
@@ -2910,12 +2913,12 @@ void GameManager::readPrefs() {
 										}
 										playMusic = false;
 									}
-
+									
 								} else if( preference == possiblePrefs.at( 13 ) ) { //L"network port"
 									if( debug ) {
 										std::wcout << L"Network port: " << choice << std::endl;
 									}
-
+									
 									try {
 										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 										network.setPort( choiceAsInt );
@@ -2923,10 +2926,10 @@ void GameManager::readPrefs() {
 										std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								} else if( preference == possiblePrefs.at( 14 ) ) { //L"always server"
-
+								
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-
+									
 									if( choice == possibleChoices.at( 0 ) ) {
 										if( debug ) {
 											std::wcout << L"This is always a server" << std::endl;
@@ -2938,12 +2941,12 @@ void GameManager::readPrefs() {
 										}
 										isServer = false;
 									}
-
+									
 								} else if( preference == possiblePrefs.at( 15 ) ) { //L"bots know the solution"
-
+									
 									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-
+									
 									if( choice == possibleChoices.at( 0 ) ) { //L"true"
 										if( debug ) {
 											std::wcout << L"Bots DO know the solution" << std::endl;
@@ -2955,7 +2958,7 @@ void GameManager::readPrefs() {
 										}
 										botsKnowSolution = false;
 									}
-
+									
 								} else if( preference == possiblePrefs.at( 16 ) ) { //L"bot movement delay"
 									try {
 										botMovementDelay = boost::lexical_cast< uint_fast16_t >( choice );
@@ -2963,118 +2966,114 @@ void GameManager::readPrefs() {
 										std::wcerr << L"Error reading botMovementDelay preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
 								}
-
+								
 							} catch ( std::exception &e ) {
 								std::wcout << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << std::endl;
 							}
 						}
 					}
-
+					
 					if( debug ) {
 						botMovementDelay = 0;
 					}
-
+					
 					prefsFile.close();
-				} else {
-					throw( std::wstring( L"Cannot open prefs file." ) );
 				}
 			} else {
-				throw( std::wstring( L"Prefs file is a directory. Cannot load prefs." ) );
-			}
-		} else {
-			if( debug ) {
-				std::wcout << L"Creating preferences file " << prefsPath.wstring() << std::endl;
-			}
-			boost::filesystem::wofstream prefsFile;
-			prefsFile.open( prefsPath );
-
-			if( prefsFile.is_open() ) {
-				prefsFile << L"volume\t" << musicVolume << std::endl;
-				prefsFile << L"number of bots\t" << numBots << std::endl;
-
-				prefsFile << L"show background animations\t";
-				if( showBackgrounds ) {
-					prefsFile << L"true";
-				} else {
-					prefsFile << L"false";
-				}
-				prefsFile << std::endl;
-
-				prefsFile << L"fullscreen\t";
-				if( fullscreen ) {
-					prefsFile << L"true";
-				} else {
-					prefsFile << L"false";
-				}
-				prefsFile << std::endl;
-
-				prefsFile << L"mark player trails\t";
-				if( markTrails ) {
-					prefsFile << L"true";
-				} else {
-					prefsFile << L"false";
-				}
-				prefsFile << std::endl;
-
-				prefsFile << L"debug\t";
 				if( debug ) {
-					prefsFile << L"true";
-				} else {
-					prefsFile << L"false";
+					std::wcout << L"Creating preferences file " << prefsPath.wstring() << std::endl;
 				}
-				prefsFile << std::endl;
-
-				prefsFile << L"bits per pixel\t" << bitsPerPixel << std::endl;
-
-				prefsFile << L"wait for vertical sync\t";
-				if( vsync ) {
-					prefsFile << L"true";
-				} else {
-					prefsFile << L"false";
+				boost::filesystem::wofstream prefsFile;
+				prefsFile.open( prefsPath );
+				
+				if( prefsFile.is_open() ) {
+					prefsFile << L"volume\t" << musicVolume << std::endl;
+					prefsFile << L"number of bots\t" << numBots << std::endl;
+					
+					prefsFile << L"show background animations\t";
+					if( showBackgrounds ) {
+						prefsFile << L"true";
+					} else {
+						prefsFile << L"false";
+					}
+					prefsFile << std::endl;
+					
+					prefsFile << L"fullscreen\t";
+					if( fullscreen ) {
+						prefsFile << L"true";
+					} else {
+						prefsFile << L"false";
+					}
+					prefsFile << std::endl;
+					
+					prefsFile << L"mark player trails\t";
+					if( markTrails ) {
+						prefsFile << L"true";
+					} else {
+						prefsFile << L"false";
+					}
+					prefsFile << std::endl;
+					
+					prefsFile << L"debug\t";
+					if( debug ) {
+						prefsFile << L"true";
+					} else {
+						prefsFile << L"false";
+					}
+					prefsFile << std::endl;
+					
+					prefsFile << L"bits per pixel\t" << bitsPerPixel << std::endl;
+					
+					prefsFile << L"wait for vertical sync\t";
+					if( vsync ) {
+						prefsFile << L"true";
+					} else {
+						prefsFile << L"false";
+					}
+					prefsFile << std::endl;
+					
+					prefsFile << L"driver type\t";
+					if( driverType == video::EDT_OPENGL ) {
+						prefsFile << L"opengl";
+					} else if( driverType == video::EDT_DIRECT3D9 ) {
+						prefsFile << L"direct3d9";
+					} else if( driverType == video::EDT_DIRECT3D8 ) {
+						prefsFile << L"direct3d8";
+					} else if( driverType == video::EDT_BURNINGSVIDEO ) {
+						prefsFile << L"burning's video";
+					} else if( driverType == video::EDT_SOFTWARE ) {
+						prefsFile << L"software";
+					} else if( driverType == video::EDT_NULL ) {
+						prefsFile << L"null";
+					} else {
+						std::wcerr << L"Warning: Creating preferences file, selected driver type " << driverType << L" not recognized. Saving OpenGL." << std::endl;
+						prefsFile << L"opengl";
+					}
+					prefsFile << std::endl;
+					
+					prefsFile << L"number of players\t" << numPlayers << std::endl;
+					
+					prefsFile << L"window size\t" << windowSize.Width << L"x" << windowSize.Height << std::endl;
+					
+					prefsFile << L"play music\t";
+					if( playMusic ) {
+						prefsFile << L"true";
+					} else {
+						prefsFile << L"false";
+					}
+					prefsFile << std::endl;
+					
+					prefsFile << L"network port\t" << network.getPort() << std::endl;
+					
+					prefsFile << L"always server\t";
+					if( isServer ) {
+						prefsFile << L"true";
+					} else {
+						prefsFile << L"false";
+					}
+					prefsFile << std::endl;
+					
 				}
-				prefsFile << std::endl;
-
-				prefsFile << L"driver type\t";
-				if( driverType == video::EDT_OPENGL ) {
-					prefsFile << L"opengl";
-				} else if( driverType == video::EDT_DIRECT3D9 ) {
-					prefsFile << L"direct3d9";
-				} else if( driverType == video::EDT_DIRECT3D8 ) {
-					prefsFile << L"direct3d8";
-				} else if( driverType == video::EDT_BURNINGSVIDEO ) {
-					prefsFile << L"burning's video";
-				} else if( driverType == video::EDT_SOFTWARE ) {
-					prefsFile << L"software";
-				} else if( driverType == video::EDT_NULL ) {
-					prefsFile << L"null";
-				} else {
-					std::wcerr << L"Warning: Creating preferences file, selected driver type " << driverType << L" not recognized. Saving OpenGL." << std::endl;
-					prefsFile << L"opengl";
-				}
-				prefsFile << std::endl;
-
-				prefsFile << L"number of players\t" << numPlayers << std::endl;
-
-				prefsFile << L"window size\t" << windowSize.Width << L"x" << windowSize.Height << std::endl;
-
-				prefsFile << L"play music\t";
-				if( playMusic ) {
-					prefsFile << L"true";
-				} else {
-					prefsFile << L"false";
-				}
-				prefsFile << std::endl;
-
-				prefsFile << L"network port\t" << network.getPort() << std::endl;
-
-				prefsFile << L"always server\t";
-				if( isServer ) {
-					prefsFile << L"true";
-				} else {
-					prefsFile << L"false";
-				}
-				prefsFile << std::endl;
-
 			}
 		}
 
@@ -3084,6 +3083,10 @@ void GameManager::readPrefs() {
 			std::wcin >> a;
 			isServer = ( a == L's' || a == L'S' );
 			myPlayer = 0;
+		}
+		
+		if( !prefsFileFound ) {
+			throw( L"prefs.cfg does not exist or is not readable in any of the folders that were searched." );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::readPrefs(): " << e.what() << std::endl;
@@ -3404,19 +3407,22 @@ void GameManager::setControls() {
 		//TODO: Add default controls.
 		enableController = false;
 		
-		boost::filesystem::path controlsPath( boost::filesystem::current_path()/L"controls.cfg" );
-
-		if( exists( controlsPath ) ) {
-			if( !is_directory( controlsPath ) ) {
+		std::vector< boost::filesystem::path > configFolders = system.getConfigFolders();
+		bool controlsFileFound = false;
+		
+		for( auto it = configFolders.begin(); it != configFolders.end(); ++it ) {
+			boost::filesystem::path controlsPath( *it/L"controls.cfg" );
+			if( exists( controlsPath ) && !is_directory( controlsPath ) ) {
 				if( debug ) {
 					std::wcout << L"Loading controls from file " << controlsPath.wstring() << std::endl;
 				}
 				boost::filesystem::wifstream controlsFile;
 				controlsFile.open( controlsPath );
-
+				
 				if( controlsFile.is_open() ) {
+					controlsFileFound = true;
 					uintmax_t lineNum = 0; //This used to be a uint_fast8_t, which should be enough, but when dealing with user input we don't want to make any assumptions.
-
+					
 					while( controlsFile.good() ) {
 						++lineNum;
 						std::wstring line;
@@ -3427,7 +3433,7 @@ void GameManager::setControls() {
 						if( debug ) {
 							std::wcout << L"Line " << lineNum << L": \"" << line << "\"" << std::endl;
 						}
-
+						
 						if( !line.empty() ) { //The line may be empty, either in the actual file or the result of removing comments and spaces
 							try {
 								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
@@ -3435,14 +3441,14 @@ void GameManager::setControls() {
 								if( debug ) {
 									std::wcout << L"Control preference \"" << preference << L"\" choiceStr \"" << choiceStr << L"\""<< std::endl;
 								}
-
+								
 								{
 									ControlMapping temp;
 									controls.push_back( temp );
 								}
-								
+									
 								std::vector< std::wstring > possibleChoiceStarts = { L"controller", L"key", L"mouse" };
-
+								
 								if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 0 ).length() ), possibleChoiceStarts.at( 0 ) ) <= 1 ) {//L"controller"
 									choiceStr = choiceStr.substr( possibleChoiceStarts.at( 0 ).length(), choiceStr.length() - possibleChoiceStarts.at( 0 ).length() ); //possibleChoiceStarts.at( 0 ).length() = length of the word "controller"
 									boost::algorithm::trim( choiceStr ); //Remove trailing and leading spaces
@@ -3543,14 +3549,14 @@ void GameManager::setControls() {
 									if( debug ) {
 										std::wcout << L"choiceStr before spell checking: " << choiceStr;
 									}
-
+									
 									std::vector< std::wstring > possibleChoices = { L"wheelup", L"wheeldown", L"leftdown", L"rightdown", L"middledown", L"leftup", L"rightup", L"middleup", L"moved", L"leftdoubleclick", L"rightdoubleclick", L"middledoubleclick", L"lefttripleclick", L"righttripleclick", L"middletripleclick" };
 									choiceStr = possibleChoices.at( spellChecker.indexOfClosestString( choiceStr, possibleChoices ) );
-
+									
 									if( debug ) {
 										std::wcout  << "\tand after: " << choiceStr << std::endl;
 									}
-
+									
 									if( choiceStr == possibleChoices.at( 0 ) ) { //L"wheelup"
 										controls.back().setMouseWheelUp( true );
 										controls.back().setMouseEvent( EMIE_MOUSE_WHEEL );
@@ -3585,14 +3591,14 @@ void GameManager::setControls() {
 										controls.back().setMouseEvent( EMIE_MMOUSE_TRIPLE_CLICK );
 									}
 								}
-
+								
 								if( preference.substr( 0, 6 ) == L"player" ) {
 									try {
 										preference = preference.substr( 7 );
 										std::wstring playerNumStr = boost::algorithm::trim_copy( preference.substr( 0, preference.find( L' ' ) ) );
 										std::wstring actionStr = boost::algorithm::trim_copy( preference.substr( preference.find( L' ' ) ) );
 										decltype( numPlayers ) playerNum = boost::lexical_cast< unsigned short int >( playerNumStr ); //Boost doesn't like casting to uint_fast8_t
-
+										
 										if( playerNum < numPlayers ) {
 											controls.back().setPlayer( playerNum );
 											controls.back().setActionFromString( actionStr );
@@ -3606,10 +3612,10 @@ void GameManager::setControls() {
 									if( debug ) {
 										std::wcout << L"preference before spell checking: " << preference;
 									}
-
+								
 									std::vector< std::wstring > possiblePrefs = { L"menu", L"screenshot", L"volumeup", L"volumedown", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l", L"enable controller" };
 									preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
-
+									
 									if( debug ) {
 										std::wcout  << "\tand after: " << preference << std::endl;
 									}
@@ -3617,7 +3623,7 @@ void GameManager::setControls() {
 									if( preference == possiblePrefs.at( 12 ) ) { //L"enable controller"
 										std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 										choiceStr = possibleChoices.at( spellChecker.indexOfClosestString( choiceStr, possibleChoices ) );
-
+										
 										if( choiceStr == possibleChoices.at( 0 ) ) {
 											if( debug ) {
 												std::wcout << L"controller is ENABLED" << std::endl;
@@ -3633,24 +3639,22 @@ void GameManager::setControls() {
 										controls.back().setActionFromString( preference );
 									}
 								}
-
+								
 							} catch( std::exception &e ) {
 								std::wcerr << L"Error in GameManager::setControls(): " << e.what() << std::endl;
 							} catch( std::wstring &e ) {
-								std::wcerr << L"Error in GameManager::setControls(): " << e << std::endl;
+							std::wcerr << L"Error in GameManager::setControls(): " << e << std::endl;
 							}
 						}
 					}
-
+					
 					controlsFile.close();
-				} else {
-					throw( std::wstring( L"controls.cfg cannot be opened." ) );
 				}
-			} else {
-				throw( std::wstring( L"controls.cfg is a directory, should be a file." ) );
 			}
-		} else {
-			throw( std::wstring( L"controls.cfg does not exist." ) );
+		}
+		
+		if( !controlsFileFound ) {
+			throw( std::wstring( L"controls.cfg does not exist or is not readable in any of the folders that were searched." ) );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::setControls(): " << e.what() << std::endl;
