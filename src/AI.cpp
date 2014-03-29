@@ -489,6 +489,7 @@ void AI::move() {
 						if( maze[ currentPosition.X ][ currentPosition.Y ].hasLock() ) {
 							pathsToLockedCells.push_back( std::vector< core::position2d< uint_fast8_t > >() );
 							pathsToLockedCells.back().push_back( currentPosition );
+							pathsToLockedCells.back().push_back( currentPosition );
 						}
 						if( currentPosition.X < ( cols - 1 ) && maze[ currentPosition.X + 1 ][ currentPosition.Y ].hasLeftLock() ) {
 							pathsToLockedCells.push_back( std::vector< core::position2d< uint_fast8_t > >() );
@@ -515,14 +516,20 @@ void AI::move() {
 							possibleDirections.push_back( RIGHT );
 						}
 					}
-
+					
+					
+					
 					//If we can't go anywhere new, go back to previous position
 					if( possibleDirections.size() == 0 && pathTaken.size() != 0 && !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
 						pathTaken.pop_back();
 						core::position2d< uint_fast8_t > oldPosition = pathTaken.back();
+						
 						for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
-							if( pathsToLockedCells.at( o ).back() != oldPosition ) {
-								pathsToLockedCells.at( o ).push_back( oldPosition );
+							if( pathsToLockedCells.at( o ).back() != currentPosition ) {
+								pathsToLockedCells.at( o ).push_back( currentPosition );
+							} else {
+								pathsToLockedCells.at( o ).pop_back();
+								//pathsToLockedCells.at( o ).push_back( currentPosition );
 							}
 						}
 						if( oldPosition.X < currentPosition.X ) {
@@ -542,9 +549,11 @@ void AI::move() {
 								core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y - 1 );
 								pathTaken.push_back( position );
 								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
-									//for( std::vector< core::dimension2d< uint_fast8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
+									if( pathsToLockedCells.at( o ).back() != position ) {
 										pathsToLockedCells.at( o ).push_back( position );
-									//}
+									} else {
+										pathsToLockedCells.at( o ).pop_back();
+									}
 								}
 								gm->movePlayerOnY( controlsPlayer, -1 );
 							} break;
@@ -552,9 +561,11 @@ void AI::move() {
 								core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y + 1 );
 								pathTaken.push_back( position );
 								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
-									//for( std::vector< core::dimension2d< uint_fast8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
+									if( pathsToLockedCells.at( o ).back() != position ) {
 										pathsToLockedCells.at( o ).push_back( position );
-									//}
+									} else {
+										pathsToLockedCells.at( o ).pop_back();
+									}
 								}
 								gm->movePlayerOnY( controlsPlayer, 1 );
 							} break;
@@ -562,9 +573,11 @@ void AI::move() {
 								core::position2d< uint_fast8_t > position( currentPosition.X - 1, currentPosition.Y );
 								pathTaken.push_back( position );
 								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
-									//for( std::vector< core::dimension2d< uint_fast8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
+									if( pathsToLockedCells.at( o ).back() != position ) {
 										pathsToLockedCells.at( o ).push_back( position );
-									//}
+									} else {
+										pathsToLockedCells.at( o ).pop_back();
+									}
 								}
 								gm->movePlayerOnX( controlsPlayer, -1 );
 							} break;
@@ -572,14 +585,23 @@ void AI::move() {
 								core::position2d< uint_fast8_t > position( currentPosition.X + 1, currentPosition.Y );
 								pathTaken.push_back( position );
 								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
-									//for( std::vector< core::dimension2d< uint_fast8_t > >::size_type i = 0; i < pathsToLockedCells.at( o ).size(); ++i ) {
+									if( pathsToLockedCells.at( o ).back() != position ) {
 										pathsToLockedCells.at( o ).push_back( position );
-									//}
+									} else {
+										pathsToLockedCells.at( o ).pop_back();
+									}
 								}
 								gm->movePlayerOnX( controlsPlayer, 1 );
 							} break;
 						}
 					}
+					
+					if( gm->getDebugStatus() ) {
+						for( decltype( pathsToLockedCells.size() ) d = 0; d < pathsToLockedCells.size(); ++d ) {
+							std::wcout << L"pathsToLockedCells.at( " << d << L" ).size(): " << pathsToLockedCells.at( d ).size() << std::endl;
+						}
+					}
+					
 					break;
 				}
 				case ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH: {
