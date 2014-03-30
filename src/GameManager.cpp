@@ -125,97 +125,6 @@ bool GameManager::allHumansAtGoal() {
 }
 
 /**
-* Should be called only by run().
-* Arguments:
-* None.
-*/
-void GameManager::processControls() {
-	try {
-		if( debug ) {
-			std::wcout << L"processControls() called" << std::endl;
-		}
-		
-		for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
-			if( controls.at( k ).activated ) {
-				switch( controls.at( k ).getAction() ) {
-					case ControlMapping::ACTION_MENU: {
-						showingMenu = !showingMenu;
-						break;
-					}
-					case ControlMapping::ACTION_SCREENSHOT: {
-						takeScreenShot();
-						break;
-					}
-					case ControlMapping::ACTION_VOLUME_UP: {
-						musicVolume += 5;
-						
-						if( musicVolume > 100 ) {
-							musicVolume = 100;
-						}
-						
-						Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
-						break;
-					}
-					case ControlMapping::ACTION_VOLUME_DOWN: {
-						if( musicVolume >= 5 ) {
-							musicVolume -= 5;
-						} else {
-							musicVolume = 0;
-						}
-						
-						Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
-						break;
-					}
-					default: {
-						bool ignoreKey = false;
-						for( decltype( numBots ) b = 0; !ignoreKey && b < numBots; ++b ) { //Ignore controls that affect bots
-							if( controls.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
-								ignoreKey = true;
-							}
-						}
-
-						if( !ignoreKey ) {
-							switch( controls.at( k ).getAction() ) {
-								case ControlMapping::ACTION_UP: {
-									movePlayerOnY( controls.at( k ).getPlayer(), -1);
-									break;
-								}
-								case ControlMapping::ACTION_DOWN: {
-									movePlayerOnY( controls.at( k ).getPlayer(), 1);
-									break;
-								}
-								case ControlMapping::ACTION_RIGHT: {
-									movePlayerOnX( controls.at( k ).getPlayer(), 1);
-									break;
-								}
-								case ControlMapping::ACTION_LEFT: {
-									movePlayerOnX( controls.at( k ).getPlayer(), -1);
-									break;
-								}
-								default: {
-									std::wcerr << "k is " << k << std::endl;
-									std::wcerr << "controls size is " << controls.size() << std::endl;
-									std::wstring actionStr = controls.at( k ).getActionAsString();
-									std::wcerr << actionStr << std::endl;
-								}
-							}
-						}
-						break;
-					}
-				}
-			}
-		}
-		
-		if( debug ) {
-			std::wcout << L"end of processControls()" << std::endl;
-		}
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::processControls(): " << e.what() << std::endl;
-	}
-}
-
-
-/**
  * Draws everything onto the screen. Calls other draw functions, including those of objects.
  */
 void GameManager::drawAll() {
@@ -301,7 +210,7 @@ void GameManager::drawAll() {
 			{
 				core::stringw timeLabel( L"Time:" );
 				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( stringConverter.toWCharArray( timeLabel ) );
+				tempDimensions = textFont->getDimension( stringConverter.toStdWString( timeLabel ).c_str() ); //stringConverter.toWCharArray( timeLabel ) );
 				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( L"Time:", tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
@@ -311,7 +220,7 @@ void GameManager::drawAll() {
 				timerStr += ( timer->getTime() / 1000 );
 				timerStr += L" seconds";
 				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( stringConverter.toWCharArray( timerStr ) );
+				tempDimensions = textFont->getDimension( stringConverter.toStdWString( timerStr ).c_str() ); //stringConverter.toWCharArray( timerStr ) );
 				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( timerStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
@@ -319,7 +228,7 @@ void GameManager::drawAll() {
 			{
 				core::stringw keysFoundStr( L"Keys found:" );
 				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( stringConverter.toWCharArray( keysFoundStr ) );
+				tempDimensions = textFont->getDimension( stringConverter.toStdWString( keysFoundStr ).c_str() ); //stringConverter.toWCharArray( keysFoundStr ) );
 				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( keysFoundStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
@@ -330,7 +239,7 @@ void GameManager::drawAll() {
 				keyStr += L"/";
 				keyStr += numLocks;
 				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( stringConverter.toWCharArray( keyStr ) );
+				tempDimensions = textFont->getDimension( stringConverter.toStdWString( keyStr ).c_str() ); //stringConverter.toWCharArray( keyStr ) );
 				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( keyStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
@@ -338,7 +247,7 @@ void GameManager::drawAll() {
 			{
 				core::stringw seedLabel( L"Random seed:" );
 				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( stringConverter.toWCharArray( seedLabel ) );
+				tempDimensions = textFont->getDimension( stringConverter.toStdWString( seedLabel ).c_str() );// stringConverter.toWCharArray( seedLabel ) );
 				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( seedLabel, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
@@ -346,14 +255,14 @@ void GameManager::drawAll() {
 			{
 				core::stringw seedStr( randomSeed );
 				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( stringConverter.toWCharArray( seedStr ) );
+				tempDimensions = textFont->getDimension( stringConverter.toStdWString( seedStr ).c_str() ); //stringConverter.toWCharArray( seedStr ) );
 				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( seedStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
 
 			{
 				core::stringw headfor( L"Head for" );
-				tempDimensions = textFont->getDimension( stringConverter.toWCharArray( headfor ) );
+				tempDimensions = textFont->getDimension( stringConverter.toStdWString( headfor ).c_str() ); //stringConverter.toWCharArray( headfor ) );
 				textY += tempDimensions.Height;
 				if( textY < ( ( windowSize.Height / 2 ) - tempDimensions.Height ) ) {
 					textY = ( ( windowSize.Height / 2 ) - tempDimensions.Height );
@@ -366,7 +275,7 @@ void GameManager::drawAll() {
 
 			{
 				core::stringw theexit( L"the exit!" );
-				tempDimensions = textFont->getDimension( stringConverter.toWCharArray( theexit ) );
+				tempDimensions = textFont->getDimension( stringConverter.toStdWString( theexit ).c_str() ); //stringConverter.toWCharArray( theexit ) );
 				textY += tempDimensions.Height;
 				if( numKeysFound >= numLocks ) {
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
@@ -378,14 +287,14 @@ void GameManager::drawAll() {
 				{
 					core::stringw nowplaying( L"Now playing:" );
 					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toWCharArray( nowplaying ) );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( nowplaying ).c_str() ); //stringConverter.toWCharArray( nowplaying ) );
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( nowplaying, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
 					textY += tempDimensions.Height;
-					tempDimensions = musicTagFont->getDimension( stringConverter.toWCharArray( musicTitle ) );
+					tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicTitle ).c_str() ); //stringConverter.toWCharArray( musicTitle ) );
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					musicTagFont->draw( musicTitle, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
 				}
@@ -393,14 +302,14 @@ void GameManager::drawAll() {
 				{
 					core::stringw by( L"by" );
 					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toWCharArray( by ) );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( by ).c_str() ); //stringConverter.toWCharArray( by ) );
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( by, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
 					textY += tempDimensions.Height;
-					tempDimensions = musicTagFont->getDimension( stringConverter.toWCharArray( musicArtist ) );
+					tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicArtist ).c_str() ); //stringConverter.toWCharArray( musicArtist ) );
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					musicTagFont->draw( musicArtist, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
 				}
@@ -408,14 +317,14 @@ void GameManager::drawAll() {
 				{
 					core::stringw fromalbum( L"from album" );
 					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toWCharArray( fromalbum ) );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( fromalbum ).c_str() ); //stringConverter.toWCharArray( fromalbum ) );
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( fromalbum, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
 					textY += tempDimensions.Height;
-					tempDimensions = musicTagFont->getDimension( stringConverter.toWCharArray( musicAlbum ) );
+					tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicAlbum ).c_str() ); //stringConverter.toWCharArray( musicAlbum ) );
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					musicTagFont->draw( musicAlbum, tempRectangle, LIGHTGRAY, true, true, &tempRectangle );
 				}
@@ -423,7 +332,7 @@ void GameManager::drawAll() {
 				{
 					core::stringw volume( L"Volume:" );
 					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toWCharArray( volume ) );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( volume ).c_str() ); //stringConverter.toWCharArray( volume ) );
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( volume, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
@@ -432,7 +341,7 @@ void GameManager::drawAll() {
 					core::stringw volumeNumber( musicVolume );
 					volumeNumber.append( L"%" );
 					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toWCharArray( volumeNumber ) );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( volumeNumber ).c_str() ); //stringConverter.toWCharArray( volumeNumber ) );
 					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( volumeNumber, tempRectangle, LIGHTRED, true, true, &tempRectangle );
 				}
@@ -511,7 +420,7 @@ void GameManager::drawLoadingScreen() {
 			}
 
 			//core::dimension2d< unsigned int > loadingDimensions = loadingFont->getDimension( stringConverter.toWCharArray( loading ) );
-			auto loadingDimensions = loadingFont->getDimension( stringConverter.toWCharArray( loading ) );
+			auto loadingDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
 			int_fast16_t textY = 0;
 			{
 				int_fast16_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
@@ -529,8 +438,8 @@ void GameManager::drawLoadingScreen() {
 				{
 					textY += loadingDimensions.Height + 1;
 					int_fast16_t textX = 0;
-					core::dimension2d< u32 > proTipPrefixDimensions = tipFont->getDimension( stringConverter.toWCharArray( proTipPrefix ) );
-					core::dimension2d< u32 > proTipDimensions = tipFont->getDimension( stringConverter.toWCharArray( proTips.at( currentProTip ) ) );
+					core::dimension2d< u32 > proTipPrefixDimensions = tipFont->getDimension( stringConverter.toStdWString( proTipPrefix ).c_str() ); //stringConverter.toWCharArray( proTipPrefix ) );
+					core::dimension2d< u32 > proTipDimensions = tipFont->getDimension( stringConverter.toStdWString( proTips.at( currentProTip ) ).c_str() ); //stringConverter.toWCharArray( proTips.at( currentProTip ) ) );
 					proTipHeight = std::max( proTipDimensions.Height, proTipPrefixDimensions.Height );
 
 					{
@@ -618,7 +527,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		decltype( textYOriginal ) textYScoresTotal = textYOriginal;
 		//To determine how tall each row of text is, we draw the row labels first (their text could conceivably have hangy-down bits like a lower-case y)
 		{
-			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( winnersLabel ) );
+			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( winnersLabel ).c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
 			core::rect< s32 > tempRectangle( textXOriginal, textY, tempDimensions.Width + textXOriginal, tempDimensions.Height + textY );
 			statsFont->draw( winnersLabel, tempRectangle, WHITE, true, true, &tempRectangle );
 
@@ -629,7 +538,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		}
 
 		{
-			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( steps ) );
+			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( steps ).c_str() );// stringConverter.toWCharArray( steps ) );
 			core::rect< s32 > tempRectangle( textXOriginal, textYSteps, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYSteps );
 			statsFont->draw( steps, tempRectangle, WHITE, true, true, &tempRectangle );
 
@@ -640,7 +549,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		}
 
 		{
-			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( times ) );
+			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( times ).c_str() ); //stringConverter.toWCharArray( times ) );
 			core::rect< s32 > tempRectangle( textXOriginal, textYTimes, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYTimes );
 			statsFont->draw( times, tempRectangle, WHITE, true, true, &tempRectangle );
 
@@ -651,7 +560,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		}
 
 		{
-			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( keysFoundPerPlayer ) );
+			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( keysFoundPerPlayer ).c_str() ); //stringConverter.toWCharArray( keysFoundPerPlayer ) );
 			core::rect< s32 > tempRectangle( textXOriginal, textYKeys, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYKeys );
 			statsFont->draw( keysFoundPerPlayer, tempRectangle, WHITE, true, true, &tempRectangle );
 
@@ -662,7 +571,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		}
 
 		{
-			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( scores ) );
+			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( scores ).c_str() ); //stringConverter.toWCharArray( scores ) );
 			core::rect< s32 > tempRectangle( textXOriginal, textYScores, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYScores );
 			statsFont->draw( scores, tempRectangle, WHITE, true, true, &tempRectangle );
 
@@ -673,7 +582,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 		}
 
 		{
-			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( scoresTotal ) );
+			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( scoresTotal ).c_str() ); //stringConverter.toWCharArray( scoresTotal ) );
 			core::rect< s32 > tempRectangle( textXOriginal, textYScoresTotal, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYScoresTotal );
 			statsFont->draw( scoresTotal, tempRectangle, WHITE, true, true, &tempRectangle );
 
@@ -692,7 +601,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 				text.append( L".P" );
 				text.append( core::stringw( winnersLoadingScreen.at( p ) ) );
 				text.append( L" " );
-				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
 				core::rect< s32 > tempRectangle( textXOld, textY, tempDimensions.Width + textXOld, tempDimensions.Height + textY );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
@@ -701,7 +610,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 			}
 			{ //Now we show how many steps each player took
 				core::stringw text( player.at( winnersLoadingScreen.at( p ) ).stepsTakenLastMaze );
-				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
 				core::rect< s32 > tempRectangle( textXOld, textYSteps, tempDimensions.Width + textXOld, tempDimensions.Height + textYSteps );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
@@ -710,7 +619,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 			}
 			{ //Now we show how long each player took in seconds
 				core::stringw text( player.at( winnersLoadingScreen.at( p ) ).timeTakenLastMaze / 1000 );
-				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
 				core::rect< s32 > tempRectangle( textXOld, textYTimes, tempDimensions.Width + textXOld, tempDimensions.Height + textYTimes );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
@@ -719,7 +628,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 			}
 			{ //Now we show how many keys each player collected
 				core::stringw text( player.at( winnersLoadingScreen.at( p ) ).keysCollectedLastMaze );
-				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
 				core::rect< s32 > tempRectangle( textXOld, textYKeys, tempDimensions.Width + textXOld, tempDimensions.Height + textYKeys );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
@@ -729,7 +638,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 			{ //Finally, each player's score is shown...
 				core::stringw text = stringConverter.toIrrlichtStringW( player.at( winnersLoadingScreen.at( p ) ).getScoreLastMaze() );
 				//text.append( player.at( winnersLoadingScreen.at( p ) ).getScoreLastMaze() );
-				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
 				core::rect< s32 > tempRectangle( textXOld, textYScores, tempDimensions.Width + textXOld, tempDimensions.Height + textYScores );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
@@ -739,7 +648,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 			{ //...followed by the totals.
 				core::stringw text = stringConverter.toIrrlichtStringW( player.at( winnersLoadingScreen.at( p ) ).getScoreTotal() );
 				//text.append( player.at( winnersLoadingScreen.at( p ) ).getScoreTotal() );
-				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toWCharArray( text ) );
+				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
 				core::rect< s32 > tempRectangle( textXOld, textYScoresTotal, tempDimensions.Width + textXOld, tempDimensions.Height + textYScoresTotal );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
@@ -873,7 +782,7 @@ GameManager::GameManager() {
 		}
 
 		//for( std::vector< boost::filesystem::path >::iterator o = fontFolders.begin(); o != fontFolders.end(); o++ ) {
-		for( decltype( fontFolders.size() ) o = 0; o < fontFolders.size(); o++ ) {
+		for( decltype( fontFolders.size() ) o = 0; o < fontFolders.size(); ++o ) {
 			//for( boost::filesystem::recursive_directory_iterator i( *o ); i != end; ++i ) {
 			if( debug ) {
 				std::wcout << L"Looking for fonts in folder " << fontFolders.at( o ) << std::endl;
@@ -974,10 +883,6 @@ GameManager::GameManager() {
 		drawLogo(); //Why the fuck isn't this working consistently? Sometimes it draws, sometimes it only thinks it draws. Had to hack the drawLoadingScreen() function (which gets called several times, therefore is likely to work at least once).
 		driver->endScene();
 
-		/*if( !debug ) { //Ensures the logo will be visible. I don't like just stopping like this but I haven't thought of a good, satisfying way to keep the program running and also continue drawing the logo.
-			device->sleep( 5000 ); //<=5 seconds. "It may not wait the full given time, as sleep may be interrupted." (Quote from the Irrlicht documentation)
-		}*/
-
 		gui = device->getGUIEnvironment();
 		if( isNull( gui ) ) {
 			throw( std::wstring( L"Cannot get GUI environment" ) );
@@ -994,7 +899,7 @@ GameManager::GameManager() {
 
 		loadProTips();
 
-		device->setWindowCaption( stringConverter.toWCharArray( PACKAGE_STRING ) );
+		device->setWindowCaption( stringConverter.toStdWString( PACKAGE_STRING ).c_str() ); //stringConverter.toWCharArray( PACKAGE_STRING ) );
 
 		if( debug ) {
 			device->getLogger()->setLogLevel( ELL_INFORMATION );
@@ -1139,12 +1044,12 @@ GameManager::GameManager() {
 
 		goal.loadTexture( driver );
 
-		if( enableController && device->activateJoysticks( controllerInfo ) && debug ) { //activatecontrollers fills controllerInfo with info about each controller
+		if( enableController && device->activateJoysticks( controllerInfo ) && debug ) { //activateJoysticks fills controllerInfo with info about each controller
 			std::wcout << L"controller support is enabled and " << controllerInfo.size() << L" controller(s) are present." << std::endl;
 
 			for( uint_fast16_t controller = 0; controller < controllerInfo.size(); ++controller ) {
 				std::wcout << L"controller " << controller << L":" << std::endl;
-				std::wcout << L"\tName: '" << stringConverter.toWCharArray( controllerInfo[ controller ].Name ) << L"'" << std::endl;
+				std::wcout << L"\tName: '" << stringConverter.toStdWString( controllerInfo[ controller ].Name ).c_str() << L"'" << std::endl; //stringConverter.toWCharArray( controllerInfo[ controller ].Name ) << L"'" << std::endl;
 				std::wcout << L"\tAxes: " << controllerInfo[ controller ].Axes << std::endl;
 				std::wcout << L"\tButtons: " << controllerInfo[ controller ].Buttons << std::endl;
 
@@ -1414,7 +1319,7 @@ void GameManager::loadFonts() {
 				do { //Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
 					loadingFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 					if( !isNull( loadingFont ) ) {
-						fontDimensions = loadingFont->getDimension( stringConverter.toWCharArray( loading ) );
+						fontDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
 						size -= 2;
 					}
 				} while( !isNull( loadingFont ) && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
@@ -1424,7 +1329,7 @@ void GameManager::loadFonts() {
 				do {
 					loadingFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 					if( !isNull( loadingFont ) ) {
-						fontDimensions = loadingFont->getDimension( stringConverter.toWCharArray( loading ) );
+						fontDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
 						size -= 1;
 					}
 				} while( !isNull( loadingFont ) && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
@@ -1541,7 +1446,7 @@ void GameManager::loadFonts() {
 							}
 
 							fontDimensions = core::dimension2d< uint_fast32_t >( temp.Width * numPlayers, temp.Height );
-							temp = statsFont->getDimension( stringConverter.toWCharArray( winnersLabel ) );
+							temp = statsFont->getDimension( stringConverter.toStdWString( winnersLabel ).c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
 							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) );
 							size -= 2;
 						}
@@ -1562,7 +1467,7 @@ void GameManager::loadFonts() {
 							}
 
 							fontDimensions = core::dimension2d< uint_fast32_t >( temp.Width * numPlayers, temp.Height );
-							temp = statsFont->getDimension( stringConverter.toWCharArray( winnersLabel ) );
+							temp = statsFont->getDimension( stringConverter.toStdWString( winnersLabel ).c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
 							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) );
 							size -= 1;
 						}
@@ -1641,9 +1546,9 @@ void GameManager::loadMusicFont() {
 				do {
 					musicTagFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 					if( !isNull( musicTagFont ) ) {
-						artistDimensions = musicTagFont->getDimension( stringConverter.toWCharArray( musicArtist ) );
-						albumDimensions = musicTagFont->getDimension( stringConverter.toWCharArray( musicAlbum ) );
-						titleDimensions = musicTagFont->getDimension( stringConverter.toWCharArray( musicTitle ) );
+						artistDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicArtist ).c_str() ); //stringConverter.toWCharArray( musicArtist ) );
+						albumDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicAlbum ).c_str() ); //stringConverter.toWCharArray( musicAlbum ) );
+						titleDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicTitle ).c_str() ); //stringConverter.toWCharArray( musicTitle ) );
 						size -= 2; //Initially I had it going down by 1 each time. It's faster to go down by 2 until we've gotten close to our desired size...
 					}
 				} while( !isNull( musicTagFont ) && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
@@ -1653,9 +1558,9 @@ void GameManager::loadMusicFont() {
 				do {
 					musicTagFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 					if( !isNull( musicTagFont ) ) {
-						artistDimensions = musicTagFont->getDimension( stringConverter.toWCharArray( musicArtist ) );
-						albumDimensions = musicTagFont->getDimension( stringConverter.toWCharArray( musicAlbum ) );
-						titleDimensions = musicTagFont->getDimension( stringConverter.toWCharArray( musicTitle ) );
+						artistDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicArtist ).c_str() ); //stringConverter.toWCharArray( musicArtist ) );
+						albumDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicAlbum ).c_str() ); //stringConverter.toWCharArray( musicAlbum ) );
+						titleDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicTitle ).c_str() ); //stringConverter.toWCharArray( musicTitle ) );
 						size -= 1; //...and start going down by 1.
 					}
 				} while( !isNull( musicTagFont ) && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
@@ -1765,7 +1670,7 @@ void GameManager::loadNextSong() {
 					}
 
 					if( debug ) {
-						std::wcout << L"Now playing: " << stringConverter.toWCharArray( musicTitle ) << L" by " << stringConverter.toWCharArray( musicArtist ) << L" from album " << stringConverter.toWCharArray( musicAlbum ) << std::endl;
+						std::wcout << L"Now playing: " << stringConverter.toStdWString( musicTitle ) << L" by " << stringConverter.toStdWString( musicArtist ) << L" from album " << stringConverter.toStdWString( musicAlbum ) << std::endl;
 					}
 				}
 
@@ -1874,7 +1779,7 @@ void GameManager::loadTipFont() {
 			do {
 				tipFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 				if( !isNull( tipFont ) ) {
-					tipDimensions = tipFont->getDimension( stringConverter.toWCharArray( tipIncludingPrefix ) );
+					tipDimensions = tipFont->getDimension( stringConverter.toStdWString( tipIncludingPrefix ).c_str() ); //stringConverter.toWCharArray( tipIncludingPrefix ) );
 					size -= 2;
 				}
 			} while( !isNull( tipFont ) && ( tipDimensions.Width > maxWidth ) );
@@ -1884,7 +1789,7 @@ void GameManager::loadTipFont() {
 			do {
 				tipFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 				if( !isNull( tipFont ) ) {
-					tipDimensions = tipFont->getDimension( stringConverter.toWCharArray( tipIncludingPrefix ) );
+					tipDimensions = tipFont->getDimension( stringConverter.toStdWString( tipIncludingPrefix ).c_str() ); //stringConverter.toWCharArray( tipIncludingPrefix ) );
 					size -= 1;
 				}
 			} while( !isNull( tipFont ) && ( tipDimensions.Width > maxWidth ) );
@@ -2268,15 +2173,14 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							message += L".\n\n";
 							message += stringConverter.toStdWString( PACKAGE_NAME );
 							message += L" is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.";
-							gui->addMessageBox( L"Freedom", stringConverter.toWCharArray( message ) );
+							gui->addMessageBox( L"Freedom", stringConverter.toStdWString( message ).c_str() ); //stringConverter.toWCharArray( message ) );
 							return true;
 						}
 				}
 
 				for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
 					if( event.MouseInput.Event == controls.at( k ).getMouseEvent() ) {
-						controls.at( k ).activated = ( ( event.MouseInput.Wheel > 0 && controls.at( k ).getMouseWheelUp() ) || ( event.MouseInput.Wheel <= 0 && !controls.at( k ).getMouseWheelUp() ) );
-						return true;
+						controls.at( k ).activated = ( ( event.MouseInput.Wheel > 0 && controls.at( k ).getMouseWheelUp() ) || ( event.MouseInput.Wheel < 0 && !controls.at( k ).getMouseWheelUp() ) );
 					}
 				}
 			}
@@ -2426,7 +2330,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 					case gui::EGET_FILE_SELECTED: {
 						if( event.GUIEvent.Caller->getID() == fileChooser->getID() ) {
 							if( debug ) {
-								std::wcout << L"File selected. Folder: " << stringConverter.toWCharArray( fileChooser->getDirectoryName() ) << L"\tFile: " << fileChooser->getFileName() << std::endl;
+								std::wcout << L"File selected. Folder: " << stringConverter.toStdWString( fileChooser->getDirectoryName() ) << L"\tFile: " << fileChooser->getFileName() << std::endl;
 							}
 							boost::filesystem::current_path( currentDirectory ); //Resets the actual current directory to currentDirectory, since the file chooser can change the current directory.
 
@@ -2567,6 +2471,103 @@ bool GameManager::OnEvent( const SEvent& event ) {
 		std::wcout << L"Error in drawLogo(): " << error.what() << std::endl;
 	}
  }
+
+/**
+* Should be called only by run().
+* Arguments:
+* None.
+*/
+void GameManager::processControls() {
+	try {
+		if( debug ) {
+			std::wcout << L"processControls() called" << std::endl;
+		}
+		
+		for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
+			if( controls.at( k ).activated ) {
+				if ( controls.at( k ).getMouseEvent() == irr::EMOUSE_INPUT_EVENT::EMIE_MOUSE_WHEEL ) { //There's no event for when the wheel stops moving, so we're manually deactivating those controls
+					controls.at( k ).activated = false;
+				}
+				
+				switch( controls.at( k ).getAction() ) {
+					case ControlMapping::ACTION_MENU: {
+						showingMenu = !showingMenu;
+						break;
+					}
+					case ControlMapping::ACTION_SCREENSHOT: {
+						takeScreenShot();
+						break;
+					}
+					case ControlMapping::ACTION_VOLUME_UP: {
+						musicVolume += 5;
+						
+						if( musicVolume > 100 ) {
+							musicVolume = 100;
+						}
+						
+						Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+						break;
+					}
+					case ControlMapping::ACTION_VOLUME_DOWN: {
+						if( musicVolume >= 5 ) {
+							musicVolume -= 5;
+						} else {
+							musicVolume = 0;
+						}
+						
+						Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+						break;
+					}
+					default: {
+						bool ignoreKey = false;
+						for( decltype( numBots ) b = 0; !ignoreKey && b < numBots; ++b ) { //Ignore controls that affect bots
+							if( controls.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
+								ignoreKey = true;
+							}
+						}
+
+						if( !ignoreKey ) {
+							switch( controls.at( k ).getAction() ) {
+								case ControlMapping::ACTION_UP: {
+									movePlayerOnY( controls.at( k ).getPlayer(), -1);
+									break;
+								}
+								case ControlMapping::ACTION_DOWN: {
+									movePlayerOnY( controls.at( k ).getPlayer(), 1);
+									break;
+								}
+								case ControlMapping::ACTION_RIGHT: {
+									movePlayerOnX( controls.at( k ).getPlayer(), 1);
+									break;
+								}
+								case ControlMapping::ACTION_LEFT: {
+									movePlayerOnX( controls.at( k ).getPlayer(), -1);
+									break;
+								}
+								default: {
+									if( debug ) {
+										std::wcerr << "k is " << k << std::endl;
+										std::wcerr << "controls size is " << controls.size() << std::endl;
+										std::wstring actionStr = controls.at( k ).getActionAsString();
+										std::wcerr << actionStr << std::endl;
+									}
+								}
+							}
+						}
+						break;
+					}
+				}
+			}
+		}
+		
+		if( debug ) {
+			std::wcout << L"end of processControls()" << std::endl;
+		}
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in GameManager::processControls(): " << e.what() << std::endl;
+	}
+}
+
 
 /**
  * Reads preferences from prefs.cfg. Sets defaults for any preference not found in the file. If the file does not exist, creates it.
@@ -4050,7 +4051,7 @@ void GameManager::takeScreenShot() {
 			if( !driver->writeImageToFile( image, filename ) ) {
 				throw( std::wstring( L"Failed to save screen shot to file " + stringConverter.toStdWString( filename ) ) );
 			} else if( debug ) {
-				std::wcout << L"Screen shot saved as " << stringConverter.toWCharArray( filename ) << std::endl;
+				std::wcout << L"Screen shot saved as " << stringConverter.toStdWString( filename ) << std::endl; //stringConverter.toWCharArray( filename ) << std::endl;
 			}
 
 			image->drop();

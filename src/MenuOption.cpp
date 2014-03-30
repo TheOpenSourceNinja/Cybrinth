@@ -58,7 +58,7 @@ void MenuOption::setDimension() {
 	try {
 		if( font != nullptr ) {
 			StringConverter sc;
-			dimension = font->getDimension( sc.toWCharArray( text ) );
+			dimension = font->getDimension( sc.toStdWString( text ).c_str() ); //sc.toWCharArray( text ) );
 		} else {
 			dimension = irr::core::dimension2d<uint_fast16_t>( 0, 0 );
 		}

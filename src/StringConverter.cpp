@@ -73,6 +73,10 @@ TagLib::wstring StringConverter::toTaglibWString ( irr::core::stringw input ) {
 	}
 }
 
+std::wstring StringConverter::toStdWString( irr::io::path input ) {
+	return toStdWString( input.c_str() );
+}
+
 TagLib::wstring StringConverter::toTaglibWString( std::wstring input ) {
 	try {
 		TagLib::wstring result;
@@ -251,7 +255,7 @@ std::wstring StringConverter::toStdWString( long double input ) {
 	}
 }
 
-const wchar_t* StringConverter::toWCharArray( std::wstring input ) {
+/*const wchar_t* StringConverter::toWCharArray( std::wstring input ) {
 	return input.c_str();
 }
 
@@ -265,7 +269,7 @@ const wchar_t* StringConverter::toWCharArray( char* input ) {
 
 const wchar_t* StringConverter::toWCharArray( const char* input ) {
 	return toStdWString( input ).c_str();
-}
+}*/
 
 StringConverter::~StringConverter() {
 	try {

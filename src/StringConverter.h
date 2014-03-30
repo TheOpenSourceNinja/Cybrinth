@@ -15,6 +15,7 @@
 #include "PreprocessorCommands.h"
 
 #include <irrString.h>
+#include <path.h>
 #include <taglib/taglib.h>
 #ifdef HAVE_STRING
 #include <string>
@@ -31,6 +32,7 @@ class StringConverter
 		TagLib::wstring toTaglibWString( irr::core::stringw input );
 		TagLib::wstring toTaglibWString( std::wstring input );
 		std::wstring toStdWString( irr::core::stringw input );
+		std::wstring toStdWString( irr::io::path input );
 		std::wstring toStdWString( TagLib::wstring input );
 		std::wstring toStdWString( std::string input );
 		std::wstring toStdWString( char* input );
@@ -46,10 +48,11 @@ class StringConverter
 		std::wstring toStdWString( float input );
 		std::wstring toStdWString( double input );
 		std::wstring toStdWString( long double input );
-		const wchar_t* toWCharArray( std::wstring input );
+		//I really would like it if we could use the following functions without relying on the user to delete the memory they use
+		/*const wchar_t* toWCharArray( std::wstring input );
 		const wchar_t* toWCharArray( irr::core::stringw input );
 		const wchar_t* toWCharArray( char* input );
-		const wchar_t* toWCharArray( const char* input );
+		const wchar_t* toWCharArray( const char* input );*/
 	protected:
 	private:
 };

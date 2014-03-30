@@ -38,7 +38,6 @@ AI::~AI() {
 void AI::allKeysFound() { //Makes the bot 'forget' that it has visited certain maze cells
 	try {
 		noKeysLeft = true;
-		findSolution();
 
 		for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 
@@ -64,6 +63,8 @@ void AI::allKeysFound() { //Makes the bot 'forget' that it has visited certain m
 		pathsToLockedCells.clear();
 		pathsToLockedCells.shrink_to_fit(); //If your compiler doesn't support C++11 or later, comment this line and uncomment the next
 		//std::vector< std::vector< core::position2d< uint_fast8_t > > >().swap( pathsToLockedCells );
+		
+		findSolution();
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::allKeysFound(): " << e.what() << std::endl;
 	}
@@ -449,7 +450,18 @@ void AI::move() {
 			if( !solved ) {
 				findSolution();
 			}
-
+			if( solved ) {
+				solved = ( !solution.empty() );
+			}
+			
+			//A workaround for a bug: on rare occasions, findSolution() fails to find a solution. Hoping that calling it again will solve that.
+			if ( !solved ) {
+				findSolution();
+			}
+			if( solved ) {
+				solved = ( !solution.empty() );
+			}
+			
 			if( !solution.empty() ) {
 				if( solution.back().X > currentPosition.X ) {
 					gm->movePlayerOnX( controlsPlayer, 1 );

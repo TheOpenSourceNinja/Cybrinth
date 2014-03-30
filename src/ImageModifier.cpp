@@ -16,7 +16,7 @@ ImageModifier::~ImageModifier() {
 video::ITexture* ImageModifier::imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* oldImage, irr::core::stringw name ) {
 	try {
 		StringConverter sc;
-		irr::video::ITexture* texture = driver->addTexture( sc.toWCharArray( name ), oldImage );
+		irr::video::ITexture* texture = driver->addTexture( name.c_str(), oldImage ); //sc.toWCharArray( name ), oldImage );
 		texture->grab();
 		return texture;
 	} catch ( std::exception &e ) {
