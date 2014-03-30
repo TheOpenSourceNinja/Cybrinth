@@ -768,7 +768,7 @@ GameManager::GameManager() {
 		minHeight = 480;
 		currentDirectory = boost::filesystem::current_path();
 		haveShownLogo = false;
-		showingMenu = false;
+		showingMenu = true;
 		donePlaying = false;
 		lastTimeControlsProcessed = 0;
 		controlProcessDelay = 100;
@@ -1307,6 +1307,9 @@ void GameManager::loadFonts() {
 		if( debug ) {
 			std::wcout << L"loadFonts() called" << std::endl;
 		}
+		
+		heightTestString = L"()*^&v.ygj";
+		
 		//These were split off into separate functions because they are needed more often than loadFonts()
 		loadTipFont();
 		loadMusicFont();
@@ -1335,7 +1338,7 @@ void GameManager::loadFonts() {
 				} while( !isNull( loadingFont ) && ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 			}
 
-			if( fontFile == "" || isNull( loadingFont ) || size <= gui->getBuiltInFont()->getDimension( L"(ygj*^" ).Height ) {
+			if( fontFile == "" || isNull( loadingFont ) || size <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
 				loadingFont = gui->getBuiltInFont();
 			}
 
@@ -1383,7 +1386,7 @@ void GameManager::loadFonts() {
 				} while( !isNull( textFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
 			}
 
-			if( fontFile == "" || isNull( textFont ) || textFont->getDimension( L"(ygj*^" ).Height <= gui->getBuiltInFont()->getDimension( L"(ygj*^" ).Height ) {
+			if( fontFile == "" || isNull( textFont ) || textFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
 				textFont = gui->getBuiltInFont();
 			}
 
@@ -1417,7 +1420,7 @@ void GameManager::loadFonts() {
 				} while( !isNull( clockFont ) && ( fontDimensions.Width + viewportSize.Width > windowSize.Width  || fontDimensions.Height > ( windowSize.Height / 5 ) ) );
 			}
 
-			if( fontFile == "" || isNull( clockFont ) || clockFont->getDimension( L"(ygj*^" ).Height <= gui->getBuiltInFont()->getDimension( L"(ygj*^" ).Height ) {
+			if( fontFile == "" || isNull( clockFont ) || clockFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
 				clockFont = gui->getBuiltInFont();
 			}
 
@@ -1429,53 +1432,56 @@ void GameManager::loadFonts() {
 
 		{ //Load statsFont
 			core::dimension2d< uint_fast32_t > fontDimensions;
+			
 			if( fontFile != "" ) {
-				uint_fast32_t size = windowSize.Width / numPlayers / 2; //A quick approximation of the size we'll need the text to be.
-				uint_fast8_t BuiltInFontWidth = gui->getBuiltInFont()->getDimension( L"e" ).Width; //Why e? I ask why not e.
-				if( size > BuiltInFontWidth ) { //If the text needs to be that small, go with the built-in font because it's readable at that size.
+				auto aboveStats = loadingFont->getDimension( loading.c_str() ).Height + std::max( tipFont->getDimension( proTipPrefix.c_str() ).Height, tipFont->getDimension( proTips.at( currentProTip ).c_str() ).Height );
+			
+				uint_fast32_t size = windowSize.Width / numPlayers / 10; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
+				uint_fast8_t builtInFontHeight = gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height;
+				if( size > builtInFontHeight ) { //If the text needs to be that small, go with the built-in font because it's readable at that size.
 					do {
+						size -= 2;
 						statsFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 						if( !isNull( statsFont ) ) {
 							core::dimension2d< uint_fast32_t > temp;
 							if( numPlayers < 10 ) {
-								temp = statsFont->getDimension( L"0.P0" );
+								temp = statsFont->getDimension( L"0.P" + numPlayers );
 							} else if( numPlayers < 100 ) {
-								temp = statsFont->getDimension( L"00.P00" );
+								temp = statsFont->getDimension( L"00.P" + numPlayers );
 							} else {
-								temp = statsFont->getDimension( L"000.P000" );
+								temp = statsFont->getDimension( L"000.P" + numPlayers );
 							}
-
+							
 							fontDimensions = core::dimension2d< uint_fast32_t >( temp.Width * numPlayers, temp.Height );
-							temp = statsFont->getDimension( stringConverter.toStdWString( winnersLabel ).c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
-							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) );
-							size -= 2;
+							temp = statsFont->getDimension( steps.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
+							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
 						}
-					} while( size > BuiltInFontWidth && !isNull( statsFont ) && ( fontDimensions.Width >= windowSize.Width  || fontDimensions.Height >= windowSize.Height ) );
+					} while( size > builtInFontHeight && !isNull( statsFont ) && ( fontDimensions.Width >= windowSize.Width  || fontDimensions.Height + aboveStats >= windowSize.Height ) );
 
 					size += 3;
 
 					do {
+						size -= 1;
 						statsFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 						if( !isNull( statsFont ) ) {
 							core::dimension2d< uint_fast32_t > temp;
 							if( numPlayers < 10 ) {
-								temp = statsFont->getDimension( L"0.P0" );
+								temp = statsFont->getDimension( L"0.P" + numPlayers  );
 							} else if( numPlayers < 100 ) {
-								temp = statsFont->getDimension( L"00.P00" );
+								temp = statsFont->getDimension( L"00.P" + numPlayers  );
 							} else {
-								temp = statsFont->getDimension( L"000.P000" );
+								temp = statsFont->getDimension( L"000.P" + numPlayers  );
 							}
 
 							fontDimensions = core::dimension2d< uint_fast32_t >( temp.Width * numPlayers, temp.Height );
-							temp = statsFont->getDimension( stringConverter.toStdWString( winnersLabel ).c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
-							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) );
-							size -= 1;
+							temp = statsFont->getDimension( steps.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
+							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
 						}
-					} while( size > BuiltInFontWidth && !isNull( statsFont ) && ( fontDimensions.Width >= windowSize.Width / 2  || fontDimensions.Height >= windowSize.Height / 2 ) );
+					} while( size > builtInFontHeight && !isNull( statsFont ) && ( fontDimensions.Width >= windowSize.Width  || fontDimensions.Height + aboveStats >= windowSize.Height ) );
 				}
 			}
 
-			if( fontFile == "" || isNull( statsFont ) || statsFont->getDimension( L"(ygj*^" ).Height <= gui->getBuiltInFont()->getDimension( L"(ygj*^" ).Height ) {
+			if( fontFile == "" || isNull( statsFont ) || statsFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
 				statsFont = gui->getBuiltInFont();
 			}
 
@@ -1566,7 +1572,7 @@ void GameManager::loadMusicFont() {
 				} while( !isNull( musicTagFont ) && ( artistDimensions.Width > maxWidth || albumDimensions.Width > maxWidth || titleDimensions.Width > maxWidth ) );
 			}
 
-			if( fontFile == "" || isNull( musicTagFont ) || musicTagFont->getDimension( L"(ygj*^" ).Height <= gui->getBuiltInFont()->getDimension( L"(ygj*^" ).Height ) {
+			if( fontFile == "" || isNull( musicTagFont ) || musicTagFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
 				musicTagFont = gui->getBuiltInFont();
 			}
 		}
@@ -1795,7 +1801,7 @@ void GameManager::loadTipFont() {
 			} while( !isNull( tipFont ) && ( tipDimensions.Width > maxWidth ) );
 		}
 
-		if( fontFile == "" || isNull( tipFont ) || tipFont->getDimension( L"(ygj*^" ).Height <= gui->getBuiltInFont()->getDimension( L"(ygj*^" ).Height ) {
+		if( fontFile == "" || isNull( tipFont ) || tipFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
 			tipFont = gui->getBuiltInFont();
 		}
 		
@@ -2117,28 +2123,6 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						return true;
 					}
 				}
-				/*if( event.KeyInput.PressedDown ) { //Don't react when the key is released, only when it's pressed.
-					if( !( showingMenu || showingLoadingScreen ) ) {
-						for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
-							if( event.KeyInput.Key == controls.at( k ).getKey() ) {
-								return doEventActions( k, event );
-								break;
-							}
-						}
-					} else if( showingMenu ) { //We only want certain actions to work if we're showing the menu
-						for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
-							if( event.KeyInput.Key == controls.at( k ).getKey() ) {
-								switch( controls.at( k ).getAction() ) {
-									case ControlMapping::MENU:
-									case ControlMapping::SCREENSHOT: {
-										return doEventActions( k, event );
-									}
-								}
-								break;
-							}
-						}
-					}
-				}*/
 			}
 			break;
 
@@ -3121,7 +3105,6 @@ void GameManager::resetThings() {
 		winnersLoadingScreen = winners;
 		winners.clear();
 		stuff.clear();
-		showingMenu = false;
 		numKeysFound = 0;
 		numLocks = 0;
 		donePlaying = false;

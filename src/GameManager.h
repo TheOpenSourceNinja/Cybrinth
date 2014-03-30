@@ -206,6 +206,8 @@ class GameManager : public IEventReceiver {
 		//wide character strings----------------------------------
 		core::stringw fontFile;
 		
+		core::stringw heightTestString; //Used only when loading fonts
+		
 		core::stringw keysFoundPerPlayer;
 		
 		core::stringw loading;

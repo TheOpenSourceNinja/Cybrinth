@@ -74,7 +74,7 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, ui
 	try {
 		video::SColor wallColor = WHITE;
 		video::SColor lockColor = BROWN;
-		video::SColor acidProofWallColor = GREEN;
+		video::SColor acidProofWallColor = LIGHTGREEN;
 		video::SColor wallShadowColor = BLACK;
 		video::SColor lockShadowColor = BLACK;
 		video::SColor acidProofWallShadowColor = BLACK;
