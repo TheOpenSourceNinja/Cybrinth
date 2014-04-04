@@ -3,6 +3,8 @@ Uses the following libraries:
 
 - Irrlicht by Nikolaus Gebhardt and others, see http://irrlicht.sourceforge.net/authors/
 - Boost Filesystem by Beman Dawes
+- Boost Lexical Cast by Kevlin Henney
+- Boost String Algo by Pavol Droba
 - TagLib by Scott Wheeler and others, see https://github.com/taglib/taglib/blob/master/AUTHORS
 - SDL_Mixer by Sam Lantinga, Stephane Peter, and Ryan Gordon
 - FreeType by David Turner, Robert Wilhelm, and Werner Lemberg.

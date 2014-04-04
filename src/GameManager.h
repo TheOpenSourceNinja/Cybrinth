@@ -135,6 +135,7 @@ class GameManager : public IEventReceiver {
 		
 		
 		void processControls();
+		void processMenuSelection();
 		
 		void readPrefs();
 
@@ -253,7 +254,7 @@ class GameManager : public IEventReceiver {
 		MenuOption saveMaze;
 		SpellChecker spellChecker;
 		
-		SystemSpecificsManager system;
+		SystemSpecificsManager system; // Flawfinder: ignore
 
 
 		//2D dimensions----------------------------------

@@ -24,6 +24,7 @@ MenuOption::MenuOption() {
 		font = nullptr;
 		setText( L"" );
 		setDimension();
+		highlighted = false;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::MenuOption(): " << e.what() << std::endl;
 	}
@@ -69,12 +70,26 @@ void MenuOption::setDimension() {
 
 void MenuOption::draw( irr::video::IVideoDriver* driver ) {
 	try {
-		//driver->draw2DImage( texture, core::position2d<int_fast16_t>( x, y ) );
 		if( font != nullptr ) {
-			font->draw( text, irr::core::rect< irr::s32 >( x, y, dimension.Width, dimension.Height ), LIGHTCYAN );
+			irr::core::rect< irr::s32 > background( x, y, x + dimension.Width, y + dimension.Height );
+			driver->draw2DRectangle( BLACK, background );
+			
+			irr::video::SColor textColor;
+			if( highlighted ) {
+				textColor = LIGHTCYAN;
+				driver->draw2DRectangleOutline( background, textColor );
+			} else {
+				textColor = CYAN;
+			}
+			font->draw( text, irr::core::rect< irr::s32 >( x, y, dimension.Width, dimension.Height ), textColor );
+		} else {
+			throw( L"Font is null" );
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::draw(): " << e.what() << std::endl;
+	}
+	 catch ( std::wstring &e ) {
+		std::wcerr << L"Error in MenuOption::draw(): " << e << std::endl;
 	}
 }
 

@@ -14,6 +14,9 @@ Play this on your TI-84+ during math class!
 Don't like the game? Change it. Seriously, it's open source.
 Watch the moving colored circles. Time can wait.
 The end of the world is next Tuesday at 16:30. Try to win the game by then, or at least get a high score.
-0x49 0x66 0x20 0x79 0x6f 0x75 0x20 0x63 0x61 0x6e 0x20 0x72 0x65 0x61 0x64 0x20 0x74 0x68 0x69 0x73 0x2c 0x20 0x67 0x65 0x74 0x20 0x61 0x20 0x6c 0x69 0x66 0x65 0x2e
+0x(49 66 20 79 6f 75 20 63 61 6e 20 72 65 61 64 20 74 68 69 73 2c 20 67 65 74 20 61 20 6c 69 66 65 2e)
 When all else fails, read the instructions. But only when all else fails.
 Solve your pattern, push on ahead, take mental notes as you proceed.
+Pray to me that I will let you win.
+Pray to your hands that your fingers will move faster.
+Pray to God to change his eternal plan so you will win this game.

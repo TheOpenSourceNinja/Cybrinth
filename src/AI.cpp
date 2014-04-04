@@ -181,7 +181,7 @@ void AI::findSolution() {
 	try {
 		solved = false;
 		//numKeysInSolution = 0;
-		keyImSeeking = 0;
+		keyImSeeking = UINT_FAST8_MAX;
 		solution.clear();
 		{
 			Player* p = gm->getPlayer( controlsPlayer );
@@ -227,7 +227,7 @@ void AI::findSolutionDFS( irr::core::position2d< uint_fast8_t > currentPosition 
 	try {
 		std::vector< irr::core::position2d< uint_fast8_t > > partialSolution;
 		//Instead of adding a bunch of code for DFS, just do IDDFS with the deepest max depth possible.
-		uint_fast16_t maxDepth = ( uint_fast16_t ) cols * rows;
+		uint_fast16_t maxDepth = static_cast< uint_fast16_t > ( cols ) * static_cast< uint_fast16_t > ( rows );
 		IDDFSCellsVisited.clear();
 		findSolutionIDDFS( partialSolution, currentPosition, maxDepth, false );
 
@@ -252,13 +252,13 @@ void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > currentPositio
 	try {
 		std::vector< irr::core::position2d< uint_fast8_t > > partialSolution;
 		
-		uint_fast16_t maxDepth = ( uint_fast16_t ) cols * rows;
+		uint_fast16_t maxDepth = static_cast< uint_fast16_t >( cols ) * static_cast< uint_fast16_t >( rows );
 		
 		if( noKeysLeft ) {
 			IDDFSCellsVisited.clear();
 			findSolutionIDDFS( partialSolution, currentPosition, maxDepth, false );
 		} else {
-			for( uint_fast16_t i = 1; solution.size() == 0 && i <= maxDepth; i++ ) {
+			for( decltype( maxDepth ) i = 1; solution.empty() && i <= maxDepth; ++i ) {
 				if( gm->getDebugStatus() ) {
 					std::wcout << L"In IDDFS loop, i=" << i << std::endl;
 				}
@@ -360,8 +360,8 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 					partialSolution.pop_back();
 				} else {
 					for( uint_fast8_t i = 0; ( i < possibleDirections.size() && solution.empty() ); ++i ) { //changed decltype( possibleDirections.size() ) to uint_fast8_t because the size of possibleDirections can never exceed 4 but could be stored in a needlessly large integer type.
-						direction_t choice = possibleDirections.at( i );
-						uint_fast16_t newDepthLimit = depthLimit - 1;
+						direction_t choice = possibleDirections.at( rand() % possibleDirections.size() );
+						auto newDepthLimit = depthLimit - 1;
 						switch( choice ) {
 							case UP: {
 								core::position2d< uint_fast8_t > newPosition( currentPosition.X, currentPosition.Y - 1 );
@@ -447,7 +447,10 @@ void AI::move() {
 		irr::core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 
 		if( startSolved ) {
-			if( !solved ) {
+			while( !solved || solution.empty() ) {
+				findSolution();
+			}
+			/*if( !solved ) {
 				findSolution();
 			}
 			if( solved ) {
@@ -460,7 +463,7 @@ void AI::move() {
 			}
 			if( solved ) {
 				solved = ( !solution.empty() );
-			}
+			}*/
 			
 			if( !solution.empty() ) {
 				if( solution.back().X > currentPosition.X ) {
@@ -816,7 +819,7 @@ bool AI::noOriginalTopWall( uint_fast8_t x, uint_fast8_t y ) {
 void AI::reset() {
 	try {
 		noKeysLeft = false;
-		keyImSeeking = 0;
+		keyImSeeking = UINT_FAST8_MAX;
 		IDDFSDepthLimit = 1;
 		hand = RIGHT; //Arbitrarily chosen direction
 		lastTimeMoved = 0;

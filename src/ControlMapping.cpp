@@ -13,74 +13,6 @@ ControlMapping::action_t ControlMapping::getAction() {
 	}
 }
 
-std::wstring ControlMapping::getActionAsString() {
-	try {
-		switch( action ) {
-			case ACTION_MENU: {
-				return L"menu";
-			}
-			case ACTION_SCREENSHOT: {
-				return L"screenshot";
-			}
-			case ACTION_VOLUME_UP: {
-				return L"volumeup";
-			}
-			case ACTION_VOLUME_DOWN: {
-				return L"volumedown";
-			}
-			case ACTION_UP: {
-				return L"up";
-			}
-			case ACTION_DOWN: {
-				return L"down";
-			}
-			case ACTION_RIGHT: {
-				return L"right";
-			}
-			case ACTION_LEFT: {
-				return L"left";
-			}
-			default: {
-				return L"ERROR DO NOT USE";
-			}
-		}
-	} catch( std::exception &e ) {
-		std::wcout << L"Error in ControlMapping::getActionAsString(): " << e.what() << std::endl;
-		return L"ERROR";
-	}
-}
-
-void ControlMapping::setActionFromString( std::wstring val ) {
-	try {
-		if( boost::iequals( val, L"menu" ) ) {
-			action = ACTION_MENU;
-		} else if( boost::iequals( val, L"screenshot" ) ) {
-			action = ACTION_SCREENSHOT;
-		} else if( boost::iequals( val, L"volumeup" ) ) {
-			action = ACTION_VOLUME_UP;
-		} else if( boost::iequals( val, L"volumedown" ) ) {
-			action = ACTION_VOLUME_DOWN;
-		} else if( boost::iequals( val, L"u" ) or boost::iequals( val, L"up" ) ) {
-			action = ACTION_UP;
-		} else if( boost::iequals( val, L"d" ) or boost::iequals( val, L"down" ) ) {
-			action = ACTION_DOWN;
-		} else if( boost::iequals( val, L"r" ) or boost::iequals( val, L"right" ) ) {
-			action = ACTION_RIGHT;
-		} else if( boost::iequals( val, L"l" ) or boost::iequals( val, L"left" ) ) {
-			action = ACTION_LEFT;
-		} else {
-			std::wstring error = L"Action string not recognized: " + val;
-			throw error;
-		}
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in ControlMapping::setActionFromString(): " << e.what() << std::endl;
-		action = ACTION_DO_NOT_USE;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in ControlMapping::setActionFromString(): " << e << std::endl;
-		action = ACTION_DO_NOT_USE;
-	}
-}
-
 uint_fast8_t ControlMapping::getControllerButton() {
 	try {
 		return controllerButton;
@@ -113,6 +45,14 @@ irr::EKEY_CODE ControlMapping::getKey() {
 */
 bool ControlMapping::getMouseWheelUp() {
 	return mouseWheelUp;
+}
+
+void ControlMapping::setMouseDirection( mouseDirection_t val ) {
+	mouseDirection = val;
+}
+
+ControlMapping::mouseDirection_t ControlMapping::getMouseDirection() {
+	return mouseDirection;
 }
 
 /** Access mouseEvent
@@ -209,7 +149,8 @@ ControlMapping::ControlMapping() {
 		setAction( ACTION_DO_NOT_USE );
 		controllerButton = UINT_FAST8_MAX;
 		controllerNumber = UINT_FAST8_MAX;
-		controllerDirection = controller_DO_NOT_USE;
+		controllerDirection = CONTROLLER_DO_NOT_USE;
+		mouseDirection = MOUSE_DO_NOT_USE;
 		activated = false;
 		controllerAxis = UINT_FAST8_MAX;
 	} catch ( std::exception &e ) {

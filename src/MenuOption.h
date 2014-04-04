@@ -30,6 +30,7 @@ class MenuOption {
 		bool contains( irr::core::position2d<uint_fast16_t> test );
 		bool contains( uint_fast16_t testX, uint_fast16_t testY );
 		void setText( irr::core::stringw newText );
+		bool highlighted;
 	protected:
 	private:
 		uint_fast16_t x;

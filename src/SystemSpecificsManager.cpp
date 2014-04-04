@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #endif //HAVE_STDLIB_H. I don't know what we'll do if we don't have this header.
 
+#include <wchar.h>
+
 #include "SystemSpecificsManager.h"
 
 std::wstring SystemSpecificsManager::getEnvironmentVariable( std::string name ) {
@@ -28,6 +30,19 @@ std::wstring SystemSpecificsManager::getEnvironmentVariable( std::string name ) 
 	}
 }
 
+std::wstring SystemSpecificsManager::getEnvironmentVariable( std::wstring name ) {
+	wchar_t * result = nullptr;
+	#ifdef HAVE__WGETENV
+		result = _wgetenv( name.c_str() );
+	#endif // HAVE__WGETENV
+	//cppcheck-suppress duplicateExpression
+	if( result != 0 && result != NULL && result != nullptr ) {
+		return sc.toStdWString( result );
+	} else {
+		return getEnvironmentVariable( sc.toStdString( name ) );
+	}
+}
+
 std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() {
 	std::vector< boost::filesystem::path > fontFolders;
 	fontFolders.push_back( boost::filesystem::current_path() );
@@ -38,7 +53,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 		fontFolders.push_back( L"/usr/share/X11/fonts/" );
 		fontFolders.push_back( L"/usr/share/fonts/" );
 		try {
-			fontFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/.fonts/");
+			fontFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/.fonts/");
 		} catch( std::wstring error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
@@ -48,7 +63,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 		fontFolders.push_back( L"/System/Library/Fonts/" );
 		fontFolders.push_back( L"/System Folder/Fonts/" );
 		try {
-			fontFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/Library/Fonts/");
+			fontFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Library/Fonts/");
 		} catch( std::wstring error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
@@ -60,7 +75,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 	//for( std::vector< boost::filesystem::path >::iterator i = fontFolders.begin(); i != fontFolders.end(); i++ ) {
 	for( decltype( fontFolders.size() ) i = 0; i < fontFolders.size(); i++ ) {
 		//if( !exists( &i ) ) {
-		if( !exists( fontFolders.at( i ) ) ) {
+		if( !exists( fontFolders.at( i ) ) || ( !is_directory( fontFolders.at( i ) ) && ( is_symlink( fontFolders.at( i ) ) && !is_directory( read_symlink( fontFolders.at( i ) ) ) ) ) ) {
 			//fontFolders.erase( i );
 			fontFolders.erase( fontFolders.begin() + i );
 		}

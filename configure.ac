@@ -42,7 +42,7 @@ AC_TYPE_UINT32_T
 AC_TYPE_INTMAX_T
 
 # Checks for library functions.
-# AC_CHECK_FUNCS([memset pow select socket sqrt strerror])
+AC_CHECK_FUNCS([_wgetenv])
 
 # End
 AC_OUTPUT

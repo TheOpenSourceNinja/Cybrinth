@@ -35,6 +35,7 @@
 //Custom user events for Irrlicht
 enum user_event_t { USER_EVENT_WINDOW_RESIZE };
 
+//TODO: Implement an options screen
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
 //TODO: Get multiplayer working online
 //TODO: Improve AI. Add any solving algorithms we can think of.
@@ -775,7 +776,7 @@ GameManager::GameManager() {
 
 		fontFile = "";
 		boost::filesystem::recursive_directory_iterator end;
-		std::vector< boost::filesystem::path > fontFolders = system.getFontFolders();
+		std::vector< boost::filesystem::path > fontFolders = system.getFontFolders(); // Flawfinder: ignore
 
 		if( debug ) {
 			std::wcout << L"fontFolders.size(): " << fontFolders.size() << std::endl;
@@ -1436,25 +1437,28 @@ void GameManager::loadFonts() {
 			if( fontFile != "" ) {
 				auto aboveStats = loadingFont->getDimension( loading.c_str() ).Height + std::max( tipFont->getDimension( proTipPrefix.c_str() ).Height, tipFont->getDimension( proTips.at( currentProTip ).c_str() ).Height );
 			
-				uint_fast32_t size = windowSize.Width / numPlayers / 10; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
+				uint_fast32_t size = windowSize.Width / numPlayers / 3; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
 				uint_fast8_t builtInFontHeight = gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height;
 				if( size > builtInFontHeight ) { //If the text needs to be that small, go with the built-in font because it's readable at that size.
 					do {
 						size -= 2;
 						statsFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 						if( !isNull( statsFont ) ) {
-							core::dimension2d< uint_fast32_t > temp;
-							if( numPlayers < 10 ) {
-								temp = statsFont->getDimension( L"0.P" + numPlayers );
-							} else if( numPlayers < 100 ) {
-								temp = statsFont->getDimension( L"00.P" + numPlayers );
+							core::dimension2d< uint_fast32_t > tempDimensions;
+							std::wstring tempString;
+							if( numPlayers <= 10 ) {
+								tempString = L"0.P";
+							} else if( numPlayers <= 100 ) {
+								tempString = L"00.P";
 							} else {
-								temp = statsFont->getDimension( L"000.P" + numPlayers );
+								tempString = L"000.P";
 							}
+							tempString += stringConverter.toStdWString( numPlayers );
 							
-							fontDimensions = core::dimension2d< uint_fast32_t >( temp.Width * numPlayers, temp.Height );
-							temp = statsFont->getDimension( steps.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
-							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
+							tempDimensions = statsFont->getDimension( tempString.c_str() );
+							fontDimensions = core::dimension2d< uint_fast32_t >( tempDimensions.Width * numPlayers, tempDimensions.Height );
+							tempDimensions = statsFont->getDimension( keysFoundPerPlayer.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
+							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + tempDimensions.Width, std::max( fontDimensions.Height, tempDimensions.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
 						}
 					} while( size > builtInFontHeight && !isNull( statsFont ) && ( fontDimensions.Width >= windowSize.Width  || fontDimensions.Height + aboveStats >= windowSize.Height ) );
 
@@ -1464,18 +1468,21 @@ void GameManager::loadFonts() {
 						size -= 1;
 						statsFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 						if( !isNull( statsFont ) ) {
-							core::dimension2d< uint_fast32_t > temp;
-							if( numPlayers < 10 ) {
-								temp = statsFont->getDimension( L"0.P" + numPlayers  );
-							} else if( numPlayers < 100 ) {
-								temp = statsFont->getDimension( L"00.P" + numPlayers  );
+							core::dimension2d< uint_fast32_t > tempDimensions;
+							std::wstring tempString;
+							if( numPlayers <= 10 ) {
+								tempString = L"0.P";
+							} else if( numPlayers <= 100 ) {
+								tempString = L"00.P";
 							} else {
-								temp = statsFont->getDimension( L"000.P" + numPlayers  );
+								tempString = L"000.P";
 							}
-
-							fontDimensions = core::dimension2d< uint_fast32_t >( temp.Width * numPlayers, temp.Height );
-							temp = statsFont->getDimension( steps.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
-							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + temp.Width, std::max( fontDimensions.Height, temp.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
+							tempString += stringConverter.toStdWString( numPlayers );
+							
+							tempDimensions = statsFont->getDimension( tempString.c_str() );
+							fontDimensions = core::dimension2d< uint_fast32_t >( tempDimensions.Width * numPlayers, tempDimensions.Height );
+							tempDimensions = statsFont->getDimension( keysFoundPerPlayer.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
+							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + tempDimensions.Width, std::max( fontDimensions.Height, tempDimensions.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
 						}
 					} while( size > builtInFontHeight && !isNull( statsFont ) && ( fontDimensions.Width >= windowSize.Width  || fontDimensions.Height + aboveStats >= windowSize.Height ) );
 				}
@@ -1735,7 +1742,7 @@ void GameManager::loadProTips() {
 
 					proTipsFile.close();
 
-					srand( time( nullptr ) );
+					srand( time( nullptr ) ); // Flawfinder: ignore
 					random_shuffle( proTips.begin(), proTips.end() );
 				} else {
 					throw( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) );
@@ -1872,7 +1879,7 @@ void GameManager::makeMusicList() {
 		if( musicList.size() > 0 ) {
 			//Do we want music sorted or random?
 			//sort( musicList.begin(), musicList.end() );
-			srand( time( nullptr ) );
+			srand( time( nullptr ) ); // Flawfinder: ignore
 			random_shuffle( musicList.begin(), musicList.end() );
 
 			currentMusic = musicList.back();
@@ -2084,7 +2091,7 @@ void GameManager::newMaze( uint_fast16_t newRandomSeed ) {
 		
 		resetThings();
 		randomSeed = newRandomSeed;
-		srand( randomSeed );
+		srand( randomSeed ); // Flawfinder: ignore
 		
 		mazeManager.makeRandomLevel();
 		
@@ -2127,39 +2134,18 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			break;
 
 			case EET_MOUSE_INPUT_EVENT: {
-				if( showingMenu && event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN ) {
-						if( exitGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-							exitConfirmation = gui->addMessageBox( L"Exit?", L"Are you sure you want to exit?", true, ( gui::EMBF_YES | gui::EMBF_NO ) );
-							return true;
-						} else if( loadMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-							if( debug ) {
-								std::wcout << L"Current working directory: " << currentDirectory << std::endl;
-							}
-							
-							fileChooser = gui->addFileOpenDialog( L"Select a Maze", true, 0, -1 );
-							return true;
-						} else if( saveMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-							mazeManager.saveToFile();
-							return true;
-						} else if( nextMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-							newMaze();
-							return true;
-						} else if( restartMaze.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-							newMaze( randomSeed );
-							return true;
-						} else if( backToGame.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-							showingMenu = false;
-							return true;
-						} else if( freedom.contains( event.MouseInput.X, event.MouseInput.Y ) ) {
-							std::wstring message = stringConverter.toStdWString( PACKAGE_NAME );
-							message += L" is copyright 2012-2014 by James Dearing. Licensed under the GNU Affero General Public License, version 3.0 or (at your option) any later version, as published by the Free Software Foundation. See the file \"COPYING\" or https://www.gnu.org/licenses/agpl.html.\n\nThis means you're free to do what you want with this game: mod it, give copies to friends, sell it if you want. Whatever. It's Free software, Free as in Freedom. You should have received the program's source code with this copy; if you don't have it, you can get it from ";
-							message += stringConverter.toStdWString( PACKAGE_URL );
-							message += L".\n\n";
-							message += stringConverter.toStdWString( PACKAGE_NAME );
-							message += L" is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.";
-							gui->addMessageBox( L"Freedom", stringConverter.toStdWString( message ).c_str() ); //stringConverter.toWCharArray( message ) );
-							return true;
-						}
+				if( showingMenu ) {
+					if( event.MouseInput.Event == EMIE_MOUSE_MOVED ) {
+						exitGame.highlighted = ( exitGame.contains( event.MouseInput.X, event.MouseInput.Y ) );
+						loadMaze.highlighted = ( loadMaze.contains( event.MouseInput.X, event.MouseInput.Y ) );
+						saveMaze.highlighted = ( saveMaze.contains( event.MouseInput.X, event.MouseInput.Y ) );
+						nextMaze.highlighted = ( nextMaze.contains( event.MouseInput.X, event.MouseInput.Y ) );
+						restartMaze.highlighted = ( restartMaze.contains( event.MouseInput.X, event.MouseInput.Y ) );
+						backToGame.highlighted = ( backToGame.contains( event.MouseInput.X, event.MouseInput.Y ) );
+						freedom.highlighted = ( freedom.contains( event.MouseInput.X, event.MouseInput.Y ) );
+					} else if( event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN ) {
+						processMenuSelection();
+					}
 				}
 
 				for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
@@ -2243,9 +2229,9 @@ bool GameManager::OnEvent( const SEvent& event ) {
 									std:: wcout << L"equivalent to axis V";
 								}
 								std::wcout << L", has controller direction ";
-								if( controls.at( k ).getControllerDirection() == ControlMapping::controller_INCREASE ) {
+								if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_INCREASE ) {
 									std::wcout << L"increase";
-								} else if( controls.at( k ).getControllerDirection() == ControlMapping::controller_DECREASE ) {
+								} else if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_DECREASE ) {
 									std::wcout << L"decrease";
 								} else {
 									std::wcout << L"other";
@@ -2257,7 +2243,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 							int_fast16_t controllerDeadZone = ( INT16_MAX / 2 ); //TODO: Make the dead zone user adjustable.
 							
 							
-							if( controls.at( k ).getControllerDirection() == ControlMapping::controller_INCREASE ) {
+							if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_INCREASE ) {
 								if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
 									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] > controllerDeadZone );
 									
@@ -2277,7 +2263,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] > controllerDeadZone );
 									
 								}
-							} else if( controls.at( k ).getControllerDirection() == ControlMapping::controller_DECREASE ) {
+							} else if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_DECREASE ) {
 								if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
 									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] < -controllerDeadZone );
 									
@@ -2474,8 +2460,66 @@ void GameManager::processControls() {
 				}
 				
 				switch( controls.at( k ).getAction() ) {
-					case ControlMapping::ACTION_MENU: {
-						showingMenu = !showingMenu;
+					case ControlMapping::ACTION_MENU_ACTIVATE: {
+						if( !showingMenu ) {
+							showingMenu = true;
+						} else {
+							processMenuSelection();
+						}
+						break;
+					}
+					case ControlMapping::ACTION_MENU_UP: {
+						if( nextMaze.highlighted ) {
+							nextMaze.highlighted = false;
+							freedom.highlighted = true;
+						} else if( restartMaze.highlighted ) {
+							restartMaze.highlighted = false;
+							nextMaze.highlighted = true;
+						} else if( loadMaze.highlighted ) {
+							loadMaze.highlighted = false;
+							restartMaze.highlighted = true;
+						} else if( saveMaze.highlighted ) {
+							saveMaze.highlighted = false;
+							loadMaze.highlighted = true;
+						} else if( exitGame.highlighted ) {
+							exitGame.highlighted = false;
+							saveMaze.highlighted = true;
+						} else if( backToGame.highlighted ) {
+							backToGame.highlighted = false;
+							exitGame.highlighted = true;
+						} else if( freedom.highlighted ) {
+							freedom.highlighted = false;
+							backToGame.highlighted = true;
+						} else { //if none are highlighted
+							nextMaze.highlighted = true;
+						}
+						break;
+					}
+					case ControlMapping::ACTION_MENU_DOWN: {
+						if( nextMaze.highlighted ) {
+							nextMaze.highlighted = false;
+							restartMaze.highlighted = true;
+						} else if( restartMaze.highlighted ) {
+							restartMaze.highlighted = false;
+							loadMaze.highlighted = true;
+						} else if( loadMaze.highlighted ) {
+							loadMaze.highlighted = false;
+							saveMaze.highlighted = true;
+						} else if( saveMaze.highlighted ) {
+							saveMaze.highlighted = false;
+							exitGame.highlighted = true;
+						} else if( exitGame.highlighted ) {
+							exitGame.highlighted = false;
+							backToGame.highlighted = true;
+						} else if( backToGame.highlighted ) {
+							backToGame.highlighted = false;
+							freedom.highlighted = true;
+						} else if( freedom.highlighted ) {
+							freedom.highlighted = false;
+							nextMaze.highlighted = true;
+						} else { //if none are highlighted
+							nextMaze.highlighted = true;
+						}
 						break;
 					}
 					case ControlMapping::ACTION_SCREENSHOT: {
@@ -2502,7 +2546,7 @@ void GameManager::processControls() {
 						Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
 						break;
 					}
-					default: {
+					default: { //Handle player controls
 						bool ignoreKey = false;
 						for( decltype( numBots ) b = 0; !ignoreKey && b < numBots; ++b ) { //Ignore controls that affect bots
 							if( controls.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
@@ -2512,29 +2556,24 @@ void GameManager::processControls() {
 
 						if( !ignoreKey ) {
 							switch( controls.at( k ).getAction() ) {
-								case ControlMapping::ACTION_UP: {
+								case ControlMapping::ACTION_PLAYER_UP: {
 									movePlayerOnY( controls.at( k ).getPlayer(), -1);
 									break;
 								}
-								case ControlMapping::ACTION_DOWN: {
+								case ControlMapping::ACTION_PLAYER_DOWN: {
 									movePlayerOnY( controls.at( k ).getPlayer(), 1);
 									break;
 								}
-								case ControlMapping::ACTION_RIGHT: {
+								case ControlMapping::ACTION_PLAYER_RIGHT: {
 									movePlayerOnX( controls.at( k ).getPlayer(), 1);
 									break;
 								}
-								case ControlMapping::ACTION_LEFT: {
+								case ControlMapping::ACTION_PLAYER_LEFT: {
 									movePlayerOnX( controls.at( k ).getPlayer(), -1);
 									break;
 								}
 								default: {
-									if( debug ) {
-										std::wcerr << "k is " << k << std::endl;
-										std::wcerr << "controls size is " << controls.size() << std::endl;
-										std::wstring actionStr = controls.at( k ).getActionAsString();
-										std::wcerr << actionStr << std::endl;
-									}
+									break;
 								}
 							}
 						}
@@ -2552,6 +2591,38 @@ void GameManager::processControls() {
 	}
 }
 
+/**
+* Should be called only by OnEvent() or processControls().
+* Arguments:
+* None.
+*/
+void GameManager::processMenuSelection() {
+	if( exitGame.highlighted ) {
+		exitConfirmation = gui->addMessageBox( L"Exit?", L"Are you sure you want to exit?", true, ( gui::EMBF_YES | gui::EMBF_NO ) );
+	} else if( loadMaze.highlighted ) {
+		if( debug ) {
+			std::wcout << L"Current working directory: " << currentDirectory << std::endl;
+		}
+		
+		fileChooser = gui->addFileOpenDialog( L"Select a Maze", true, 0, -1 );
+	} else if( saveMaze.highlighted ) {
+		mazeManager.saveToFile();
+	} else if( nextMaze.highlighted ) {
+		newMaze();
+	} else if( restartMaze.highlighted ) {
+		newMaze( randomSeed );
+	} else if( backToGame.highlighted ) {
+		showingMenu = false;
+	} else if( freedom.highlighted ) {
+		std::wstring message = stringConverter.toStdWString( PACKAGE_NAME );
+		message += L" is copyright 2012-2014 by James Dearing. Licensed under the GNU Affero General Public License, version 3.0 or (at your option) any later version, as published by the Free Software Foundation. See the file \"COPYING\" or https://www.gnu.org/licenses/agpl.html.\n\nThis means you're free to do what you want with this game: mod it, give copies to friends, sell it if you want. Whatever. It's Free software, Free as in Freedom. You should have received the program's source code with this copy; if you don't have it, you can get it from ";
+		message += stringConverter.toStdWString( PACKAGE_URL );
+		message += L".\n\n";
+		message += stringConverter.toStdWString( PACKAGE_NAME );
+		message += L" is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.";
+		gui->addMessageBox( L"Freedom", stringConverter.toStdWString( message ).c_str() ); //stringConverter.toWCharArray( message ) );
+	}
+}
 
 /**
  * Reads preferences from prefs.cfg. Sets defaults for any preference not found in the file. If the file does not exist, creates it.
@@ -2586,7 +2657,7 @@ void GameManager::readPrefs() {
 			debug = false;
 		#endif
 		
-		std::vector< boost::filesystem::path > configFolders = system.getConfigFolders();
+		std::vector< boost::filesystem::path > configFolders = system.getConfigFolders(); // Flawfinder: ignore
 		bool prefsFileFound = false;
 		
 		for( auto it = configFolders.begin(); it != configFolders.end(); ++it ) {
@@ -3391,7 +3462,7 @@ void GameManager::setControls() {
 		//TODO: Add default controls.
 		enableController = false;
 		
-		std::vector< boost::filesystem::path > configFolders = system.getConfigFolders();
+		std::vector< boost::filesystem::path > configFolders = system.getConfigFolders(); // Flawfinder: ignore
 		bool controlsFileFound = false;
 		
 		for( auto it = configFolders.begin(); it != configFolders.end(); ++it ) {
@@ -3510,15 +3581,15 @@ void GameManager::setControls() {
 												std::vector< std::wstring > possibleChoices = { L"increase", L"decrease" };
 												std::wstring choice = possibleChoices.at( spellChecker.indexOfClosestString( increaseOrDecrease, possibleChoices ) );
 												if( choice == possibleChoices.at( 0 ) ) { //L"increase"
-													controls.back().setControllerDirection( ControlMapping::controller_INCREASE );
+													controls.back().setControllerDirection( ControlMapping::CONTROLLER_INCREASE );
 												} else if( choice == possibleChoices.at( 1 ) ) { //L"decrease"
-													controls.back().setControllerDirection( ControlMapping::controller_DECREASE );
+													controls.back().setControllerDirection( ControlMapping::CONTROLLER_DECREASE );
 												}
 											}
 										}
 									}
 									
-								} else if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 1 ).length() ), possibleChoiceStarts.at( 1 ) ) <= 1 ) {//if( spellChecker.indexOfClosestString( choiceStr.substr( 0, 3 ), possibleChoiceStarts )  == 1  ) { //L"key"
+								} else if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 1 ).length() ), possibleChoiceStarts.at( 1 ) ) <= 1 ) { //L"key"
 									choiceStr = boost::algorithm::trim_copy( choiceStr.substr( possibleChoiceStarts.at( 1 ).length(), choiceStr.length() - possibleChoiceStarts.at( 1 ).length() ) ); //possibleChoiceStarts.at( 1 ).length() = length of the word "key"
 									EKEY_CODE choice;
 									
@@ -3526,42 +3597,121 @@ void GameManager::setControls() {
 									
 									controls.back().setKey( choice );
 									
-								} else if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 2 ).length() ), possibleChoiceStarts.at( 2 ) ) <= 1 ) {//else if( spellChecker.indexOfClosestString( choiceStr.substr( 0, 5 ), possibleChoiceStarts )  == 2 ) { //L"mouse"
+								} else if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 2 ).length() ), possibleChoiceStarts.at( 2 ) ) <= 1 ) { //L"mouse"
 									
-									choiceStr = choiceStr.substr( 5, choiceStr.length() - 5 ); //5 = length of the word "mouse"
-									
+									choiceStr = choiceStr.substr( possibleChoiceStarts.at( 2 ).length(), choiceStr.length() - possibleChoiceStarts.at( 2 ).length() ); //possibleChoiceStarts.at( 2 ).length() = length of the word "mouse"
+									boost::algorithm::trim( choiceStr ); //Remove trailing and leading spaces
 									if( debug ) {
-										std::wcout << L"choiceStr before spell checking: " << choiceStr;
+										std::wcout << L"choiceStr: " << choiceStr;
 									}
 									
-									std::vector< std::wstring > possibleChoices = { L"wheelup", L"wheeldown", L"leftdown", L"rightdown", L"middledown", L"leftup", L"rightup", L"middleup", L"moved", L"leftdoubleclick", L"rightdoubleclick", L"middledoubleclick", L"lefttripleclick", L"righttripleclick", L"middletripleclick" };
-									choiceStr = possibleChoices.at( spellChecker.indexOfClosestString( choiceStr, possibleChoices ) );
-									
-									if( debug ) {
-										std::wcout  << "\tand after: " << choiceStr << std::endl;
+									{
+										std::wstring moveOrButtonOrWheel = choiceStr.substr( 0, choiceStr.find( L' ' ) );
+										if( debug ) {
+											std::wcout << L"moveOrButtonOrWheel before spell checking: " << moveOrButtonOrWheel;
+										}
+										
+										std::vector< std::wstring > possibleChoices = { L"wheel", L"leftbutton", L"middlebutton", L"rightbutton", L"move" };
+										moveOrButtonOrWheel = possibleChoices.at( spellChecker.indexOfClosestString( moveOrButtonOrWheel, possibleChoices ) );
+										
+										if( debug ) {
+											std::wcout << L"moveOrButtonOrWheel after spell checking: " << moveOrButtonOrWheel;
+										}
+										
+										if( moveOrButtonOrWheel == possibleChoices.at( 0 ) ) { //L"wheel"
+											controls.back().setMouseEvent( EMIE_MOUSE_WHEEL );
+											
+											std::wstring wheelDirection = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
+											if( debug ) {
+												std::wcout << L"wheelDirection before spell checking: " << wheelDirection << std::endl;
+											}
+											std::vector< std::wstring > possibleDirections = { L"up", L"u", L"down", L"d", L"left", L"l", L"right", L"r" };
+											wheelDirection = possibleDirections.at( spellChecker.indexOfClosestString( wheelDirection, possibleDirections ) );
+											if( debug ) {
+												std::wcout << L"wheelDirection after spell checking: " << wheelDirection << std::endl;
+											}
+											
+											if( wheelDirection == possibleDirections.at( 0 ) || wheelDirection == possibleDirections.at( 1 ) ) { //up
+												controls.back().setMouseWheelUp( true );
+											} else {
+												controls.back().setMouseWheelUp( false );
+											}
+										} else if( moveOrButtonOrWheel == possibleChoices.at( 1 ) ) { //L"leftbutton"
+											std::wstring upOrDown = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
+											if( debug ) {
+												std::wcout << L"upOrDown before spell checking: " << upOrDown << std::endl;
+											}
+											std::vector< std::wstring > possibleStates = { L"up", L"u", L"down", L"d" };
+											upOrDown = possibleStates.at( spellChecker.indexOfClosestString( upOrDown, possibleStates ) );
+											if( debug ) {
+												std::wcout << L"upOrDown after spell checking: " << upOrDown << std::endl;
+											}
+											
+											if( upOrDown == possibleStates.at( 0 ) || upOrDown == possibleStates.at( 1 ) ) { //L"up"
+												controls.back().setMouseEvent( EMIE_LMOUSE_LEFT_UP );
+											} else {
+												controls.back().setMouseEvent( EMIE_LMOUSE_PRESSED_DOWN );
+											}
+										} else if( moveOrButtonOrWheel == possibleChoices.at( 2 ) ) { //L"middlebutton"
+											std::wstring upOrDown = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
+											if( debug ) {
+												std::wcout << L"upOrDown before spell checking: " << upOrDown << std::endl;
+											}
+											std::vector< std::wstring > possibleStates = { L"up", L"u", L"down", L"d" };
+											upOrDown = possibleStates.at( spellChecker.indexOfClosestString( upOrDown, possibleStates ) );
+											if( debug ) {
+												std::wcout << L"upOrDown after spell checking: " << upOrDown << std::endl;
+											}
+											
+											if( upOrDown == possibleStates.at( 0 ) || upOrDown == possibleStates.at( 1 ) ) { //L"up"
+												controls.back().setMouseEvent( EMIE_MMOUSE_LEFT_UP );
+											} else {
+												controls.back().setMouseEvent( EMIE_MMOUSE_PRESSED_DOWN );
+											}
+										} else if( moveOrButtonOrWheel == possibleChoices.at( 3 ) ) { //L"rightbutton"
+											std::wstring upOrDown = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
+											if( debug ) {
+												std::wcout << L"upOrDown before spell checking: " << upOrDown << std::endl;
+											}
+											std::vector< std::wstring > possibleStates = { L"up", L"u", L"down", L"d" };
+											upOrDown = possibleStates.at( spellChecker.indexOfClosestString( upOrDown, possibleStates ) );
+											if( debug ) {
+												std::wcout << L"upOrDown after spell checking: " << upOrDown << std::endl;
+											}
+											
+											if( upOrDown == possibleStates.at( 0 ) || upOrDown == possibleStates.at( 1 ) ) { //L"up"
+												controls.back().setMouseEvent( EMIE_RMOUSE_LEFT_UP );
+											} else {
+												controls.back().setMouseEvent( EMIE_RMOUSE_PRESSED_DOWN );
+											}
+										} else if( moveOrButtonOrWheel == possibleChoices.at( 4 ) ) { //L"move"
+											controls.back().setMouseEvent( EMIE_MOUSE_MOVED );
+											
+											std::wstring direction = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
+											
+											if( debug ) {
+												std::wcout << L"direction before spell checking: " << direction << std::endl;
+											}
+											std::vector< std::wstring > possibleDirections = { L"up", L"u", L"down", L"d", L"left", L"l", L"right", L"r" };
+											direction = possibleDirections.at( spellChecker.indexOfClosestString( direction, possibleDirections ) );
+											if( debug ) {
+												std::wcout << L"direction after spell checking: " << direction << std::endl;
+											}
+											
+											if( direction == possibleDirections.at( 0 ) || direction == possibleDirections.at( 1 ) ) { //L"up"
+												controls.back().setMouseDirection( ControlMapping::MOUSE_UP );
+											} else if( direction == possibleDirections.at( 2 ) || direction == possibleDirections.at( 3 ) ) { //L"down"
+												controls.back().setMouseDirection( ControlMapping::MOUSE_DOWN );
+											} else if( direction == possibleDirections.at( 4 ) || direction == possibleDirections.at( 5 ) ) { //L"left"
+												controls.back().setMouseDirection( ControlMapping::MOUSE_LEFT );
+											} else { //L"right"
+												controls.back().setMouseDirection( ControlMapping::MOUSE_RIGHT );
+											}
+										}
 									}
 									
-									if( choiceStr == possibleChoices.at( 0 ) ) { //L"wheelup"
-										controls.back().setMouseWheelUp( true );
-										controls.back().setMouseEvent( EMIE_MOUSE_WHEEL );
-									} else if( choiceStr == possibleChoices.at( 1 ) ) { //L"wheeldown"
-										controls.back().setMouseWheelUp( false );
-										controls.back().setMouseEvent( EMIE_MOUSE_WHEEL );
-									} else if( choiceStr == possibleChoices.at( 2 ) ) { //L"leftdown"
-										controls.back().setMouseEvent( EMIE_LMOUSE_PRESSED_DOWN );
-									} else if( choiceStr == possibleChoices.at( 3 ) ) { //L"rightdown"
-										controls.back().setMouseEvent( EMIE_RMOUSE_PRESSED_DOWN );
-									} else if( choiceStr == possibleChoices.at( 4 ) ) { //L"middledown"
-										controls.back().setMouseEvent( EMIE_MMOUSE_PRESSED_DOWN );
-									} else if( choiceStr == possibleChoices.at( 5 ) ) { //L"leftup"
-										controls.back().setMouseEvent( EMIE_LMOUSE_LEFT_UP );
-									} else if( choiceStr == possibleChoices.at( 6 ) ) { //L"rightup"
-										controls.back().setMouseEvent( EMIE_RMOUSE_LEFT_UP );
-									} else if( choiceStr == possibleChoices.at( 7 ) ) { //L"middleup"
-										controls.back().setMouseEvent( EMIE_MMOUSE_LEFT_UP );
-									} else if( choiceStr == possibleChoices.at( 8 ) ) { //L"moved"
-										controls.back().setMouseEvent( EMIE_MOUSE_MOVED );
-									} else if( choiceStr == possibleChoices.at( 9 ) ) { //L"leftdoubleclick"
+									//TODO: Enable double- and triple-clicks.
+									/*if( choiceStr == possibleChoices.at( 9 ) ) { //L"leftdoubleclick"
 										controls.back().setMouseEvent( EMIE_LMOUSE_DOUBLE_CLICK );
 									} else if( choiceStr == possibleChoices.at( 10 ) ) { //L"rightdoubleclick"
 										controls.back().setMouseEvent( EMIE_RMOUSE_DOUBLE_CLICK );
@@ -3573,7 +3723,7 @@ void GameManager::setControls() {
 										controls.back().setMouseEvent( EMIE_RMOUSE_TRIPLE_CLICK );
 									} else if( choiceStr == possibleChoices.at( 14 ) ) { //L"middletripleclick"
 										controls.back().setMouseEvent( EMIE_MMOUSE_TRIPLE_CLICK );
-									}
+									}*/
 								}
 								
 								if( preference.substr( 0, 6 ) == L"player" ) {
@@ -3584,27 +3734,59 @@ void GameManager::setControls() {
 										decltype( numPlayers ) playerNum = boost::lexical_cast< unsigned short int >( playerNumStr ); //Boost doesn't like casting to uint_fast8_t
 										
 										if( playerNum < numPlayers ) {
+											std::vector< std::wstring > possibleActions = { L"up", L"u", L"down", L"d", L"left", L"l", L"right", L"r" };
+											actionStr = possibleActions.at( spellChecker.indexOfClosestString( actionStr, possibleActions) );
 											controls.back().setPlayer( playerNum );
-											controls.back().setActionFromString( actionStr );
+											
+											if( actionStr == possibleActions.at( 0 )  || actionStr == possibleActions.at( 1 ) ) { //L"up"
+												controls.back().setAction( ControlMapping::ACTION_PLAYER_UP );
+											} else if( actionStr == possibleActions.at( 2 ) || actionStr == possibleActions.at( 3 ) ) { //L"down"
+												controls.back().setAction( ControlMapping::ACTION_PLAYER_DOWN );
+											} else if( actionStr == possibleActions.at( 4 ) || actionStr == possibleActions.at( 5 ) ) { //L"left"
+												controls.back().setAction( ControlMapping::ACTION_PLAYER_LEFT );
+											} else { //L"right"
+												controls.back().setAction( ControlMapping::ACTION_PLAYER_RIGHT );
+											}
+											
 										} else { //We ignore that player number because we don't have that many players
 											controls.pop_back();
 										}
 									} catch ( boost::bad_lexical_cast &e ) {
 										std::wcerr << L"Error reading player number (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 									}
+								} else if( preference.substr( 0, 4 ) == L"menu" ) {
+									std::wstring menuWhat = boost::algorithm::trim_copy( preference.substr( 4 ) );
+									std::vector< std::wstring > possibleMenuStuff = { L"up", L"u", L"down", L"d", L"activate" };
+									menuWhat = possibleMenuStuff.at( spellChecker.indexOfClosestString( menuWhat, possibleMenuStuff ) );
+									if( menuWhat == possibleMenuStuff.at( 0 ) || menuWhat == possibleMenuStuff.at( 1 ) ) { //L"up"
+										controls.back().setAction( ControlMapping::ACTION_MENU_UP );
+									} else if( menuWhat == possibleMenuStuff.at( 2 ) || menuWhat == possibleMenuStuff.at( 3 ) ) { //L"down"
+										controls.back().setAction( ControlMapping::ACTION_MENU_DOWN );
+									} else { //L"activate"
+										controls.back().setAction( ControlMapping::ACTION_MENU_ACTIVATE );
+									}
+								} else if( preference.substr( 0, 6 ) == L"volume" ) {
+									std::wstring volumeWhat = boost::algorithm::trim_copy( preference.substr( 6 ) );
+									std::vector< std::wstring > possibleVolumes = { L"up", L"u", L"down", L"d" };
+									volumeWhat = possibleVolumes.at( spellChecker.indexOfClosestString( volumeWhat, possibleVolumes ) );
+									if( volumeWhat == possibleVolumes.at( 0 ) || volumeWhat == possibleVolumes.at( 1 ) ) { //L"up"
+										controls.back().setAction( ControlMapping::ACTION_VOLUME_UP );
+									} else { //L"down"
+										controls.back().setAction( ControlMapping::ACTION_VOLUME_DOWN );
+									}
 								} else {
 									if( debug ) {
 										std::wcout << L"preference before spell checking: " << preference;
 									}
 								
-									std::vector< std::wstring > possiblePrefs = { L"menu", L"screenshot", L"volumeup", L"volumedown", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l", L"enable controller" };
+									std::vector< std::wstring > possiblePrefs = { L"screenshot", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l", L"enable controller" };
 									preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
 									
 									if( debug ) {
 										std::wcout  << "\tand after: " << preference << std::endl;
 									}
 									
-									if( preference == possiblePrefs.at( 12 ) ) { //L"enable controller"
+									if( preference == possiblePrefs.at( 9 ) ) { //L"enable controller"
 										std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 										choiceStr = possibleChoices.at( spellChecker.indexOfClosestString( choiceStr, possibleChoices ) );
 										
@@ -3619,8 +3801,6 @@ void GameManager::setControls() {
 											}
 											enableController = false;
 										}
-									} else {
-										controls.back().setActionFromString( preference );
 									}
 								}
 								

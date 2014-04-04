@@ -32,6 +32,7 @@ class SystemSpecificsManager
 		std::vector< boost::filesystem::path > getConfigFolders();
 	protected:
 		std::wstring getEnvironmentVariable( std::string name );
+		std::wstring getEnvironmentVariable( std::wstring name );
 	private:
 		StringConverter sc;
 };

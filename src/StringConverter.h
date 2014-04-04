@@ -48,6 +48,7 @@ class StringConverter
 		std::wstring toStdWString( float input );
 		std::wstring toStdWString( double input );
 		std::wstring toStdWString( long double input );
+		std::string toStdString( std::wstring input );
 		//I really would like it if we could use the following functions without relying on the user to delete the memory they use
 		/*const wchar_t* toWCharArray( std::wstring input );
 		const wchar_t* toWCharArray( irr::core::stringw input );

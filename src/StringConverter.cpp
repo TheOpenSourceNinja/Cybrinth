@@ -13,8 +13,11 @@
 #include <iostream>
 #endif //HAVE_IOSTREAM
 
+/*#include <codecvt>
+#include <locale>*/
+
 /**
-This class exists just to convert between Irrlicht's wide character strings and TagLib's wide character strings. I have no idea whether I'm doing it right. I just want to make sure this program can work with non-English characters. If anyone can suggest a way to improve my code, fix any bugs, or whatever, PLEASE send in a patch!
+This class exists just to convert between various types of strings. I have no idea whether I'm doing it right. I just want to make sure this program can work with non-English characters. If anyone can suggest a way to improve my code, fix any bugs, or whatever, PLEASE send in a patch!
 **/
 
 
@@ -89,6 +92,21 @@ TagLib::wstring StringConverter::toTaglibWString( std::wstring input ) {
 	}
 }
 
+std::string StringConverter::toStdString( std::wstring input ) {
+	try {
+		std::string result;
+		result.assign( input.begin(), input.end() ); //Definitely not the right way do to this, but the code below (which is correct according to what I've read online) does not compile for me.
+		/*std::wstring_convert< std::codecvt_utf8< std::wstring::value_type >, std::wstring::value_type > cv;
+		result = cv.to_bytes( input );*/
+		
+		return result;
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in StringConverter::toStdWString(): " << e.what() << std::endl;
+		std::string w;
+		return w;
+	}
+}
+
 std::wstring StringConverter::toStdWString ( irr::core::stringw input ) {
 	try {
 		std::wstring result;
@@ -117,6 +135,9 @@ std::wstring StringConverter::toStdWString( std::string input ) {
 	try {
 		std::wstring result;
 		result.assign( input.begin(), input.end() );
+		/*std::wstring_convert< std::codecvt_utf8< std::wstring::value_type >, std::wstring::value_type > cv;
+		result = cv.from_bytes( input );*/
+		
 		return result;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::toStdWString(): " << e.what() << std::endl;

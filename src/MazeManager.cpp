@@ -127,7 +127,7 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, ui
 void MazeManager::makeRandomLevel() {
 	try {
 		gameManager->drawAll();
-
+		// Flawfinder: ignore
 		srand( gameManager->randomSeed ); //randomSeed is set either by resetThings() or by loadFromFile()
 		{
 			decltype( cols ) tempCols = rand() % 28 + 2; //I don't remember where I got the 28. The 2 is so there's some minimum amount.
