@@ -52,32 +52,6 @@ enum user_event_t { USER_EVENT_WINDOW_RESIZE };
 using namespace irr;
 
 /**
- * Places the menu options at the correct locations on screen.
- */
-void GameManager::adjustMenu() {
-	try {
-		if( debug ) {
-				std::wcout << L"adjustMenu() called" << std::endl;
-		}
-		
-		uint_fast8_t numMenuOptions = 7;
-		nextMaze.setY( 0 );
-		restartMaze.setY( 1 * windowSize.Height / numMenuOptions );
-		loadMaze.setY( 2 * windowSize.Height / numMenuOptions );
-		saveMaze.setY( 3 * windowSize.Height / numMenuOptions );
-		exitGame.setY( 4 * windowSize.Height / numMenuOptions );
-		backToGame.setY( 5 * windowSize.Height / numMenuOptions );
-		freedom.setY( 6 * windowSize.Height / numMenuOptions );
-		
-		if( debug ) {
-				std::wcout << L"end of adjustMenu()" << std::endl;
-		}
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::adjustMenu(): " << e.what() << std::endl;
-	}
-}
-
-/**
  * Figures out which players are human, then figures out whether they're all at the goal.
  * Returns: True if all humans are at the goal, false otherwise.
  */
@@ -184,13 +158,7 @@ void GameManager::drawAll() {
 			mazeManager.draw( driver, cellWidth, cellHeight );
 
 			if( showingMenu ) {
-				nextMaze.draw( driver );
-				restartMaze.draw( driver );
-				loadMaze.draw( driver );
-				saveMaze.draw( driver );
-				exitGame.draw( driver );
-				backToGame.draw( driver );
-				freedom.draw( driver );
+				menuManager.draw( driver );
 			}
 
 
@@ -1002,15 +970,8 @@ GameManager::GameManager() {
 		}
 
 		loadFonts();
-
-		nextMaze.setText( L"Next maze" );
-		restartMaze.setText( L"Restart maze" );
-		loadMaze.setText( L"Load maze" );
-		saveMaze.setText( L"Save maze" );
-		exitGame.setText( L"Exit game" );
-		backToGame.setText( L"Back to game" );
-		freedom.setText( L"Freedom" );
-		adjustMenu();
+		
+		menuManager.setPositions( windowSize.Height );
 
 		if ( debug ) {
 			std::wcout << L"Resizing player and playerStart vectors to " << numPlayers << std::endl;
@@ -1496,14 +1457,8 @@ void GameManager::loadFonts() {
 				std::wcout << L"statsFont is loaded" << std::endl;
 			}
 		}
-
-		nextMaze.setFont( clockFont );
-		restartMaze.setFont( clockFont );
-		loadMaze.setFont( clockFont );
-		saveMaze.setFont( clockFont );
-		exitGame.setFont( clockFont );
-		backToGame.setFont( clockFont );
-		freedom.setFont( clockFont );
+		
+		menuManager.setFont( clockFont );
 
 		uint_fast32_t size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect readability on large or small screens, but it's better on large screens than the built-in font.
 		gui->getSkin()->setFont( fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts ) );
@@ -2136,15 +2091,9 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			case EET_MOUSE_INPUT_EVENT: {
 				if( showingMenu ) {
 					if( event.MouseInput.Event == EMIE_MOUSE_MOVED ) {
-						exitGame.highlighted = ( exitGame.contains( event.MouseInput.X, event.MouseInput.Y ) );
-						loadMaze.highlighted = ( loadMaze.contains( event.MouseInput.X, event.MouseInput.Y ) );
-						saveMaze.highlighted = ( saveMaze.contains( event.MouseInput.X, event.MouseInput.Y ) );
-						nextMaze.highlighted = ( nextMaze.contains( event.MouseInput.X, event.MouseInput.Y ) );
-						restartMaze.highlighted = ( restartMaze.contains( event.MouseInput.X, event.MouseInput.Y ) );
-						backToGame.highlighted = ( backToGame.contains( event.MouseInput.X, event.MouseInput.Y ) );
-						freedom.highlighted = ( freedom.contains( event.MouseInput.X, event.MouseInput.Y ) );
+						menuManager.findHighlights( event.MouseInput.X, event.MouseInput.Y );
 					} else if( event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN ) {
-						processMenuSelection();
+						menuManager.processSelection( this );
 					}
 				}
 
@@ -2184,7 +2133,9 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 						cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 						loadFonts();
-						adjustMenu();
+						
+						menuManager.setPositions( windowSize.Height );
+						
 						if( showBackgrounds ) {
 							scene::ICameraSceneNode* camera = bgscene->getActiveCamera();
 							if( !isNull( camera ) ) {
@@ -2464,62 +2415,16 @@ void GameManager::processControls() {
 						if( !showingMenu ) {
 							showingMenu = true;
 						} else {
-							processMenuSelection();
+							menuManager.processSelection( this );
 						}
 						break;
 					}
 					case ControlMapping::ACTION_MENU_UP: {
-						if( nextMaze.highlighted ) {
-							nextMaze.highlighted = false;
-							freedom.highlighted = true;
-						} else if( restartMaze.highlighted ) {
-							restartMaze.highlighted = false;
-							nextMaze.highlighted = true;
-						} else if( loadMaze.highlighted ) {
-							loadMaze.highlighted = false;
-							restartMaze.highlighted = true;
-						} else if( saveMaze.highlighted ) {
-							saveMaze.highlighted = false;
-							loadMaze.highlighted = true;
-						} else if( exitGame.highlighted ) {
-							exitGame.highlighted = false;
-							saveMaze.highlighted = true;
-						} else if( backToGame.highlighted ) {
-							backToGame.highlighted = false;
-							exitGame.highlighted = true;
-						} else if( freedom.highlighted ) {
-							freedom.highlighted = false;
-							backToGame.highlighted = true;
-						} else { //if none are highlighted
-							nextMaze.highlighted = true;
-						}
+						menuManager.scrollHighlights( true );
 						break;
 					}
 					case ControlMapping::ACTION_MENU_DOWN: {
-						if( nextMaze.highlighted ) {
-							nextMaze.highlighted = false;
-							restartMaze.highlighted = true;
-						} else if( restartMaze.highlighted ) {
-							restartMaze.highlighted = false;
-							loadMaze.highlighted = true;
-						} else if( loadMaze.highlighted ) {
-							loadMaze.highlighted = false;
-							saveMaze.highlighted = true;
-						} else if( saveMaze.highlighted ) {
-							saveMaze.highlighted = false;
-							exitGame.highlighted = true;
-						} else if( exitGame.highlighted ) {
-							exitGame.highlighted = false;
-							backToGame.highlighted = true;
-						} else if( backToGame.highlighted ) {
-							backToGame.highlighted = false;
-							freedom.highlighted = true;
-						} else if( freedom.highlighted ) {
-							freedom.highlighted = false;
-							nextMaze.highlighted = true;
-						} else { //if none are highlighted
-							nextMaze.highlighted = true;
-						}
+						menuManager.scrollHighlights( false );
 						break;
 					}
 					case ControlMapping::ACTION_SCREENSHOT: {
@@ -2588,39 +2493,6 @@ void GameManager::processControls() {
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::processControls(): " << e.what() << std::endl;
-	}
-}
-
-/**
-* Should be called only by OnEvent() or processControls().
-* Arguments:
-* None.
-*/
-void GameManager::processMenuSelection() {
-	if( exitGame.highlighted ) {
-		exitConfirmation = gui->addMessageBox( L"Exit?", L"Are you sure you want to exit?", true, ( gui::EMBF_YES | gui::EMBF_NO ) );
-	} else if( loadMaze.highlighted ) {
-		if( debug ) {
-			std::wcout << L"Current working directory: " << currentDirectory << std::endl;
-		}
-		
-		fileChooser = gui->addFileOpenDialog( L"Select a Maze", true, 0, -1 );
-	} else if( saveMaze.highlighted ) {
-		mazeManager.saveToFile();
-	} else if( nextMaze.highlighted ) {
-		newMaze();
-	} else if( restartMaze.highlighted ) {
-		newMaze( randomSeed );
-	} else if( backToGame.highlighted ) {
-		showingMenu = false;
-	} else if( freedom.highlighted ) {
-		std::wstring message = stringConverter.toStdWString( PACKAGE_NAME );
-		message += L" is copyright 2012-2014 by James Dearing. Licensed under the GNU Affero General Public License, version 3.0 or (at your option) any later version, as published by the Free Software Foundation. See the file \"COPYING\" or https://www.gnu.org/licenses/agpl.html.\n\nThis means you're free to do what you want with this game: mod it, give copies to friends, sell it if you want. Whatever. It's Free software, Free as in Freedom. You should have received the program's source code with this copy; if you don't have it, you can get it from ";
-		message += stringConverter.toStdWString( PACKAGE_URL );
-		message += L".\n\n";
-		message += stringConverter.toStdWString( PACKAGE_NAME );
-		message += L" is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.";
-		gui->addMessageBox( L"Freedom", stringConverter.toStdWString( message ).c_str() ); //stringConverter.toWCharArray( message ) );
 	}
 }
 
@@ -3194,7 +3066,7 @@ void GameManager::resetThings() {
 			if( debug ) {
 				std::wcout << L"Setting player " << winnersLoadingScreen.at( w ) << L"'s score to ";
 			}
-			score += ( winners.size() - w ) * additiveMultiplier;
+			score += ( winnersLoadingScreen.size() - w ) * additiveMultiplier;
 			if( debug ) {
 				std::wcout << ( winners.size() - w ) * additiveMultiplier;
 			}
@@ -4166,6 +4038,20 @@ void GameManager::setupBackground() {
 	if( debug ) {
 		std::wcout << L"end of setupBackground()" << std::endl;
 	}
+}
+
+/**
+ * Called by menuManager.
+ */
+void GameManager::setExitConfirmation( irr::gui::IGUIWindow* newWindow ) {
+	exitConfirmation = newWindow;
+}
+
+/**
+ * Called by menuManager.
+ */
+void GameManager::setFileChooser( irr::gui::IGUIFileOpenDialog* newChooser ) {
+	fileChooser = newChooser;
 }
 
 /**

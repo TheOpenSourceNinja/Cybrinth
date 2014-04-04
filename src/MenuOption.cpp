@@ -127,18 +127,18 @@ uint_fast16_t MenuOption::getY() {
 	}
 }
 
-bool MenuOption::contains( irr::core::position2d<uint_fast16_t> test ) {
+bool MenuOption::contains( irr::core::position2d< int_fast32_t > test ) {
 	try {
-		return ( test.X >= x && test.Y >= y && test.X <= x + dimension.Width && test.Y <= y + dimension.Height );
+		return ( ( test.X >= x && test.Y >= y ) && ( test.X <= x + dimension.Width && test.Y <= y + dimension.Height ) );
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::contains(): " << e.what() << std::endl;
 		return false;
 	}
 }
 
-bool MenuOption::contains( uint_fast16_t testX, uint_fast16_t testY ) {
+bool MenuOption::contains( int_fast32_t testX, int_fast32_t testY ) {
 	try {
-		return contains( irr::core::position2d<uint_fast16_t>( testX, testY ) );
+		return contains( irr::core::position2d< int_fast32_t >( testX, testY ) );
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::contains(): " << e.what() << std::endl;
 		return false;

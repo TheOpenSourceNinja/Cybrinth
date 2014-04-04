@@ -9,36 +9,49 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MENUOPTION_H
-#define MENUOPTION_H
+#ifndef MENUMANAGER_H
+#define MENUMANAGER_H
 
+//#include "GameManager.h"
+class GameManager; //Avoids circular dependency
+#include <iostream>
 #include <irrlicht.h>
-#include "Integers.h"
-#include "PreprocessorCommands.h"
+#include "MenuOption.h"
+#include <string>
+#include "StringConverter.h"
 
-
-class MenuOption {
+class MenuManager {
 	public:
-		MenuOption();
-		virtual ~MenuOption();
-		uint_fast16_t getX();
-		void setX( uint_fast16_t val );
-		uint_fast16_t getY();
-		void setY( uint_fast16_t val );
-		void setFont( irr::gui::IGUIFont* newFont );
+		MenuManager();
+		virtual ~MenuManager();
+		
 		void draw( irr::video::IVideoDriver* driver );
-		bool contains( irr::core::position2d< int_fast32_t > test );
-		bool contains( int_fast32_t testX, int_fast32_t testY );
-		void setText( irr::core::stringw newText );
-		bool highlighted;
+		
+		void findHighlights( int_fast32_t x, int_fast32_t y );
+		
+		void processSelection( GameManager* gm );
+		
+		void scrollHighlights( bool up );
+		
+		void setFont( irr::gui::IGUIFont* font );
+		
+		void setPositions( uint_fast32_t windowHeight );
 	protected:
 	private:
-		uint_fast16_t x;
-		uint_fast16_t y;
-		irr::core::dimension2d<uint_fast16_t> dimension;
-		irr::gui::IGUIFont* font;
-		irr::core::stringw text;
-		void setDimension();
+		MenuOption backToGame;
+		
+		MenuOption freedom;
+
+		MenuOption exitGame;
+		
+		MenuOption loadMaze;
+		
+		MenuOption nextMaze;
+		
+		MenuOption restartMaze;
+		
+		MenuOption saveMaze;
+		StringConverter stringConverter;
 };
 
-#endif // MENUOPTION_H
+#endif // MENUMANAGER_H

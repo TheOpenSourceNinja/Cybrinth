@@ -31,6 +31,9 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Option use_console_runner="0" />
+				<Compiler>
+					<Add directory="src" />
+				</Compiler>
 				<MakeCommands>
 					<Build command="$make -f $makefile $target" />
 					<CompileFile command="$make -f $makefile $file" />
@@ -165,6 +168,12 @@
 			<Option target="cybrinth" />
 		</Unit>
 		<Unit filename="src/MazeManager.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/MenuManager.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/MenuManager.h">
 			<Option target="cybrinth" />
 		</Unit>
 		<Unit filename="src/MenuOption.cpp">

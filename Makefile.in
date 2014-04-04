@@ -109,7 +109,8 @@ am_cybrinth_OBJECTS = src/AI.$(OBJEXT) src/Collectable.$(OBJEXT) \
 	src/PlayerStart.$(OBJEXT) src/StringConverter.$(OBJEXT) \
 	src/SpellChecker.$(OBJEXT) src/ImageModifier.$(OBJEXT) \
 	src/SystemSpecificsManager.$(OBJEXT) \
-	compiled-images/key.$(OBJEXT) compiled-images/acid.$(OBJEXT)
+	compiled-images/key.$(OBJEXT) compiled-images/acid.$(OBJEXT) \
+	src/MenuManager.$(OBJEXT)
 cybrinth_OBJECTS = $(am_cybrinth_OBJECTS)
 am__DEPENDENCIES_1 =
 cybrinth_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -301,7 +302,7 @@ top_srcdir = @top_srcdir@
 DEB_BUILD_HARDENING = 1 #If you have hardening wrapper scripts installed (Ubuntu/Debian package "hardening-wrapper"), this should make them harden the program
 AM_CPPFLAGS = -std=c++0x -pg -lc $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS)
 AM_LDFLAGS = -pg
-cybrinth_SOURCES = src/AI.h src/AI.cpp src/Collectable.h src/Collectable.cpp src/colors.h src/FontManager.h src/FontManager.cpp src/GameManager.h src/GameManager.cpp src/Goal.h src/Goal.cpp src/GUIFreetypeFont.h src/GUIFreetypeFont.cpp src/ControlMapping.h src/ControlMapping.cpp src/main.cpp src/MazeCell.h src/MazeCell.cpp src/MazeManager.h src/MazeManager.cpp src/MenuOption.h src/MenuOption.cpp src/NetworkManager.h src/NetworkManager.cpp src/Object.h src/Object.cpp src/Player.h src/Player.cpp src/PlayerStart.h src/PlayerStart.cpp src/StringConverter.h src/StringConverter.cpp src/SpellChecker.h src/SpellChecker.cpp src/ImageModifier.h src/ImageModifier.cpp src/SystemSpecificsManager.h src/SystemSpecificsManager.cpp src/PreprocessorCommands.h compiled-images/key.cpp compiled-images/acid.cpp
+cybrinth_SOURCES = src/AI.h src/AI.cpp src/Collectable.h src/Collectable.cpp src/colors.h src/FontManager.h src/FontManager.cpp src/GameManager.h src/GameManager.cpp src/Goal.h src/Goal.cpp src/GUIFreetypeFont.h src/GUIFreetypeFont.cpp src/ControlMapping.h src/ControlMapping.cpp src/main.cpp src/MazeCell.h src/MazeCell.cpp src/MazeManager.h src/MazeManager.cpp src/MenuOption.h src/MenuOption.cpp src/NetworkManager.h src/NetworkManager.cpp src/Object.h src/Object.cpp src/Player.h src/Player.cpp src/PlayerStart.h src/PlayerStart.cpp src/StringConverter.h src/StringConverter.cpp src/SpellChecker.h src/SpellChecker.cpp src/ImageModifier.h src/ImageModifier.cpp src/SystemSpecificsManager.h src/SystemSpecificsManager.cpp src/PreprocessorCommands.h compiled-images/key.cpp compiled-images/acid.cpp src/MenuManager.h src/MenuManager.cpp
 cybrinth_LDADD = $(IRRLICHT_LIBS) $(BOOSTFILESYSTEM_LIBS) $(BOOSTSYSTEM_LIBS) $(DEPS_LIBS)
 all: all-am
 
@@ -436,6 +437,8 @@ compiled-images/key.$(OBJEXT): compiled-images/$(am__dirstamp) \
 	compiled-images/$(DEPDIR)/$(am__dirstamp)
 compiled-images/acid.$(OBJEXT): compiled-images/$(am__dirstamp) \
 	compiled-images/$(DEPDIR)/$(am__dirstamp)
+src/MenuManager.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 
 cybrinth$(EXEEXT): $(cybrinth_OBJECTS) $(cybrinth_DEPENDENCIES) $(EXTRA_cybrinth_DEPENDENCIES) 
 	@rm -f cybrinth$(EXEEXT)
@@ -461,6 +464,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ImageModifier.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/MazeCell.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/MazeManager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/MenuManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/MenuOption.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/NetworkManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/Object.Po@am__quote@
