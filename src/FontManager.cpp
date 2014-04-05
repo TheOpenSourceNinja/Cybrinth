@@ -14,12 +14,12 @@
 #include "GUIFreetypeFont.h"
 #include "StringConverter.h"
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 #ifdef HAVE_IOSTREAM
-#include <iostream>
+	#include <iostream>
 #endif //HAVE_IOSTREAM
-#include <algorithm/string.hpp>
-#include <filesystem/operations.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem/operations.hpp>
 
 FontManager::FontManager() {
 	try {

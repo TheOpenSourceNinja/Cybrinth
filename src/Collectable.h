@@ -16,7 +16,7 @@
 #include "ImageModifier.h"
 #include "PreprocessorCommands.h"
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 
 class Collectable : public Object {
 	public:

@@ -5,9 +5,9 @@
 #include "MazeCell.h"
 #include "PreprocessorCommands.h"
 
-#include <filesystem.hpp>
+#include <boost/filesystem.hpp>
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 
 class GameManager;
 

@@ -2,7 +2,7 @@
 #include "MazeManager.h"
 #include "GameManager.h"
 
-#include <filesystem/fstream.hpp>
+#include <boost/filesystem/fstream.hpp>
 #ifdef HAVE_IOSTREAM
 #include <iostream>
 #endif //HAVE_IOSTREAM

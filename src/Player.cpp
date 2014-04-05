@@ -9,7 +9,7 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Player.h"
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 #ifdef HAVE_IOSTREAM
 #include <iostream>
 #endif //HAVE_IOSTREAM

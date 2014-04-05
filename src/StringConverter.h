@@ -13,9 +13,9 @@
 #define STRINGCONVERTER_H
 
 #include "PreprocessorCommands.h"
-
-#include <irrString.h>
-#include <path.h>
+#include <irrlicht/irrlicht.h>
+#include <irrlicht/irrString.h>
+#include <boost/filesystem/path.hpp>
 #include <taglib/taglib.h>
 #ifdef HAVE_STRING
 #include <string>

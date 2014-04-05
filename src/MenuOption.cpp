@@ -15,7 +15,7 @@
 #include <iostream>
 #endif //HAVE_IOSTREAM
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 
 MenuOption::MenuOption() {
 	try {

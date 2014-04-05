@@ -17,10 +17,10 @@
 #include "PreprocessorCommands.h"
 
 #ifdef HAVE_MAP
-#include <map>
+	#include <map>
 #endif //HAVE_MAP
-#include <irrlicht.h>
-#include <filesystem/path.hpp>
+#include <irrlicht/irrlicht.h>
+#include <boost/filesystem/path.hpp>
 
 namespace irr {
 	namespace gui {

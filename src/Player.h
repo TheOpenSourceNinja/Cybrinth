@@ -12,7 +12,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 #include "Collectable.h"
 #include "Object.h"
 #include "colors.h"

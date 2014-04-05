@@ -17,14 +17,14 @@
  */
 
 #include "GameManager.h"
-#include <filesystem/fstream.hpp>
-#include <algorithm/string.hpp>
-#include <algorithm/string/trim.hpp>
-#include <algorithm/string/trim_all.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/trim_all.hpp>
 #include <boost/lexical_cast.hpp>
-#include <SDL/SDL.h>
-#include <taglib/fileref.h>
-#include <taglib/tag.h>
+#include <SDL.h>
+#include <fileref.h>
+#include <tag.h>
 
 #if defined WINDOWS //Networking stuff
 #include <winsock>
@@ -57,9 +57,6 @@ using namespace irr;
  */
 bool GameManager::allHumansAtGoal() {
 	try {
-		if( debug ) {
-			std::wcout << L"allHumansAtGoal() called" << std::endl;
-		}
 		std::vector< uint_fast8_t > humanPlayers; //Get a list of players
 
 		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
@@ -88,10 +85,6 @@ bool GameManager::allHumansAtGoal() {
 			}
 
 		}
-		
-		if( debug ) {
-				std::wcout << L"End of allHumansAtGoal()" << std::endl;
-		}
 		return result;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::allHumansAtGoal(): " << e.what() << std::endl;
@@ -104,9 +97,6 @@ bool GameManager::allHumansAtGoal() {
  */
 void GameManager::drawAll() {
 	try {
-		if( debug ) {
-			std::wcout << L"drawAll() called" << std::endl;
-		}
 		driver->beginScene();
 		//driver->beginScene( false, true );
 
@@ -322,9 +312,6 @@ void GameManager::drawAll() {
 		}
 
 		driver->endScene();
-		if( debug ) {
-				std::wcout << L"end of drawAll()" << std::endl;
-		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::drawAll(): " << e.what() << std::endl;
 	}
@@ -335,10 +322,6 @@ void GameManager::drawAll() {
  */
 void GameManager::drawBackground() {
 	try {
-		if( debug ) {
-				std::wcout << L"drawBackgound() called" << std::endl;
-		}
-		
 		switch( backgroundChosen ) {
 			case 0: {
 				bgscene->drawAll();
@@ -357,10 +340,6 @@ void GameManager::drawBackground() {
 				}
 			}
 		}
-		
-		if( debug ) {
-				std::wcout << L"end of drawBackground()" << std::endl;
-		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::drawBackground(): " << e.what() << std::endl;
 	}
@@ -371,10 +350,6 @@ void GameManager::drawBackground() {
  */
 void GameManager::drawLoadingScreen() {
 	try {
-		if( debug ) {
-				std::wcout << L"drawLoadingScreen() called" << std::endl;
-		}
-		
 		if( !haveShownLogo ) { //This is an ugly hack, but it works and I can't think of a better way to do it.
 			drawLogo();
 		} else {
@@ -427,10 +402,6 @@ void GameManager::drawLoadingScreen() {
 
 			drawStats( textY );
 		}
-		
-		if( debug ) {
-				std::wcout << L"end of drawLoadingScreen()" << std::endl;
-		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::drawLoadingScreen(): " << e.what() << std::endl;
 	}
@@ -441,10 +412,6 @@ void GameManager::drawLoadingScreen() {
  */
  void GameManager::drawLogo() {
 	try {
-		if( debug ) {
-				std::wcout << L"drawLogo() called" << std::endl;
-		}
-
 		if( isNull( logoTexture ) ) {
 			std::wstring error = L"drawLogo() called but logoTexture is null.";
 			throw error;
@@ -461,10 +428,6 @@ void GameManager::drawLoadingScreen() {
 		} else {
 			driver->draw2DImage( logoTexture, core::position2d< s32 >( 0, 0 ) );
 		}
-		
-		if( debug ) {
-				std::wcout << L"end of drawLogo()" << std::endl;
-		}
 	} catch( std::wstring error ) {
 		std::wcout << L"Error in drawLogo(): " << error << std::endl;
 	} catch ( std::exception &error ) {
@@ -478,10 +441,6 @@ void GameManager::drawLoadingScreen() {
  */
 void GameManager::drawStats( int_fast16_t textY ) {
 	try {
-		if( debug ) {
-				std::wcout << L"drawStats() called" << std::endl;
-		}
-		
 		if( isNull( statsFont ) ) {
 			statsFont = gui->getBuiltInFont();
 		}
@@ -624,10 +583,6 @@ void GameManager::drawStats( int_fast16_t textY ) {
 					textX = tempDimensions.Width + textXOld;
 				}
 			}
-		}
-		
-		if( debug ) {
-				std::wcout << L"end of drawStats()" << std::endl;
 		}
 	} catch ( std::exception &error ) {
 		std::wcout << L"Error in drawStats(): " << error.what() << std::endl;
@@ -1059,9 +1014,6 @@ GameManager::GameManager() {
  */
 Collectable* GameManager::getCollectable( uint_fast8_t collectable ) {
 	try {
-		if( debug ) {
-			std::wcout << L"getCollectable() called" << std::endl;
-		}
 		return &stuff.at( collectable );
 	} catch( std::exception &e ) {
 		std::wcout << L"Error in GameManager::getCollectable(): " << e.what() << std::endl;
@@ -1074,9 +1026,6 @@ Collectable* GameManager::getCollectable( uint_fast8_t collectable ) {
  */
 bool GameManager::getDebugStatus() {
 	try {
-		if( debug ) {
-			std::wcout << L"getDebugStatus() called" << std::endl;
-		}
 		return debug;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getDebugStatus(): " << e.what() << std::endl;
@@ -1090,9 +1039,6 @@ bool GameManager::getDebugStatus() {
  */
 Goal* GameManager::getGoal() {
 	try {
-		if( debug ) {
-			std::wcout << L"getGoal() called" << std::endl;
-		}
 		return &goal;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getGoal(): " << e.what() << std::endl;
@@ -1168,10 +1114,6 @@ MazeManager* GameManager::getMazeManager() {
  */
  uint_fast8_t GameManager::getNumCollectables() {
 	try {
-		if( debug ) {
-			std::wcout << L"getNumCollectables() called" << std::endl;
-		}
-		
 		return stuff.size();
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getNumCollectables(): " << e.what() << std::endl;
@@ -1184,18 +1126,12 @@ MazeManager* GameManager::getMazeManager() {
  */
 uint_fast8_t GameManager::getNumKeys() {
 	try {
-		if( debug ) {
-			std::wcout << L"getNumKeys() called" << std::endl;
-		}
 		
 		uint_fast8_t result = 0;
 		for( decltype( stuff.size() ) s = 0; s < stuff.size(); ++s ) {
 			if( stuff.at( s ).getType() == Collectable::KEY ) {
 				result++;
 			}
-		}
-		if( debug ) {
-			std::wcout << L"end of getNumKeys()" << std::endl;
 		}
 		
 		return result;
@@ -1213,10 +1149,6 @@ uint_fast8_t GameManager::getNumKeys() {
  */
 Player* GameManager::getPlayer( uint_fast8_t p ) {
 	try {
-		if( debug ) {
-			std::wcout << L"getPlayer() called" << std::endl;
-		}
-		
 		if( p < numPlayers ) {
 			return &player.at( p );
 		} else {
@@ -1859,10 +1791,6 @@ void GameManager::makeMusicList() {
  */
 void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 	try {
-		if( debug ) {
-			std::wcout << L"movePlayerOnX() called" << std::endl;
-		}
-		
 		if( numPlayers > p && mazeManager.cols > 0 ) {
 			if( direction < 0 ) {
 				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getX() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() != MazeCell::ACIDPROOF && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() != MazeCell::LOCK  && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() != MazeCell::NONE ) {
@@ -1906,10 +1834,6 @@ void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 	} catch( std::wstring &e ) {
 		std::wcerr << L"Error in GameManager::movePlayerOnX(): " << e << std::endl;
 	}
-	
-	if( debug ) {
-		std::wcout << L"end of movePlayerOnX()" << std::endl;
-	}
 }
 
 /**
@@ -1920,10 +1844,6 @@ void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
  */
 void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 	try {
-		if( debug ) {
-			std::wcout << L"movePlayerOnY() called" << std::endl;
-		}
-		
 		if( numPlayers > p && mazeManager.rows > 0 ) {
 			if( direction < 0 ) {
 				if( player.at( p ).hasItem() && player.at( p ).getItemType() == Collectable::ACID && player.at( p ).getY() > 0 && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() != MazeCell::ACIDPROOF && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() != MazeCell::LOCK && mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() != MazeCell::NONE ) {
@@ -1961,10 +1881,6 @@ void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 		} else {
 			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
 			throw e;
-		}
-		
-		if( debug ) {
-			std::wcout << L"movePlayerOnY() called" << std::endl;
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::movePlayerOnY(): " << e.what() << std::endl;
@@ -2057,7 +1973,7 @@ void GameManager::newMaze( uint_fast16_t newRandomSeed ) {
 		}
 		
 		if( debug ) {
-			std::wcout << L"end of nwMaze() with an argument" << std::endl;
+			std::wcout << L"end of newMaze() with an argument" << std::endl;
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::newMaze(): " << e.what() << std::endl;
@@ -2073,10 +1989,6 @@ void GameManager::newMaze( uint_fast16_t newRandomSeed ) {
 //cppcheck-suppress unusedFunction
 bool GameManager::OnEvent( const SEvent& event ) {
 	try {
-		if( debug ) {
-			std::wcout << L"OnEvent() called" << std::endl;
-		}
-		
 		switch( event.EventType ) {
 			case EET_KEY_INPUT_EVENT: {
 				for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
@@ -2400,10 +2312,6 @@ bool GameManager::OnEvent( const SEvent& event ) {
 */
 void GameManager::processControls() {
 	try {
-		if( debug ) {
-			std::wcout << L"processControls() called" << std::endl;
-		}
-		
 		for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
 			if( controls.at( k ).activated ) {
 				if ( controls.at( k ).getMouseEvent() == irr::EMOUSE_INPUT_EVENT::EMIE_MOUSE_WHEEL ) { //There's no event for when the wheel stops moving, so we're manually deactivating those controls
@@ -2486,10 +2394,6 @@ void GameManager::processControls() {
 					}
 				}
 			}
-		}
-		
-		if( debug ) {
-			std::wcout << L"end of processControls()" << std::endl;
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::processControls(): " << e.what() << std::endl;

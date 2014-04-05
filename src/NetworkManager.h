@@ -20,7 +20,7 @@
 #include "PlayerStart.h"
 #include "Collectable.h"
 #include "PreprocessorCommands.h"
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 #ifdef HAVE_SSTREAM
 #include <sstream>
 #endif //HAVE_SSTREAM

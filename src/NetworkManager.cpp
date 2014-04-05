@@ -10,7 +10,7 @@
 */
 #include "NetworkManager.h"
 #include "GameManager.h"
-#include <algorithm/string.hpp>
+#include <boost/algorithm/string.hpp>
 #ifdef HAVE_IOSTREAM
 #include <iostream>
 #endif //HAVE_IOSTREAM

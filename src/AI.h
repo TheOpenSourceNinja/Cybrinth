@@ -12,12 +12,12 @@
 #ifndef AI_H
 #define AI_H
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 #ifdef HAVE_STRING
-#include <string>
+	#include <string>
 #endif //HAVE_STRING
 #ifdef HAVE_VECTOR
-#include <vector>
+	#include <vector>
 #endif //HAVE_VECTOR
 #include "Collectable.h"
 #include "MazeCell.h"

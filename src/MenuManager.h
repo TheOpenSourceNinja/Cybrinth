@@ -15,7 +15,7 @@
 //#include "GameManager.h"
 class GameManager; //Avoids circular dependency
 #include <iostream>
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 #include "MenuOption.h"
 #include <string>
 #include "StringConverter.h"

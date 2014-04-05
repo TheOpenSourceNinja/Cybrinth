@@ -15,7 +15,7 @@
 #ifndef SYSTEMSPECIFICSMANAGER_H
 #define SYSTEMSPECIFICSMANAGER_H
 
-#include <filesystem.hpp>
+#include <boost/filesystem.hpp>
 #ifdef HAVE_VECTOR
 #include <vector>
 #endif //HAVE_VECTOR

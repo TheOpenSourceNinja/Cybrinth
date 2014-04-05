@@ -12,7 +12,7 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 #include "Integers.h"
 #include "PreprocessorCommands.h"
 

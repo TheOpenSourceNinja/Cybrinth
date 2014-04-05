@@ -12,7 +12,7 @@
 #ifndef COLORS_H_INCLUDED
 #define COLORS_H_INCLUDED
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 
 #include "PreprocessorCommands.h"
 

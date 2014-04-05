@@ -359,8 +359,10 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 				if( possibleDirections.size() == 0 && partialSolution.size() != 0 ) {
 					partialSolution.pop_back();
 				} else {
-					for( uint_fast8_t i = 0; ( i < possibleDirections.size() && solution.empty() ); ++i ) { //changed decltype( possibleDirections.size() ) to uint_fast8_t because the size of possibleDirections can never exceed 4 but could be stored in a needlessly large integer type.
-						direction_t choice = possibleDirections.at( rand() % possibleDirections.size() );
+					while( !possibleDirections.empty() ) { //for( uint_fast8_t i = 0; ( i < possibleDirections.size() && solution.empty() ); ++i ) { //changed decltype( possibleDirections.size() ) to uint_fast8_t because the size of possibleDirections can never exceed 4 but could be stored in a needlessly large integer type.
+						uint_fast8_t choiceInt = rand() % possibleDirections.size();
+						direction_t choice = possibleDirections.at( choiceInt );
+						//direction_t choice = possibleDirections.at( i );
 						auto newDepthLimit = depthLimit - 1;
 						switch( choice ) {
 							case UP: {
@@ -400,6 +402,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 								findSolutionIDDFS( partialSolution, newPosition, newDepthLimit, canDissolveWalls );
 							} break;
 						}
+						possibleDirections.erase( possibleDirections.begin() + choiceInt );
 					}
 				}
 

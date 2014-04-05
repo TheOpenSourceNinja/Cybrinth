@@ -15,11 +15,11 @@
 #if COMPILE_WITH_FREETYPE
 
 #ifdef HAVE_CASSERT
-#include <cassert>
+	#include <cassert>
 #endif //HAVE_CASSERT
 #include "Integers.h"
 #ifdef HAVE_IOSTREAM
-#include <iostream>
+	#include <iostream>
 #endif //HAVE_IOSTREAM
 
 using namespace irr;

@@ -1,9 +1,9 @@
 #ifndef KEYMAPPING_H
 #define KEYMAPPING_H
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 #ifdef HAVE_STRING
-#include <string>
+	#include <string>
 #endif //HAVE_STRING
 #include "Integers.h"
 #include "PreprocessorCommands.h"

@@ -12,7 +12,7 @@
 #ifndef MENUOPTION_H
 #define MENUOPTION_H
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 #include "Integers.h"
 #include "PreprocessorCommands.h"
 

@@ -4,7 +4,7 @@
 #include "Integers.h"
 #include "PreprocessorCommands.h"
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 using namespace irr;
 
 class ImageModifier {

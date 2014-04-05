@@ -20,9 +20,9 @@
 #include "Integers.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 #ifdef HAVE_STRING
-#include <string>
+	#include <string>
 #endif //HAVE_STRING
 
 class CGUITTFace : public irr::IReferenceCounted {

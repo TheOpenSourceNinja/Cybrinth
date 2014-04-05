@@ -1,7 +1,7 @@
 #include "ControlMapping.h"
-#include <algorithm/string.hpp>
+#include <boost/algorithm/string.hpp>
 #ifdef HAVE_IOSTREAM
-#include <iostream>
+	#include <iostream>
 #endif //HAVE_IOSTREAM
 
 ControlMapping::action_t ControlMapping::getAction() {

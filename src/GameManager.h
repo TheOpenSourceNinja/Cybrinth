@@ -33,7 +33,7 @@
 #include "StringConverter.h"
 #include "SystemSpecificsManager.h"
 
-#include <irrlicht.h>
+#include <irrlicht/irrlicht.h>
 #include <SDL_mixer.h>
 #ifdef HAVE_STRING
 	#include <string>

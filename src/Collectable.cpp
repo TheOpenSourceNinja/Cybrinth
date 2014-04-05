@@ -12,7 +12,7 @@
 #include "Collectable.h"
 #include "colors.h"
 #ifdef HAVE_IOSTREAM
-#include <iostream>
+	#include <iostream>
 #endif //HAVE_IOSTREAM
 
 Collectable::Collectable() {
