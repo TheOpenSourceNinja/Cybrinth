@@ -60,6 +60,7 @@ class GameManager : public IEventReceiver {
 		bool getDebugStatus();
 		Goal* getGoal();
 		Collectable* getKey( uint_fast8_t key );
+		float getLoadingPercentage();
 		MazeManager* getMazeManager();
 		uint_fast8_t getNumCollectables();
 		uint_fast8_t getNumKeys();
@@ -83,6 +84,7 @@ class GameManager : public IEventReceiver {
 		void setControls();
 		void setExitConfirmation( irr::gui::IGUIWindow* newWindow );
 		void setFileChooser( irr::gui::IGUIFileOpenDialog* newChooser );
+		void setLoadingPercentage( float newPercent );
 		
 		//Non-functions----------------------------------
 		std::vector< AI > bot;
@@ -119,7 +121,7 @@ class GameManager : public IEventReceiver {
 		void drawBackground();
 		void drawLoadingScreen();
 		void drawLogo();
-		void drawStats( int_fast16_t textY );
+		void drawStats( int_fast32_t textY );
 		
 		bool haveShownLogo;
 		
@@ -199,6 +201,13 @@ class GameManager : public IEventReceiver {
 		uint_fast32_t minWidth;
 		uint_fast32_t minHeight;
 		
+		//signed 32-bit integers----------------------------------
+		s32 mouseX;
+		s32 mouseY;
+		
+		//floating point numbers----------------------------------
+		float loadingProgress;
+		
 		//wide character strings----------------------------------
 		core::stringw fontFile;
 		
@@ -207,6 +216,7 @@ class GameManager : public IEventReceiver {
 		core::stringw keysFoundPerPlayer;
 		
 		core::stringw loading;
+		core::stringw loadingStatus;
 		
 		core::stringw musicAlbum;
 		core::stringw musicArtist;
@@ -272,14 +282,13 @@ class GameManager : public IEventReceiver {
 		
 		video::ITexture* logoTexture;
 		
-		boost::filesystem::directory_iterator currentFile;
-		
 		
 		//Misc. SDL/SDL_Mixer types----------------------------------
 		Mix_Music* music;
 		
 		//Misc. Boost/Boost Filesystem types----------------------------------
 		boost::filesystem::path currentDirectory;
+		boost::filesystem::directory_iterator currentFile;
 		boost::filesystem::path currentMusic;
 
 		std::vector<boost::filesystem::path> musicList;

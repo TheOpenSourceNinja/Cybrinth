@@ -12,6 +12,7 @@
 #ifdef HAVE_IOSTREAM
 #include <iostream>
 #endif //HAVE_IOSTREAM
+#include <cwchar>
 
 /*#include <codecvt>
 #include <locale>*/
@@ -254,6 +255,13 @@ std::wstring StringConverter::toStdWString( float input ) {
 		std::wstring w;
 		return w;
 	}
+}
+
+std::wstring StringConverter::toStdWString( float input, const wchar_t* format, size_t maxLength ) {
+	wchar_t buffer[ maxLength ];
+	swprintf( buffer, maxLength, format, input );
+	std::wstring result = buffer;
+	return result;
 }
 
 std::wstring StringConverter::toStdWString( double input ) {

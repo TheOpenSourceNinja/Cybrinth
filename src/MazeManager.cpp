@@ -169,6 +169,9 @@ void MazeManager::makeRandomLevel() {
 			decltype( rows ) tempRows = tempCols + ( rand() % 5 ); //Again, no idea where the 5 came from.
 			newMaze( tempCols, tempRows );
 		}
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
+		gameManager->device->run();
+		gameManager->drawAll();
 		
 		//Set whether the cells are visible. Those on the border are changed later.
 		for( decltype( cols ) x = 0; x < cols; ++x ) {
@@ -187,6 +190,10 @@ void MazeManager::makeRandomLevel() {
 				maze[ x ][ y ].visited = false;
 			}
 		}
+		
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
+		gameManager->device->run();
+		gameManager->drawAll();
 
 		for( decltype( gameManager->numPlayers ) p = 0; p < gameManager->numPlayers; ++p ) {
 			gameManager->playerStart[ p ].reset();
@@ -210,6 +217,10 @@ void MazeManager::makeRandomLevel() {
 			recurseRandom( goalX, goalY, 0, 0 ); //Start recursion from the goal's position; for some reason that makes the mazes harder than if we started recursion from the player's starting point.
 		}
 		
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
+		gameManager->device->run();
+		gameManager->drawAll();
+		
 		//Add walls at maze borders
 		for( decltype( cols ) x = 0; x < cols; ++x ) {
 			maze[ x ][ 0 ].setOriginalTop( MazeCell::ACIDPROOF );
@@ -225,6 +236,10 @@ void MazeManager::makeRandomLevel() {
 			maze[ cols-1 ][ y ].rightVisible = true;
 		}
 		
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
+		gameManager->device->run();
+		gameManager->drawAll();
+		
 		//Make MazeCell::isDeadEnd() work
 		for( decltype( cols ) x = 1; x < cols; ++x ) {
 			for( decltype( rows ) y = 0; y < rows; ++y ) {
@@ -236,6 +251,10 @@ void MazeManager::makeRandomLevel() {
 				maze[ x ][ y-1 ].setOriginalBottom( maze[ x ][ y ].getTop() );
 			}
 		}
+		
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
+		gameManager->device->run();
+		gameManager->drawAll();
 
 		//Find all dead ends. I'm sure it would be more efficient to do this during maze generation rather than going back through afterward, but I can't be bothered with that now.
 		std::vector< decltype( cols ) > deadEndsX;
@@ -249,6 +268,10 @@ void MazeManager::makeRandomLevel() {
 				}
 			}
 		}
+		
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
+		gameManager->device->run();
+		gameManager->drawAll();
 
 		//Remove player starts from list of dead ends
 		for( decltype( gameManager->numPlayers ) p = 0; p < gameManager->numPlayers; ++p ) {
@@ -259,6 +282,10 @@ void MazeManager::makeRandomLevel() {
 				}
 			}
 		}
+		
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
+		gameManager->device->run();
+		gameManager->drawAll();
 
 		//Remove goal from list of dead ends
 		for( decltype( deadEndsX.size() ) i = 0; i < deadEndsX.size(); ++i ) {
@@ -305,6 +332,10 @@ void MazeManager::makeRandomLevel() {
 				deadEndsY.erase( deadEndsY.begin() + chosen );
 			}
 		}
+		
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
+		gameManager->device->run();
+		gameManager->drawAll();
 		
 		{
 			uint_fast8_t acidChance = UINT_FAST8_MAX; //Acid is supposed to be really rare.
@@ -411,6 +442,10 @@ void MazeManager::makeRandomLevel() {
 
 			numKeys = gameManager->numLocks = numLocksPlaced;
 		}
+		
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
+		gameManager->device->run();
+		gameManager->drawAll();
 
 		for( decltype( cols ) x = 0; x < cols; ++x ) {
 			for( decltype( rows ) y = 0; y < rows; ++y ) {
@@ -422,6 +457,10 @@ void MazeManager::makeRandomLevel() {
 			maze[ gameManager->playerStart[ p ].getX() ][ gameManager->playerStart[ p ].getY() ].visited = true;
 			maze[ gameManager->playerStart[ p ].getX() ][ gameManager->playerStart[ p ].getY() ].setVisitorColor( gameManager->player[ p ].getColorTwo() );
 		}
+		
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
+		gameManager->device->run();
+		gameManager->drawAll();
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::makeRandomLevel(): " << e.what() << std::endl;
 	}
@@ -480,73 +519,74 @@ void MazeManager::newMaze( uint_fast8_t newCols, uint_fast8_t newRows ) {
 //Generates the maze recursively
 void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t depth, uint_fast16_t numSoFar ) {
 	try {
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + ( 90.0 / ( cols * rows ) ) );
 		//At one point I included the following two lines because I hoped to show the maze as it was being generated. Might still add that as an option. Now they're there so that the loading screen gets drawn and lasts long enough to read it.
 		gameManager->device->run();
 		gameManager->drawAll();
-
+		
 		maze[ x ][ y ].visited = true;
 		maze[ x ][ y ].id = numSoFar;
-
+		
 		for( decltype( gameManager->numPlayers ) p = 0; p < gameManager->numPlayers; ++p ) {
 			if( depth >= gameManager->playerStart[ p ].distanceFromExit ) {
 				gameManager->playerStart[ p ].setPos( x, y );
 				gameManager->playerStart[ p ].distanceFromExit = depth;
 			}
 		}
-
+		
 		bool keepGoing = true;
-
+		
 		while( keepGoing ) {
 			numSoFar += 1;
-
+			
 			switch( rand() % 4 ) { //4 = number of directions (up, down, left, right)
 				case 0: //Left
-
+					
 					if( x > 0 && maze[ x-1 ][ y ].visited == false ) {
 						maze[ x ][ y ].setOriginalLeft( MazeCell::NONE );
-
+						
 						recurseRandom( x - 1, y, depth + 1, numSoFar );
 					}
-
+					
 					break;
-
+				
 				case 1: //Right
-
+					
 					if( x < cols - 1 && maze[ x+1 ][ y ].visited == false ) {
 						maze[ x+1 ][ y ].setOriginalLeft( MazeCell::NONE );
-
+						
 						recurseRandom( x + 1, y, depth + 1, numSoFar );
 					}
-
+					
 					break;
-
+				
 				case 2: //Up
-
+					
 					if( y > 0 && maze[ x ][ y-1 ].visited == false ) {
 						maze[ x ][ y ].setOriginalTop( MazeCell::NONE );
-
+						
 						recurseRandom( x, y - 1, depth + 1, numSoFar );
 					}
-
+					
 					break;
-
+				
 				case 3: //Down
-
+					
 					if( y < rows - 1 && maze[ x ][ y+1 ].visited == false ) {
 						maze[ x ][ y+1 ].setOriginalTop( MazeCell::NONE );
-
+						
 						recurseRandom( x, y + 1, depth + 1, numSoFar );
 					}
-
+					
 					break;
 			}
-
+			
 			//If we've reached a dead end, don't keep going. Otherwise do.
 			keepGoing = false;
-			if(( x > 0 && maze[ x-1 ][ y ].visited == false )
-					|| ( x < cols - 1 && maze[ x+1 ][ y ].visited == false )
-					|| ( y > 0 && maze[ x ][ y-1 ].visited == false )
-					|| ( y < rows - 1 && maze[ x ][ y+1 ].visited == false )
+			if( ( x > 0 && maze[ x - 1 ][ y ].visited == false )
+					|| ( x < cols - 1 && maze[ x + 1 ][ y ].visited == false )
+					|| ( y > 0 && maze[ x ][ y - 1 ].visited == false )
+					|| ( y < rows - 1 && maze[ x ][ y + 1 ].visited == false )
 			  ) {
 				keepGoing = true;
 			}

@@ -17,6 +17,7 @@
 #include <irrlicht/irrString.h>
 #include <boost/filesystem/path.hpp>
 #include <taglib/taglib.h>
+#include <cwchar>
 #ifdef HAVE_STRING
 #include <string>
 #endif //HAVE_STRING
@@ -45,6 +46,7 @@ class StringConverter {
 		std::wstring toStdWString( unsigned long input );
 		std::wstring toStdWString( unsigned long long input );
 		std::wstring toStdWString( float input );
+		std::wstring toStdWString( float input, const wchar_t* format, size_t maxLength );
 		std::wstring toStdWString( double input );
 		std::wstring toStdWString( long double input );
 		std::string toStdString( std::wstring input );

@@ -44,8 +44,9 @@ void MenuManager::processSelection( GameManager* gm ) {
 	if( exitGame.highlighted ) {
 		gm->setExitConfirmation( gm->gui->addMessageBox( L"Exit?", L"Are you sure you want to exit?", true, ( irr::gui::EMBF_YES | irr::gui::EMBF_NO ) ) );
 	} else if( loadMaze.highlighted ) {
-		gm->setFileChooser( gm->gui->addFileOpenDialog( L"Select a Maze", true, 0, -1 ) );
+		gm->setFileChooser( gm->gui->addFileOpenDialog( L"Select a Maze", true, 0, -1, true ) );
 	} else if( saveMaze.highlighted ) {
+		//TODO: Add a dialog for choosing where to save the file. Perhaps base it on http://irrlicht.sourceforge.net/forum/viewtopic.php?f=9&t=30241&sid=3972875b2ce9b7f301b5f2123929f641&start=30
 		gm->getMazeManager()->saveToFile();
 	} else if( nextMaze.highlighted ) {
 		gm->newMaze();

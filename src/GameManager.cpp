@@ -43,7 +43,6 @@ enum user_event_t { USER_EVENT_WINDOW_RESIZE };
 //TODO: Add more backgrounds.
 //TODO: Support video as backgrounds?
 //TODO: Add theme support (theme = (zipped?) set of backgrounds, player images, collectable images)
-//TODO: Add a progress bar to the loading screen, and text explaining what is happening.
 //TODO: If we ever add achievements, players should get an achievement for a September score (where a player's score = the current day of Eternal September)
 //TODO: Add an option to use only the built-in font. This should greatly speed up loading on underpowered systems like the Pi. Is this really necessary though? All you have to do currently is delete the font file in the working directory, right?
 
@@ -360,48 +359,64 @@ void GameManager::drawLoadingScreen() {
 			if( isNull( statsFont ) ) {
 				statsFont = gui->getBuiltInFont();
 			}
-
-			//core::dimension2d< unsigned int > loadingDimensions = loadingFont->getDimension( stringConverter.toWCharArray( loading ) );
-			auto loadingDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
-			int_fast16_t textY = 0;
+			
+			int_fast32_t Y = 0;
 			{
-				int_fast16_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
-				core::rect< s32 > tempRectangle(textX, textY, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + textY );
+				auto loadingDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
+				int_fast32_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
+				core::rect< s32 > tempRectangle( textX, Y, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + Y );
 				loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
+				Y += loadingDimensions.Height + 1;
 			}
-
+			
+			{
+				std::wstring percentString = stringConverter.toStdWString( loadingProgress, L"%05.1f%%", 7 ); //7 is the length that L"%05.1f%%" expands to plus one extra to terminate the resulting string with a null
+				auto percentDimensions = loadingFont->getDimension( percentString.c_str() );
+				core::recti progressBarOutline( 0, Y, windowSize.Width, Y + percentDimensions.Height );
+				driver->draw2DRectangleOutline( progressBarOutline, GRAY );
+				core::recti progressBarFilled; //( 0, Y, windowSize.Width / loadingProgress, Y + percentDimensions.Height );
+				progressBarFilled = core::recti( 0, Y, windowSize.Width * loadingProgress / 100, Y + percentDimensions.Height );
+				driver->draw2DRectangle( LIGHTGRAY, progressBarFilled );
+				int_fast32_t textX = ( windowSize.Width / 2 ) - ( percentDimensions.Width / 2 );
+				core::recti percentRectangle( textX, Y, ( windowSize.Width / 2 ) + ( percentDimensions.Width / 2 ), percentDimensions.Height + Y );
+				loadingFont->draw( stringConverter.toIrrlichtStringW( percentString ), percentRectangle, YELLOW, true, true, &percentRectangle );
+				Y += percentDimensions.Height + 1;
+			}
+			
 			if( proTips.size() > 0 ) {
 				if( isNull( tipFont ) ) {
 					tipFont = gui->getBuiltInFont();
 				}
-
+				
 				u32 proTipHeight = 0;
-
+				
 				{
-					textY += loadingDimensions.Height + 1;
-					int_fast16_t textX = 0;
+					int_fast32_t textX = 0;
 					core::dimension2d< u32 > proTipPrefixDimensions = tipFont->getDimension( stringConverter.toStdWString( proTipPrefix ).c_str() ); //stringConverter.toWCharArray( proTipPrefix ) );
 					core::dimension2d< u32 > proTipDimensions = tipFont->getDimension( stringConverter.toStdWString( proTips.at( currentProTip ) ).c_str() ); //stringConverter.toWCharArray( proTips.at( currentProTip ) ) );
 					proTipHeight = std::max( proTipDimensions.Height, proTipPrefixDimensions.Height );
-
+					
 					{
-						core::rect< s32 > tempRectangle( textX, textY, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + textY );
+						core::rect< s32 > tempRectangle( textX, Y, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + Y );
 						tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
 					}
-
+					
 					{
-						core::rect< s32 > tempRectangle( textX + proTipPrefixDimensions.Width, textY, proTipDimensions.Width + textX + proTipPrefixDimensions.Width, proTipDimensions.Height + textY );
+						core::rect< s32 > tempRectangle( textX + proTipPrefixDimensions.Width, Y, proTipDimensions.Width + textX + proTipPrefixDimensions.Width, proTipDimensions.Height + Y );
 						tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
 					}
-
-					textY += proTipHeight;
+					
+					Y += proTipHeight;
 				}
 			}
-
-			drawStats( textY );
+			
+			drawStats( Y );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::drawLoadingScreen(): " << e.what() << std::endl;
+	}
+	catch( std::wstring e ) {
+		std::wcerr << L"Error in GameManager::drawLoadingScreen(): " << e << std::endl;
 	}
 }
 
@@ -437,7 +452,7 @@ void GameManager::drawLoadingScreen() {
  * Should only be called from drawLoadingScreen(). Just putting it here for code separation/readability.
  * //TODO: Add more stats (estimated difficulty of maze, number of cells backtracked, etc) to loading screen.
  */
-void GameManager::drawStats( int_fast16_t textY ) {
+void GameManager::drawStats( int_fast32_t textY ) {
 	try {
 		if( isNull( statsFont ) ) {
 			statsFont = gui->getBuiltInFont();
@@ -1063,6 +1078,13 @@ Collectable* GameManager::getKey( uint_fast8_t key ) {
 }
 
 /**
+ * Other objects can't properly add to the loading percentage if they can't see what it is first
+ */
+float GameManager::getLoadingPercentage() {
+	return loadingProgress;
+}
+
+/**
  * Lets other objects get a pointer to the maze manager, perhaps to get the maze.
  * Returns: A pointer to the mazeManager object.
  */
@@ -1326,7 +1348,7 @@ void GameManager::loadFonts() {
 			core::dimension2d< uint_fast32_t > fontDimensions;
 			
 			if( fontFile != "" ) {
-				auto aboveStats = loadingFont->getDimension( loading.c_str() ).Height + std::max( tipFont->getDimension( proTipPrefix.c_str() ).Height, tipFont->getDimension( proTips.at( currentProTip ).c_str() ).Height );
+				auto aboveStats = loadingFont->getDimension( loading.c_str() ).Height * 2 + std::max( tipFont->getDimension( proTipPrefix.c_str() ).Height, tipFont->getDimension( proTips.at( currentProTip ).c_str() ).Height );
 			
 				uint_fast32_t size = windowSize.Width / numPlayers / 3; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
 				uint_fast8_t builtInFontHeight = gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height;
@@ -1973,6 +1995,8 @@ void GameManager::newMaze( uint_fast16_t newRandomSeed ) {
 			bot.at( b ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm, botMovementDelay );
 		}
 		
+		setLoadingPercentage( 100 );
+		
 		if( debug ) {
 			std::wcout << L"end of newMaze() with an argument" << std::endl;
 		}
@@ -2017,11 +2041,40 @@ bool GameManager::OnEvent( const SEvent& event ) {
 								controls.at( k ).activated = ( ( event.MouseInput.Wheel > 0 && controls.at( k ).getMouseWheelUp() ) || ( event.MouseInput.Wheel < 0 && !controls.at( k ).getMouseWheelUp() ) );
 								break;
 							}
+							case irr::EMIE_MOUSE_MOVED: {
+								switch( controls.at( k ).getMouseDirection() ) {
+									case ControlMapping::MOUSE_UP: {
+										controls.at( k ).activated = ( event.MouseInput.Y < mouseY );
+										break;
+									}
+									case ControlMapping::MOUSE_DOWN: {
+										controls.at( k ).activated = ( event.MouseInput.Y > mouseY );
+										break;
+									}
+									case ControlMapping::MOUSE_LEFT: {
+										controls.at( k ).activated = ( event.MouseInput.X < mouseX );
+										break;
+									}
+									case ControlMapping::MOUSE_RIGHT: {
+										controls.at( k ).activated = ( event.MouseInput.X > mouseX );
+										break;
+									}
+								}
+								break;
+							}
 							default: {
 								//TODO: Add mouse handling stuff here
 								break;
 							}
 						}
+					}
+				}
+				
+				switch( event.MouseInput.Event ) { //Anything that should be updated regardless of whether it's required by any controls
+					case irr::EMIE_MOUSE_MOVED: {
+						mouseX = event.MouseInput.X;
+						mouseY = event.MouseInput.Y;
+						break;
 					}
 				}
 			}
@@ -2061,7 +2114,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						if( showBackgrounds ) {
 							scene::ICameraSceneNode* camera = bgscene->getActiveCamera();
 							if( !isNull( camera ) ) {
-								camera->setAspectRatio( static_cast< float >( windowSize.Width ) / windowSize.Height );
+								camera->setAspectRatio( static_cast< decltype( camera->getAspectRatio() ) >( windowSize.Width ) / windowSize.Height );
 							}
 
 							if( !isNull( backgroundTexture ) && backgroundTexture->getSize() != windowSize ) {
@@ -2439,7 +2492,7 @@ void GameManager::readPrefs() {
 		bitsPerPixel = 8;
 		vsync = true;
 		driverType = video::EDT_OPENGL;
-		windowSize = core::dimension2d< uint_fast16_t >( minWidth, minHeight );
+		windowSize = core::dimension2d< decltype( windowSize.Height ) >( minWidth, minHeight );
 		allowSmallSize = false;
 		playMusic = true;
 		numBots = 0;
@@ -2703,16 +2756,16 @@ void GameManager::readPrefs() {
 											std::wcout << L"Window size: " << width << L"x" << height << std::endl;
 										}
 										
-										uint_fast16_t widthAsInt = boost::lexical_cast< uint_fast16_t >( width );
-										uint_fast16_t heightAsInt = boost::lexical_cast< uint_fast16_t >( height );
+										decltype( windowSize.Width ) widthAsInt = boost::lexical_cast< decltype( windowSize.Width ) >( width );
+										decltype( windowSize.Height ) heightAsInt = boost::lexical_cast< decltype( windowSize.Height ) >( height );
 										
 										if( widthAsInt < 160 || heightAsInt < 240 ) {
 											std::wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << std::endl;
 										} else if( widthAsInt == 160 && heightAsInt == 240 ) {
 											std::wcout << L"Rock on, CGA graphics. Rock on." << std::endl;
-											windowSize = core::dimension2d< uint_fast16_t >( widthAsInt, heightAsInt );
+											windowSize = core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
 										} else {
-											windowSize = core::dimension2d< uint_fast16_t >( widthAsInt, heightAsInt );
+											windowSize = core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
 										}
 										break;
 									}
@@ -2902,6 +2955,8 @@ void GameManager::resetThings() {
 			std::wcout << L"resetThings() called" << std::endl;
 		}
 		
+		setLoadingPercentage( 0 );
+		
 		randomSeed = time( nullptr );
 
 		//The delay exists so that people can admire the logo artwork or read the pro tips on the loading screen. Actual loading happens in the blink of an eye on my computer.
@@ -3023,7 +3078,7 @@ uint_fast8_t GameManager::run() {
 					device->postEventFromUser( temp );
 				}
 
-				if( playMusic && !Mix_PlayingMusic() ) {
+				if( playMusic && !Mix_PlayingMusic() ) { //If we've finished playing a song.
 					loadNextSong();
 				}
 				
@@ -3919,6 +3974,20 @@ void GameManager::setExitConfirmation( irr::gui::IGUIWindow* newWindow ) {
 void GameManager::setFileChooser( irr::gui::IGUIFileOpenDialog* newChooser ) {
 	fileChooser = newChooser;
 }
+
+/**
+ * Sets loadingProgress
+ * Arguments: Yes please.
+ **/
+void GameManager::setLoadingPercentage( float newPercent ) {
+ 	if( newPercent < 100 && newPercent > 0 ) {
+		loadingProgress = newPercent;
+ 	} else if( newPercent >= 100 ) {
+ 		loadingProgress = 100;
+ 	} else {
+ 		loadingProgress = 0;
+ 	}
+ }
 
 /**
  * Sets showingLoadingScreen to true and timeStartedLoading to the current time, then calls drawLoadingScreen().
