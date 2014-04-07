@@ -39,8 +39,6 @@ enum user_event_t { USER_EVENT_WINDOW_RESIZE };
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
 //TODO: Get multiplayer working online
 //TODO: Improve AI. Add any solving algorithms we can think of.
-//TODO: Possible idea: Hide parts of the maze that are inaccessible due to locks.
-//TODO: Possible idea: Hide parts of the maze not seen yet (seen means line-of-sight to any visited cell)
 //TODO: Add shader to simulate old monitor?
 //TODO: Add more backgrounds.
 //TODO: Support video as backgrounds?
@@ -429,9 +427,9 @@ void GameManager::drawLoadingScreen() {
 			driver->draw2DImage( logoTexture, core::position2d< s32 >( 0, 0 ) );
 		}
 	} catch( std::wstring error ) {
-		std::wcout << L"Error in drawLogo(): " << error << std::endl;
+		std::wcerr << L"Error in drawLogo(): " << error << std::endl;
 	} catch ( std::exception &error ) {
-		std::wcout << L"Error in drawLogo(): " << error.what() << std::endl;
+		std::wcerr << L"Error in drawLogo(): " << error.what() << std::endl;
 	}
  }
 
@@ -585,7 +583,7 @@ void GameManager::drawStats( int_fast16_t textY ) {
 			}
 		}
 	} catch ( std::exception &error ) {
-		std::wcout << L"Error in drawStats(): " << error.what() << std::endl;
+		std::wcerr << L"Error in drawStats(): " << error.what() << std::endl;
 	}
 }
 
@@ -610,7 +608,7 @@ void GameManager::eraseCollectable( uint_fast8_t item ) {
 				std::wcout << L"end of eraseCollectable()" << std::endl;
 		}
 	} catch ( std::exception &error ) {
-		std::wcout << L"Error in eraseCollectable(): " << error.what() << std::endl;
+		std::wcerr << L"Error in eraseCollectable(): " << error.what() << std::endl;
 	}
 }
 
@@ -696,34 +694,6 @@ GameManager::GameManager() {
 		donePlaying = false;
 		lastTimeControlsProcessed = 0;
 		controlProcessDelay = 100;
-
-		fontFile = "";
-		boost::filesystem::recursive_directory_iterator end;
-		std::vector< boost::filesystem::path > fontFolders = system.getFontFolders(); // Flawfinder: ignore
-
-		if( debug ) {
-			std::wcout << L"fontFolders.size(): " << fontFolders.size() << std::endl;
-		}
-
-		//for( std::vector< boost::filesystem::path >::iterator o = fontFolders.begin(); o != fontFolders.end(); o++ ) {
-		for( decltype( fontFolders.size() ) o = 0; o < fontFolders.size(); ++o ) {
-			//for( boost::filesystem::recursive_directory_iterator i( *o ); i != end; ++i ) {
-			if( debug ) {
-				std::wcout << L"Looking for fonts in folder " << fontFolders.at( o ) << std::endl;
-			}
-			for( boost::filesystem::recursive_directory_iterator i( fontFolders.at( o ) ); i != end; ++i ) {
-				if( fontManager.canLoadFont( i->path() ) ) {
-					if( debug ) {
-						std::wcout << L"SUCCESS: " << i->path() << L" is a loadable font." << std::endl;
-					}
-					fontFile = stringConverter.toIrrlichtStringW( i->path().wstring() );
-					break;
-				}
-			}
-			if( fontFile != "" ) { //We've found a loadable file
-				break;
-			}
-		}
 
 		device = createDevice( video::EDT_NULL ); //Must create a device before calling readPrefs();
 
@@ -1016,7 +986,7 @@ Collectable* GameManager::getCollectable( uint_fast8_t collectable ) {
 	try {
 		return &stuff.at( collectable );
 	} catch( std::exception &e ) {
-		std::wcout << L"Error in GameManager::getCollectable(): " << e.what() << std::endl;
+		std::wcerr << L"Error in GameManager::getCollectable(): " << e.what() << std::endl;
 	}
 }
 
@@ -1082,9 +1052,9 @@ Collectable* GameManager::getKey( uint_fast8_t key ) {
 			throw error;
 		}
 	} catch( std::exception &e ) {
-		std::wcout << L"Error in GameManager::getKey(): " << e.what() << std::endl;
+		std::wcerr << L"Error in GameManager::getKey(): " << e.what() << std::endl;
 	} catch( std::wstring e ) {
-		std::wcout << L"Error in GameManager::getKey(): " << e << std::endl;
+		std::wcerr << L"Error in GameManager::getKey(): " << e << std::endl;
 	}
 	
 	if( debug ) {
@@ -1200,6 +1170,34 @@ void GameManager::loadFonts() {
 	try {
 		if( debug ) {
 			std::wcout << L"loadFonts() called" << std::endl;
+		}
+		
+		fontFile = "";
+		boost::filesystem::recursive_directory_iterator end;
+		std::vector< boost::filesystem::path > fontFolders = system.getFontFolders(); // Flawfinder: ignore
+
+		if( debug ) {
+			std::wcout << L"fontFolders.size(): " << fontFolders.size() << std::endl;
+		}
+
+		//for( std::vector< boost::filesystem::path >::iterator o = fontFolders.begin(); o != fontFolders.end(); o++ ) {
+		for( decltype( fontFolders.size() ) o = 0; o < fontFolders.size(); ++o ) {
+			//for( boost::filesystem::recursive_directory_iterator i( *o ); i != end; ++i ) {
+			if( debug ) {
+				std::wcout << L"Looking for fonts in folder " << fontFolders.at( o ) << std::endl;
+			}
+			for( boost::filesystem::recursive_directory_iterator i( fontFolders.at( o ) ); i != end; ++i ) {
+				if( fontManager.canLoadFont( i->path() ) ) {
+					if( debug ) {
+						std::wcout << L"SUCCESS: " << i->path() << L" is a loadable font." << std::endl;
+					}
+					fontFile = stringConverter.toIrrlichtStringW( i->path().wstring() );
+					break;
+				}
+			}
+			if( fontFile != "" ) { //We've found a loadable file
+				break;
+			}
 		}
 		
 		heightTestString = L"()*^&v.ygj";
@@ -1771,7 +1769,7 @@ void GameManager::makeMusicList() {
 
 			currentMusic = musicList.back();
 		} else {
-			std::wcout << L"Could not find any music to play. Turning off playback." << std::endl;
+			std::wcerr << L"Could not find any music to play. Turning off playback." << std::endl;
 			playMusic = false;
 		}
 		
@@ -1782,6 +1780,22 @@ void GameManager::makeMusicList() {
 		std::wcerr << L"Error in GameManager::makeMusicList(): " << e.what() << std::endl;
 	}
 }
+
+/**
+ * Anything that should be done when a player moves, whichever axis they move on. Should only be called by movePlayerOnX() or movePlayerOnY().
+ * Arguments:
+ * --- p: The player to move
+ */
+ void GameManager::movePlayerCommon( uint_fast8_t p ) {
+ 	network.sendPlayerPos( p, player.at( p ).getX(), player.at( p ).getY() );
+ 	mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].visited = true;
+ 	if( player.at( p ).stepsTakenThisMaze % 2 == 0 ) {
+		mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorTwo() );
+	} else {
+		mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorOne() );
+	}
+	mazeManager.makeCellsVisible( player.at( p ).getX(), player.at( p ).getY() );
+ }
 
 /**
  * If the maze allows it, moves a player one unit in the indicated direction along the X axis.
@@ -1812,18 +1826,11 @@ void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 				}
 			}
 
-			network.sendPlayerPos( p, player.at( p ).getX(), player.at( p ).getY() );
+			movePlayerCommon( p );
 			if( player.at( p ).getX() >= mazeManager.cols ) {
 				throw L"Player "+ stringConverter.toStdWString( p ) + L"'s X (" + stringConverter.toStdWString( player.at( p ).getX() ) + L") is outside mazeManager's cols (" + stringConverter.toStdWString( mazeManager.cols ) + L").";
 			} else if( player.at( p ).getY() >= mazeManager.rows ) {
 				throw L"Player "+ stringConverter.toStdWString( p ) + L"'s Y (" + stringConverter.toStdWString( player.at( p ).getY() ) + L") is outside mazeManager's rows (" + stringConverter.toStdWString( mazeManager.rows ) + L").";
-			}
-			mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].visited = true;
-
-			if( player.at( p ).stepsTakenThisMaze % 2 == 0 ) {
-				mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorTwo() );
-			} else {
-				mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorOne() );
 			}
 		} else {
 			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
@@ -1865,19 +1872,13 @@ void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 				}
 			}
 
-			network.sendPlayerPos( p, player.at( p ).getX(), player.at( p ).getY() );
-			mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].visited = true;
 			if( player.at( p ).getX() >= mazeManager.cols ) {
 				throw L"Player "+ stringConverter.toStdWString( p ) + L"'s X (" + stringConverter.toStdWString( player.at( p ).getX() ) + L") is outside mazeManager's cols (" + stringConverter.toStdWString( mazeManager.cols ) + L").";
 			} else if( player.at( p ).getY() >= mazeManager.rows ) {
 				throw L"Player "+ stringConverter.toStdWString( p ) + L"'s Y (" + stringConverter.toStdWString( player.at( p ).getY() ) + L") is outside mazeManager's rows (" + stringConverter.toStdWString( mazeManager.rows ) + L").";
 			}
 
-			if( player.at( p ).stepsTakenThisMaze % 2 == 0 ) {
-				mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorTwo() );
-			} else {
-				mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorOne() );
-			}
+			movePlayerCommon( p );
 		} else {
 			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
 			throw e;
@@ -2011,7 +2012,16 @@ bool GameManager::OnEvent( const SEvent& event ) {
 
 				for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
 					if( event.MouseInput.Event == controls.at( k ).getMouseEvent() ) {
-						controls.at( k ).activated = ( ( event.MouseInput.Wheel > 0 && controls.at( k ).getMouseWheelUp() ) || ( event.MouseInput.Wheel < 0 && !controls.at( k ).getMouseWheelUp() ) );
+						switch( controls.at( k ).getMouseEvent() ) {
+							case irr::EMIE_MOUSE_WHEEL: {
+								controls.at( k ).activated = ( ( event.MouseInput.Wheel > 0 && controls.at( k ).getMouseWheelUp() ) || ( event.MouseInput.Wheel < 0 && !controls.at( k ).getMouseWheelUp() ) );
+								break;
+							}
+							default: {
+								//TODO: Add mouse handling stuff here
+								break;
+							}
+						}
 					}
 				}
 			}
@@ -2073,85 +2083,87 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			break;
 
 			case EET_JOYSTICK_INPUT_EVENT: {
-				for( uint_fast8_t k = 0; k < controls.size(); ++k ) {
-					if( event.JoystickEvent.Joystick == controls.at( k ).getControllerNumber() ) {
-						{ //Handle controller axes
-							if( debug && controls.at( k ).getControllerAxis() != UINT_FAST8_MAX ) {
-								std:: wcout << L"Keymap " << k << L" axis " << controls.at( k ).getControllerAxis() << L", ";
-								if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
-									std:: wcout << L"equivalent to axis X";
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
-									std:: wcout << L"equivalent to axis Y";
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
-									std:: wcout << L"equivalent to axis Z";
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
-									std:: wcout << L"equivalent to axis R";
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
-									std:: wcout << L"equivalent to axis U";
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
-									std:: wcout << L"equivalent to axis V";
+				if( enableController ) {
+					for( uint_fast8_t k = 0; k < controls.size(); ++k ) {
+						if( event.JoystickEvent.Joystick == controls.at( k ).getControllerNumber() ) {
+							{ //Handle controller axes
+								if( debug && controls.at( k ).getControllerAxis() != UINT_FAST8_MAX ) {
+									std:: wcout << L"Keymap " << k << L" axis " << controls.at( k ).getControllerAxis() << L", ";
+									if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+										std:: wcout << L"equivalent to axis X";
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+										std:: wcout << L"equivalent to axis Y";
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+										std:: wcout << L"equivalent to axis Z";
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+										std:: wcout << L"equivalent to axis R";
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+										std:: wcout << L"equivalent to axis U";
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+										std:: wcout << L"equivalent to axis V";
+									}
+									std::wcout << L", has controller direction ";
+									if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_INCREASE ) {
+										std::wcout << L"increase";
+									} else if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_DECREASE ) {
+										std::wcout << L"decrease";
+									} else {
+										std::wcout << L"other";
+									}
+									std::wcout << std::endl;
 								}
-								std::wcout << L", has controller direction ";
+								
+								
+								int_fast16_t controllerDeadZone = ( INT16_MAX / 2 ); //TODO: Make the dead zone user adjustable.
+								
+								
 								if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_INCREASE ) {
-									std::wcout << L"increase";
+									if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] > controllerDeadZone );
+										
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] > controllerDeadZone );
+										
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] > controllerDeadZone );
+										
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] > controllerDeadZone );
+										
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] > controllerDeadZone );
+										
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] > controllerDeadZone );
+										
+									}
 								} else if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_DECREASE ) {
-									std::wcout << L"decrease";
-								} else {
-									std::wcout << L"other";
-								}
-								std::wcout << std::endl;
-							}
-							
-							
-							int_fast16_t controllerDeadZone = ( INT16_MAX / 2 ); //TODO: Make the dead zone user adjustable.
-							
-							
-							if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_INCREASE ) {
-								if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
-									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] > controllerDeadZone );
-									
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
-									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] > controllerDeadZone );
-									
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
-									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] > controllerDeadZone );
-									
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
-									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] > controllerDeadZone );
-									
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
-									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] > controllerDeadZone );
-									
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
-									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] > controllerDeadZone );
-									
-								}
-							} else if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_DECREASE ) {
-								if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
-									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] < -controllerDeadZone );
-									
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
-									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] < -controllerDeadZone );
-									
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
-									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] < -controllerDeadZone );
-									
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
-									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] < -controllerDeadZone );
-									
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
-									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] < -controllerDeadZone );
-									
-								} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
-									controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] < -controllerDeadZone );
-									
+									if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] < -controllerDeadZone );
+										
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] < -controllerDeadZone );
+										
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] < -controllerDeadZone );
+										
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] < -controllerDeadZone );
+										
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] < -controllerDeadZone );
+										
+									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] < -controllerDeadZone );
+										
+									}
 								}
 							}
-						}
-						
-						//Handle controller buttons
-						if( controls.at( k ).getControllerButton() != UINT_FAST8_MAX ) {
-							controls.at( k ).activated = event.JoystickEvent.IsButtonPressed( controls.at( k ).getControllerButton() );
+							
+							//Handle controller buttons
+							if( controls.at( k ).getControllerButton() != UINT_FAST8_MAX ) {
+								controls.at( k ).activated = event.JoystickEvent.IsButtonPressed( controls.at( k ).getControllerButton() );
+							}
 						}
 					}
 				}
@@ -2292,18 +2304,30 @@ bool GameManager::OnEvent( const SEvent& event ) {
 
 			drawLogo();
 		} else {
-			std::wcout << L"Could not find any logo images." << std::endl;
+			std::wcerr << L"Could not find any logo images." << std::endl;
 		}
 		
 		if( debug ) {
 			std::wcout << L"end of pickLogo()" << std::endl;
 		}
 	} catch( std::wstring error ) {
-		std::wcout << L"Error in drawLogo(): " << error << std::endl;
+		std::wcerr << L"Error in drawLogo(): " << error << std::endl;
 	} catch ( std::exception &error ) {
-		std::wcout << L"Error in drawLogo(): " << error.what() << std::endl;
+		std::wcerr << L"Error in drawLogo(): " << error.what() << std::endl;
 	}
  }
+
+/**
+ * Created because so many preferences are booleans
+ * Arguments:
+ * --- std::wstring choice: a string which should be either "true" or "false"
+ * Returns: A Boolean indicating whether choice is closer to "true" or to "false"
+ */
+bool GameManager::prefIsTrue( std::wstring choice ) {
+	std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+	auto choiceNum = spellChecker.indexOfClosestString( choice, possibleChoices );
+	return( choiceNum == 0 );
+}
 
 /**
 * Should be called only by run().
@@ -2427,6 +2451,7 @@ void GameManager::readPrefs() {
 		botsKnowSolution = false;
 		botAlgorithm = AI::DEPTH_FIRST_SEARCH;
 		botMovementDelay = 300;
+		mazeManager.hideUnseen = false;
 		#if defined DEBUG
 			debug = true;
 		#else
@@ -2473,334 +2498,271 @@ void GameManager::readPrefs() {
 								
 								std::vector< std::wstring > possiblePrefs = { L"bots' solving algorithm", L"volume", L"number of bots", L"show backgrounds",
 									L"fullscreen", L"mark player trails", L"debug", L"bits per pixel", L"wait for vertical sync", L"driver type", L"number of players",
-									L"window size", L"play music", L"network port", L"always server", L"bots know the solution", L"bot movement delay" };
+									L"window size", L"play music", L"network port", L"always server", L"bots know the solution", L"bot movement delay", L"hide unseen maze areas" };
 								
-								preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
+								//preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
+								auto preferenceNum = spellChecker.indexOfClosestString( preference, possiblePrefs );
 								
 								if( debug ) {
 									std::wcout << L"Preference after spellchecking \"" << preference << std::endl;
 								}
 								
-								if( preference == possiblePrefs.at( 0 ) ) { //L"bots' solving algorithm"
-								
-									std::vector< std::wstring > possibleChoices = { L"depth-first search", L"iterative deepening depth-first search", L"right hand rule", L"left hand rule" };
-									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
-									if( choice == possibleChoices.at( 0 ) ) { //DFS
-										if( debug ) {
-											std::wcout << L"Bots will use Depth-First Search" << std::endl;
-										}
-										botAlgorithm = AI::DEPTH_FIRST_SEARCH;
-									} else if( choice == possibleChoices.at( 1 ) ) { //IDDFS
-										if( debug ) {
-											std::wcout << L"Bots will use Iterative Deepening Depth-First Search" << std::endl;
-										}
-										botAlgorithm = AI::ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH;
-									} else if( choice == possibleChoices.at( 2 ) ) {
-										if( debug ) {
-											std::wcout << L"Bots will use the Right Hand Rule" << std::endl;
-										}
-										botAlgorithm = AI::RIGHT_HAND_RULE;
-									} else if( choice == possibleChoices.at( 3 ) ) {
-										if( debug ) {
-											std::wcout << L"Bots will use the Left Hand Rule" << std::endl;
-										}
-										botAlgorithm = AI::LEFT_HAND_RULE;
-									}
-									
-								} else if( preference == possiblePrefs.at( 1 ) ) { //L"volume"
-									try {
-										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-										
-										if( choiceAsInt <= 100 && choiceAsInt >= 0 ) {
-											musicVolume = choiceAsInt;
-											Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
-											if( debug ) {
-												std::wcout << L"Volume should be " << choiceAsInt << "%" << std::endl;
-												std::wcout << L"Volume is really " << 100 * Mix_VolumeMusic( -1 ) / MIX_MAX_VOLUME << "%" << std::endl;
-											}
-										} else if( choiceAsInt < 0 ) {
-											std::wcerr << L"Warning: Volume less than zero: " << choiceAsInt << std::endl;
-											Mix_VolumeMusic( 0 );
-											musicVolume = 0;
-										} else {
-											std::wcerr << L"Warning: Volume greater than 100%: " << choiceAsInt << std::endl;
-											Mix_VolumeMusic( MIX_MAX_VOLUME );
-											musicVolume = 100;
-										}
-									} catch( boost::bad_lexical_cast &e ) {
-										std::wcerr << L"Error reading volume preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-									}
-								} else if( preference == possiblePrefs.at( 2 ) ) { //L"number of bots"
-									try {
-										decltype( numBots ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
-										
-										if( choiceAsInt <= numPlayers ) {
-											numBots = choiceAsInt;
-											if( debug ) {
-												std::wcout << L"Number of bots is " << choiceAsInt << std::endl;
-											}
-										} else {
-											std::wcerr << L"Warning: Number of bots not less than or equal to number of players (number of players may not have been read yet): " << choiceAsInt << std::endl;
-											numBots = choiceAsInt;
-										}
-									} catch( boost::bad_lexical_cast &e ) {
-										std::wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-									}
-								} else if( preference == possiblePrefs.at( 3 ) ) { //L"show backgrounds"
-									
-									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
-									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
-									if( choice == possibleChoices.at( 0 ) ) {
-										if( debug ) {
-											std::wcout << L"Show backgrounds is ON" << std::endl;
-										}
-										showBackgrounds = true;
-									} else {
-										if( debug ) {
-											std::wcout << L"Show backgrounds is OFF" << std::endl;
-										}
-										showBackgrounds = false;
-									}
-									
-								} else if( preference == possiblePrefs.at( 4 ) ) { //L"fullscreen"
-									
-									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
-									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
-									if( choice == possibleChoices.at( 0 ) ) {
-										if( debug ) {
-											std::wcout << L"Fullscreen is ON" << std::endl;
-										}
-										fullscreen = true;
-									} else {
-										if( debug ) {
-											std::wcout << L"Fullscreen is OFF" << std::endl;
-										}
-										fullscreen = false;
-									}
-									
-								} else if( preference == possiblePrefs.at( 5 ) ) { //L"mark player trails"
-									
-									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
-									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
-									if( choice == possibleChoices.at( 0 ) ) {
-										if( debug ) {
-											std::wcout << L"Mark trails is ON" << std::endl;
-										}
-										markTrails = true;
-									} else {
-										if( debug ) {
-											std::wcout << L"Mark trails is OFF" << std::endl;
-										}
-										markTrails = false;
-									}
-									
-								} else if( preference == possiblePrefs.at( 6 ) ) { //L"debug"
-								
-									#ifndef DEBUG
-										std::vector< std::wstring > possibleChoices = { L"true", L"false" };
+								switch( preferenceNum ) {
+									case 0: { //L"bots' solving algorithm"
+										std::vector< std::wstring > possibleChoices = { L"depth-first search", L"iterative deepening depth-first search", L"right hand rule", L"left hand rule" };
 										choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 										
-										if( choice == possibleChoices.at( 0 ) ) {
-											debug = true;
-										} else {
-											debug = false;
-										}
-									#endif
-									
-									if( debug ) {
-										std::wcout << L"Debug is ON" << std::endl;
-									}
-								} else if( preference == possiblePrefs.at( 7 ) ) { //L"bits per pixel"
-									try {
-										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-										
-										if( choiceAsInt <= 16 ) {
-											bitsPerPixel = choiceAsInt;
+										if( choice == possibleChoices.at( 0 ) ) { //DFS
 											if( debug ) {
-												std::wcout << L"Bits per pixel is " << choiceAsInt << std::endl;
+												std::wcout << L"Bots will use Depth-First Search" << std::endl;
 											}
-										} else {
-											std::wcerr << L"Warning: Bits per pixel not less than or equal to 16: " << choiceAsInt << std::endl;
-											bitsPerPixel = choiceAsInt;
-										}
-									} catch( boost::bad_lexical_cast &e ) {
-										std::wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-									}
-									
-								} else if( preference == possiblePrefs.at( 8 ) ) { //L"wait for vertical sync"
-								
-									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
-									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
-									if( choice == possibleChoices.at( 0 ) ) {
-										if( debug ) {
-											std::wcout << L"Vertical sync is ON" << std::endl;
-										}
-										vsync = true;
-									} else {
-										if( debug ) {
-											std::wcout << L"Vertical sync is OFF" << std::endl;
-										}
-										vsync = false;
-									}
-									
-								} else if( preference == possiblePrefs.at( 9 ) ) { //L"driver type"
-									
-									std::vector< std::wstring > possibleChoices = { L"opengl", L"direct3d9", L"direct3d8", L"burning's video", L"software", L"null" };
-									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
-									if( choice == possibleChoices.at( 0 ) ) { //L"opengl"
-										driverType = video::EDT_OPENGL;
-									} else if( choice == possibleChoices.at( 1 ) ) { //L"direct3d9"
-										driverType = video::EDT_DIRECT3D9;
-									} else if( choice == possibleChoices.at( 2 ) ) { //L"direct3d8"
-										driverType = video::EDT_DIRECT3D8;
-									} else if( choice == possibleChoices.at( 3 ) ) { //L"burning's video"
-										driverType = video::EDT_BURNINGSVIDEO;
-									} else if( choice == possibleChoices.at( 4 ) ) { //L"software"
-										driverType = video::EDT_SOFTWARE;
-									} else if( choice == possibleChoices.at( 5 ) ) { //L"null"
-										driverType = video::EDT_NULL;
-									}
-									
-									if( !device->isDriverSupported( driverType ) ) {
-										std::wcerr << L"Warning: Chosen driver type " << choice << L" is not supported on this system. Auto-picking a new type.";
-										
-										driverType = video::EDT_NULL;
-										//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
-										for( uint_fast8_t i = ( uint_fast8_t ) video::EDT_COUNT; i != ( uint_fast8_t ) video::EDT_NULL; i-- ) {
-											if( device->isDriverSupported( ( video::E_DRIVER_TYPE ) i ) ) {
-												driverType = ( video::E_DRIVER_TYPE ) i;
-												break;
-											}
-										}
-										
-										//Note: Just because the library supports a driver type doesn't mean we can actually use it. A loop similar to the above is used in the GameManager constructor where we call createDevice(). Therefore, the final driverType may not be what is set here.
-										if( driverType == video::EDT_NULL ) {
-											std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
-											debug = true;
-										}
-									}
-									
-									if( debug ) {
-										std::wcout << L"Driver type is " << choice << std::endl;
-									}
-									
-								} else if( preference == possiblePrefs.at( 10 ) ) { //L"number of players"
-									try {
-										decltype( numPlayers ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
-										
-										if( choiceAsInt <= 4 && choiceAsInt > 0 ) {
-											numPlayers = choiceAsInt;
+											botAlgorithm = AI::DEPTH_FIRST_SEARCH;
+										} else if( choice == possibleChoices.at( 1 ) ) { //IDDFS
 											if( debug ) {
-												std::wcout << L"Number of players is " << choiceAsInt << std::endl;
+												std::wcout << L"Bots will use Iterative Deepening Depth-First Search" << std::endl;
 											}
-										} else if( choiceAsInt > 4 ) {
-											std::wcerr << L"Warning: Number of players not less than or equal to 4: " << choiceAsInt << std::endl;
-											numPlayers = choiceAsInt;
+											botAlgorithm = AI::ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH;
+										} else if( choice == possibleChoices.at( 2 ) ) {
+											if( debug ) {
+												std::wcout << L"Bots will use the Right Hand Rule" << std::endl;
+											}
+											botAlgorithm = AI::RIGHT_HAND_RULE;
+										} else if( choice == possibleChoices.at( 3 ) ) {
+											if( debug ) {
+												std::wcout << L"Bots will use the Left Hand Rule" << std::endl;
+											}
+											botAlgorithm = AI::LEFT_HAND_RULE;
+										}
+										break;
+									}
+									
+									case 1: { //L"volume"
+										try {
+											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
+											
+											if( choiceAsInt <= 100 && choiceAsInt >= 0 ) {
+												musicVolume = choiceAsInt;
+												Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+												if( debug ) {
+													std::wcout << L"Volume should be " << choiceAsInt << "%" << std::endl;
+													std::wcout << L"Volume is really " << 100 * Mix_VolumeMusic( -1 ) / MIX_MAX_VOLUME << "%" << std::endl;
+												}
+											} else if( choiceAsInt < 0 ) {
+												std::wcerr << L"Warning: Volume less than zero: " << choiceAsInt << std::endl;
+												Mix_VolumeMusic( 0 );
+												musicVolume = 0;
+											} else {
+												std::wcerr << L"Warning: Volume greater than 100%: " << choiceAsInt << std::endl;
+												Mix_VolumeMusic( MIX_MAX_VOLUME );
+												musicVolume = 100;
+											}
+										} catch( boost::bad_lexical_cast &e ) {
+											std::wcerr << L"Error reading volume preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+										}
+										break;
+									}
+									
+									case 2: { //L"number of bots"
+										try {
+											decltype( numBots ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
+											
+											if( choiceAsInt <= numPlayers ) {
+												numBots = choiceAsInt;
+												if( debug ) {
+													std::wcout << L"Number of bots is " << choiceAsInt << std::endl;
+												}
+											} else {
+												std::wcerr << L"Warning: Number of bots not less than or equal to number of players (number of players may not have been read yet): " << choiceAsInt << std::endl;
+												numBots = choiceAsInt;
+											}
+										} catch( boost::bad_lexical_cast &e ) {
+											std::wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+										}
+										break;
+									}
+									
+									case 3: { //L"show backgrounds"
+										showBackgrounds = prefIsTrue( choice );
+										break;
+									}
+									
+									case 4: { //L"fullscreen"
+										fullscreen = prefIsTrue( choice );
+										break;
+									}
+									
+									case 5: { //L"mark player trails"
+										markTrails = prefIsTrue( choice );
+										break;
+									}
+									
+									case 6: { //L"debug"
+										#ifndef DEBUG
+											debug = prefIsTrue( choice );
+										#endif
+										
+										if( debug ) {
+											std::wcout << L"Debug is ON" << std::endl;
+										}
+										break;
+									}
+									
+									case 7: { //L"bits per pixel"
+										try {
+											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
+											
+											if( choiceAsInt <= 16 ) {
+												bitsPerPixel = choiceAsInt;
+												if( debug ) {
+													std::wcout << L"Bits per pixel is " << choiceAsInt << std::endl;
+												}
+											} else {
+												std::wcerr << L"Warning: Bits per pixel not less than or equal to 16: " << choiceAsInt << std::endl;
+												bitsPerPixel = choiceAsInt;
+											}
+										} catch( boost::bad_lexical_cast &e ) {
+											std::wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+										}
+										break;
+									}
+									
+									case 8: { //L"wait for vertical sync"
+										vsync = prefIsTrue( choice );
+										break;
+									}
+									
+									case 9: { //L"driver type"
+										std::vector< std::wstring > possibleChoices = { L"opengl", L"direct3d9", L"direct3d8", L"burning's video", L"software", L"null" };
+										choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
+										
+										if( choice == possibleChoices.at( 0 ) ) { //L"opengl"
+											driverType = video::EDT_OPENGL;
+										} else if( choice == possibleChoices.at( 1 ) ) { //L"direct3d9"
+											driverType = video::EDT_DIRECT3D9;
+										} else if( choice == possibleChoices.at( 2 ) ) { //L"direct3d8"
+											driverType = video::EDT_DIRECT3D8;
+										} else if( choice == possibleChoices.at( 3 ) ) { //L"burning's video"
+											driverType = video::EDT_BURNINGSVIDEO;
+										} else if( choice == possibleChoices.at( 4 ) ) { //L"software"
+											driverType = video::EDT_SOFTWARE;
+										} else if( choice == possibleChoices.at( 5 ) ) { //L"null"
+											driverType = video::EDT_NULL;
+										}
+										
+										if( !device->isDriverSupported( driverType ) ) {
+											std::wcerr << L"Warning: Chosen driver type " << choice << L" is not supported on this system. Auto-picking a new type.";
+											
+											driverType = video::EDT_NULL;
+											//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
+											for( uint_fast8_t i = ( uint_fast8_t ) video::EDT_COUNT; i != ( uint_fast8_t ) video::EDT_NULL; i-- ) {
+												if( device->isDriverSupported( ( video::E_DRIVER_TYPE ) i ) ) {
+													driverType = ( video::E_DRIVER_TYPE ) i;
+													break;
+												}
+											}
+											
+											//Note: Just because the library supports a driver type doesn't mean we can actually use it. A loop similar to the above is used in the GameManager constructor where we call createDevice(). Therefore, the final driverType may not be what is set here.
+											if( driverType == video::EDT_NULL ) {
+												std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
+												debug = true;
+											}
+										}
+										
+										if( debug ) {
+											std::wcout << L"Driver type is " << choice << std::endl;
+										}
+										break;
+									}
+									
+									case 10: { //L"number of players"
+										try {
+											decltype( numPlayers ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
+											
+											if( choiceAsInt <= 4 && choiceAsInt > 0 ) {
+												numPlayers = choiceAsInt;
+												if( debug ) {
+													std::wcout << L"Number of players is " << choiceAsInt << std::endl;
+												}
+											} else if( choiceAsInt > 4 ) {
+												std::wcerr << L"Warning: Number of players not less than or equal to 4: " << choiceAsInt << std::endl;
+												numPlayers = choiceAsInt;
+											} else {
+												std::wcerr << L"Warning: Number of players is zero or not a number: " << choiceAsInt << L". Setting number of players to default." << std::endl;
+											}
+										} catch( boost::bad_lexical_cast &e ) {
+											std::wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+										}
+										break;
+									}
+									
+									case 11: { //L"window size"
+										size_t locationOfX = choice.find( L"x" );
+										std::wstring width = choice.substr( 0, locationOfX );
+										std::wstring height = choice.substr( locationOfX + 1 );
+										if( debug ) {
+											std::wcout << L"Window size: " << width << L"x" << height << std::endl;
+										}
+										
+										uint_fast16_t widthAsInt = boost::lexical_cast< uint_fast16_t >( width );
+										uint_fast16_t heightAsInt = boost::lexical_cast< uint_fast16_t >( height );
+										
+										if( widthAsInt < 160 || heightAsInt < 240 ) {
+											std::wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << std::endl;
+										} else if( widthAsInt == 160 && heightAsInt == 240 ) {
+											std::wcout << L"Rock on, CGA graphics. Rock on." << std::endl;
+											windowSize = core::dimension2d< uint_fast16_t >( widthAsInt, heightAsInt );
 										} else {
-											std::wcerr << L"Warning: Number of players is zero or not a number: " << choiceAsInt << L". Setting number of players to default." << std::endl;
+											windowSize = core::dimension2d< uint_fast16_t >( widthAsInt, heightAsInt );
 										}
-									} catch( boost::bad_lexical_cast &e ) {
-										std::wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+										break;
 									}
 									
-								} else if( preference == possiblePrefs.at( 11 ) ) { //L"window size"
-									size_t locationOfX = choice.find( L"x" );
-									std::wstring width = choice.substr( 0, locationOfX );
-									std::wstring height = choice.substr( locationOfX + 1 );
-									if( debug ) {
-										std::wcout << L"Window size: " << width << L"x" << height << std::endl;
+									case 12: { //L"play music"
+										playMusic = prefIsTrue( choice );
+										break;
 									}
 									
-									uint_fast16_t widthAsInt = boost::lexical_cast< uint_fast16_t >( width );
-									uint_fast16_t heightAsInt = boost::lexical_cast< uint_fast16_t >( height );
-									
-									if( widthAsInt < 160 || heightAsInt < 240 ) {
-										std::wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << std::endl;
-									} else if( widthAsInt == 160 && heightAsInt == 240 ) {
-										std::wcout << L"Rock on, CGA graphics. Rock on." << std::endl;
-										windowSize = core::dimension2d< uint_fast16_t >( widthAsInt, heightAsInt );
-									} else {
-										windowSize = core::dimension2d< uint_fast16_t >( widthAsInt, heightAsInt );
-									}
-									
-								} else if( preference == possiblePrefs.at( 12 ) ) { //L"play music"
-								
-									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
-									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
-									if( choice == possibleChoices.at( 0 ) ) {
+									case 13: { //L"network port"
 										if( debug ) {
-											std::wcout << L"Play music is ON" << std::endl;
+											std::wcout << L"Network port: " << choice << std::endl;
 										}
-										playMusic = true;
-									} else {
-										if( debug ) {
-											std::wcout << L"Play music is OFF" << std::endl;
+										
+										try {
+											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
+											network.setPort( choiceAsInt );
+										} catch( boost::bad_lexical_cast &e ) {
+											std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 										}
-										playMusic = false;
+										break;
 									}
 									
-								} else if( preference == possiblePrefs.at( 13 ) ) { //L"network port"
-									if( debug ) {
-										std::wcout << L"Network port: " << choice << std::endl;
+									case 14: { //L"always server"
+										isServer = prefIsTrue( choice );
+										break;
 									}
 									
-									try {
-										uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-										network.setPort( choiceAsInt );
-									} catch( boost::bad_lexical_cast &e ) {
-										std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-									}
-								} else if( preference == possiblePrefs.at( 14 ) ) { //L"always server"
-								
-									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
-									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
-									if( choice == possibleChoices.at( 0 ) ) {
-										if( debug ) {
-											std::wcout << L"This is always a server" << std::endl;
-										}
-										isServer = true;
-									} else {
-										if( debug ) {
-											std::wcout << L"This is not always a server" << std::endl;
-										}
-										isServer = false;
+									case 15: { //L"bots know the solution"
+										botsKnowSolution = prefIsTrue( choice );
+										break;
 									}
 									
-								} else if( preference == possiblePrefs.at( 15 ) ) { //L"bots know the solution"
-									
-									std::vector< std::wstring > possibleChoices = { L"true", L"false" };
-									choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-									
-									if( choice == possibleChoices.at( 0 ) ) { //L"true"
-										if( debug ) {
-											std::wcout << L"Bots DO know the solution" << std::endl;
+									case 16: { //L"bot movement delay"
+										try {
+											botMovementDelay = boost::lexical_cast< uint_fast16_t >( choice );
+										} catch( boost::bad_lexical_cast &e ) {
+											std::wcerr << L"Error reading botMovementDelay preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 										}
-										botsKnowSolution = true;
-									} else {
-										if( debug ) {
-											std::wcout << L"Bots do NOT know the solution" << std::endl;
-										}
-										botsKnowSolution = false;
+										break;
 									}
 									
-								} else if( preference == possiblePrefs.at( 16 ) ) { //L"bot movement delay"
-									try {
-										botMovementDelay = boost::lexical_cast< uint_fast16_t >( choice );
-									} catch( boost::bad_lexical_cast &e ) {
-										std::wcerr << L"Error reading botMovementDelay preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+									case 17: { //L"hide unseen maze areas"
+										mazeManager.hideUnseen = prefIsTrue( choice );
+										break;
 									}
 								}
 								
 							} catch ( std::exception &e ) {
-								std::wcout << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << std::endl;
+								std::wcerr << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << std::endl;
 							}
 						}
 					}
@@ -3922,7 +3884,7 @@ void GameManager::setupBackground() {
 						throw error;
 					}
 				} else {
-					std::wcout << L"Could not find any background images." << std::endl;
+					std::wcerr << L"Could not find any background images." << std::endl;
 				}
 
 				break;

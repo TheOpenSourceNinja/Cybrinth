@@ -4336,7 +4336,7 @@ fi
 
 
 # Checks for header files.
-for ac_header in vector iostream string sstream map cassert ft2build
+for ac_header in vector iostream string sstream map cassert
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_cxx_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"

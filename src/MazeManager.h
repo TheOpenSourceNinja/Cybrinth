@@ -11,8 +11,7 @@
 
 class GameManager;
 
-class MazeManager
-{
+class MazeManager {
 	public:
 		/** Default constructor */
 		MazeManager();
@@ -25,7 +24,10 @@ class MazeManager
 		bool canGetToAllCollectables( uint_fast8_t startX, uint_fast8_t startY );
 
 		void draw( irr::video::IVideoDriver* driver, uint_fast16_t cellWidth, uint_fast16_t cellHeight );
-
+		
+		bool hideUnseen;
+		
+		void makeCellsVisible( uint_fast8_t x, uint_fast8_t y );
 		void makeRandomLevel();
 		
 		void newMaze( uint_fast8_t newCols, uint_fast8_t newRows );

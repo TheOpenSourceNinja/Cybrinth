@@ -27,7 +27,11 @@ MazeCell::MazeCell() {
 		distanceFromStart = 999;
 		id = 0;
 		setVisitorColor(BLACK);
-		visible = true;
+		bool startVisible = false;
+		topVisible = startVisible;
+		leftVisible = startVisible;
+		rightVisible = startVisible;
+		bottomVisible = startVisible;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeCell::MazeCell(): " << e.what() << std::endl;
 	}

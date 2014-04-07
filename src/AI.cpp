@@ -135,7 +135,7 @@ bool AI::atGoal() {
 			return false;
 		}
 	} catch( std::exception &e ) {
-		std::wcout << "Error in AI::atGoal(): " << e.what() << std::endl;
+		std::wcerr << "Error in AI::atGoal(): " << e.what() << std::endl;
 		return true;
 	}
 }
@@ -148,7 +148,7 @@ bool AI::doneWaiting() {
 			return false;
 		}
 	} catch( std::exception &e ) {
-		std::wcout << L"Error in AI::doneWaiting(): " << e.what() << std::endl;
+		std::wcerr << L"Error in AI::doneWaiting(): " << e.what() << std::endl;
 		return false;
 	}
 }
@@ -217,9 +217,9 @@ void AI::findSolution() {
 			}
 		}
 	} catch( std::exception &e ) {
-		std::wcout << L"Error in AI::findSolution(): " << e.what() << std::endl;
+		std::wcerr << L"Error in AI::findSolution(): " << e.what() << std::endl;
 	} catch( std::wstring &e ) {
-		std::wcout << L"Error in AI::findSolution(): " << e << std::endl;
+		std::wcerr << L"Error in AI::findSolution(): " << e << std::endl;
 	}
 }
 
@@ -244,7 +244,7 @@ void AI::findSolutionDFS( irr::core::position2d< uint_fast8_t > currentPosition 
 		}
 		solution.push_back( currentPosition );
 	} catch( std::exception &e ) {
-		std::wcout << L"Error in AI::findSolutionDFS(): " << e.what() << std::endl;
+		std::wcerr << L"Error in AI::findSolutionDFS(): " << e.what() << std::endl;
 	}
 }
 
@@ -280,7 +280,7 @@ void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > currentPositio
 		}
 		solution.push_back( currentPosition );
 	} catch( std::exception &e ) {
-		std::wcout << L"Error in AI::findSolutionIDDFS(): " << e.what() << std::endl;
+		std::wcerr << L"Error in AI::findSolutionIDDFS(): " << e.what() << std::endl;
 	}
 }
 
@@ -412,7 +412,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 			}
 		}
 	} catch( std::exception &e ) {
-		std::wcout << L"Error in AI::findSolutionIDDFS(): " << e.what() << std::endl;
+		std::wcerr << L"Error in AI::findSolutionIDDFS(): " << e.what() << std::endl;
 	}
 	if( partialSolution.size() > 0 ) {
 		partialSolution.pop_back();
@@ -440,7 +440,7 @@ void AI::keyFound( uint_fast8_t key ) {
 		}
 
 	} catch( std::exception &e ) {
-		std::wcout << L"Error in AI::keyFound(): " << e.what() << std::endl;
+		std::wcerr << L"Error in AI::keyFound(): " << e.what() << std::endl;
 	}
 }
 
@@ -482,7 +482,7 @@ void AI::move() {
 			} else {
 				solved = false;
 				startSolved = false;
-				std::wcout << L"Could not find a solution" << std::endl;
+				std::wcerr << L"Could not find a solution" << std::endl;
 				move();
 			}
 
@@ -801,7 +801,7 @@ void AI::move() {
 					break;
 				}
 				default: {
-					std::wcout << L"The current algorithm cannot be used when bots don't know the solution." << std::endl;
+					std::wcerr << L"The current algorithm cannot be used when bots don't know the solution." << std::endl;
 					break;
 				}
 			}
@@ -841,7 +841,7 @@ void AI::reset() {
 			findSolution();
 		}
 	} catch( std::exception &e ) {
-		std::wcout << L"Error in AI::reset(): " << e.what() << std::endl;
+		std::wcerr << L"Error in AI::reset(): " << e.what() << std::endl;
 	}
 }
 

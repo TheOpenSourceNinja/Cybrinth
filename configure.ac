@@ -47,7 +47,7 @@ AC_CHECK_HEADER([boost/lexical_cast.hpp], [], [AC_MSG_ERROR(You need the Boost L
 AC_CHECK_HEADER([boost/algorithm/string.hpp], [], [AC_MSG_ERROR(You need the Boost String Algo library installed)])
 
 # Checks for header files.
-AC_CHECK_HEADERS([vector iostream string sstream map cassert ft2build])
+AC_CHECK_HEADERS([vector iostream string sstream map cassert])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T

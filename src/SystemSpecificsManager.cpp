@@ -47,13 +47,15 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 	std::vector< boost::filesystem::path > fontFolders;
 	fontFolders.push_back( boost::filesystem::current_path() );
 	#if defined WINDOWS
-		fontFolders.push_back( L"C:\Windows\Fonts");
-		fontFolders.push_back( L"C:\WINNT\Fonts");
+		fontFolders.push_back( L"C:\Windows\Fonts" );
+		fontFolders.push_back( L"C:\WINNT\Fonts" );
 	#elif defined LINUX
 		fontFolders.push_back( L"/usr/share/X11/fonts/" );
+		fontFolders.push_back( L"/usr/share/fonts/opentype" ); //This and the next line are a workaround: the first font my system finds in /usr/share/fonts is invisible
+		fontFolders.push_back( L"/usr/share/fonts/truetype" );
 		fontFolders.push_back( L"/usr/share/fonts/" );
 		try {
-			fontFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/.fonts/");
+			fontFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/.fonts/" );
 		} catch( std::wstring error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}

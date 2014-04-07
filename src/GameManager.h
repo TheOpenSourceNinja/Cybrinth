@@ -133,7 +133,9 @@ class GameManager : public IEventReceiver {
 		void loadTipFont();
 		
 		void makeMusicList();
+		void movePlayerCommon( uint_fast8_t p );
 		
+		bool prefIsTrue( std::wstring choice );
 		void processControls();
 		
 		void readPrefs();

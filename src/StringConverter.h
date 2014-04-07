@@ -21,8 +21,7 @@
 #include <string>
 #endif //HAVE_STRING
 
-class StringConverter
-{
+class StringConverter {
 	public:
 		StringConverter();
 		virtual ~StringConverter();

@@ -9,6 +9,8 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
 */
 
+//This file is just here to gather together a bunch of preprocessor commands that used to be repeated over and over in different files.
+
 #ifndef PREPROCESSOR_COMMANDS_H_INCLUDED
 #define PREPROCESSOR_COMMANDS_H_INCLUDED
 

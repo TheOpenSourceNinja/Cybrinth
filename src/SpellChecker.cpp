@@ -77,7 +77,7 @@ std::wstring::size_type SpellChecker::DamerauLevenshteinDistance( std::wstring s
 
 		return score[ source.size() + 1 ][ target.size() + 1 ];
 	} catch( std::exception &e ) {
-		std::wcout << L"Error in SpellChecker::DamerauLevenshteinDistance(): " << e.what() << std::endl;
+		std::wcerr << L"Error in SpellChecker::DamerauLevenshteinDistance(): " << e.what() << std::endl;
 		return -1;
 	}
 }
@@ -101,7 +101,7 @@ std::vector< std::wstring >::size_type SpellChecker::indexOfClosestString( std::
 
 		return indexOfMinDistance;
 	} catch( std::exception &e ) {
-		std::wcout << L"Error in SpellChecker::minDistance(): " << e.what() << std::endl;
+		std::wcerr << L"Error in SpellChecker::minDistance(): " << e.what() << std::endl;
 		return -1;
 	}
 }

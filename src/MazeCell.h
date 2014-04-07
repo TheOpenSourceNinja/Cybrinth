@@ -43,7 +43,10 @@ class MazeCell {
 		bool hasLock();
 		bool hasLeftLock();
 		bool hasTopLock();
-		bool visible;
+		bool topVisible;
+		bool leftVisible;
+		bool bottomVisible;
+		bool rightVisible;
 	protected:
 	private:
 		border_t top;

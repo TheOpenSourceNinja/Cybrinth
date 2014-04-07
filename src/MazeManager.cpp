@@ -82,7 +82,7 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, ui
 
 		for( decltype( cols ) x = 0; x < cols; ++x ) {
 			for( decltype( rows ) y = 0; y < rows; ++y ) {
-				if( maze[ x ][ y ].visible ) {
+				if( maze[ x ][ y ].topVisible ) {
 					if( maze[ x ][ y ].getTop() == MazeCell::WALL ) {
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), wallShadowColor );
 						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), wallColor );
@@ -93,7 +93,9 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, ui
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), lockShadowColor );
 						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >(cellWidth * ( x + 1 ), cellHeight * y ), lockColor );
 					}
-
+				}
+				
+				if( maze[ x ][ y ].leftVisible ) {
 					if( maze[ x ][ y ].getLeft() == MazeCell::WALL ) {
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), wallShadowColor );
 						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), wallColor );
@@ -104,13 +106,16 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, ui
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * y ), shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), lockShadowColor );
 						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * y ), core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), lockColor );
 					}
-
+				}
+				
+				if( maze[ x ][ y ].rightVisible ) {
 					//Only cells on the right or bottom edge of the maze should have anything other than NONE as right or bottom, and then it should only be a solid WALL
 					if( maze[ x ][ y ].getRight() == MazeCell::ACIDPROOF ) {
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * y ), shadowOffset + core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallShadowColor );
 						driver->draw2DLine( core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * y ), core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), acidProofWallColor );
 					}
-
+				}
+				if( maze[ x ][ y ].bottomVisible ) {	
 					if( maze[ x ][ y ].getBottom() == MazeCell::ACIDPROOF ) {
 						driver->draw2DLine( shadowOffset + core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), shadowOffset + core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), wallShadowColor );
 						driver->draw2DLine( core::position2d< s32 >( cellWidth * x, cellHeight * ( y + 1 ) ), core::position2d< s32 >( cellWidth * ( x + 1 ), cellHeight * ( y + 1 ) ), acidProofWallColor );
@@ -123,6 +128,36 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, ui
 	}
 }
 
+//Figures out which cells should be visible from the given position
+void MazeManager::makeCellsVisible( uint_fast8_t x, uint_fast8_t y ) {
+	if( hideUnseen ) { //No need to do anything if they're all visible anyway
+		for( auto yprime = y; yprime >= 0; --yprime ) {
+			maze[ x ][ yprime ].topVisible = true;
+			if( maze[ x ][ yprime ].getTop() != MazeCell::NONE ) {
+				break;
+			}
+		}
+		for( auto yprime = y + 1; yprime < rows; ++yprime ) {
+			maze[ x ][ yprime ].topVisible = true;
+			if( maze[ x ][ yprime ].getTop() != MazeCell::NONE ) {
+				break;
+			}
+		}
+		for( auto xprime = x; xprime >= 0; --xprime ) {
+			maze[ xprime ][ y ].leftVisible = true;
+			if( maze[ xprime ][ y ].getLeft() != MazeCell::NONE ) {
+				break;
+			}
+		}
+		for( auto xprime = x + 1; xprime < cols; ++xprime ) {
+			maze[ xprime ][ y ].leftVisible = true;
+			if( maze[ xprime ][ y ].getLeft() != MazeCell::NONE ) {
+				break;
+			}
+		}
+	}
+}
+
 //Does everything involved in making the maze, calls other functions as needed.
 void MazeManager::makeRandomLevel() {
 	try {
@@ -130,11 +165,19 @@ void MazeManager::makeRandomLevel() {
 		// Flawfinder: ignore
 		srand( gameManager->randomSeed ); //randomSeed is set either by resetThings() or by loadFromFile()
 		{
-			decltype( cols ) tempCols = rand() % 28 + 2; //I don't remember where I got the 28. The 2 is so there's some minimum amount.
+			decltype( cols ) tempCols = rand() % 28 + 2; //I don't remember where I got the 28. The 2 is arbitrary so there's some minimum amount.
 			decltype( rows ) tempRows = tempCols + ( rand() % 5 ); //Again, no idea where the 5 came from.
 			newMaze( tempCols, tempRows );
 		}
-
+		
+		//Set whether the cells are visible. Those on the border are changed later.
+		for( decltype( cols ) x = 0; x < cols; ++x ) {
+			for( decltype( rows ) y = 0; y < rows; ++y ) {
+				maze[ x ][ y ].topVisible = !hideUnseen;
+				maze[ x ][ y ].leftVisible = !hideUnseen;
+			}
+		}
+		
 		for( decltype( cols ) x = 0; x < cols; ++x ) {
 			for( decltype( rows ) y = 0; y < rows; ++y ) {
 				maze[ x ][ y ].setOriginalTop( MazeCell::WALL );
@@ -170,20 +213,24 @@ void MazeManager::makeRandomLevel() {
 		//Add walls at maze borders
 		for( decltype( cols ) x = 0; x < cols; ++x ) {
 			maze[ x ][ 0 ].setOriginalTop( MazeCell::ACIDPROOF );
+			maze[ x ][ 0 ].topVisible = true;
 			maze[ x ][ rows-1 ].setOriginalBottom( MazeCell::ACIDPROOF );
+			maze[ x ][ rows-1 ].bottomVisible = true;
 		}
 
 		for( decltype( rows ) y = 0; y < rows; ++y ) {
 			maze[ 0 ][ y ].setOriginalLeft( MazeCell::ACIDPROOF );
+			maze[ 0 ][ y ].leftVisible = true;
 			maze[ cols-1 ][ y ].setOriginalRight( MazeCell::ACIDPROOF );
+			maze[ cols-1 ][ y ].rightVisible = true;
 		}
-
+		
+		//Make MazeCell::isDeadEnd() work
 		for( decltype( cols ) x = 1; x < cols; ++x ) {
 			for( decltype( rows ) y = 0; y < rows; ++y ) {
 				maze[ x-1 ][ y ].setOriginalRight( maze[ x ][ y ].getLeft() );
 			}
 		}
-
 		for( decltype( cols ) x = 0; x < cols; ++x ) {
 			for( decltype( rows ) y = 1; y < rows; ++y ) {
 				maze[ x ][ y-1 ].setOriginalBottom( maze[ x ][ y ].getTop() );

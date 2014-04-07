@@ -23,8 +23,7 @@
 #include "PreprocessorCommands.h"
 #include "StringConverter.h"
 
-class SystemSpecificsManager
-{
+class SystemSpecificsManager {
 	public:
 		SystemSpecificsManager();
 		virtual ~SystemSpecificsManager();

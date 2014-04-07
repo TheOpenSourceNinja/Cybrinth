@@ -8,8 +8,7 @@
 #include "Integers.h"
 #include "PreprocessorCommands.h"
 
-class ControlMapping
-{
+class ControlMapping {
 	public:
 		enum controllerDirection_t { CONTROLLER_INCREASE, CONTROLLER_DECREASE, CONTROLLER_DO_NOT_USE };
 		enum mouseDirection_t { MOUSE_UP, MOUSE_DOWN, MOUSE_RIGHT, MOUSE_LEFT, MOUSE_DO_NOT_USE };

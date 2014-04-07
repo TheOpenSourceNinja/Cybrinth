@@ -1,6 +1,6 @@
 Images and music files not created for or as part of Cybrinth may be under separate licenses, see the "License" and "Source" files associated with each file. The Ubuntu font (Ubuntu-R.ttf) is copyrighted 2011 Canonical Ltd and licensed under the Ubuntu Fonts Licence 1.0 (reproduced below). All other files, including images and music created for Cybrinth, are licensed under the GNU AGPL version 3 (reproduced below) or any later version. 
 
-For image files licensed under the GNU AGPL, the preferred form for editing ("source code") is either a "Portable Network Graphics" (.png), Inkscape-compatible "Scalable Vector Graphics" (.svg), or GIMP-compatible "eXperimental Computing Facility" (.xcf) file; any other formats including C/C++ files shall be considered "object code".
+For image files licensed under the GNU AGPL, the preferred form for editing ("source code") is either a "Portable Network Graphics" (.png), Inkscape-compatible "Scalable Vector Graphics" (.svg), or GIMP-compatible "eXperimental Computing Facility" (.xcf)  or "OpenRaster" (.ora) file; any other formats including C/C++ files shall be considered "object code".
 
 ---------------------------------------
                     GNU AFFERO GENERAL PUBLIC LICENSE
