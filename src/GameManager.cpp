@@ -1193,7 +1193,7 @@ void GameManager::loadFonts() {
 		if( debug ) {
 			std::wcout << L"loadFonts() called" << std::endl;
 		}
-		
+		//TODO: When a font is loaded, use its size ratio to estimate what the next size to try should be
 		fontFile = "";
 		boost::filesystem::recursive_directory_iterator end;
 		std::vector< boost::filesystem::path > fontFolders = system.getFontFolders(); // Flawfinder: ignore
@@ -1937,39 +1937,10 @@ void GameManager::newMaze() {
  * --- boost::filesystem::path src: the file from which to load the maze.
  */
 void GameManager::newMaze( boost::filesystem::path src ) {
-	try {
-		if( debug ) {
-			std::wcout << L"Trying to load from file " << src.wstring() << std::endl;
-		}
-		
-		if( !exists( src ) ) {
-			throw( std::wstring( L"File not found: " ) + src.wstring() );
-		} else if( is_directory( src ) ) {
-			throw( std::wstring( L"Directory specified, file needed: " ) + src.wstring() );
-		}
-		
-		boost::filesystem::wifstream file; //Identical to a standard C++ fstream, except it takes Boost paths
-		file.open( src );
-
-		if( file.is_open() ) {
-			uint_fast16_t newRandomSeed;
-			file >> newRandomSeed;
-			file.close();
-			newMaze( newRandomSeed );
-			return;
-		} else {
-			throw( std::wstring( L"Cannot open file: " ) + src.wstring() );
-		}
-	} catch( const boost::filesystem::filesystem_error &e ) {
-		std::wcerr << L"Boost Filesystem error in GameManager::newMaze(): " << e.what() << std::endl;
-	} catch( std::exception &e ) {
-		std::wcerr << L"non-Boost-Filesystem error in GameManager::newMaze(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"non-Boost-Filesystem error in GameManager::newMaze(): " << e << std::endl;
+	if( !mazeManager.loadFromFile( src ) ) {
+		//If we get this far, it's an error. Probably a file not found. Fail gracefully by starting a new maze anyway.
+		newMaze( rand() );
 	}
-	
-	//If we get this far, it's an error. Probably a file not found. Fail gracefully by starting a new maze anyway.
-	newMaze( rand() );
 }
 
 /**

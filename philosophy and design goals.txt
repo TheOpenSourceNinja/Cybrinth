@@ -1,3 +1,4 @@
+﻿(character encoding: UTF-8)
 The game's design philosophy is really quite simple: Make as few assumptions as possible about the player or the computer on which the game will be played. That's it, summarized in one sentence. That's the reason behind nearly every decision.
 
 Resulting from that overarching goal are some subgoals:
@@ -10,6 +11,10 @@ Resulting from that overarching goal are some subgoals:
 
 4- Keep it open source. The portability resulting from the preceding subgoals should not be limited to modern computers, instead extending to all future types of computers. That can't happen if somebody makes a proprietary fork of the program. Unfortunately this means choosing what some would call a restrictive license: a copyleft license, such as the GNU GPL or AGPL.
 
+Obviously, making a proprietary fork does not subtract from the code that is available - it does not prevent the public from accessing anything that gets released in this non-proprietary version. The point is that all improvements should be made equally open source. We should be able to build off of the best version of the software, not be forced to use the second best.
+
+"Developers who build upon community work have a social obligation to release their modifications back into the community. You shouldn't be free to leech off the efforts of the community for personal gain... [The GPL] forces this social contract." -Zach L. in an email to the Linux Luddites podcast. http://linuxluddites.com/shows/episode-8/
+
 5- Use as few external libraries as is convenient. Libraries exist for convenience, so that we don't have to rewrite functions that others have already written or spend years learning about the mathematics behind something we're only going to use once or twice, but they come at a cost: portability. Older games often don't work on modern systems simply because the libraries they depend on are significantly different now. I'm thinking specifically of Microsoft's Age of Empires, whose multiplayer component depended on a feature called DirectPlay, which is only partially implemented Windows versions after XP. It's also possible that certain libraries will simply not be available or installed by default in the future. Libraries that we do need can be statically linked into the program itself or distributed alongside it.
 
 6- Rely on as few external files (of any kind) as possible. The program is designed to load external files, such as images or music, if it finds them. Using external files is great for mod-makers since they won't need to look at the source code, just replace some image or music files. However, the game can generate all of the resources it needs: it will not crash if an image is not found.
@@ -17,3 +22,4 @@ Resulting from that overarching goal are some subgoals:
 7- Make use of as many external files as possible. The game should be modifiable even by those who can't code. If people don't like the retro look, let them change it.
 
 8- Support as wide an array of input devices as possible. Don't assume that a standard keyboard and mouse will always be available. The game currently is only guaranteed to work using controllers (joysticks/gamepads) and/or a keyboard. Support for other input methods such as touch screens is totally unimplemented at this time, but hopefully somebody will add it in the future. Maybe add some voice recognition, or use one of those home brainwave-reading devices that are starting to enter the market.
+

@@ -27,6 +27,9 @@ class MazeManager {
 		
 		bool hideUnseen;
 		
+		bool loadFromFile();
+		bool loadFromFile( boost::filesystem::path src );
+		
 		void makeCellsVisible( uint_fast8_t x, uint_fast8_t y );
 		void makeRandomLevel();
 		

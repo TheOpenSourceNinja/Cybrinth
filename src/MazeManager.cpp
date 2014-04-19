@@ -128,6 +128,53 @@ void MazeManager::draw( video::IVideoDriver* driver, uint_fast16_t cellWidth, ui
 	}
 }
 
+bool MazeManager::loadFromFile() {
+	try {
+		return loadFromFile( L"default.maz" );
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in MazeManager::loadFromFile(): " << e.what() << std::endl;
+		return false;
+	}
+}
+
+bool MazeManager::loadFromFile( boost::filesystem::path src ) {
+	try {
+		//cppcheck-suppress duplicateIf
+		if( gameManager == 0 || gameManager == NULL || gameManager == nullptr ) {
+			throw( L"setGameManager() has not been called yet." );
+		}
+		if( gameManager->getDebugStatus() ) {
+			std::wcout << L"Trying to load from file " << src.wstring() << std::endl;
+		}
+		
+		if( !exists( src ) ) {
+			throw( std::wstring( L"File not found: " ) + src.wstring() );
+		} else if( is_directory( src ) ) {
+			throw( std::wstring( L"Directory specified, file needed: " ) + src.wstring() );
+		}
+		
+		boost::filesystem::wifstream file; //Identical to a standard C++ fstream, except it takes Boost paths
+		file.open( src, std::ifstream::binary | std::ifstream::trunc );
+
+		if( file.is_open() ) {
+			uint_fast16_t newRandomSeed;
+			file >> newRandomSeed;
+			file.close();
+			gameManager->newMaze( newRandomSeed );
+			return true;
+		} else {
+			throw( std::wstring( L"Cannot open file: " ) + src.wstring() );
+		}
+	} catch( const boost::filesystem::filesystem_error &e ) {
+		std::wcerr << L"Boost Filesystem error in MazeManager::loadFromFile(): " << e.what() << std::endl;
+	} catch( std::exception &e ) {
+		std::wcerr << L"non-Boost-Filesystem error in MazeManager::loadFromFile(): " << e.what() << std::endl;
+	} catch( std::wstring &e ) {
+		std::wcerr << L"non-Boost-Filesystem error in MazeManager::loadFromFile(): " << e << std::endl;
+	}
+	return false;
+}
+
 //Figures out which cells should be visible from the given position
 void MazeManager::makeCellsVisible( uint_fast8_t x, uint_fast8_t y ) {
 	if( hideUnseen ) { //No need to do anything if they're all visible anyway
@@ -170,7 +217,6 @@ void MazeManager::makeRandomLevel() {
 			newMaze( tempCols, tempRows );
 		}
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
-		gameManager->device->run();
 		gameManager->drawAll();
 		
 		//Set whether the cells are visible. Those on the border are changed later.
@@ -192,7 +238,6 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
-		gameManager->device->run();
 		gameManager->drawAll();
 
 		for( decltype( gameManager->numPlayers ) p = 0; p < gameManager->numPlayers; ++p ) {
@@ -218,7 +263,6 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
-		gameManager->device->run();
 		gameManager->drawAll();
 		
 		//Add walls at maze borders
@@ -237,7 +281,6 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
-		gameManager->device->run();
 		gameManager->drawAll();
 		
 		//Make MazeCell::isDeadEnd() work
@@ -253,7 +296,6 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
-		gameManager->device->run();
 		gameManager->drawAll();
 
 		//Find all dead ends. I'm sure it would be more efficient to do this during maze generation rather than going back through afterward, but I can't be bothered with that now.
@@ -270,7 +312,6 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
-		gameManager->device->run();
 		gameManager->drawAll();
 
 		//Remove player starts from list of dead ends
@@ -284,7 +325,6 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
-		gameManager->device->run();
 		gameManager->drawAll();
 
 		//Remove goal from list of dead ends
@@ -334,7 +374,6 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
-		gameManager->device->run();
 		gameManager->drawAll();
 		
 		{
@@ -444,7 +483,6 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
-		gameManager->device->run();
 		gameManager->drawAll();
 
 		for( decltype( cols ) x = 0; x < cols; ++x ) {
@@ -459,7 +497,6 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
-		gameManager->device->run();
 		gameManager->drawAll();
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::makeRandomLevel(): " << e.what() << std::endl;
@@ -519,9 +556,8 @@ void MazeManager::newMaze( uint_fast8_t newCols, uint_fast8_t newRows ) {
 //Generates the maze recursively
 void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t depth, uint_fast16_t numSoFar ) {
 	try {
-		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + ( 90.0 / ( cols * rows ) ) );
-		//At one point I included the following two lines because I hoped to show the maze as it was being generated. Might still add that as an option. Now they're there so that the loading screen gets drawn and lasts long enough to read it.
-		gameManager->device->run();
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + ( 90.0 / ( cols * rows ) ) ); //I figure this recursion takes up about 90% of loading time. That's not based on any measurements, it's just a guess.
+		//At one point I included the following line because I hoped to show the maze as it was being generated. Might still add that as an option. Now they're there so that the loading screen gets drawn and lasts long enough to read it.
 		gameManager->drawAll();
 		
 		maze[ x ][ y ].visited = true;
@@ -599,7 +635,7 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 bool MazeManager::saveToFile() {
 	try {
 		return saveToFile( L"default.maz" );
-	} catch ( std::exception &e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::saveToFile(): " << e.what() << std::endl;
 		return false;
 	}
@@ -610,16 +646,18 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 		if( is_directory( dest ) ) {
 			throw( std::wstring( L"Directory specified, file needed: " ) + dest.wstring() );
 		}
-
+		
 		boost::filesystem::wofstream file; //Identical to a standard C++ wofstream, except it takes Boost paths
-		file.open( dest );
-
+		file.open( dest, std::wofstream::binary | std::wofstream::trunc );
+		
 		if( file.is_open() ) {
 			file << gameManager->randomSeed;
+			/*auto rs = gameManager->randomSeed;
+			file.write( reinterpret_cast<boost::filesystem::wofstream::char_type *>( &rs ), sizeof( rs ) / sizeof( boost::filesystem::wofstream::char_type ) );*/
+			file.close();
 			core::stringw message( L"This maze has been saved to the file " );
 			message += gameManager->stringConverter.toIrrlichtStringW( dest.wstring() );
 			gameManager->gui->addMessageBox( L"Maze saved", gameManager->stringConverter.toStdWString( message ).c_str() ); //stringConverter.toWCharArray( message ) );
-			file.close();
 		} else {
 			core::stringw message( L"Cannot save to file " );
 			message += gameManager->stringConverter.toIrrlichtStringW( dest.wstring() );
