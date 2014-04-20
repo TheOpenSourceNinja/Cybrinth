@@ -27,8 +27,8 @@ class MenuOption {
 		void setY( uint_fast16_t val );
 		void setFont( irr::gui::IGUIFont* newFont );
 		void draw( irr::video::IVideoDriver* driver );
-		bool contains( irr::core::position2d< int_fast32_t > test );
-		bool contains( int_fast32_t testX, int_fast32_t testY );
+		bool contains( irr::core::position2d< uint_fast32_t > test );
+		bool contains( uint_fast32_t testX, uint_fast32_t testY );
 		void setText( irr::core::stringw newText );
 		bool highlighted;
 	protected:

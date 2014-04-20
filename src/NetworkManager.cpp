@@ -275,8 +275,8 @@ bool NetworkManager::hasNewPlayerConnected() {
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::hasNewPlayerConnected(): " << e.what() << std::endl;
-		return false;
 	}
+	return false;
 }
 
 void NetworkManager::sendMaze( MazeCell ** maze, uint_fast8_t cols, uint_fast8_t rows ) {

@@ -934,7 +934,8 @@ GameManager::GameManager() {
 			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
 				bot.at( i ).setPlayer( numPlayers - ( i + 1 ) ) ;
 				player.at( bot.at( i ).getPlayer() ).isHuman = false;
-				bot.at( i ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm, botMovementDelay );
+				//bot.at( i ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm, botMovementDelay );
+				bot.at( i ).setup( this, botsKnowSolution, botAlgorithm, botMovementDelay );
 			}
 		}
 
@@ -993,9 +994,8 @@ GameManager::GameManager() {
 
 /**
  * Lets other objects get a pointer to one of the collectables, probably to see if a player has touched one.
- * Arguments:
- * --uint_fast8_t collectable: The item desired.
- * Returns: A pointer to a Collectable.
+ * @param uint_fast8_t collectable: The number of the item desired.
+ * @return A pointer to a Collectable.
  */
 Collectable* GameManager::getCollectable( uint_fast8_t collectable ) {
 	try {
@@ -1003,6 +1003,7 @@ Collectable* GameManager::getCollectable( uint_fast8_t collectable ) {
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getCollectable(): " << e.what() << std::endl;
 	}
+	return nullptr;
 }
 
 /**
@@ -1032,9 +1033,8 @@ Goal* GameManager::getGoal() {
 
 /**
  * Lets other objects get a pointer to one of the keys, probably to see if a player has touched one.
- * Arguments:
- * --uint_fast8_t key: The key desired.
- * Returns: A pointer to a key.
+ * @param uint_fast8_t key: The number of the key desired.
+ * @return A pointer to a key.
  */
 Collectable* GameManager::getKey( uint_fast8_t key ) {
 	try {
@@ -1075,6 +1075,7 @@ Collectable* GameManager::getKey( uint_fast8_t key ) {
 	if( debug ) {
 		std::wcout << L"end of getKey() (key is not valid)" << std::endl;
 	}
+	return nullptr;
 }
 
 /**
@@ -1098,6 +1099,7 @@ MazeManager* GameManager::getMazeManager() {
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getMazeManager(): " << e.what() << std::endl;
 	}
+	return nullptr;
 }
 
 /**
@@ -1963,7 +1965,7 @@ void GameManager::newMaze( uint_fast16_t newRandomSeed ) {
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
-			bot.at( b ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm, botMovementDelay );
+			bot.at( b ).setup( this, botsKnowSolution, botAlgorithm, botMovementDelay );
 		}
 		
 		setLoadingPercentage( 100 );
@@ -2030,6 +2032,9 @@ bool GameManager::OnEvent( const SEvent& event ) {
 										controls.at( k ).activated = ( event.MouseInput.X > mouseX );
 										break;
 									}
+									default: { //ControlMapping::MOUSE_DO_NOT_USE
+										break;
+									}
 								}
 								break;
 							}
@@ -2042,9 +2047,12 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				}
 				
 				switch( event.MouseInput.Event ) { //Anything that should be updated regardless of whether it's required by any controls
-					case irr::EMIE_MOUSE_MOVED: {
+					case irr::EMIE_MOUSE_MOVED: { //So far this is the only thing that should always be updated
 						mouseX = event.MouseInput.X;
 						mouseY = event.MouseInput.Y;
+						break;
+					}
+					default: {
 						break;
 					}
 				}
@@ -2564,17 +2572,13 @@ void GameManager::readPrefs() {
 										try {
 											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
 											
-											if( choiceAsInt <= 100 && choiceAsInt >= 0 ) {
+											if( choiceAsInt <= 100 ) {
 												musicVolume = choiceAsInt;
 												Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
 												if( debug ) {
 													std::wcout << L"Volume should be " << choiceAsInt << "%" << std::endl;
 													std::wcout << L"Volume is really " << 100 * Mix_VolumeMusic( -1 ) / MIX_MAX_VOLUME << "%" << std::endl;
 												}
-											} else if( choiceAsInt < 0 ) {
-												std::wcerr << L"Warning: Volume less than zero: " << choiceAsInt << std::endl;
-												Mix_VolumeMusic( 0 );
-												musicVolume = 0;
 											} else {
 												std::wcerr << L"Warning: Volume greater than 100%: " << choiceAsInt << std::endl;
 												Mix_VolumeMusic( MIX_MAX_VOLUME );

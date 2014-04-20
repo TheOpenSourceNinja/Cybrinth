@@ -178,7 +178,7 @@ bool MazeManager::loadFromFile( boost::filesystem::path src ) {
 //Figures out which cells should be visible from the given position
 void MazeManager::makeCellsVisible( uint_fast8_t x, uint_fast8_t y ) {
 	if( hideUnseen ) { //No need to do anything if they're all visible anyway
-		for( auto yprime = y; yprime >= 0; --yprime ) {
+		for( auto yprime = y; yprime <= y; --yprime ) { //When yprime wraps around, we're done
 			maze[ x ][ yprime ].topVisible = true;
 			if( maze[ x ][ yprime ].getTop() != MazeCell::NONE ) {
 				break;
@@ -190,7 +190,7 @@ void MazeManager::makeCellsVisible( uint_fast8_t x, uint_fast8_t y ) {
 				break;
 			}
 		}
-		for( auto xprime = x; xprime >= 0; --xprime ) {
+		for( auto xprime = x; xprime <= x; --xprime ) { //When xprime wraps around, we're done
 			maze[ xprime ][ y ].leftVisible = true;
 			if( maze[ xprime ][ y ].getLeft() != MazeCell::NONE ) {
 				break;
@@ -556,7 +556,7 @@ void MazeManager::newMaze( uint_fast8_t newCols, uint_fast8_t newRows ) {
 //Generates the maze recursively
 void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t depth, uint_fast16_t numSoFar ) {
 	try {
-		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + ( 90.0 / ( cols * rows ) ) ); //I figure this recursion takes up about 90% of loading time. That's not based on any measurements, it's just a guess.
+		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + ( 90.0f / ( cols * rows ) ) ); //I figure this recursion takes up about 90% of loading time. That's not based on any measurements, it's just a guess.
 		//At one point I included the following line because I hoped to show the maze as it was being generated. Might still add that as an option. Now they're there so that the loading screen gets drawn and lasts long enough to read it.
 		gameManager->drawAll();
 		

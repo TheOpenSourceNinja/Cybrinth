@@ -53,6 +53,7 @@ video::ITexture* ImageModifier::resize( video::ITexture* image, uint_fast32_t wi
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in ImageModifier::resize(): " << e.what() << std::endl;
 	}
+	return nullptr;
 }
 
 video::IImage* ImageModifier::resize( video::IImage* image, uint_fast32_t width, uint_fast32_t height, irr::video::IVideoDriver* driver ) {
@@ -83,6 +84,7 @@ video::IImage* ImageModifier::resize( video::IImage* image, uint_fast32_t width,
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in ImageModifier::resize(): " << e.what() << std::endl;
 	}
+	return nullptr;
 }
 
 video::IImage* ImageModifier::textureToImage( irr::video::IVideoDriver* driver, irr::video::ITexture* texture ) {

@@ -246,8 +246,8 @@
 				<comment_style block="4" line="2" />
 				<doxyfile_project />
 				<doxyfile_build />
-				<doxyfile_warnings />
-				<doxyfile_output />
+				<doxyfile_warnings warn_if_undocumented="1" />
+				<doxyfile_output html="0" />
 				<doxyfile_dot />
 				<general />
 			</DoxyBlocks>

@@ -118,9 +118,9 @@ void Player::loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t size )
 
 		{
 			int_fast16_t radius = size / 2;
-			float rSquared = pow( radius, 2 );
+			float rSquared = pow( static_cast< float >( radius ), 2.0f );
 			for( auto x = -radius; x <= 0; ++x ) {
-				auto height = static_cast< decltype( radius ) >( sqrt( rSquared - pow( x, 2 ) ) );
+				auto height = static_cast< decltype( radius ) >( sqrt( rSquared - static_cast< float >( pow( static_cast< float >( x ), 2.0f ) ) ) );
 				for( auto y = -height; y <= 0; ++y ) {
 					tempImage->setPixel( x + origin.X, y + origin.Y, colorOne );
 					tempImage->setPixel( x + origin.X, -y + origin.Y, colorOne );
@@ -133,9 +133,9 @@ void Player::loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t size )
 		{
 			size /= 2;
 			int_fast16_t radius = size / 2;
-			float rSquared = pow( radius, 2 );
+			float rSquared = pow( static_cast< float >( radius ), 2.0f );
 			for( auto x = -radius; x <= 0; ++x ) {
-				auto height = static_cast< decltype( radius ) >( sqrt( rSquared - pow( x, 2 ) ) );
+				auto height = static_cast< decltype( radius ) >( sqrt( rSquared - static_cast< float >( pow( static_cast< float >( x ), 2.0f ) ) ) );
 				for( auto y = -height; y <= 0; ++y ) {
 					tempImage->setPixel( x + origin.X, y + origin.Y, colorTwo );
 					tempImage->setPixel( x + origin.X, -y + origin.Y, colorTwo );
