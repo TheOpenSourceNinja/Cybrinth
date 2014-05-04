@@ -13,7 +13,7 @@ ImageModifier::~ImageModifier() {
 	//dtor
 }
 
-video::ITexture* ImageModifier::imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* oldImage, irr::core::stringw name ) {
+irr::video::ITexture* ImageModifier::imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* oldImage, irr::core::stringw name ) {
 	try {
 		StringConverter sc;
 		irr::video::ITexture* texture = driver->addTexture( name.c_str(), oldImage ); //sc.toWCharArray( name ), oldImage );
@@ -25,7 +25,7 @@ video::ITexture* ImageModifier::imageToTexture( irr::video::IVideoDriver* driver
 	}
 }
 
-video::ITexture* ImageModifier::resize( video::ITexture* image, uint_fast32_t width, uint_fast32_t height, irr::video::IVideoDriver* driver ) {
+irr::video::ITexture* ImageModifier::resize( irr::video::ITexture* image, uint_fast32_t width, uint_fast32_t height, irr::video::IVideoDriver* driver ) {
 	try {
 		/*if( image == nullptr || image->getOriginalSize().Width < width || image->getOriginalSize().Height < height ) {
 			switch( type ) {
@@ -44,7 +44,7 @@ video::ITexture* ImageModifier::resize( video::ITexture* image, uint_fast32_t wi
 		irr::video::IImage* tempImage = textureToImage( driver, image );
 		//driver->removeTexture( image );
 		//image->drop();
-		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< u32 >( width, height ) );
+		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< irr::u32 >( width, height ) );
 		tempImage->copyToScaling( tempImage2 );
 		//tempImage->drop();
 		image = imageToTexture( driver, tempImage2, L"resized" );
@@ -56,7 +56,7 @@ video::ITexture* ImageModifier::resize( video::ITexture* image, uint_fast32_t wi
 	return nullptr;
 }
 
-video::IImage* ImageModifier::resize( video::IImage* image, uint_fast32_t width, uint_fast32_t height, irr::video::IVideoDriver* driver ) {
+irr::video::IImage* ImageModifier::resize( irr::video::IImage* image, uint_fast32_t width, uint_fast32_t height, irr::video::IVideoDriver* driver ) {
 	try {
 		/*if( image == nullptr || image->getOriginalSize().Width < width || image->getOriginalSize().Height < height ) {
 			switch( type ) {
@@ -75,7 +75,7 @@ video::IImage* ImageModifier::resize( video::IImage* image, uint_fast32_t width,
 		irr::video::IImage* tempImage = image;//textureToImage( driver, image );
 		//driver->removeTexture( image );
 		//image->drop();
-		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< u32 >( width, height ) );
+		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< irr::u32 >( width, height ) );
 		tempImage->copyToScaling( tempImage2 );
 		//tempImage->drop();
 		image = tempImage2;//imageToTexture( driver, tempImage2, L"resized" );
@@ -87,7 +87,7 @@ video::IImage* ImageModifier::resize( video::IImage* image, uint_fast32_t width,
 	return nullptr;
 }
 
-video::IImage* ImageModifier::textureToImage( irr::video::IVideoDriver* driver, irr::video::ITexture* texture ) {
+irr::video::IImage* ImageModifier::textureToImage( irr::video::IVideoDriver* driver, irr::video::ITexture* texture ) {
 	try {
 		irr::video::IImage* newImage = driver->createImageFromData( texture->getColorFormat(), texture->getSize(), texture->lock(), false );
 		texture->unlock();

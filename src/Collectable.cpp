@@ -33,8 +33,9 @@ Collectable::~Collectable() {
 	}
 }
 
-void Collectable::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height ) {
+void Collectable::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height ) {
 	try {
+		irr::video::IVideoDriver* driver = device->getVideoDriver();
 		uint_fast16_t smaller = height;
 		if( smaller > width ) {
 			smaller = width;
@@ -43,13 +44,13 @@ void Collectable::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, u
 		//wcout << L"desired size: " << smaller << std::endl;
 
 		if( texture->getSize().Width != smaller && texture->getSize().Height != smaller ) {
-			loadTexture( driver );
+			loadTexture( device );
 			if( texture->getSize().Width != smaller && texture->getSize().Height != smaller ) {
 				texture = resizer.resize( texture, smaller, smaller, driver );
 			}
 		}
 
-		Object::draw( driver, width, height );
+		Object::draw( device, width, height );
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Collectable::draw(): " << e.what() << std::endl;
 	}
@@ -63,11 +64,12 @@ Collectable::type_t Collectable::getType() {
 	}
 }
 
-void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
+void Collectable::loadTexture( irr::IrrlichtDevice* device ) {
 	try {
+		irr::video::IVideoDriver* driver = device->getVideoDriver();
 		switch( type ) {
 			case KEY: {
-					texture = driver->getTexture( L"key.png" );
+					texture = driver->getTexture( L"images/items/key.png" ); //TODO: Make this able to accept formats other than png
 
 					if( texture == nullptr ) {
 						//Uncomment the following if using key.h instead of key.c:
@@ -148,7 +150,7 @@ void Collectable::loadTexture( irr::video::IVideoDriver* driver ) {
 					break;
 				}
 			case ACID: {
-					texture = driver->getTexture( L"acid.png" );
+					texture = driver->getTexture( L"images/items/acid.png" ); //TODO: Make this able to accept formats other than png
 
 					if( texture == nullptr ) {
 						//Uncomment the following if using acid.h instead of acid.c:

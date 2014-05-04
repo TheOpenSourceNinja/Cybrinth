@@ -46,8 +46,6 @@ enum user_event_t { USER_EVENT_WINDOW_RESIZE };
 //TODO: If we ever add achievements, players should get an achievement for a September score (where a player's score = the current day of Eternal September)
 //TODO: Add an option to use only the built-in font. This should greatly speed up loading on underpowered systems like the Pi. Is this really necessary though? All you have to do currently is delete the font file in the working directory, right?
 
-using namespace irr;
-
 /**
  * Figures out which players are human, then figures out whether they're all at the goal.
  * Returns: True if all humans are at the goal, false otherwise.
@@ -113,34 +111,34 @@ void GameManager::drawAll() {
 								dotSize = 2;
 							}
 
-							driver->draw2DRectangle( mazeManager.maze[ x ][ y ].getVisitorColor() , core::rect<s32>( core::position2d<s32>(( x * cellWidth ) + ( 0.5 * cellWidth ) - ( 0.5 * dotSize ), ( y * cellHeight ) + ( 0.5 * cellHeight ) - ( 0.5 * dotSize ) ), core::dimension2d< s32 >( dotSize, dotSize ) ) );
+							driver->draw2DRectangle( mazeManager.maze[ x ][ y ].getVisitorColor() , irr::core::rect< irr::s32 >( irr::core::position2d< irr::s32 >(( x * cellWidth ) + ( 0.5 * cellWidth ) - ( 0.5 * dotSize ), ( y * cellHeight ) + ( 0.5 * cellHeight ) - ( 0.5 * dotSize ) ), irr::core::dimension2d< irr::s32 >( dotSize, dotSize ) ) );
 						}
 					}
 				}
 			}
 
 			for( decltype( numPlayers ) ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts. Changed decltype( playerStart.size() ) to decltype( numPlayers ) because playerStart.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
-				playerStart.at( ps ).draw( driver, cellWidth, cellHeight );
+				playerStart.at( ps ).draw( device, cellWidth, cellHeight );
 			}
 
 			//Drawing bots before human players makes it easier to play against large numbers of bots
 			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
-				player.at( bot.at( i ).getPlayer() ).draw( driver, cellWidth, cellHeight );
+				player.at( bot.at( i ).getPlayer() ).draw( device, cellWidth, cellHeight );
 			}
 
 			//Now we draw the players
 			for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 				if( player.at( p ).isHuman ) {
-					player.at( p ).draw( driver, cellWidth, cellHeight );
+					player.at( p ).draw( device, cellWidth, cellHeight );
 				}
 			}
 
 			//We used to draw Collectables before the players due to a texture resizing bug in Irrlicht's software renderer (the bug still exists AFAIK). Collectables generally use pre-created images whereas players generally use dynamically generated images. This made players potentially get covered by Collectables and thus invisible. Now that players can hold Collectables, we want them drawn on top of the players.
 			for( decltype( stuff.size() ) i = 0; i < stuff.size(); ++i ) {
-				stuff.at( i ).draw( driver, cellWidth, cellHeight );
+				stuff.at( i ).draw( device, cellWidth, cellHeight );
 			}
 
-			goal.draw( driver, cellWidth, cellHeight );
+			goal.draw( device, cellWidth, cellHeight );
 
 			mazeManager.draw( driver, cellWidth, cellHeight );
 
@@ -151,7 +149,7 @@ void GameManager::drawAll() {
 
 			uint_fast32_t spaceBetween = windowSize.Height / 30;
 			uint_fast32_t textY = spaceBetween;
-			core::dimension2d< u32 > tempDimensions;
+			irr::core::dimension2d< irr::u32 > tempDimensions;
 
 			{
 				time_t currentTime = time( nullptr );
@@ -159,146 +157,146 @@ void GameManager::drawAll() {
 				wcsftime( clockTime, 9, L"%H:%M:%S", localtime( &currentTime ) );
 				clockTime[ 8 ] = '\0';
 				tempDimensions = clockFont->getDimension( clockTime );
-				core::rect< s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				clockFont->draw( clockTime, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
 			}
 
 			{
-				core::stringw timeLabel( L"Time:" );
+				irr::core::stringw timeLabel( L"Time:" );
 				textY += tempDimensions.Height;
 				tempDimensions = textFont->getDimension( stringConverter.toStdWString( timeLabel ).c_str() ); //stringConverter.toWCharArray( timeLabel ) );
-				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( L"Time:", tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
 
 			{
-				core::stringw timerStr( "" );
+				irr::core::stringw timerStr( "" );
 				timerStr += ( timer->getTime() / 1000 );
 				timerStr += L" seconds";
 				textY += tempDimensions.Height;
 				tempDimensions = textFont->getDimension( stringConverter.toStdWString( timerStr ).c_str() ); //stringConverter.toWCharArray( timerStr ) );
-				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( timerStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
 
 			{
-				core::stringw keysFoundStr( L"Keys found:" );
+				irr::core::stringw keysFoundStr( L"Keys found:" );
 				textY += tempDimensions.Height;
 				tempDimensions = textFont->getDimension( stringConverter.toStdWString( keysFoundStr ).c_str() ); //stringConverter.toWCharArray( keysFoundStr ) );
-				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( keysFoundStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
 
 			{
-				core::stringw keyStr;
+				irr::core::stringw keyStr;
 				keyStr += numKeysFound;
 				keyStr += L"/";
 				keyStr += numLocks;
 				textY += tempDimensions.Height;
 				tempDimensions = textFont->getDimension( stringConverter.toStdWString( keyStr ).c_str() ); //stringConverter.toWCharArray( keyStr ) );
-				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( keyStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
 
 			{
-				core::stringw seedLabel( L"Random seed:" );
+				irr::core::stringw seedLabel( L"Random seed:" );
 				textY += tempDimensions.Height;
 				tempDimensions = textFont->getDimension( stringConverter.toStdWString( seedLabel ).c_str() );// stringConverter.toWCharArray( seedLabel ) );
-				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( seedLabel, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
 
 			{
-				core::stringw seedStr( randomSeed );
+				irr::core::stringw seedStr( randomSeed );
 				textY += tempDimensions.Height;
 				tempDimensions = textFont->getDimension( stringConverter.toStdWString( seedStr ).c_str() ); //stringConverter.toWCharArray( seedStr ) );
-				core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 				textFont->draw( seedStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 			}
 
 			{
-				core::stringw headfor( L"Head for" );
+				irr::core::stringw headfor( L"Head for" );
 				tempDimensions = textFont->getDimension( stringConverter.toStdWString( headfor ).c_str() ); //stringConverter.toWCharArray( headfor ) );
 				textY += tempDimensions.Height;
 				if( textY < ( ( windowSize.Height / 2 ) - tempDimensions.Height ) ) {
 					textY = ( ( windowSize.Height / 2 ) - tempDimensions.Height );
 				}
 				if( numKeysFound >= numLocks ) {
-					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( headfor, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
 				}
 			}
 
 			{
-				core::stringw theexit( L"the exit!" );
+				irr::core::stringw theexit( L"the exit!" );
 				tempDimensions = textFont->getDimension( stringConverter.toStdWString( theexit ).c_str() ); //stringConverter.toWCharArray( theexit ) );
 				textY += tempDimensions.Height;
 				if( numKeysFound >= numLocks ) {
-					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( theexit, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
 				}
 			}
 
 			if( playMusic ) {
 				{
-					core::stringw nowplaying( L"Now playing:" );
+					irr::core::stringw nowplaying( L"Now playing:" );
 					textY += tempDimensions.Height;
 					tempDimensions = textFont->getDimension( stringConverter.toStdWString( nowplaying ).c_str() ); //stringConverter.toWCharArray( nowplaying ) );
-					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( nowplaying, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
 					textY += tempDimensions.Height;
 					tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicTitle ).c_str() ); //stringConverter.toWCharArray( musicTitle ) );
-					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					musicTagFont->draw( musicTitle, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
 				}
 
 				{
-					core::stringw by( L"by" );
+					irr::core::stringw by( L"by" );
 					textY += tempDimensions.Height;
 					tempDimensions = textFont->getDimension( stringConverter.toStdWString( by ).c_str() ); //stringConverter.toWCharArray( by ) );
-					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( by, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
 					textY += tempDimensions.Height;
 					tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicArtist ).c_str() ); //stringConverter.toWCharArray( musicArtist ) );
-					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					musicTagFont->draw( musicArtist, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
 				}
 
 				{
-					core::stringw fromalbum( L"from album" );
+					irr::core::stringw fromalbum( L"from album" );
 					textY += tempDimensions.Height;
 					tempDimensions = textFont->getDimension( stringConverter.toStdWString( fromalbum ).c_str() ); //stringConverter.toWCharArray( fromalbum ) );
-					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( fromalbum, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
 					textY += tempDimensions.Height;
 					tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicAlbum ).c_str() ); //stringConverter.toWCharArray( musicAlbum ) );
-					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					musicTagFont->draw( musicAlbum, tempRectangle, LIGHTGRAY, true, true, &tempRectangle );
 				}
 
 				{
-					core::stringw volume( L"Volume:" );
+					irr::core::stringw volume( L"Volume:" );
 					textY += tempDimensions.Height;
 					tempDimensions = textFont->getDimension( stringConverter.toStdWString( volume ).c_str() ); //stringConverter.toWCharArray( volume ) );
-					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( volume, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
-					core::stringw volumeNumber( musicVolume );
+					irr::core::stringw volumeNumber( musicVolume );
 					volumeNumber.append( L"%" );
 					textY += tempDimensions.Height;
 					tempDimensions = textFont->getDimension( stringConverter.toStdWString( volumeNumber ).c_str() ); //stringConverter.toWCharArray( volumeNumber ) );
-					core::rect< s32 > tempRectangle = core::rect< s32 >( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 					textFont->draw( volumeNumber, tempRectangle, LIGHTRED, true, true, &tempRectangle );
 				}
 			}
@@ -333,7 +331,7 @@ void GameManager::drawBackground() {
 					if( backgroundTexture->getSize() != windowSize ) {
 						backgroundTexture = resizer.resize( backgroundTexture, windowSize.Width, windowSize.Height, driver );
 					}
-					driver->draw2DImage( backgroundTexture, core::position2d< s32 >( 0, 0 ) );
+					driver->draw2DImage( backgroundTexture, irr::core::position2d< irr::s32 >( 0, 0 ) );
 				}
 			}
 		}
@@ -364,7 +362,7 @@ void GameManager::drawLoadingScreen() {
 			{
 				auto loadingDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
 				int_fast32_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
-				core::rect< s32 > tempRectangle( textX, Y, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + Y );
+				irr::core::rect< irr::s32 > tempRectangle( textX, Y, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + Y );
 				loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
 				Y += loadingDimensions.Height + 1;
 			}
@@ -372,13 +370,12 @@ void GameManager::drawLoadingScreen() {
 			{
 				std::wstring percentString = stringConverter.toStdWString( loadingProgress, L"%05.1f%%", 7 ); //7 is the length that L"%05.1f%%" expands to plus one extra to terminate the resulting string with a null
 				auto percentDimensions = loadingFont->getDimension( percentString.c_str() );
-				core::recti progressBarOutline( 0, Y, windowSize.Width, Y + percentDimensions.Height );
+				irr::core::recti progressBarOutline( 0, Y, windowSize.Width, Y + percentDimensions.Height );
 				driver->draw2DRectangleOutline( progressBarOutline, GRAY );
-				core::recti progressBarFilled; //( 0, Y, windowSize.Width / loadingProgress, Y + percentDimensions.Height );
-				progressBarFilled = core::recti( 0, Y, windowSize.Width * loadingProgress / 100, Y + percentDimensions.Height );
+				irr::core::recti progressBarFilled( 0, Y, windowSize.Width * loadingProgress / 100, Y + percentDimensions.Height );
 				driver->draw2DRectangle( LIGHTGRAY, progressBarFilled );
 				int_fast32_t textX = ( windowSize.Width / 2 ) - ( percentDimensions.Width / 2 );
-				core::recti percentRectangle( textX, Y, ( windowSize.Width / 2 ) + ( percentDimensions.Width / 2 ), percentDimensions.Height + Y );
+				irr::core::recti percentRectangle( textX, Y, ( windowSize.Width / 2 ) + ( percentDimensions.Width / 2 ), percentDimensions.Height + Y );
 				loadingFont->draw( stringConverter.toIrrlichtStringW( percentString ), percentRectangle, YELLOW, true, true, &percentRectangle );
 				Y += percentDimensions.Height + 1;
 			}
@@ -388,21 +385,21 @@ void GameManager::drawLoadingScreen() {
 					tipFont = gui->getBuiltInFont();
 				}
 				
-				u32 proTipHeight = 0;
+				irr::u32 proTipHeight = 0;
 				
 				{
 					int_fast32_t textX = 0;
-					core::dimension2d< u32 > proTipPrefixDimensions = tipFont->getDimension( stringConverter.toStdWString( proTipPrefix ).c_str() ); //stringConverter.toWCharArray( proTipPrefix ) );
-					core::dimension2d< u32 > proTipDimensions = tipFont->getDimension( stringConverter.toStdWString( proTips.at( currentProTip ) ).c_str() ); //stringConverter.toWCharArray( proTips.at( currentProTip ) ) );
+					irr::core::dimension2d< irr::u32 > proTipPrefixDimensions = tipFont->getDimension( stringConverter.toStdWString( proTipPrefix ).c_str() ); //stringConverter.toWCharArray( proTipPrefix ) );
+					irr::core::dimension2d< irr::u32 > proTipDimensions = tipFont->getDimension( stringConverter.toStdWString( proTips.at( currentProTip ) ).c_str() ); //stringConverter.toWCharArray( proTips.at( currentProTip ) ) );
 					proTipHeight = std::max( proTipDimensions.Height, proTipPrefixDimensions.Height );
 					
 					{
-						core::rect< s32 > tempRectangle( textX, Y, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + Y );
+						irr::core::rect< irr::s32 > tempRectangle( textX, Y, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + Y );
 						tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
 					}
 					
 					{
-						core::rect< s32 > tempRectangle( textX + proTipPrefixDimensions.Width, Y, proTipDimensions.Width + textX + proTipPrefixDimensions.Width, proTipDimensions.Height + Y );
+						irr::core::rect< irr::s32 > tempRectangle( textX + proTipPrefixDimensions.Width, Y, proTipDimensions.Width + textX + proTipPrefixDimensions.Width, proTipDimensions.Height + Y );
 						tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
 					}
 					
@@ -439,7 +436,7 @@ void GameManager::drawLoadingScreen() {
 			std::wstring error = L"Cannot resize logo texture.";
 			throw error;
 		} else {
-			driver->draw2DImage( logoTexture, core::position2d< s32 >( 0, 0 ) );
+			driver->draw2DImage( logoTexture, irr::core::position2d< irr::s32 >( 0, 0 ) );
 		}
 	} catch( std::wstring error ) {
 		std::wcerr << L"Error in drawLogo(): " << error << std::endl;
@@ -469,7 +466,7 @@ void GameManager::drawStats( int_fast32_t textY ) {
 		//To determine how tall each row of text is, we draw the row labels first (their text could conceivably have hangy-down bits like a lower-case y)
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( winnersLabel ).c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
-			core::rect< s32 > tempRectangle( textXOriginal, textY, tempDimensions.Width + textXOriginal, tempDimensions.Height + textY );
+			irr::core::rect< irr::s32 > tempRectangle( textXOriginal, textY, tempDimensions.Width + textXOriginal, tempDimensions.Height + textY );
 			statsFont->draw( winnersLabel, tempRectangle, WHITE, true, true, &tempRectangle );
 
 			if( tempDimensions.Width + textXOriginal > textX ) {
@@ -480,7 +477,7 @@ void GameManager::drawStats( int_fast32_t textY ) {
 
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( steps ).c_str() );// stringConverter.toWCharArray( steps ) );
-			core::rect< s32 > tempRectangle( textXOriginal, textYSteps, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYSteps );
+			irr::core::rect< irr::s32 > tempRectangle( textXOriginal, textYSteps, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYSteps );
 			statsFont->draw( steps, tempRectangle, WHITE, true, true, &tempRectangle );
 
 			if( tempDimensions.Width + textXOriginal > textX ) {
@@ -491,7 +488,7 @@ void GameManager::drawStats( int_fast32_t textY ) {
 
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( times ).c_str() ); //stringConverter.toWCharArray( times ) );
-			core::rect< s32 > tempRectangle( textXOriginal, textYTimes, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYTimes );
+			irr::core::rect< irr::s32 > tempRectangle( textXOriginal, textYTimes, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYTimes );
 			statsFont->draw( times, tempRectangle, WHITE, true, true, &tempRectangle );
 
 			if( tempDimensions.Width + textXOriginal > textX ) {
@@ -502,7 +499,7 @@ void GameManager::drawStats( int_fast32_t textY ) {
 
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( keysFoundPerPlayer ).c_str() ); //stringConverter.toWCharArray( keysFoundPerPlayer ) );
-			core::rect< s32 > tempRectangle( textXOriginal, textYKeys, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYKeys );
+			irr::core::rect< irr::s32 > tempRectangle( textXOriginal, textYKeys, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYKeys );
 			statsFont->draw( keysFoundPerPlayer, tempRectangle, WHITE, true, true, &tempRectangle );
 
 			if( tempDimensions.Width + textXOriginal > textX ) {
@@ -513,7 +510,7 @@ void GameManager::drawStats( int_fast32_t textY ) {
 
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( scores ).c_str() ); //stringConverter.toWCharArray( scores ) );
-			core::rect< s32 > tempRectangle( textXOriginal, textYScores, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYScores );
+			irr::core::rect< irr::s32 > tempRectangle( textXOriginal, textYScores, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYScores );
 			statsFont->draw( scores, tempRectangle, WHITE, true, true, &tempRectangle );
 
 			if( tempDimensions.Width + textXOriginal > textX ) {
@@ -524,7 +521,7 @@ void GameManager::drawStats( int_fast32_t textY ) {
 
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( scoresTotal ).c_str() ); //stringConverter.toWCharArray( scoresTotal ) );
-			core::rect< s32 > tempRectangle( textXOriginal, textYScoresTotal, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYScoresTotal );
+			irr::core::rect< irr::s32 > tempRectangle( textXOriginal, textYScoresTotal, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYScoresTotal );
 			statsFont->draw( scoresTotal, tempRectangle, WHITE, true, true, &tempRectangle );
 
 			if( tempDimensions.Width + textXOriginal > textX ) {
@@ -538,59 +535,59 @@ void GameManager::drawStats( int_fast32_t textY ) {
 		for( decltype( numPlayers ) p = 0; p < winnersLoadingScreen.size(); ++p ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 			int_fast16_t textXOld = textX;
 			{ //First we identify the players
-				core::stringw text( p );
+				irr::core::stringw text( p );
 				text.append( L".P" );
-				text.append( core::stringw( winnersLoadingScreen.at( p ) ) );
+				text.append( irr::core::stringw( winnersLoadingScreen.at( p ) ) );
 				text.append( L" " );
-				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
-				core::rect< s32 > tempRectangle( textXOld, textY, tempDimensions.Width + textXOld, tempDimensions.Height + textY );
+				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
+				irr::core::rect< irr::s32 > tempRectangle( textXOld, textY, tempDimensions.Width + textXOld, tempDimensions.Height + textY );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
 					textX = tempDimensions.Width + textXOld;
 				}
 			}
 			{ //Now we show how many steps each player took
-				core::stringw text( player.at( winnersLoadingScreen.at( p ) ).stepsTakenLastMaze );
-				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
-				core::rect< s32 > tempRectangle( textXOld, textYSteps, tempDimensions.Width + textXOld, tempDimensions.Height + textYSteps );
+				irr::core::stringw text( player.at( winnersLoadingScreen.at( p ) ).stepsTakenLastMaze );
+				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
+				irr::core::rect< irr::s32 > tempRectangle( textXOld, textYSteps, tempDimensions.Width + textXOld, tempDimensions.Height + textYSteps );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
 					textX = tempDimensions.Width + textXOld;
 				}
 			}
 			{ //Now we show how long each player took in seconds
-				core::stringw text( player.at( winnersLoadingScreen.at( p ) ).timeTakenLastMaze / 1000 );
-				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
-				core::rect< s32 > tempRectangle( textXOld, textYTimes, tempDimensions.Width + textXOld, tempDimensions.Height + textYTimes );
+				irr::core::stringw text( player.at( winnersLoadingScreen.at( p ) ).timeTakenLastMaze / 1000 );
+				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
+				irr::core::rect< irr::s32 > tempRectangle( textXOld, textYTimes, tempDimensions.Width + textXOld, tempDimensions.Height + textYTimes );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
 					textX = tempDimensions.Width + textXOld;
 				}
 			}
 			{ //Now we show how many keys each player collected
-				core::stringw text( player.at( winnersLoadingScreen.at( p ) ).keysCollectedLastMaze );
-				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
-				core::rect< s32 > tempRectangle( textXOld, textYKeys, tempDimensions.Width + textXOld, tempDimensions.Height + textYKeys );
+				irr::core::stringw text( player.at( winnersLoadingScreen.at( p ) ).keysCollectedLastMaze );
+				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
+				irr::core::rect< irr::s32 > tempRectangle( textXOld, textYKeys, tempDimensions.Width + textXOld, tempDimensions.Height + textYKeys );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
 					textX = tempDimensions.Width + textXOld;
 				}
 			}
 			{ //Finally, each player's score is shown...
-				core::stringw text = stringConverter.toIrrlichtStringW( player.at( winnersLoadingScreen.at( p ) ).getScoreLastMaze() );
+				irr::core::stringw text = stringConverter.toIrrlichtStringW( player.at( winnersLoadingScreen.at( p ) ).getScoreLastMaze() );
 				//text.append( player.at( winnersLoadingScreen.at( p ) ).getScoreLastMaze() );
-				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
-				core::rect< s32 > tempRectangle( textXOld, textYScores, tempDimensions.Width + textXOld, tempDimensions.Height + textYScores );
+				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
+				irr::core::rect< irr::s32 > tempRectangle( textXOld, textYScores, tempDimensions.Width + textXOld, tempDimensions.Height + textYScores );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
 					textX = tempDimensions.Width + textXOld;
 				}
 			}
 			{ //...followed by the totals.
-				core::stringw text = stringConverter.toIrrlichtStringW( player.at( winnersLoadingScreen.at( p ) ).getScoreTotal() );
+				irr::core::stringw text = stringConverter.toIrrlichtStringW( player.at( winnersLoadingScreen.at( p ) ).getScoreTotal() );
 				//text.append( player.at( winnersLoadingScreen.at( p ) ).getScoreTotal() );
-				decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
-				core::rect< s32 > tempRectangle( textXOld, textYScoresTotal, tempDimensions.Width + textXOld, tempDimensions.Height + textYScoresTotal );
+				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
+				irr::core::rect< irr::s32 > tempRectangle( textXOld, textYScoresTotal, tempDimensions.Width + textXOld, tempDimensions.Height + textYScoresTotal );
 				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
 					textX = tempDimensions.Width + textXOld;
@@ -710,7 +707,7 @@ GameManager::GameManager() {
 		lastTimeControlsProcessed = 0;
 		controlProcessDelay = 100;
 
-		device = createDevice( video::EDT_NULL ); //Must create a device before calling readPrefs();
+		device = irr::createDevice( irr::video::EDT_NULL ); //Must create a device before calling readPrefs();
 
 		if( isNull( device ) ) {
 			throw( std::wstring( L"Cannot create null device. Something is definitely wrong here!" ) );
@@ -725,11 +722,11 @@ GameManager::GameManager() {
 		setControls();
 
 		if( fullscreen ) {
-			video::IVideoModeList* vmList = device->getVideoModeList();
+			irr::video::IVideoModeList* vmList = device->getVideoModeList();
 			if( allowSmallSize ) {
-				windowSize = vmList->getVideoModeResolution( core::dimension2d< u32 >( 1, 1 ), device->getVideoModeList()->getDesktopResolution() ); //Gets a video resolution between minimum (1,1) and maximum (desktop resolution)
+				windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), device->getVideoModeList()->getDesktopResolution() ); //Gets a video resolution between minimum (1,1) and maximum (desktop resolution)
 			} else {
-				windowSize = vmList->getVideoModeResolution( core::dimension2d< u32 >( minWidth, minHeight ), device->getVideoModeList()->getDesktopResolution() );
+				windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( minWidth, minHeight ), device->getVideoModeList()->getDesktopResolution() );
 			}
 		}
 
@@ -752,9 +749,9 @@ GameManager::GameManager() {
 				throw( std::wstring( L"Even the software renderer didn't work." ) );
 			}*/
 			//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
-			for( uint_fast8_t i = ( uint_fast8_t ) video::EDT_COUNT; isNull( device ) && i != ( uint_fast8_t ) video::EDT_NULL; i-- ) {
-				if( device->isDriverSupported( ( video::E_DRIVER_TYPE ) i ) ) {
-					driverType = ( video::E_DRIVER_TYPE ) i;
+			for( uint_fast8_t i = ( uint_fast8_t ) irr::video::EDT_COUNT; isNull( device ) && i != ( uint_fast8_t ) irr::video::EDT_NULL; i-- ) {
+				if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
+					driverType = ( irr::video::E_DRIVER_TYPE ) i;
 					device = createDevice( driverType, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
 					break;
 				}
@@ -762,7 +759,7 @@ GameManager::GameManager() {
 			
 			if( isNull( device ) ) {
 				std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
-				device = createDevice( video::EDT_NULL, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
+				device = createDevice( irr::video::EDT_NULL, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
 				debug = true;
 			}
 		} else if ( debug ) {
@@ -776,15 +773,15 @@ GameManager::GameManager() {
 			std::wcout << L"Got the video driver" << std::endl;
 		}
 
-		driver->setTextureCreationFlag( video::ETCF_NO_ALPHA_CHANNEL, false );
-		driver->setTextureCreationFlag( video::ETCF_CREATE_MIP_MAPS, false );
-		if( driverType == video::EDT_SOFTWARE || driverType == video:: EDT_BURNINGSVIDEO ) {
-			driver->setTextureCreationFlag( video::ETCF_OPTIMIZED_FOR_SPEED, true );
+		driver->setTextureCreationFlag( irr::video::ETCF_NO_ALPHA_CHANNEL, false );
+		driver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, false );
+		if( driverType == irr::video::EDT_SOFTWARE || driverType == irr::video:: EDT_BURNINGSVIDEO ) {
+			driver->setTextureCreationFlag( irr::video::ETCF_OPTIMIZED_FOR_SPEED, true );
 		} else {
-			driver->setTextureCreationFlag( video::ETCF_OPTIMIZED_FOR_QUALITY, true );
+			driver->setTextureCreationFlag( irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true );
 		}
-		if( driverType == video::EDT_SOFTWARE ) {
-			driver->setTextureCreationFlag( video::ETCF_ALLOW_NON_POWER_2, false );
+		if( driverType == irr::video::EDT_SOFTWARE ) {
+			driver->setTextureCreationFlag( irr::video::ETCF_ALLOW_NON_POWER_2, false );
 		}
 
 		pickLogo();
@@ -799,10 +796,10 @@ GameManager::GameManager() {
 			if ( debug ) {
 				std::wcout << L"Got the gui environment" << std::endl;
 			}
-			for( uint_fast16_t i = 0; i < gui::EGDC_COUNT ; ++i ) {
-				video::SColor guiSkinColor = gui->getSkin()->getColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ) );
+			for( uint_fast16_t i = 0; i < irr::gui::EGDC_COUNT ; ++i ) {
+				irr::video::SColor guiSkinColor = gui->getSkin()->getColor( static_cast< irr::gui::EGUI_DEFAULT_COLOR >( i ) );
 				guiSkinColor.setAlpha( 255 );
-				gui->getSkin()->setColor( static_cast<gui::EGUI_DEFAULT_COLOR>( i ), guiSkinColor );
+				gui->getSkin()->setColor( static_cast< irr::gui::EGUI_DEFAULT_COLOR >( i ), guiSkinColor );
 			}
 		}
 
@@ -811,9 +808,9 @@ GameManager::GameManager() {
 		device->setWindowCaption( stringConverter.toStdWString( PACKAGE_STRING ).c_str() ); //stringConverter.toWCharArray( PACKAGE_STRING ) );
 
 		if( debug ) {
-			device->getLogger()->setLogLevel( ELL_INFORMATION );
+			device->getLogger()->setLogLevel( irr::ELL_INFORMATION );
 		} else {
-			device->getLogger()->setLogLevel( ELL_ERROR );
+			device->getLogger()->setLogLevel( irr::ELL_ERROR );
 		}
 
 		bgscene = device->getSceneManager(); //Not sure if this would be possible with a null device, which is why we don't exit
@@ -940,12 +937,13 @@ GameManager::GameManager() {
 		}
 
 		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
-			player.at( p ).setColorBasedOnNum( p );
-			player.at( p ).loadTexture( driver );
+			player.at( p ).setPlayerNumber( p );
+			player.at( p ).setColorBasedOnNum();
+			player.at( p ).loadTexture( device );
 			player.at( p ).setGM( this );
 		}
 
-		goal.loadTexture( driver );
+		goal.loadTexture( device );
 
 		if( enableController && device->activateJoysticks( controllerInfo ) && debug ) { //activateJoysticks fills controllerInfo with info about each controller
 			std::wcout << L"controller support is enabled and " << controllerInfo.size() << L" controller(s) are present." << std::endl;
@@ -959,15 +957,15 @@ GameManager::GameManager() {
 				std::wcout << L"\tHat is: ";
 
 				switch( controllerInfo[controller ].PovHat ) {
-					case SJoystickInfo::POV_HAT_PRESENT:
+					case irr::SJoystickInfo::POV_HAT_PRESENT:
 						std::wcout << L"present" << std::endl;
 						break;
 
-					case SJoystickInfo::POV_HAT_ABSENT:
+					case irr::SJoystickInfo::POV_HAT_ABSENT:
 						std::wcout << L"absent" << std::endl;
 						break;
 
-					case SJoystickInfo::POV_HAT_UNKNOWN:
+					case irr::SJoystickInfo::POV_HAT_UNKNOWN:
 					default:
 						std::wcout << L"unknown" << std::endl;
 						break;
@@ -1091,10 +1089,6 @@ float GameManager::getLoadingPercentage() {
  */
 MazeManager* GameManager::getMazeManager() {
 	try {
-		if( debug ) {
-			std::wcout << L"getMazeManager() called" << std::endl;
-		}
-		
 		return &mazeManager;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::getMazeManager(): " << e.what() << std::endl;
@@ -1231,7 +1225,7 @@ void GameManager::loadFonts() {
 		loadMusicFont();
 
 		{ //Load loadingFont
-			core::dimension2d< uint_fast32_t > fontDimensions;
+			irr::core::dimension2d< uint_fast32_t > fontDimensions;
 			uint_fast32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
 
 			if( fontFile != "" ) {
@@ -1265,7 +1259,7 @@ void GameManager::loadFonts() {
 
 
 		{ //load textFont
-			core::dimension2d< uint_fast32_t > fontDimensions;
+			irr::core::dimension2d< uint_fast32_t > fontDimensions;
 			if( fontFile != "" ) {
 				uint_fast32_t size = ( windowSize.Width / sideDisplaySizeDenominator ) / 6; //found through experimentation, adjust it however you like and see how many times the font gets loaded
 
@@ -1313,7 +1307,7 @@ void GameManager::loadFonts() {
 
 
 		{ //Load clockFont
-			core::dimension2d< uint_fast32_t > fontDimensions;
+			irr::core::dimension2d< uint_fast32_t > fontDimensions;
 			if( fontFile != "" ) {
 				uint_fast32_t size = ( windowSize.Width / sideDisplaySizeDenominator );
 
@@ -1347,7 +1341,7 @@ void GameManager::loadFonts() {
 
 
 		{ //Load statsFont
-			core::dimension2d< uint_fast32_t > fontDimensions;
+			irr::core::dimension2d< uint_fast32_t > fontDimensions;
 			
 			if( fontFile != "" ) {
 				auto aboveStats = loadingFont->getDimension( loading.c_str() ).Height * 2 + std::max( tipFont->getDimension( proTipPrefix.c_str() ).Height, tipFont->getDimension( proTips.at( currentProTip ).c_str() ).Height );
@@ -1359,7 +1353,7 @@ void GameManager::loadFonts() {
 						size -= 2;
 						statsFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 						if( !isNull( statsFont ) ) {
-							core::dimension2d< uint_fast32_t > tempDimensions;
+							irr::core::dimension2d< uint_fast32_t > tempDimensions;
 							std::wstring tempString;
 							if( numPlayers <= 10 ) {
 								tempString = L"0.P";
@@ -1371,9 +1365,9 @@ void GameManager::loadFonts() {
 							tempString += stringConverter.toStdWString( numPlayers );
 							
 							tempDimensions = statsFont->getDimension( tempString.c_str() );
-							fontDimensions = core::dimension2d< uint_fast32_t >( tempDimensions.Width * numPlayers, tempDimensions.Height );
+							fontDimensions = irr::core::dimension2d< uint_fast32_t >( tempDimensions.Width * numPlayers, tempDimensions.Height );
 							tempDimensions = statsFont->getDimension( keysFoundPerPlayer.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
-							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + tempDimensions.Width, std::max( fontDimensions.Height, tempDimensions.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
+							fontDimensions = irr::core::dimension2d< uint_fast32_t >( fontDimensions.Width + tempDimensions.Width, std::max( fontDimensions.Height, tempDimensions.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
 						}
 					} while( size > builtInFontHeight && !isNull( statsFont ) && ( fontDimensions.Width >= windowSize.Width  || fontDimensions.Height + aboveStats >= windowSize.Height ) );
 
@@ -1383,7 +1377,7 @@ void GameManager::loadFonts() {
 						size -= 1;
 						statsFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 						if( !isNull( statsFont ) ) {
-							core::dimension2d< uint_fast32_t > tempDimensions;
+							irr::core::dimension2d< uint_fast32_t > tempDimensions;
 							std::wstring tempString;
 							if( numPlayers <= 10 ) {
 								tempString = L"0.P";
@@ -1395,9 +1389,9 @@ void GameManager::loadFonts() {
 							tempString += stringConverter.toStdWString( numPlayers );
 							
 							tempDimensions = statsFont->getDimension( tempString.c_str() );
-							fontDimensions = core::dimension2d< uint_fast32_t >( tempDimensions.Width * numPlayers, tempDimensions.Height );
+							fontDimensions = irr::core::dimension2d< uint_fast32_t >( tempDimensions.Width * numPlayers, tempDimensions.Height );
 							tempDimensions = statsFont->getDimension( keysFoundPerPlayer.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
-							fontDimensions = core::dimension2d< uint_fast32_t >( fontDimensions.Width + tempDimensions.Width, std::max( fontDimensions.Height, tempDimensions.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
+							fontDimensions = irr::core::dimension2d< uint_fast32_t >( fontDimensions.Width + tempDimensions.Width, std::max( fontDimensions.Height, tempDimensions.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
 						}
 					} while( size > builtInFontHeight && !isNull( statsFont ) && ( fontDimensions.Width >= windowSize.Width  || fontDimensions.Height + aboveStats >= windowSize.Height ) );
 				}
@@ -1461,9 +1455,9 @@ void GameManager::loadMusicFont() {
 					size = numerator;
 				}
 
-				core::dimension2d< uint_fast32_t > artistDimensions;
-				core::dimension2d< uint_fast32_t > albumDimensions;
-				core::dimension2d< uint_fast32_t > titleDimensions;
+				irr::core::dimension2d< uint_fast32_t > artistDimensions;
+				irr::core::dimension2d< uint_fast32_t > albumDimensions;
+				irr::core::dimension2d< uint_fast32_t > titleDimensions;
 
 				do {
 					musicTagFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
@@ -1687,7 +1681,7 @@ void GameManager::loadTipFont() {
 		if( fontFile != "" ) {
 			uint_fast32_t maxWidth = windowSize.Width;
 			
-			core::stringw tipIncludingPrefix = proTipPrefix;
+			irr::core::stringw tipIncludingPrefix = proTipPrefix;
 
 			if( proTips.size() > 0 ) { //If pro tips have been loaded, guess size based on tip length.
 				tipIncludingPrefix.append( proTips.at( currentProTip ) );
@@ -1696,7 +1690,7 @@ void GameManager::loadTipFont() {
 				size = maxWidth / 10; //10 is also arbitrarily chosen.
 			}
 
-			core::dimension2d< uint_fast32_t > tipDimensions;
+			irr::core::dimension2d< uint_fast32_t > tipDimensions;
 
 			do {
 				tipFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
@@ -1985,10 +1979,10 @@ void GameManager::newMaze( uint_fast16_t newRandomSeed ) {
  * Returns: True if the event was handled by this function, false if Irrlicht should handle the event.
  */
 //cppcheck-suppress unusedFunction
-bool GameManager::OnEvent( const SEvent& event ) {
+bool GameManager::OnEvent( const irr::SEvent& event ) {
 	try {
 		switch( event.EventType ) {
-			case EET_KEY_INPUT_EVENT: {
+			case irr::EET_KEY_INPUT_EVENT: {
 				for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
 					if( controls.at( k ).getKey() == event.KeyInput.Key ) {
 						controls.at( k ).activated = event.KeyInput.PressedDown;
@@ -1998,11 +1992,11 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			}
 			break;
 
-			case EET_MOUSE_INPUT_EVENT: {
+			case irr::EET_MOUSE_INPUT_EVENT: {
 				if( showingMenu ) {
-					if( event.MouseInput.Event == EMIE_MOUSE_MOVED ) {
+					if( event.MouseInput.Event == irr::EMIE_MOUSE_MOVED ) {
 						menuManager.findHighlights( event.MouseInput.X, event.MouseInput.Y );
-					} else if( event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN ) {
+					} else if( event.MouseInput.Event == irr::EMIE_LMOUSE_PRESSED_DOWN ) {
 						menuManager.processSelection( this );
 					}
 				}
@@ -2059,7 +2053,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			}
 			break;
 
-			case EET_USER_EVENT: {
+			case irr::EET_USER_EVENT: {
 				switch( event.UserEvent.UserData1 ) {
 					case USER_EVENT_WINDOW_RESIZE: {
 						windowSize.set( driver->getScreenSize().Width, driver->getScreenSize().Height );
@@ -2091,7 +2085,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						menuManager.setPositions( windowSize.Height );
 						
 						if( showBackgrounds ) {
-							scene::ICameraSceneNode* camera = bgscene->getActiveCamera();
+							irr::scene::ICameraSceneNode* camera = bgscene->getActiveCamera();
 							if( !isNull( camera ) ) {
 								camera->setAspectRatio( static_cast< decltype( camera->getAspectRatio() ) >( windowSize.Width ) / windowSize.Height );
 							}
@@ -2114,7 +2108,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			}
 			break;
 
-			case EET_JOYSTICK_INPUT_EVENT: {
+			case irr::EET_JOYSTICK_INPUT_EVENT: {
 				if( enableController ) {
 					for( uint_fast8_t k = 0; k < controls.size(); ++k ) {
 						if( event.JoystickEvent.Joystick == controls.at( k ).getControllerNumber() ) {
@@ -2202,9 +2196,9 @@ bool GameManager::OnEvent( const SEvent& event ) {
 			}
 			break;
 
-			case EET_GUI_EVENT: {
+			case irr::EET_GUI_EVENT: {
 				switch( event.GUIEvent.EventType ) {
-					case gui::EGET_FILE_SELECTED: {
+					case irr::gui::EGET_FILE_SELECTED: {
 						if( event.GUIEvent.Caller->getID() == fileChooser->getID() ) {
 							if( debug ) {
 								std::wcout << L"File selected. Folder: " << stringConverter.toStdWString( fileChooser->getDirectoryName() ) << L"\tFile: " << fileChooser->getFileName() << std::endl;
@@ -2216,7 +2210,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						}
 						break;
 					}
-					case gui::EGET_DIRECTORY_SELECTED: {
+					case irr::gui::EGET_DIRECTORY_SELECTED: {
 						if( event.GUIEvent.Caller->getID() == fileChooser->getID() ) {
 							if( debug ) {
 								std::wcout << L"Folder selected." << std::endl;
@@ -2226,7 +2220,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 
 						break;
 					}
-					case gui::EGET_MESSAGEBOX_YES: {
+					case irr::gui::EGET_MESSAGEBOX_YES: {
 						if( event.GUIEvent.Caller->getID() == exitConfirmation->getID() ) {
 							device->closeDevice();
 							donePlaying = true;
@@ -2234,7 +2228,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 						}
 						break;
 					}
-					case gui::EGET_MESSAGEBOX_NO: {
+					case irr::gui::EGET_MESSAGEBOX_NO: {
 						if( event.GUIEvent.Caller->getID() == exitConfirmation->getID() ) {
 							//do nothing
 							return true;
@@ -2267,7 +2261,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 		
 		std::vector< boost::filesystem::path > logoList;
 
-		boost::filesystem::path logoPath( boost::filesystem::current_path()/L"logos" );
+		boost::filesystem::path logoPath( boost::filesystem::current_path()/L"images/logos" );
 
 		//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
 		logoPath = system_complete( logoPath );
@@ -2293,12 +2287,12 @@ bool GameManager::OnEvent( const SEvent& event ) {
 					//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
 					for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
 
-						video::IImageLoader* loader = driver->getImageLoader( loaderNum );
-						io::IFileSystem* fileSystem = device->getFileSystem();
-						io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
+						irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
+						irr::io::IFileSystem* fileSystem = device->getFileSystem();
+						irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
 
 						//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
-							io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
+							irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
 							if( loader->isALoadableFileFormat( file ) ) {
 								logoList.push_back( i->path() );
 								file->drop();
@@ -2327,7 +2321,7 @@ bool GameManager::OnEvent( const SEvent& event ) {
 				std::wcout << L"Logo chosen: #" << logoChosen;
 				std::wcout << L" " << logoList.at( logoChosen ).wstring() << std::endl;
 			}
-			io::path logoFilePath = stringConverter.toIrrlichtStringW( logoList.at( logoChosen ).wstring() );
+			irr::io::path logoFilePath = stringConverter.toIrrlichtStringW( logoList.at( logoChosen ).wstring() );
 			logoTexture = driver->getTexture( logoFilePath );
 			if( isNull( logoTexture ) ) {
 				std::wstring error = L"Cannot load logo texture, even though Irrlicht said it was loadable?!?";
@@ -2470,8 +2464,8 @@ void GameManager::readPrefs() {
 		fullscreen = false;
 		bitsPerPixel = 8;
 		vsync = true;
-		driverType = video::EDT_OPENGL;
-		windowSize = core::dimension2d< decltype( windowSize.Height ) >( minWidth, minHeight );
+		driverType = irr::video::EDT_OPENGL;
+		windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( minWidth, minHeight );
 		allowSmallSize = false;
 		playMusic = true;
 		numBots = 0;
@@ -2664,33 +2658,33 @@ void GameManager::readPrefs() {
 										choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 										
 										if( choice == possibleChoices.at( 0 ) ) { //L"opengl"
-											driverType = video::EDT_OPENGL;
+											driverType = irr::video::EDT_OPENGL;
 										} else if( choice == possibleChoices.at( 1 ) ) { //L"direct3d9"
-											driverType = video::EDT_DIRECT3D9;
+											driverType = irr::video::EDT_DIRECT3D9;
 										} else if( choice == possibleChoices.at( 2 ) ) { //L"direct3d8"
-											driverType = video::EDT_DIRECT3D8;
+											driverType = irr::video::EDT_DIRECT3D8;
 										} else if( choice == possibleChoices.at( 3 ) ) { //L"burning's video"
-											driverType = video::EDT_BURNINGSVIDEO;
+											driverType = irr::video::EDT_BURNINGSVIDEO;
 										} else if( choice == possibleChoices.at( 4 ) ) { //L"software"
-											driverType = video::EDT_SOFTWARE;
+											driverType = irr::video::EDT_SOFTWARE;
 										} else if( choice == possibleChoices.at( 5 ) ) { //L"null"
-											driverType = video::EDT_NULL;
+											driverType = irr::video::EDT_NULL;
 										}
 										
 										if( !device->isDriverSupported( driverType ) ) {
 											std::wcerr << L"Warning: Chosen driver type " << choice << L" is not supported on this system. Auto-picking a new type.";
 											
-											driverType = video::EDT_NULL;
+											driverType = irr::video::EDT_NULL;
 											//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
-											for( uint_fast8_t i = ( uint_fast8_t ) video::EDT_COUNT; i != ( uint_fast8_t ) video::EDT_NULL; i-- ) {
-												if( device->isDriverSupported( ( video::E_DRIVER_TYPE ) i ) ) {
-													driverType = ( video::E_DRIVER_TYPE ) i;
+											for( uint_fast8_t i = ( uint_fast8_t ) irr::video::EDT_COUNT; i != ( uint_fast8_t ) irr::video::EDT_NULL; i-- ) {
+												if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
+													driverType = ( irr::video::E_DRIVER_TYPE ) i;
 													break;
 												}
 											}
 											
 											//Note: Just because the library supports a driver type doesn't mean we can actually use it. A loop similar to the above is used in the GameManager constructor where we call createDevice(). Therefore, the final driverType may not be what is set here.
-											if( driverType == video::EDT_NULL ) {
+											if( driverType == irr::video::EDT_NULL ) {
 												std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
 												debug = true;
 											}
@@ -2738,9 +2732,9 @@ void GameManager::readPrefs() {
 											std::wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << std::endl;
 										} else if( widthAsInt == 160 && heightAsInt == 240 ) {
 											std::wcout << L"Rock on, CGA graphics. Rock on." << std::endl;
-											windowSize = core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
+											windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
 										} else {
-											windowSize = core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
+											windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
 										}
 										break;
 									}
@@ -2855,17 +2849,17 @@ void GameManager::readPrefs() {
 					prefsFile << std::endl;
 					
 					prefsFile << L"driver type\t";
-					if( driverType == video::EDT_OPENGL ) {
+					if( driverType == irr::video::EDT_OPENGL ) {
 						prefsFile << L"opengl";
-					} else if( driverType == video::EDT_DIRECT3D9 ) {
+					} else if( driverType == irr::video::EDT_DIRECT3D9 ) {
 						prefsFile << L"direct3d9";
-					} else if( driverType == video::EDT_DIRECT3D8 ) {
+					} else if( driverType == irr::video::EDT_DIRECT3D8 ) {
 						prefsFile << L"direct3d8";
-					} else if( driverType == video::EDT_BURNINGSVIDEO ) {
+					} else if( driverType == irr::video::EDT_BURNINGSVIDEO ) {
 						prefsFile << L"burning's video";
-					} else if( driverType == video::EDT_SOFTWARE ) {
+					} else if( driverType == irr::video::EDT_SOFTWARE ) {
 						prefsFile << L"software";
-					} else if( driverType == video::EDT_NULL ) {
+					} else if( driverType == irr::video::EDT_NULL ) {
 						prefsFile << L"null";
 					} else {
 						std::wcerr << L"Warning: Creating preferences file, selected driver type " << driverType << L" not recognized. Saving OpenGL." << std::endl;
@@ -2987,7 +2981,7 @@ void GameManager::resetThings() {
 		}
 
 		for( decltype( stuff.size() ) i = 0; i < stuff.size(); ++i ) {
-			stuff.at( i ).loadTexture( driver );
+			stuff.at( i ).loadTexture( device );
 		}
 
 		for( decltype( mazeManager.cols ) x = 0; x < mazeManager.cols; ++x ) {
@@ -3047,8 +3041,8 @@ uint_fast8_t GameManager::run() {
 				}
 
 				if( driver->getScreenSize() != windowSize ) { //If the window has been resized. Only here until Irrlicht implements proper window resize events.
-					SEvent temp;
-					temp.EventType = EET_USER_EVENT;
+					irr::SEvent temp;
+					temp.EventType = irr::EET_USER_EVENT;
 					temp.UserEvent.UserData1 = USER_EVENT_WINDOW_RESIZE;
 					device->postEventFromUser( temp );
 				}
@@ -3359,9 +3353,9 @@ void GameManager::setControls() {
 									
 								} else if( spellChecker.DamerauLevenshteinDistance( choiceStr.substr( 0, possibleChoiceStarts.at( 1 ).length() ), possibleChoiceStarts.at( 1 ) ) <= 1 ) { //L"key"
 									choiceStr = boost::algorithm::trim_copy( choiceStr.substr( possibleChoiceStarts.at( 1 ).length(), choiceStr.length() - possibleChoiceStarts.at( 1 ).length() ) ); //possibleChoiceStarts.at( 1 ).length() = length of the word "key"
-									EKEY_CODE choice;
+									irr::EKEY_CODE choice;
 									
-									choice = static_cast< EKEY_CODE >( boost::lexical_cast< int >( choiceStr ) ); //Boost lexical cast can't convert directly to enumerated types
+									choice = static_cast< irr::EKEY_CODE >( boost::lexical_cast< int >( choiceStr ) ); //Boost lexical cast can't convert directly to enumerated types
 									
 									controls.back().setKey( choice );
 									
@@ -3387,7 +3381,7 @@ void GameManager::setControls() {
 										}
 										
 										if( moveOrButtonOrWheel == possibleChoices.at( 0 ) ) { //L"wheel"
-											controls.back().setMouseEvent( EMIE_MOUSE_WHEEL );
+											controls.back().setMouseEvent( irr::EMIE_MOUSE_WHEEL );
 											
 											std::wstring wheelDirection = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
 											if( debug ) {
@@ -3416,9 +3410,9 @@ void GameManager::setControls() {
 											}
 											
 											if( upOrDown == possibleStates.at( 0 ) || upOrDown == possibleStates.at( 1 ) ) { //L"up"
-												controls.back().setMouseEvent( EMIE_LMOUSE_LEFT_UP );
+												controls.back().setMouseEvent( irr::EMIE_LMOUSE_LEFT_UP );
 											} else {
-												controls.back().setMouseEvent( EMIE_LMOUSE_PRESSED_DOWN );
+												controls.back().setMouseEvent( irr::EMIE_LMOUSE_PRESSED_DOWN );
 											}
 										} else if( moveOrButtonOrWheel == possibleChoices.at( 2 ) ) { //L"middlebutton"
 											std::wstring upOrDown = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
@@ -3432,9 +3426,9 @@ void GameManager::setControls() {
 											}
 											
 											if( upOrDown == possibleStates.at( 0 ) || upOrDown == possibleStates.at( 1 ) ) { //L"up"
-												controls.back().setMouseEvent( EMIE_MMOUSE_LEFT_UP );
+												controls.back().setMouseEvent( irr::EMIE_MMOUSE_LEFT_UP );
 											} else {
-												controls.back().setMouseEvent( EMIE_MMOUSE_PRESSED_DOWN );
+												controls.back().setMouseEvent( irr::EMIE_MMOUSE_PRESSED_DOWN );
 											}
 										} else if( moveOrButtonOrWheel == possibleChoices.at( 3 ) ) { //L"rightbutton"
 											std::wstring upOrDown = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
@@ -3448,12 +3442,12 @@ void GameManager::setControls() {
 											}
 											
 											if( upOrDown == possibleStates.at( 0 ) || upOrDown == possibleStates.at( 1 ) ) { //L"up"
-												controls.back().setMouseEvent( EMIE_RMOUSE_LEFT_UP );
+												controls.back().setMouseEvent( irr::EMIE_RMOUSE_LEFT_UP );
 											} else {
-												controls.back().setMouseEvent( EMIE_RMOUSE_PRESSED_DOWN );
+												controls.back().setMouseEvent( irr::EMIE_RMOUSE_PRESSED_DOWN );
 											}
 										} else if( moveOrButtonOrWheel == possibleChoices.at( 4 ) ) { //L"move"
-											controls.back().setMouseEvent( EMIE_MOUSE_MOVED );
+											controls.back().setMouseEvent( irr::EMIE_MOUSE_MOVED );
 											
 											std::wstring direction = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
 											
@@ -3621,9 +3615,9 @@ void GameManager::setupBackground() {
 		switch( backgroundChosen ) {
 			case 0: { //Original starfield: just flies straight forward.
 				// create a particle system
-				scene::ICameraSceneNode* camera = bgscene->addCameraSceneNode();
-				camera->setPosition( core::vector3df( 0, 0, -150 ) );
-				scene::IParticleSystemSceneNode* ps = bgscene->addParticleSystemSceneNode( false );
+				irr::scene::ICameraSceneNode* camera = bgscene->addCameraSceneNode();
+				camera->setPosition( irr::core::vector3df( 0, 0, -150 ) );
+				irr::scene::IParticleSystemSceneNode* ps = bgscene->addParticleSystemSceneNode( false );
 
 				irr::video::SColor darkStarColor;
 				irr::video::SColor lightStarColor;
@@ -3671,15 +3665,15 @@ void GameManager::setupBackground() {
 					}
 				}
 
-				scene::IParticleEmitter* em = ps->createBoxEmitter(
+				irr::scene::IParticleEmitter* em = ps->createBoxEmitter(
 												  camera->getViewFrustum()->getBoundingBox(), //core::aabbox3d< float >(-7,-7,-7,7,7,7), // emitter size
-												  core::vector3df( 0.0f, 0.0f, -0.1f ), // initial direction
+												  irr::core::vector3df( 0.0f, 0.0f, -0.1f ), // initial direction
 												  100, 500,							// Min & max emit rate
 												  darkStarColor,	   // darkest color
 												  lightStarColor,	   // brightest color
 												  2000, 20000, 0,					   // min and max age, angle
-												  core::dimension2df( 1.f, 1.f ),	  // min size
-												  core::dimension2df( 20.f, 20.f ) );	// max size
+												  irr::core::dimension2df( 1.f, 1.f ),	  // min size
+												  irr::core::dimension2df( 20.f, 20.f ) );	// max size
 
 				ps->setEmitter( em ); // this grabs the emitter
 				em->drop(); // so we can drop it here without deleting it
@@ -3689,23 +3683,23 @@ void GameManager::setupBackground() {
 				//ps->addAffector(paf); // same goes for the affector
 				//paf->drop();
 
-				ps->setPosition( core::vector3df( 0, 0, 40 ) );
-				ps->setScale( core::vector3df( 1, 1, 1 ) );
-				ps->setMaterialFlag( video::EMF_LIGHTING, false );
-				ps->setMaterialFlag( video::EMF_ZWRITE_ENABLE, false );
+				ps->setPosition( irr::core::vector3df( 0, 0, 40 ) );
+				ps->setScale( irr::core::vector3df( 1, 1, 1 ) );
+				ps->setMaterialFlag( irr::video::EMF_LIGHTING, false );
+				ps->setMaterialFlag( irr::video::EMF_ZWRITE_ENABLE, false );
 				//ps->setMaterialTexture( 0, driver->getTexture( "star.png" ) );
-				ps->setMaterialType( video::EMT_TRANSPARENT_ALPHA_CHANNEL );
+				ps->setMaterialType( irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL );
 
-				video::IImage* pixelImage = driver->createImage( video::ECF_A1R5G5B5, core::dimension2d< u32 >( 1, 1 ) );
+				irr::video::IImage* pixelImage = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( 1, 1 ) );
 				//pixelImage->fill( WHITE );
 				pixelImage->setPixel( 0, 0, WHITE, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
-				video::ITexture* pixelTexture = driver->addTexture( "pixel", pixelImage );
+				irr::video::ITexture* pixelTexture = driver->addTexture( "pixel", pixelImage );
 				ps->setMaterialTexture( 0, pixelTexture );
 				break;
 			}
 			case 1: { //New starfield: rotates the camera around.
 				// create a particle system
-				scene::ICameraSceneNode* camera = bgscene->addCameraSceneNode();
+				irr::scene::ICameraSceneNode* camera = bgscene->addCameraSceneNode();
 
 				//Decide which direction to rotate
 				float x, y, z;
@@ -3754,7 +3748,7 @@ void GameManager::setupBackground() {
 				}
 
 				//Create rotation animator and bind it to the camera
-				scene::ISceneNodeAnimator* rotator = bgscene->createRotationAnimator( core::vector3df( x, y, z ) );
+				irr::scene::ISceneNodeAnimator* rotator = bgscene->createRotationAnimator( irr::core::vector3df( x, y, z ) );
 				if( rotator ) {
 					camera->bindTargetAndRotation( true );
 					camera->addAnimator( rotator );
@@ -3764,8 +3758,8 @@ void GameManager::setupBackground() {
 					rotator->drop();
 				}
 
-				camera->setPosition( core::vector3df( 0, 0, -150 ) );
-				scene::IParticleSystemSceneNode* ps = bgscene->addParticleSystemSceneNode( false );
+				camera->setPosition( irr::core::vector3df( 0, 0, -150 ) );
+				irr::scene::IParticleSystemSceneNode* ps = bgscene->addParticleSystemSceneNode( false );
 
 				irr::video::SColor darkStarColor;
 				irr::video::SColor lightStarColor;
@@ -3813,15 +3807,15 @@ void GameManager::setupBackground() {
 					}
 				}
 
-				scene::IParticleEmitter* em = ps->createBoxEmitter(
+				irr::scene::IParticleEmitter* em = ps->createBoxEmitter(
 												  camera->getViewFrustum()->getBoundingBox(), //core::aabbox3d< float >(-7,-7,-7,7,7,7), // emitter size
-												  core::vector3df( 0.0f, 0.0f, -0.1f ), // initial direction
+												  irr::core::vector3df( 0.0f, 0.0f, -0.1f ), // initial direction
 												  100, 500,							// Min & max emit rate
 												  darkStarColor,	   // darkest color
 												  lightStarColor,	   // brightest color
 												  4000, 40000, 0,					   // min and max age, angle
-												  core::dimension2df( 1.f, 1.f ),	  // min size
-												  core::dimension2df( 20.f, 20.f ) );	// max size
+												  irr::core::dimension2df( 1.f, 1.f ),	  // min size
+												  irr::core::dimension2df( 20.f, 20.f ) );	// max size
 
 				ps->setEmitter( em ); // this grabs the emitter
 				em->drop(); // so we can drop it here without deleting it
@@ -3831,24 +3825,24 @@ void GameManager::setupBackground() {
 				//ps->addAffector(paf); // same goes for the affector
 				//paf->drop();
 
-				ps->setPosition( core::vector3df( 0, 0, 40 ) );
-				ps->setScale( core::vector3df( 1, 1, 1 ) );
-				ps->setMaterialFlag( video::EMF_LIGHTING, false );
-				ps->setMaterialFlag( video::EMF_ZWRITE_ENABLE, false );
+				ps->setPosition( irr::core::vector3df( 0, 0, 40 ) );
+				ps->setScale( irr::core::vector3df( 1, 1, 1 ) );
+				ps->setMaterialFlag( irr::video::EMF_LIGHTING, false );
+				ps->setMaterialFlag( irr::video::EMF_ZWRITE_ENABLE, false );
 				//ps->setMaterialTexture( 0, driver->getTexture( "star.png" ) );
-				ps->setMaterialType( video::EMT_TRANSPARENT_ALPHA_CHANNEL );
+				ps->setMaterialType( irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL );
 
-				video::IImage* pixelImage = driver->createImage( video::ECF_A8R8G8B8, core::dimension2d< u32 >( 1, 1 ) );
+				irr::video::IImage* pixelImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( 1, 1 ) );
 				//pixelImage->fill( WHITE );
 				pixelImage->setPixel( 0, 0, WHITE, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
-				video::ITexture* pixelTexture = driver->addTexture( "pixel", pixelImage );
+				irr::video::ITexture* pixelTexture = driver->addTexture( "pixel", pixelImage );
 				ps->setMaterialTexture( 0, pixelTexture );
 				break;
 			}
 			case 2: { //Image files
 				std::vector< boost::filesystem::path > backgroundList;
 
-				boost::filesystem::path backgroundPath( boost::filesystem::current_path()/L"backgrounds" );
+				boost::filesystem::path backgroundPath( boost::filesystem::current_path()/L"images/backgrounds" );
 
 				//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
 				backgroundPath = system_complete( backgroundPath );
@@ -3878,12 +3872,12 @@ void GameManager::setupBackground() {
 							//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
 							for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
 
-								video::IImageLoader* loader = driver->getImageLoader( loaderNum );
-								io::IFileSystem* fileSystem = device->getFileSystem();
-								io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
+								irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
+								irr::io::IFileSystem* fileSystem = device->getFileSystem();
+								irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
 
 								//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
-									io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
+									irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
 									if( loader->isALoadableFileFormat( file ) ) {
 										backgroundList.push_back( i->path() );
 										file->drop();

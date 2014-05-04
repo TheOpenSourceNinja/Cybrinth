@@ -113,7 +113,7 @@ bool AI::alreadyVisitedPretend( irr::core::position2d< uint_fast8_t > position )
 bool AI::atGoal() {
 	try {
 		Player* p = gm->getPlayer( controlsPlayer );
-		core::position2d< uint_fast8_t > currentPosition( p->getX(), p->getY() );
+		irr::core::position2d< uint_fast8_t > currentPosition( p->getX(), p->getY() );
 		Goal* goal = gm->getGoal();
 		if( currentPosition.X == goal->getX() && currentPosition.Y == goal->getY() ) {
 			return true;
@@ -171,7 +171,7 @@ void AI::findSolution() {
 		solution.clear();
 		{
 			Player* p = gm->getPlayer( controlsPlayer );
-			core::position2d< uint_fast8_t > currentPosition( p->getX(), p->getY() );
+			irr::core::position2d< uint_fast8_t > currentPosition( p->getX(), p->getY() );
 			switch( algorithm ) {
 				case DEPTH_FIRST_SEARCH: {
 					pretendCellsVisited.clear();
@@ -329,16 +329,16 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 				}
 
 				//See which direction(s) the bot can move
-				if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+				if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 					possibleDirections.push_back( UP );
 				}
-				if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+				if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 					possibleDirections.push_back( LEFT );
 				}
-				if( currentPosition.Y < (gm->getMazeManager()->rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1, canDissolveWalls ) && !alreadyVisitedPretend( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+				if( currentPosition.Y < (gm->getMazeManager()->rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 					possibleDirections.push_back( DOWN );
 				}
-				if( currentPosition.X < (gm->getMazeManager()->cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+				if( currentPosition.X < (gm->getMazeManager()->cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 					possibleDirections.push_back( RIGHT );
 				}
 
@@ -352,7 +352,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 						auto newDepthLimit = depthLimit - 1;
 						switch( choice ) {
 							case UP: {
-								core::position2d< uint_fast8_t > newPosition( currentPosition.X, currentPosition.Y - 1 );
+								irr::core::position2d< uint_fast8_t > newPosition( currentPosition.X, currentPosition.Y - 1 );
 								
 								if ( gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y ].getTop() != MazeCell::ACIDPROOF && canDissolveWalls ) {
 									canDissolveWalls = false;
@@ -361,7 +361,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 								findSolutionIDDFS( partialSolution, newPosition, newDepthLimit, canDissolveWalls );
 							} break;
 							case DOWN: {
-								core::position2d< uint_fast8_t > newPosition( currentPosition.X, currentPosition.Y + 1 );
+								irr::core::position2d< uint_fast8_t > newPosition( currentPosition.X, currentPosition.Y + 1 );
 								
 								if ( gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() != MazeCell::ACIDPROOF && canDissolveWalls ) {
 									canDissolveWalls = false;
@@ -370,7 +370,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 								findSolutionIDDFS( partialSolution, newPosition, newDepthLimit, canDissolveWalls );
 							} break;
 							case LEFT: {
-								core::position2d< uint_fast8_t > newPosition( currentPosition.X - 1, currentPosition.Y );
+								irr::core::position2d< uint_fast8_t > newPosition( currentPosition.X - 1, currentPosition.Y );
 								
 								if ( gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOF && canDissolveWalls ) {
 									canDissolveWalls = false;
@@ -379,7 +379,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 								findSolutionIDDFS( partialSolution, newPosition, newDepthLimit, canDissolveWalls );
 							} break;
 							case RIGHT: {
-								core::position2d< uint_fast8_t > newPosition( currentPosition.X + 1, currentPosition.Y );
+								irr::core::position2d< uint_fast8_t > newPosition( currentPosition.X + 1, currentPosition.Y );
 								
 								if ( gm->getMazeManager()->maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOF && canDissolveWalls ) {
 									canDissolveWalls = false;
@@ -471,7 +471,7 @@ void AI::move() {
 
 			switch( algorithm ) {
 				case DEPTH_FIRST_SEARCH: {
-					core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
+					irr::core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 					
 					if( pathTaken.size() == 0 ) { //Ensures that the player's start position is marked as visited
 						pathTaken.push_back( currentPosition );
@@ -486,32 +486,32 @@ void AI::move() {
 
 						//Check for locks
 						if( gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y ].hasLock() ) {
-							pathsToLockedCells.push_back( std::vector< core::position2d< uint_fast8_t > >() );
+							pathsToLockedCells.push_back( std::vector< irr::core::position2d< uint_fast8_t > >() );
 							pathsToLockedCells.back().push_back( currentPosition );
 							pathsToLockedCells.back().push_back( currentPosition );
 						}
 						if( currentPosition.X < ( gm->getMazeManager()->cols - 1 ) && gm->getMazeManager()->maze[ currentPosition.X + 1 ][ currentPosition.Y ].hasLeftLock() ) {
-							pathsToLockedCells.push_back( std::vector< core::position2d< uint_fast8_t > >() );
+							pathsToLockedCells.push_back( std::vector< irr::core::position2d< uint_fast8_t > >() );
 							pathsToLockedCells.back().push_back( currentPosition );
-							pathsToLockedCells.back().push_back( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) );
+							pathsToLockedCells.back().push_back( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) );
 						}
 						if( currentPosition.Y < ( gm->getMazeManager()->rows - 1 ) && gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y + 1 ].hasTopLock() ) {
-							pathsToLockedCells.push_back( std::vector< core::position2d< uint_fast8_t > >() );
+							pathsToLockedCells.push_back( std::vector< irr::core::position2d< uint_fast8_t > >() );
 							pathsToLockedCells.back().push_back( currentPosition );
-							pathsToLockedCells.back().push_back( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) );
+							pathsToLockedCells.back().push_back( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) );
 						}
 
 						//See which direction(s) the bot can move
-						if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+						if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 							possibleDirections.push_back( UP );
 						}
-						if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( LEFT );
 						}
-						if( currentPosition.Y < (gm->getMazeManager()->rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1 ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+						if( currentPosition.Y < (gm->getMazeManager()->rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1 ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 							possibleDirections.push_back( DOWN );
 						}
-						if( currentPosition.X < (gm->getMazeManager()->cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X < (gm->getMazeManager()->cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( RIGHT );
 						}
 					}
@@ -521,7 +521,7 @@ void AI::move() {
 					//If we can't go anywhere new, go back to previous position
 					if( possibleDirections.size() == 0 && pathTaken.size() != 0 && !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
 						pathTaken.pop_back();
-						core::position2d< uint_fast8_t > oldPosition = pathTaken.back();
+						irr::core::position2d< uint_fast8_t > oldPosition = pathTaken.back();
 						
 						for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 							if( pathsToLockedCells.at( o ).back() != currentPosition ) {
@@ -545,7 +545,7 @@ void AI::move() {
 						direction_t choice = possibleDirections.at( rand() % possibleDirections.size() );
 						switch( choice ) {
 							case UP: {
-								core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y - 1 );
+								irr::core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y - 1 );
 								pathTaken.push_back( position );
 								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 									if( pathsToLockedCells.at( o ).back() != position ) {
@@ -557,7 +557,7 @@ void AI::move() {
 								gm->movePlayerOnY( controlsPlayer, -1 );
 							} break;
 							case DOWN: {
-								core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y + 1 );
+								irr::core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y + 1 );
 								pathTaken.push_back( position );
 								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 									if( pathsToLockedCells.at( o ).back() != position ) {
@@ -569,7 +569,7 @@ void AI::move() {
 								gm->movePlayerOnY( controlsPlayer, 1 );
 							} break;
 							case LEFT: {
-								core::position2d< uint_fast8_t > position( currentPosition.X - 1, currentPosition.Y );
+								irr::core::position2d< uint_fast8_t > position( currentPosition.X - 1, currentPosition.Y );
 								pathTaken.push_back( position );
 								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 									if( pathsToLockedCells.at( o ).back() != position ) {
@@ -581,7 +581,7 @@ void AI::move() {
 								gm->movePlayerOnX( controlsPlayer, -1 );
 							} break;
 							case RIGHT: {
-								core::position2d< uint_fast8_t > position( currentPosition.X + 1, currentPosition.Y );
+								irr::core::position2d< uint_fast8_t > position( currentPosition.X + 1, currentPosition.Y );
 								pathTaken.push_back( position );
 								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
 									if( pathsToLockedCells.at( o ).back() != position ) {
@@ -605,7 +605,7 @@ void AI::move() {
 				}
 				case ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH: {
 					
-					core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
+					irr::core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 					
 					if( pathTaken.empty() ) {//currentPosition.X == gm->getStart( controlsPlayer )->getX() && currentPosition.Y == gm->getStart( controlsPlayer )->getY() ) {
 						IDDFSDepthLimit += 1;
@@ -621,16 +621,16 @@ void AI::move() {
 					if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
 
 						//See which direction(s) the bot can move
-						if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+						if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 							possibleDirections.push_back( UP );
 						}
-						if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( LEFT );
 						}
-						if( currentPosition.Y < (gm->getMazeManager()->rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1 ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+						if( currentPosition.Y < (gm->getMazeManager()->rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1 ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 							possibleDirections.push_back( DOWN );
 						}
-						if( currentPosition.X < (gm->getMazeManager()->cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y ) && !alreadyVisited( core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X < (gm->getMazeManager()->cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( RIGHT );
 						}
 					}
@@ -642,7 +642,7 @@ void AI::move() {
 					//If we can't go anywhere new, go back to previous position
 					if( possibleDirections.empty() && !pathTaken.empty() && !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
 						pathTaken.pop_back();
-						core::position2d< uint_fast8_t > oldPosition = pathTaken.back();
+						irr::core::position2d< uint_fast8_t > oldPosition = pathTaken.back();
 
 						if( oldPosition.X < currentPosition.X ) {
 							gm->movePlayerOnX( controlsPlayer, -1 );
@@ -658,22 +658,22 @@ void AI::move() {
 						direction_t choice = possibleDirections.at( choiceNum );
 						switch( choice ) {
 							case UP: {
-								core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y - 1 );
+								irr::core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y - 1 );
 								pathTaken.push_back( position );
 								gm->movePlayerOnY( controlsPlayer, -1 );
 							} break;
 							case DOWN: {
-								core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y + 1 );
+								irr::core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y + 1 );
 								pathTaken.push_back( position );
 								gm->movePlayerOnY( controlsPlayer, 1 );
 							} break;
 							case LEFT: {
-								core::position2d< uint_fast8_t > position( currentPosition.X - 1, currentPosition.Y );
+								irr::core::position2d< uint_fast8_t > position( currentPosition.X - 1, currentPosition.Y );
 								pathTaken.push_back( position );
 								gm->movePlayerOnX( controlsPlayer, -1 );
 							} break;
 							case RIGHT: {
-								core::position2d< uint_fast8_t > position( currentPosition.X + 1, currentPosition.Y );
+								irr::core::position2d< uint_fast8_t > position( currentPosition.X + 1, currentPosition.Y );
 								pathTaken.push_back( position );
 								gm->movePlayerOnX( controlsPlayer, 1 );
 							} break;

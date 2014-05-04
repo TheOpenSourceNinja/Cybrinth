@@ -37,8 +37,9 @@ Object::~Object() {
 	}
 }
 
-void Object::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height ) {
+void Object::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height ) {
 	try {
+		irr::video::IVideoDriver* driver = device->getVideoDriver();
 		if( moving ) {
 			float speed = .2;
 

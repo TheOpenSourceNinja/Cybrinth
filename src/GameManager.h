@@ -42,11 +42,9 @@
 	#include <vector>
 #endif //HAVE_VECTOR
 
-using namespace irr;
-
 //using boost::asio::ip::tcp;
 
-class GameManager : public IEventReceiver {
+class GameManager : public irr::IEventReceiver {
 	public:
 		//Functions----------------------------------
 		GameManager();
@@ -74,7 +72,7 @@ class GameManager : public IEventReceiver {
 		void newMaze( uint_fast16_t newRandomSeed );
 		void newMaze( boost::filesystem::path src );
 		
-		bool OnEvent( const SEvent& );
+		bool OnEvent( const irr::SEvent& );
 		
 		void pickLogo();
 		
@@ -89,11 +87,11 @@ class GameManager : public IEventReceiver {
 		//Non-functions----------------------------------
 		std::vector< AI > bot;
 		
-		IrrlichtDevice* device;
-		video::IVideoDriver* driver;
+		irr::IrrlichtDevice* device;
+		irr::video::IVideoDriver* driver;
 		
 		Goal goal;
-		gui::IGUIEnvironment* gui;
+		irr::gui::IGUIEnvironment* gui;
 		
 		uint_fast16_t loadingDelay;
 		
@@ -110,7 +108,7 @@ class GameManager : public IEventReceiver {
 		StringConverter stringConverter;
 		std::vector< Collectable > stuff;
 		
-		ITimer* timer;
+		irr::ITimer* timer;
 		uint_fast16_t timeStartedLoading;
 		
 	protected:
@@ -202,35 +200,35 @@ class GameManager : public IEventReceiver {
 		uint_fast32_t minHeight;
 		
 		//signed 32-bit integers----------------------------------
-		s32 mouseX;
-		s32 mouseY;
+		irr::s32 mouseX;
+		irr::s32 mouseY;
 		
 		//floating point numbers----------------------------------
 		float loadingProgress;
 		
 		//wide character strings----------------------------------
-		core::stringw fontFile;
+		irr::core::stringw fontFile;
 		
-		core::stringw heightTestString; //Used only when loading fonts
+		irr::core::stringw heightTestString; //Used only when loading fonts
 		
-		core::stringw keysFoundPerPlayer;
+		irr::core::stringw keysFoundPerPlayer;
 		
-		core::stringw loading;
-		core::stringw loadingStatus;
+		irr::core::stringw loading;
+		irr::core::stringw loadingStatus;
 		
-		core::stringw musicAlbum;
-		core::stringw musicArtist;
-		core::stringw musicTitle;
+		irr::core::stringw musicAlbum;
+		irr::core::stringw musicArtist;
+		irr::core::stringw musicTitle;
 		
-		core::stringw proTipPrefix;
-		std::vector< core::stringw > proTips;
+		irr::core::stringw proTipPrefix;
+		std::vector< irr::core::stringw > proTips;
 		
-		core::stringw winnersLabel;
-		core::stringw scores;
-		core::stringw scoresTotal;
-		core::stringw steps;
+		irr::core::stringw winnersLabel;
+		irr::core::stringw scores;
+		irr::core::stringw scoresTotal;
+		irr::core::stringw steps;
 		
-		core::stringw times;
+		irr::core::stringw times;
 		
 		//Our own types----------------------------------
 		AI::algorithm_t botAlgorithm;
@@ -252,35 +250,35 @@ class GameManager : public IEventReceiver {
 		SystemSpecificsManager system; // Flawfinder: ignore
 		
 		//2D dimensions----------------------------------
-		core::dimension2d< uint_fast16_t > viewportSize;
-		core::dimension2d< u32 > windowSize;
+		irr::core::dimension2d< uint_fast16_t > viewportSize;
+		irr::core::dimension2d< irr::u32 > windowSize;
 		
 		//Fonts----------------------------------
-		gui::IGUIFont* clockFont;
+		irr::gui::IGUIFont* clockFont;
 		
-		gui::IGUIFont* loadingFont;
+		irr::gui::IGUIFont* loadingFont;
 		
-		gui::IGUIFont* musicTagFont;
+		irr::gui::IGUIFont* musicTagFont;
 		
-		gui::IGUIFont* statsFont;
+		irr::gui::IGUIFont* statsFont;
 		
-		gui::IGUIFont* textFont;
-		gui::IGUIFont* tipFont;
+		irr::gui::IGUIFont* textFont;
+		irr::gui::IGUIFont* tipFont;
 		
 		//Misc. Irrlicht types----------------------------------
-		scene::ISceneManager* bgscene;
-		video::ITexture* backgroundTexture;
-		io::path backgroundFilePath;
+		irr::scene::ISceneManager* bgscene;
+		irr::video::ITexture* backgroundTexture;
+		irr::io::path backgroundFilePath;
 		
-		video::E_DRIVER_TYPE driverType;
+		irr::video::E_DRIVER_TYPE driverType;
 		
-		gui::IGUIWindow* exitConfirmation;
+		irr::gui::IGUIWindow* exitConfirmation;
 		
-		gui::IGUIFileOpenDialog* fileChooser;
+		irr::gui::IGUIFileOpenDialog* fileChooser;
 		
-		core::array< SJoystickInfo > controllerInfo;
+		irr::core::array< irr::SJoystickInfo > controllerInfo;
 		
-		video::ITexture* logoTexture;
+		irr::video::ITexture* logoTexture;
 		
 		
 		//Misc. SDL/SDL_Mixer types----------------------------------

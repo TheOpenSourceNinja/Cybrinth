@@ -26,6 +26,7 @@ class Player : public Object {
 		Player();
 		virtual ~Player();
 		
+		void draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height );
 		void draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height );
 		
 		uint_fast8_t getItem();
@@ -42,8 +43,8 @@ class Player : public Object {
 		uint_fast8_t keysCollectedThisMaze;
 		uint_fast8_t keysCollectedLastMaze;
 		
-		void loadTexture( irr::video::IVideoDriver* driver );
-		void loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t size );
+		void loadTexture( irr::IrrlichtDevice* device );
+		void loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size );
 		
 		void moveX( int_fast8_t val );
 		void moveY( int_fast8_t val );
@@ -51,7 +52,9 @@ class Player : public Object {
 		void removeItem();
 		void reset();
 		
+		void setColorBasedOnNum(); //We provide our own version of this function here because we know which color to use.
 		void setGM( GameManager* newGM );
+		void setPlayerNumber( uint_fast8_t newNumber );
 		void setScore( intmax_t newScore );
 		
 		uint_fast16_t stepsTakenLastMaze;
@@ -65,6 +68,8 @@ class Player : public Object {
 		
 		uint_fast8_t heldItem;
 		Collectable::type_t heldItemType;
+		
+		uint_fast8_t playerNumber; //Each player knows what number it is. That knowledge is only needed for setColorBasedOnNum() and loadTexture().
 		
 		intmax_t scoreLastMaze;
 		intmax_t scoreTotal;

@@ -5,16 +5,15 @@
 #include "PreprocessorCommands.h"
 
 #include <irrlicht/irrlicht.h>
-using namespace irr;
 
 class ImageModifier {
 	public:
 		ImageModifier();
 		virtual ~ImageModifier();
-		video::ITexture* resize( video::ITexture* image, uint_fast32_t width, uint_fast32_t height, video::IVideoDriver* driver );
-		video::IImage* resize( video::IImage* image, uint_fast32_t width, uint_fast32_t height, video::IVideoDriver* driver );
-		video::IImage* textureToImage( video::IVideoDriver* driver, video::ITexture* texture );
-		video::ITexture* imageToTexture( video::IVideoDriver* driver, video::IImage* texture, core::stringw name );
+		irr::video::ITexture* resize( irr::video::ITexture* image, uint_fast32_t width, uint_fast32_t height, irr::video::IVideoDriver* driver );
+		irr::video::IImage* resize( irr::video::IImage* image, uint_fast32_t width, uint_fast32_t height, irr::video::IVideoDriver* driver );
+		irr::video::IImage* textureToImage( irr::video::IVideoDriver* driver, irr::video::ITexture* texture );
+		irr::video::ITexture* imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* texture, irr::core::stringw name );
 	protected:
 	private:
 };

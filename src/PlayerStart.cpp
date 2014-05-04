@@ -40,16 +40,17 @@ void PlayerStart::reset() {
 	}
 }
 
-void PlayerStart::loadTexture( irr::video::IVideoDriver* driver ) {
+void PlayerStart::loadTexture( irr::IrrlichtDevice* device ) {
 	try {
-		loadTexture( driver, 1 );
+		loadTexture( device, 1 );
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in PlayerStart::loadTexture(): " << e.what() << std::endl;
 	}
 }
 
-void PlayerStart::loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t size ) {
+void PlayerStart::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 	try {
+		irr::video::IVideoDriver* driver = device->getVideoDriver();
 		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) );
 		tempImage->fill( WHITE );
 		setColor( BLACK );
@@ -61,7 +62,7 @@ void PlayerStart::loadTexture( irr::video::IVideoDriver* driver, uint_fast16_t s
 	}
 }
 
-void PlayerStart::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height ) {
+void PlayerStart::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height ) {
 	try {
 		uint_fast16_t size;
 
@@ -72,10 +73,10 @@ void PlayerStart::draw( irr::video::IVideoDriver* driver, uint_fast16_t width, u
 		}
 
 		if( texture == nullptr || ( texture != nullptr && texture->getSize().Width != size ) ) {
-			loadTexture( driver, size );
+			loadTexture( device, size );
 		}
 
-		Object::draw( driver, width, height );
+		Object::draw( device, width, height );
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in PlayerStart::draw(): " << e.what() << std::endl;
 	}
