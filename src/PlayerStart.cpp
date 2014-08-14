@@ -29,36 +29,17 @@ PlayerStart::~PlayerStart() {
 	}
 }
 
-void PlayerStart::reset() {
-	try {
-		texture = nullptr;
-		x = 0;
-		y = 0;
-		distanceFromExit = 0;
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in PlayerStart::reset(): " << e.what() << std::endl;
-	}
-}
-
-void PlayerStart::loadTexture( irr::IrrlichtDevice* device ) {
-	try {
-		loadTexture( device, 1 );
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in PlayerStart::loadTexture(): " << e.what() << std::endl;
-	}
-}
-
-void PlayerStart::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
+void PlayerStart::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 	try {
 		irr::video::IVideoDriver* driver = device->getVideoDriver();
 		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) );
 		tempImage->fill( WHITE );
 		setColor( BLACK );
-
+		
 		driver->removeTexture( texture );
 		texture = driver->addTexture( L"playerStart", tempImage );
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in PlayerStart::loadTexture(): " << e.what() << std::endl;
+		std::wcerr << L"Error in PlayerStart::createTexture(): " << e.what() << std::endl;
 	}
 }
 
@@ -73,7 +54,10 @@ void PlayerStart::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_f
 		}
 
 		if( texture == nullptr || ( texture != nullptr && texture->getSize().Width != size ) ) {
-			loadTexture( device, size );
+			Object::loadTexture( device, size, L"playerStart" ); //NOTE:The "playerStart" string should be the same as in the loadTexture() function above
+			if( texture == nullptr || texture == NULL ) {
+				createTexture( device, size );
+			}
 		}
 
 		Object::draw( device, width, height );
@@ -81,3 +65,26 @@ void PlayerStart::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_f
 		std::wcerr << L"Error in PlayerStart::draw(): " << e.what() << std::endl;
 	}
 }
+
+void PlayerStart::loadTexture( irr::IrrlichtDevice* device ) {
+	try {
+		Object::loadTexture( device, 1, L"playerStart" ); //NOTE:The "playerStart" string should be the same as in the draw() function above
+		if( texture == nullptr || texture == NULL ) {
+			createTexture( device, 1 );
+		}
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in PlayerStart::loadTexture(): " << e.what() << std::endl;
+	}
+}
+
+void PlayerStart::reset() {
+	try {
+		texture = nullptr;
+		x = 0;
+		y = 0;
+		distanceFromExit = 0;
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in PlayerStart::reset(): " << e.what() << std::endl;
+	}
+}
+

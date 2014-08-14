@@ -26,6 +26,8 @@ class Player : public Object {
 		Player();
 		virtual ~Player();
 		
+		void createTexture( irr::IrrlichtDevice* device, uint_fast16_t size );
+		
 		void draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height );
 		void draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height );
 		
@@ -44,7 +46,6 @@ class Player : public Object {
 		uint_fast8_t keysCollectedLastMaze;
 		
 		void loadTexture( irr::IrrlichtDevice* device );
-		void loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size );
 		
 		void moveX( int_fast8_t val );
 		void moveY( int_fast8_t val );

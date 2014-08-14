@@ -21,10 +21,14 @@ class PlayerStart : public Object {
 	public:
 		PlayerStart();
 		virtual ~PlayerStart();
-		void reset();
-		void loadTexture( irr::IrrlichtDevice* device );
-		void loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size );
+		
+		void createTexture( irr::IrrlichtDevice* device, uint_fast16_t size );
+		
 		void draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height );
+		
+		void loadTexture( irr::IrrlichtDevice* device );
+		
+		void reset();
 	protected:
 	private:
 };

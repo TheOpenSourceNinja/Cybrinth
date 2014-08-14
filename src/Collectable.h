@@ -21,17 +21,22 @@
 class Collectable : public Object {
 	public:
 		enum type_t { KEY, ACID };
-
+		
+		void createTexture( irr::IrrlichtDevice* device, uint_fast16_t size = 1 );
+		
 		Collectable();
 		virtual ~Collectable();
 
 		void draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height );
+		
 		type_t getType();
+		
 		void loadTexture( irr::IrrlichtDevice* device );
 		
 		bool owned;
 		
 		void reset();
+		
 		void setType( type_t newType );
 	protected:
 	private:

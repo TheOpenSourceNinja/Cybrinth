@@ -30,6 +30,8 @@ class Object {
 		void moveX( int_fast8_t val );
 		void draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height );
 		virtual void loadTexture( irr::IrrlichtDevice* device ) = 0;
+		void loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::core::stringw fileName );
+		virtual void createTexture( irr::IrrlichtDevice* device, uint_fast16_t size = 1 ) = 0; //To be called by subclasses when they can't get their texture loaded
 		virtual void reset() = 0;
 		void setColorBasedOnNum( uint_fast8_t num );
 		void setColor( irr::video::SColor newColor );

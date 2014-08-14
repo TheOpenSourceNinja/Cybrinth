@@ -47,6 +47,53 @@ Player::~Player() {
 	}
 }
 
+//Draws a filled circle. Somebody please implement a faster algorithm.
+void Player::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
+	try {
+		auto driver = device->getVideoDriver();
+		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) ); //Colorspace should be irr::video::A1R5G5B5 but that causes a bug on my current laptop.
+		tempImage->fill( irr::video::SColor( 0, 0, 0, 0 ) ); //Fills the image with invisibility!
+		tempImage->setPixel( size - 1, size - 1, irr::video::SColor( 0, 0, 0, 0 ) ); //Workaround for a bug in Irrlicht's software renderer
+		
+		irr::core::position2d< decltype( size ) > origin( size / 2, size / 2 );
+		
+		{
+			int_fast16_t radius = size / 2;
+			float rSquared = pow( static_cast< float >( radius ), 2.0f );
+			for( auto x = -radius; x <= 0; ++x ) {
+				auto height = static_cast< decltype( radius ) >( sqrt( rSquared - static_cast< float >( pow( static_cast< float >( x ), 2.0f ) ) ) );
+				for( auto y = -height; y <= 0; ++y ) {
+					tempImage->setPixel( x + origin.X, y + origin.Y, colorOne );
+					tempImage->setPixel( x + origin.X, -y + origin.Y, colorOne );
+					tempImage->setPixel( -x + origin.X, y + origin.Y, colorOne );
+					tempImage->setPixel( -x + origin.X, -y + origin.Y, colorOne );
+				}
+			}
+		}
+		
+		{
+			size /= 2;
+			int_fast16_t radius = size / 2;
+			float rSquared = pow( static_cast< float >( radius ), 2.0f );
+			for( auto x = -radius; x <= 0; ++x ) {
+				auto height = static_cast< decltype( radius ) >( sqrt( rSquared - static_cast< float >( pow( static_cast< float >( x ), 2.0f ) ) ) );
+				for( auto y = -height; y <= 0; ++y ) {
+					tempImage->setPixel( x + origin.X, y + origin.Y, colorTwo );
+					tempImage->setPixel( x + origin.X, -y + origin.Y, colorTwo );
+					tempImage->setPixel( -x + origin.X, y + origin.Y, colorTwo );
+					tempImage->setPixel( -x + origin.X, -y + origin.Y, colorTwo );
+				}
+			}
+		}
+		
+		
+		driver->removeTexture( texture );
+		texture = driver->addTexture( L"playerCircle", tempImage );
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in Player::createTexture(): " << e.what() << std::endl;
+	}
+}
+
 void Player::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height ) {
 	try {
 		uint_fast16_t size;
@@ -58,7 +105,10 @@ void Player::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16
 		}
 
 		if( texture->getSize().Width != size ) {
-			loadTexture( device, size );
+			Object::loadTexture( device, size, L"player" ); //NOTE:The "player" string should be the same as in the loadTexture() function below
+			if( texture == nullptr || texture == NULL ) {
+				createTexture( device, size );
+			}
 		}
 
 		Object::draw( device, width, height );
@@ -102,118 +152,9 @@ bool Player::hasItem( uint_fast8_t item ) {
 
 void Player::loadTexture( irr::IrrlichtDevice* device ) {
 	try {
-		loadTexture( device, 1 );
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in Player::loadTexture(): " << e.what() << std::endl;
-	}
-}
-
-//Draws a filled circle. Somebody please implement a faster algorithm.
-void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
-	try {
-		irr::video::IVideoDriver* driver = device->getVideoDriver();
-		
-		irr::core::stringw fileName = L"player";
-		if( playerNumber < 100 ) {
-			fileName.append( L"0" );
-			if( playerNumber < 10 ) {
-				fileName.append( L"0" );
-			}
-		}
-		fileName += static_cast< const unsigned int >( playerNumber );
-		
-		{
-			boost::filesystem::path path( boost::filesystem::current_path()/L"images/players" );
-			
-			//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
-			path = system_complete( path );
-			//path = absolute( path );
-			
-			while( ( !exists( path ) || !is_directory( path ) ) && path.has_parent_path() ) {
-				if( gm != nullptr && gm->getDebugStatus() ) {
-					std::wcout << L"Path " << path.wstring() << L" does not exist or is not a directory. Checking parent path " << path.parent_path().wstring() << std::endl;
-				}
-
-				path = path.parent_path();
-			}
-			
-			if( exists( path ) ) {
-				boost::filesystem::recursive_directory_iterator end;
-				bool fileFound = false;
-				
-				for( boost::filesystem::recursive_directory_iterator i( path ); i != end && !fileFound; ++i ) {
-					if( !is_directory( i->path() ) ) { //We've found a file
-						if( gm != nullptr && gm->getDebugStatus() ) {
-							std::wcout << i->path().wstring() << std::endl;
-						}
-						
-						irr::io::IFileSystem* fileSystem = device->getFileSystem();
-						StringConverter stringConverter;
-						irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
-						if( fileSystem->getFileBasename( filePath, false ) == fileName ) {
-							//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
-							for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount() && !fileFound; ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
-								irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
-							
-								//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
-								irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
-								if( loader->isALoadableFileFormat( file ) ) {
-									fileName = filePath;
-									fileFound = true;
-									file->drop();
-									break;
-								}
-								file->drop();
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		texture = driver->getTexture( fileName );
-		
-		if( texture == nullptr ) {
-			irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) ); //Colorspace should be irr::video::A1R5G5B5 but that causes a bug on my current laptop.
-			tempImage->fill( irr::video::SColor( 0, 0, 0, 0 ) ); //Fills the image with invisibility!
-			tempImage->setPixel( size - 1, size - 1, irr::video::SColor( 0, 0, 0, 0 ) ); //Workaround for a bug in Irrlicht's software renderer
-			
-			irr::core::position2d< decltype( size ) > origin( size / 2, size / 2 );
-
-			{
-				int_fast16_t radius = size / 2;
-				float rSquared = pow( static_cast< float >( radius ), 2.0f );
-				for( auto x = -radius; x <= 0; ++x ) {
-					auto height = static_cast< decltype( radius ) >( sqrt( rSquared - static_cast< float >( pow( static_cast< float >( x ), 2.0f ) ) ) );
-					for( auto y = -height; y <= 0; ++y ) {
-						tempImage->setPixel( x + origin.X, y + origin.Y, colorOne );
-						tempImage->setPixel( x + origin.X, -y + origin.Y, colorOne );
-						tempImage->setPixel( -x + origin.X, y + origin.Y, colorOne );
-						tempImage->setPixel( -x + origin.X, -y + origin.Y, colorOne );
-					}
-				}
-			}
-			
-			{
-				size /= 2;
-				int_fast16_t radius = size / 2;
-				float rSquared = pow( static_cast< float >( radius ), 2.0f );
-				for( auto x = -radius; x <= 0; ++x ) {
-					auto height = static_cast< decltype( radius ) >( sqrt( rSquared - static_cast< float >( pow( static_cast< float >( x ), 2.0f ) ) ) );
-					for( auto y = -height; y <= 0; ++y ) {
-						tempImage->setPixel( x + origin.X, y + origin.Y, colorTwo );
-						tempImage->setPixel( x + origin.X, -y + origin.Y, colorTwo );
-						tempImage->setPixel( -x + origin.X, y + origin.Y, colorTwo );
-						tempImage->setPixel( -x + origin.X, -y + origin.Y, colorTwo );
-					}
-				}
-			}
-
-
-			driver->removeTexture( texture );
-			texture = driver->addTexture( L"playerCircle", tempImage );
-		} else if( texture->getSize() != irr::core::dimension2d< irr::u32 >( size, size ) ) {
-			texture = resizer.resize( texture, size, size, driver );
+		Object::loadTexture( device, 1, L"player" ); //NOTE:The "player" string should be the same as in the draw() function above
+		if( texture == nullptr || texture == NULL ) {
+			createTexture( device, 1 );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::loadTexture(): " << e.what() << std::endl;

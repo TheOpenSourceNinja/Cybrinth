@@ -11,8 +11,10 @@
 #include "Object.h"
 #include "colors.h"
 #ifdef HAVE_IOSTREAM
-#include <iostream>
+	#include <iostream>
 #endif //HAVE_IOSTREAM
+#include <boost/filesystem.hpp>
+#include "StringConverter.h"
 
 
 
@@ -133,6 +135,70 @@ uint_fast8_t Object::getY() {
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::getY(): " << e.what() << std::endl;
 		return UINT_FAST8_MAX;
+	}
+}
+
+void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::core::stringw fileName ) {
+	try {
+		irr::video::IVideoDriver* driver = device->getVideoDriver();
+		
+		{
+			boost::filesystem::path path( boost::filesystem::current_path()/L"images" );
+			
+			//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
+			path = system_complete( path );
+			//path = absolute( path );
+			
+			while( ( !exists( path ) || !is_directory( path ) ) && path.has_parent_path() ) {
+				path = path.parent_path();
+			}
+			
+			if( exists( path ) ) {
+				boost::filesystem::recursive_directory_iterator end;
+				bool fileFound = false;
+				
+				for( boost::filesystem::recursive_directory_iterator i( path ); i != end && !fileFound; ++i ) {
+					if( !is_directory( i->path() ) ) { //We've found a file
+						irr::io::IFileSystem* fileSystem = device->getFileSystem();
+						StringConverter stringConverter;
+						irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
+						if( fileSystem->getFileBasename( filePath, false ) == fileName ) {
+							//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
+							for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount() && !fileFound; ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
+								irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
+							
+								//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
+								irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
+								if( loader->isALoadableFileFormat( file ) ) {
+									fileName = filePath;
+									fileFound = true;
+									file->drop();
+									break;
+								}
+								file->drop();
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		texture = driver->getTexture( fileName );
+		
+		if( texture == nullptr ) {
+			return;
+		} else if( texture->getSize() != irr::core::dimension2d< irr::u32 >( size, size ) ) {
+			auto textureSize = texture->getSize();
+			auto desiredSize = irr::core::dimension2d< irr::u32 >( size, size );
+			std::wcout << L"Texture size (" << textureSize.Width << L"x" << textureSize.Height << L") is not equal to (" << desiredSize.Width << L"x" << desiredSize.Height << L")" << std::endl;
+			auto newTexture = resizer.resize( texture, size, size, driver );
+			driver->removeTexture(texture);
+			texture = newTexture;
+			textureSize = texture->getSize();
+			std::wcout << L"New texture size (" << textureSize.Width << L"x" << textureSize.Height << L")" << std::endl;
+		}
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in Object::loadTexture(): " << e.what() << std::endl;
 	}
 }
 
