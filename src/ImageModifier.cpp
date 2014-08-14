@@ -42,7 +42,7 @@ irr::video::ITexture* ImageModifier::resize( irr::video::ITexture* image, uint_f
 			}
 		}*/
 		irr::video::IImage* tempImage = textureToImage( driver, image );
-		//driver->removeTexture( image );
+		//driver->removeTexture( image ); //Why does this make the program crash?
 		//image->drop();
 		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< irr::u32 >( width, height ) );
 		tempImage->copyToScaling( tempImage2 );

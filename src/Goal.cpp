@@ -15,7 +15,6 @@
 #endif //HAVE_IOSTREAM
 #include <boost/filesystem.hpp>
 #include "StringConverter.h"
-#include "ImageModifier.h"
 
 
 Goal::Goal() {
@@ -140,9 +139,17 @@ void Goal::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 
 			driver->removeTexture( texture );
 			texture = driver->addTexture( L"goalDiamond", tempImage );
-		} else if( texture->getSize() != irr::core::dimension2d< irr::u32 >( size, size ) ) {
-			ImageModifier resizer;
-			resizer.resize( texture, size, size, driver );
+		}
+		
+		if( texture->getSize() != irr::core::dimension2d< irr::u32 >( size, size ) ) {
+			auto textureSize = texture->getSize();
+			auto desiredSize = irr::core::dimension2d< irr::u32 >( size, size );
+			std::wcout << L"Texture size (" << textureSize.Width << L"x" << textureSize.Height << L") is not equal to (" << desiredSize.Width << L"x" << desiredSize.Height << L")" << std::endl;
+			auto newTexture = resizer.resize( texture, size, size, driver );
+			driver->removeTexture(texture);
+			texture = newTexture;
+			textureSize = texture->getSize();
+			std::wcout << L"New texture size (" << textureSize.Width << L"x" << textureSize.Height << L")" << std::endl;
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Goal::loadTexture(): " << e.what() << std::endl;

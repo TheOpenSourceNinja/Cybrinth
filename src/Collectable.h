@@ -36,7 +36,6 @@ class Collectable : public Object {
 	protected:
 	private:
 		type_t type;
-		ImageModifier resizer;
 };
 
 #endif // COLLECTABLE_H

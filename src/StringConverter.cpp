@@ -14,8 +14,8 @@
 #endif //HAVE_IOSTREAM
 #include <cwchar>
 
-/*#include <codecvt>
-#include <locale>*/
+//#include <codecvt>
+#include <locale>
 
 /**
 This class exists just to convert between various types of strings. I have no idea whether I'm doing it right. I just want to make sure this program can work with non-English characters. If anyone can suggest a way to improve my code, fix any bugs, or whatever, PLEASE send in a patch!

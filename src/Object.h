@@ -15,6 +15,7 @@
 #include <irrlicht/irrlicht.h>
 #include "Integers.h"
 #include "PreprocessorCommands.h"
+#include "ImageModifier.h"
 
 class Object {
 	public:
@@ -45,6 +46,7 @@ class Object {
 		irr::video::ITexture* texture;
 		irr::video::SColor colorOne;
 		irr::video::SColor colorTwo;
+		ImageModifier resizer;
 	private:
 };
 

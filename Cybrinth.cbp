@@ -233,7 +233,7 @@
 		<Unit filename="src/colors.h">
 			<Option target="cybrinth" />
 		</Unit>
-		<Unit filename="src/key.png">
+		<Unit filename="src/key.xcf">
 			<Option target="non-building files" />
 		</Unit>
 		<Unit filename="src/main.cpp">

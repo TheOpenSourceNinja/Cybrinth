@@ -213,8 +213,7 @@ void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 			driver->removeTexture( texture );
 			texture = driver->addTexture( L"playerCircle", tempImage );
 		} else if( texture->getSize() != irr::core::dimension2d< irr::u32 >( size, size ) ) {
-			ImageModifier resizer;
-			resizer.resize( texture, size, size, driver );
+			texture = resizer.resize( texture, size, size, driver );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::loadTexture(): " << e.what() << std::endl;
