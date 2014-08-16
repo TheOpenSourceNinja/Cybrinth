@@ -494,6 +494,7 @@ void MazeManager::makeRandomLevel() {
 		for( decltype( gameManager->numPlayers ) p = 0; p < gameManager->numPlayers; ++p ) {
 			maze[ gameManager->playerStart[ p ].getX() ][ gameManager->playerStart[ p ].getY() ].visited = true;
 			maze[ gameManager->playerStart[ p ].getX() ][ gameManager->playerStart[ p ].getY() ].setVisitorColor( gameManager->player[ p ].getColorTwo() );
+			makeCellsVisible( gameManager->playerStart[ p ].getX(), gameManager->playerStart[ p ].getY() );
 		}
 		
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );

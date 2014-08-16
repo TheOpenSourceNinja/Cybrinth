@@ -43,11 +43,11 @@ irr::video::ITexture* ImageModifier::resize( irr::video::ITexture* image, uint_f
 		}*/
 		irr::video::IImage* tempImage = textureToImage( driver, image );
 		//driver->removeTexture( image ); //Why does this make the program crash?
-		//image->drop();
+		auto name = image->getName().getInternalName() + L"-resized";
 		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< irr::u32 >( width, height ) );
 		tempImage->copyToScaling( tempImage2 );
 		//tempImage->drop();
-		image = imageToTexture( driver, tempImage2, L"resized" );
+		image = imageToTexture( driver, tempImage2, name );
 		//tempImage2->drop();
 		return image;
 	} catch ( std::exception &e ) {

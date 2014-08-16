@@ -428,7 +428,6 @@ void GameManager::drawLoadingScreen() {
 		}
 
 		if( logoTexture->getSize() != windowSize ) {
-			std::wcout << L"Resizing texture from " << logoTexture->getSize().Width << L"x" << logoTexture->getSize().Height << L" to " << windowSize.Width << L"x" << windowSize.Height << std::endl;
 			logoTexture = resizer.resize( logoTexture, windowSize.Width, windowSize.Height, driver );
 		}
 

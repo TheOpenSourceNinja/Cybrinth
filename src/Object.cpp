@@ -27,6 +27,7 @@ Object::Object() {
 		moving = false;
 		distanceFromExit = 0;
 		texture = nullptr;
+		driver = nullptr;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::Object(): " << e.what() << std::endl;
 	}
@@ -34,6 +35,10 @@ Object::Object() {
 
 Object::~Object() {
 	try {
+		if( !( driver == nullptr || driver == NULL ) && !( texture == nullptr || texture == NULL ) ) {
+			driver->removeTexture( texture );
+			texture = nullptr;
+		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::~Object(): " << e.what() << std::endl;
 	}
@@ -140,7 +145,12 @@ uint_fast8_t Object::getY() {
 
 void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::core::stringw fileName ) {
 	try {
-		irr::video::IVideoDriver* driver = device->getVideoDriver();
+		driver = device->getVideoDriver();
+		
+		if( !( texture == nullptr || texture == NULL ) ) {
+			driver->removeTexture( texture );
+			texture = nullptr;
+		}
 		
 		{
 			boost::filesystem::path path( boost::filesystem::current_path()/L"images" );
@@ -188,14 +198,9 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 		if( texture == nullptr ) {
 			return;
 		} else if( texture->getSize() != irr::core::dimension2d< irr::u32 >( size, size ) ) {
-			auto textureSize = texture->getSize();
-			auto desiredSize = irr::core::dimension2d< irr::u32 >( size, size );
-			std::wcout << L"Texture size (" << textureSize.Width << L"x" << textureSize.Height << L") is not equal to (" << desiredSize.Width << L"x" << desiredSize.Height << L")" << std::endl;
 			auto newTexture = resizer.resize( texture, size, size, driver );
-			driver->removeTexture(texture);
+			driver->removeTexture( texture );
 			texture = newTexture;
-			textureSize = texture->getSize();
-			std::wcout << L"New texture size (" << textureSize.Width << L"x" << textureSize.Height << L")" << std::endl;
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::loadTexture(): " << e.what() << std::endl;

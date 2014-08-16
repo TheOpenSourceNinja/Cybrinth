@@ -49,6 +49,7 @@ class Object {
 		irr::video::SColor colorOne;
 		irr::video::SColor colorTwo;
 		ImageModifier resizer;
+		irr::video::IVideoDriver* driver;
 	private:
 };
 

@@ -46,6 +46,7 @@ class Player : public Object {
 		uint_fast8_t keysCollectedLastMaze;
 		
 		void loadTexture( irr::IrrlichtDevice* device );
+		void loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size );
 		
 		void moveX( int_fast8_t val );
 		void moveY( int_fast8_t val );
