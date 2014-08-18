@@ -19,7 +19,7 @@
 
 Goal::Goal() {
 	try {
-		setColor( WHITE );
+		setColors( GRAY, LIGHTGREEN );
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Goal::Goal(): " << e.what() << std::endl;
 	}

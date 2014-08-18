@@ -25,7 +25,7 @@ Player::Player() {
 		xInterp = 0;
 		yInterp = 0;
 		moving = false;
-		setColor( RED );
+		setColors( BLACK, WHITE ); //The two colors should always be different so they can stand out against any background.
 		texture = nullptr;
 		isHuman = true;
 		timeTakenThisMaze = 0;
@@ -185,60 +185,6 @@ void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 	
 	if( texture == nullptr || texture == NULL ) {
 		createTexture( device, size );
-	} else {
-		irr::video::IVideoDriver* driver = device->getVideoDriver();
-		irr::video::IImage* image = resizer.textureToImage( driver, texture );
-		irr::core::stringw textureName = texture->getName().getInternalName(); //Needed when converting the image back to a texture
-		driver->removeTexture( texture );
-		texture = nullptr;
-		
-		//Find the darkest and lightest colors
-		irr::video::SColor darkestColor = WHITE;
-		auto darkestLuminance = darkestColor.getLuminance();
-		irr::video::SColor lightestColor = BLACK;
-		auto lightestLuminance = lightestColor.getLuminance();
-		for( decltype( image->getDimension().Width ) x = 0; x < image->getDimension().Width; ++x ) {
-			for( decltype( image->getDimension().Height ) y = 0; y < image->getDimension().Height; ++y ) {
-				auto pixel = image->getPixel( x, y );
-				if( pixel.getAlpha() > 0 ) {
-					if( pixel.getLuminance() < darkestLuminance ) {
-						darkestColor = pixel;
-						darkestLuminance = darkestColor.getLuminance();
-					}
-					
-					if( pixel.getLuminance() > lightestLuminance ) { //This is a separate if, not an else if, because there's a tiny chance the lightest and darkest colors might be the same
-						lightestColor = pixel;
-						lightestLuminance = lightestColor.getLuminance();
-					}
-				}
-			}
-		}
-		
-		//Now, set pixels to their desired colors (interpolate between colorOne and colorTwo instead of the lightest and darkest colors in the original file)
-		for( decltype( image->getDimension().Width ) x = 0; x < image->getDimension().Width; ++x ) {
-			for( decltype( image->getDimension().Height ) y = 0; y < image->getDimension().Height; ++y ) {
-				auto pixel = image->getPixel( x, y );
-				if( pixel.getAlpha() > 0 ) {
-					auto luminance = pixel.getLuminance();
-					if( luminance == lightestLuminance ) {
-						auto newColor = colorTwo;
-						newColor.setAlpha( pixel.getAlpha() );
-						image->setPixel( x, y, newColor );
-					} else if( luminance < lightestLuminance && luminance > darkestLuminance ) {
-						auto interpolation = ( lightestLuminance - luminance ) / 255.0f;
-						auto newColor = colorOne.getInterpolated( colorTwo, interpolation );
-						image->setPixel( x, y , newColor );
-					} else { // if( luminance == darkestLuminance ) {
-						auto newColor = colorOne;
-						newColor.setAlpha( pixel.getAlpha() );
-						image->setPixel( x, y, newColor );
-					}
-				}
-			}
-		}
-		
-		textureName += L"-recolored";
-		texture = resizer.imageToTexture( driver, image, textureName );
 	}
 }
 

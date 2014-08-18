@@ -215,6 +215,7 @@ void AI::findSolutionDFS( irr::core::position2d< uint_fast8_t > startPosition ) 
 		//Instead of adding a bunch of code for DFS, just do IDDFS with the deepest max depth possible.
 		uint_fast16_t maxDepth = static_cast< uint_fast16_t > ( gm->getMazeManager()->cols ) * static_cast< uint_fast16_t > ( gm->getMazeManager()->rows );
 		pretendCellsVisited.clear();
+		IDDFSDeadEnds.clear();
 		findSolutionIDDFS( partialSolution, startPosition, maxDepth, false );
 
 		{ //Reverses the order of the solution, so we don't start at the wrong end
@@ -242,8 +243,10 @@ void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > startPosition 
 		
 		if( noKeysLeft ) { //If there aren't any keys left, the only thing left to try for is the goal. There's no point in using a less-than-maximum depth limit in that case.
 			pretendCellsVisited.clear();
+			IDDFSDeadEnds.clear();
 			findSolutionIDDFS( partialSolution, startPosition, maxDepth, false );
 		} else {
+			IDDFSDeadEnds.clear();
 			for( decltype( maxDepth ) i = 1; solution.empty() && i <= maxDepth; ++i ) {
 				if( gm->getDebugStatus() ) {
 					std::wcout << L"In IDDFS loop, i=" << i << std::endl;
@@ -270,7 +273,6 @@ void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > startPosition 
 	}
 }
 
-///TODO: Find some way to make IDDFS faster, possibly using a caching mechanism or dead-end filling.
 void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > currentPosition, uint_fast16_t depthLimit, bool canDissolveWalls ) {
 	try {
 		if( gm->getDebugStatus() ) {
@@ -302,7 +304,9 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 				}
 			}
 			
-			return; //No solution found, therefore solution.size() should be zero
+			//No solution found, therefore solution.size() should be zero
+			//IDDFSDeadEnds.push_back( currentPosition );
+			return;
 		} else {
 
 			pretendCellsVisited.push_back( currentPosition );
@@ -329,20 +333,24 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 				}
 
 				//See which direction(s) the bot can move
-				if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+				if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) && !IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 					possibleDirections.push_back( UP );
 				}
-				if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+				if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) && !IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 					possibleDirections.push_back( LEFT );
 				}
-				if( currentPosition.Y < (gm->getMazeManager()->rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+				if( currentPosition.Y < (gm->getMazeManager()->rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) && !IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 					possibleDirections.push_back( DOWN );
 				}
-				if( currentPosition.X < (gm->getMazeManager()->cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+				if( currentPosition.X < (gm->getMazeManager()->cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) && !IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 					possibleDirections.push_back( RIGHT );
 				}
-
-				if( possibleDirections.size() == 0 && partialSolution.size() != 0 ) {
+				
+				if( possibleDirections.empty() ) {
+					IDDFSDeadEnds.push_back( currentPosition );
+				}
+				
+				if( possibleDirections.empty() && partialSolution.size() != 0 ) {
 					partialSolution.pop_back();
 				} else {
 					while( !possibleDirections.empty() ) { //for( uint_fast8_t i = 0; ( i < possibleDirections.size() && solution.empty() ); ++i ) { //changed decltype( possibleDirections.size() ) to uint_fast8_t because the size of possibleDirections can never exceed 4 but could be stored in a needlessly large integer type.
@@ -407,6 +415,15 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 
 uint_fast8_t AI::getPlayer() {
 	return controlsPlayer;
+}
+
+bool AI::IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t > position ) {
+	for( decltype( IDDFSDeadEnds.size() ) i = 0; i < IDDFSDeadEnds.size(); ++i ) {
+		if( IDDFSDeadEnds.at( i ) == position ) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void AI::keyFound( uint_fast8_t key ) {

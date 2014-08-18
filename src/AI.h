@@ -175,6 +175,7 @@ class AI {
 		
 		std::vector< irr::core::position2d< uint_fast8_t > > IDDFSDeadEnds;
 		uint_fast16_t IDDFSDepthLimit; ///< For use only when the bots don't know the solution.
+		bool IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t > position );
 		
 		uint_fast8_t keyImSeeking; ///< When a key is found, see if it's this one. If so, look for a new key. Not used if we don't pre-solve the maze.
 		

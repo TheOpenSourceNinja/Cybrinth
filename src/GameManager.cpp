@@ -533,6 +533,32 @@ void GameManager::drawStats( int_fast32_t textY ) {
 		//Now we go through and draw the actual player stats
 		for( decltype( numPlayers ) p = 0; p < winnersLoadingScreen.size(); ++p ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 			int_fast16_t textXOld = textX;
+			
+			auto backgroundColor = player.at( winnersLoadingScreen.at( p ) ).getColorOne();
+			auto textColor = player.at( winnersLoadingScreen.at( p ) ).getColorTwo();
+			
+			//Text wrapping!
+			{
+				irr::core::stringw dummy( winnersLoadingScreen.size() );
+				dummy.append( L".P" );
+				dummy.append( irr::core::stringw( winnersLoadingScreen.size() ) );
+				dummy.append( L" " );
+				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( dummy ).c_str() );
+				if( textX >= windowSize.Width - tempDimensions.Width ) {
+					textX = 0;
+					textXOld = 0;
+					decltype( textY ) separatorY = textYScoresTotal + tempDimensions.Height + 1;
+					driver->draw2DLine( irr::core::position2d< irr::s32 >( 0, separatorY ), irr::core::position2d< irr::s32 >( windowSize.Width, separatorY ) );
+					textY = separatorY + 1;
+					textYSteps += ( textY - textYOriginal );
+					textYTimes += ( textY - textYOriginal );
+					textYKeys += ( textY - textYOriginal );
+					textYScores += ( textY - textYOriginal );
+					textYScoresTotal += ( textY - textYOriginal );
+					textYOriginal = textY;
+				}
+			}
+			
 			{ //First we identify the players
 				irr::core::stringw text( p );
 				text.append( L".P" );
@@ -540,7 +566,8 @@ void GameManager::drawStats( int_fast32_t textY ) {
 				text.append( L" " );
 				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
 				irr::core::rect< irr::s32 > tempRectangle( textXOld, textY, tempDimensions.Width + textXOld, tempDimensions.Height + textY );
-				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
+				driver->draw2DRectangle( backgroundColor, tempRectangle );
+				statsFont->draw( text, tempRectangle, textColor, true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
 					textX = tempDimensions.Width + textXOld;
 				}
@@ -549,7 +576,8 @@ void GameManager::drawStats( int_fast32_t textY ) {
 				irr::core::stringw text( player.at( winnersLoadingScreen.at( p ) ).stepsTakenLastMaze );
 				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
 				irr::core::rect< irr::s32 > tempRectangle( textXOld, textYSteps, tempDimensions.Width + textXOld, tempDimensions.Height + textYSteps );
-				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
+				driver->draw2DRectangle( backgroundColor, tempRectangle );
+				statsFont->draw( text, tempRectangle, textColor, true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
 					textX = tempDimensions.Width + textXOld;
 				}
@@ -558,7 +586,8 @@ void GameManager::drawStats( int_fast32_t textY ) {
 				irr::core::stringw text( player.at( winnersLoadingScreen.at( p ) ).timeTakenLastMaze / 1000 );
 				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
 				irr::core::rect< irr::s32 > tempRectangle( textXOld, textYTimes, tempDimensions.Width + textXOld, tempDimensions.Height + textYTimes );
-				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
+				driver->draw2DRectangle( backgroundColor, tempRectangle );
+				statsFont->draw( text, tempRectangle, textColor, true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
 					textX = tempDimensions.Width + textXOld;
 				}
@@ -567,7 +596,8 @@ void GameManager::drawStats( int_fast32_t textY ) {
 				irr::core::stringw text( player.at( winnersLoadingScreen.at( p ) ).keysCollectedLastMaze );
 				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
 				irr::core::rect< irr::s32 > tempRectangle( textXOld, textYKeys, tempDimensions.Width + textXOld, tempDimensions.Height + textYKeys );
-				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
+				driver->draw2DRectangle( backgroundColor, tempRectangle );
+				statsFont->draw( text, tempRectangle, textColor, true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
 					textX = tempDimensions.Width + textXOld;
 				}
@@ -577,7 +607,8 @@ void GameManager::drawStats( int_fast32_t textY ) {
 				//text.append( player.at( winnersLoadingScreen.at( p ) ).getScoreLastMaze() );
 				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
 				irr::core::rect< irr::s32 > tempRectangle( textXOld, textYScores, tempDimensions.Width + textXOld, tempDimensions.Height + textYScores );
-				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorOne(), true, true, &tempRectangle );
+				driver->draw2DRectangle( backgroundColor, tempRectangle );
+				statsFont->draw( text, tempRectangle, textColor, true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
 					textX = tempDimensions.Width + textXOld;
 				}
@@ -587,7 +618,8 @@ void GameManager::drawStats( int_fast32_t textY ) {
 				//text.append( player.at( winnersLoadingScreen.at( p ) ).getScoreTotal() );
 				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( text ).c_str() ); //stringConverter.toWCharArray( text ) );
 				irr::core::rect< irr::s32 > tempRectangle( textXOld, textYScoresTotal, tempDimensions.Width + textXOld, tempDimensions.Height + textYScoresTotal );
-				statsFont->draw( text, tempRectangle, player.at( winnersLoadingScreen.at( p ) ).getColorTwo(), true, true, &tempRectangle );
+				driver->draw2DRectangle( backgroundColor, tempRectangle );
+				statsFont->draw( text, tempRectangle, textColor, true, true, &tempRectangle );
 				if( tempDimensions.Width + textXOld > textX ) {
 					textX = tempDimensions.Width + textXOld;
 				}

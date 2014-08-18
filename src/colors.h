@@ -17,6 +17,7 @@
 #include "PreprocessorCommands.h"
 
 //These are CGA colors. I'm kind of going for that look, but without the low screen resolution limit.
+//See https://en.wikipedia.org/wiki/Color_Graphics_Adapter#Color_palette
 
 #define BLACK irr::video::SColor( 255, 0, 0, 0 )
 #define BLUE irr::video::SColor( 255, 0, 0, 170 )

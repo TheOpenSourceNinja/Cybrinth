@@ -377,11 +377,12 @@ void MazeManager::makeRandomLevel() {
 		gameManager->drawAll();
 		
 		{
-			uint_fast8_t acidChance = UINT_FAST8_MAX; //Acid is supposed to be really rare.
+			uint_fast8_t InverseProbabilityOfAcid = UINT_FAST8_MAX; //Acid is supposed to be really rare. I call this inverse probability because the higher this number is, the less the probability is.
+			//uint_fast8_t InverseProbabilityOfAcid = 1; //For debugging. 1 means total, 100% probability. Never set this to zero.
 			if( gameManager->getDebugStatus() ) {
-				acidChance = 1; //If the game is being debugged, ensure the acid is always there - it may be what's being debugged.
+				InverseProbabilityOfAcid = 1; //If the game is being debugged, ensure the acid is always there - it may be what's being debugged.
 			}
-			if( rand() % acidChance == 0 ) {
+			if( rand() % InverseProbabilityOfAcid == 0 ) {
 				if( deadEndsX.empty() ) { //If all the dead ends have been filled with other collectables
 					Collectable temp;
 					temp.setX( rand() % cols );

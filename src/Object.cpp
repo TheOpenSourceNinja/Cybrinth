@@ -28,6 +28,7 @@ Object::Object() {
 		distanceFromExit = 0;
 		texture = nullptr;
 		driver = nullptr;
+		setColors( BLACK, GREEN );
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::Object(): " << e.what() << std::endl;
 	}
@@ -48,21 +49,21 @@ void Object::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16
 	try {
 		irr::video::IVideoDriver* driver = device->getVideoDriver();
 		if( moving ) {
-			float speed = .2;
+			float delta = 0.2; //Magic number! The value doesn't matter, except it should be between 0.0 and 1.0. Affects how quickly players appear to move between locations (how fast xInterp and yInterp approach the real x and y).
 
 			if( x > xInterp ) {
-				xInterp += speed;
+				xInterp += delta;
 			} else if( x < xInterp ) {
-				xInterp -= speed;
+				xInterp -= delta;
 			}
 
 			if( y > yInterp ) {
-				yInterp += speed;
+				yInterp += delta;
 			} else if( y < yInterp ) {
-				yInterp -= speed;
+				yInterp -= delta;
 			}
 
-			if(( x >= ( xInterp - speed ) ) && ( x <= ( xInterp + speed ) ) && ( y >= ( yInterp - speed ) ) && ( y <= ( yInterp + speed ) ) ) {
+			if( ( x >= ( xInterp - delta ) ) && ( x <= ( xInterp + delta ) ) && ( y >= ( yInterp - delta ) ) && ( y <= ( yInterp + delta ) ) ) {
 				moving = false;
 				xInterp = x;
 				yInterp = y;
@@ -81,8 +82,8 @@ void Object::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16
 		}
 
 		if( texture != nullptr ) {
-			int_fast16_t cornerX = ( xInterp * width ) + (( width / 2 ) - ( size / 2 ) );
-			int_fast16_t cornerY = ( yInterp * height ) + (( height / 2 ) - ( size / 2 ) );
+			int_fast16_t cornerX = ( xInterp * width ) + ( ( width / 2 ) - ( size / 2 ) );
+			int_fast16_t cornerY = ( yInterp * height ) + ( ( height / 2 ) - ( size / 2 ) );
 			driver->draw2DImage( texture,
 								 irr::core::rect< irr::s32 >( cornerX, cornerY, cornerX + size, cornerY + size ),
 								 irr::core::rect< irr::s32 >( irr::core::position2d< irr::s32 >( 0, 0 ), texture->getSize() ),
@@ -92,16 +93,6 @@ void Object::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::draw(): " << e.what() << std::endl;
-	}
-}
-
-irr::video::SColor Object::getColor() {
-	try {
-		return getColorOne();
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in Object::getColor(): " << e.what() << std::endl;
-		irr::video::SColor c;
-		return c;
 	}
 }
 
@@ -197,10 +188,66 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 		
 		if( texture == nullptr ) {
 			return;
-		} else if( texture->getSize() != irr::core::dimension2d< irr::u32 >( size, size ) ) {
-			auto newTexture = resizer.resize( texture, size, size, driver );
+		}  else {
+			if( texture->getSize() != irr::core::dimension2d< irr::u32 >( size, size ) ) {
+				auto newTexture = resizer.resize( texture, size, size, driver );
+				driver->removeTexture( texture );
+				texture = newTexture;
+			}
+			
+			irr::video::IVideoDriver* driver = device->getVideoDriver();
+			irr::video::IImage* image = resizer.textureToImage( driver, texture );
+			irr::core::stringw textureName = texture->getName().getInternalName(); //Needed when converting the image back to a texture
 			driver->removeTexture( texture );
-			texture = newTexture;
+			texture = nullptr;
+			
+			//Find the darkest and lightest colors
+			irr::video::SColor darkestColor = WHITE;
+			auto darkestLuminance = darkestColor.getLuminance();
+			irr::video::SColor lightestColor = BLACK;
+			auto lightestLuminance = lightestColor.getLuminance();
+			for( decltype( image->getDimension().Width ) x = 0; x < image->getDimension().Width; ++x ) {
+				for( decltype( image->getDimension().Height ) y = 0; y < image->getDimension().Height; ++y ) {
+					auto pixel = image->getPixel( x, y );
+					if( pixel.getAlpha() > 0 ) {
+						if( pixel.getLuminance() < darkestLuminance ) {
+							darkestColor = pixel;
+							darkestLuminance = darkestColor.getLuminance();
+						}
+						
+						if( pixel.getLuminance() > lightestLuminance ) { //This is a separate if, not an else if, because there's a tiny chance the lightest and darkest colors might be the same
+							lightestColor = pixel;
+							lightestLuminance = lightestColor.getLuminance();
+						}
+					}
+				}
+			}
+			
+			//Now, set pixels to their desired colors (interpolate between colorOne and colorTwo instead of the lightest and darkest colors in the original file)
+			for( decltype( image->getDimension().Width ) x = 0; x < image->getDimension().Width; ++x ) {
+				for( decltype( image->getDimension().Height ) y = 0; y < image->getDimension().Height; ++y ) {
+					auto pixel = image->getPixel( x, y );
+					if( pixel.getAlpha() > 0 ) {
+						auto luminance = pixel.getLuminance();
+						if( luminance == lightestLuminance ) {
+							auto newColor = colorTwo;
+							newColor.setAlpha( pixel.getAlpha() );
+							image->setPixel( x, y, newColor );
+						} else if( luminance < lightestLuminance && luminance > darkestLuminance ) {
+							auto interpolation = ( lightestLuminance - luminance ) / 255.0f;
+							auto newColor = colorOne.getInterpolated( colorTwo, interpolation );
+							image->setPixel( x, y , newColor );
+						} else { // if( luminance == darkestLuminance ) {
+							auto newColor = colorOne;
+							newColor.setAlpha( pixel.getAlpha() );
+							image->setPixel( x, y, newColor );
+						}
+					}
+				}
+			}
+			
+			textureName += L"-recolored";
+			texture = resizer.imageToTexture( driver, image, textureName );
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::loadTexture(): " << e.what() << std::endl;
@@ -239,60 +286,10 @@ void Object::moveY( int_fast8_t val ) {
 	}
 }
 
-void Object::setColor( irr::video::SColor newColor ) {
+void Object::setColors( irr::video::SColor newColorOne, irr::video::SColor newColorTwo ) {
 	try {
-		if( newColor == BLACK ) {
-			colorOne = BLACK;
-			colorTwo = GRAY;
-		} else if( newColor == GRAY ) {
-			colorOne = GRAY;
-			colorTwo = BLACK;
-		} else if( newColor == BLUE) {
-			colorOne = BLUE;
-			colorTwo = LIGHTBLUE;
-		} else if( newColor == LIGHTBLUE ) {
-			colorOne = LIGHTBLUE;
-			colorTwo = BLUE;
-		} else if( newColor == GREEN ) {
-			colorOne = GREEN;
-			colorTwo = LIGHTGREEN;
-		} else if( newColor == LIGHTGREEN ) {
-			colorOne = LIGHTGREEN;
-			colorTwo = GREEN;
-		} else if( newColor == CYAN ) {
-			colorOne = CYAN;
-			colorTwo = LIGHTCYAN;
-		} else if( newColor == LIGHTCYAN ) {
-			colorOne = LIGHTCYAN;
-			colorTwo = CYAN;
-		} else if( newColor == RED ) {
-			colorOne = RED;
-			colorTwo = LIGHTRED;
-		} else if( newColor == LIGHTRED ) {
-			colorOne = LIGHTRED;
-			colorTwo = RED;
-		} else if( newColor == MAGENTA ) {
-			colorOne = MAGENTA;
-			colorTwo = LIGHTMAGENTA;
-		} else if( newColor == LIGHTMAGENTA ) {
-			colorOne = LIGHTMAGENTA;
-			colorTwo = MAGENTA;
-		} else if( newColor == BROWN ) {
-			colorOne = YELLOW;
-			colorTwo = BROWN;
-		} else if( newColor == YELLOW ) {
-			colorOne = BROWN;
-			colorTwo = YELLOW;
-		} else if( newColor == LIGHTGRAY ) {
-			colorOne = LIGHTGRAY;
-			colorTwo = WHITE;
-		} else if( newColor == WHITE ) {
-			colorOne = WHITE;
-			colorTwo = LIGHTGRAY;
-		} else {
-			colorOne = GREEN; //Magenta on a green background: Never used in DOS games because, on composite monitors, it left too much color 'smearing'. Likewise, it should never be used in this game.
-			colorTwo = MAGENTA;
-		}
+		colorOne = newColorOne;
+		colorTwo = newColorTwo;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::setColor(): " << e.what() << std::endl;
 	}
@@ -300,6 +297,160 @@ void Object::setColor( irr::video::SColor newColor ) {
 
 void Object::setColorBasedOnNum( uint_fast8_t num ) {
 	try {
+		uint_fast8_t maxNum = NUMCOLORS - 1; //Numbers can start at zero, thus the maximum is one less than the total
+		uint_fast8_t numOne = num % maxNum;
+		uint_fast8_t numTwo = ( num / NUMCOLORS ) % maxNum;
+		
+		numTwo = maxNum - numTwo;
+		if( numOne == numTwo ) {
+			numTwo = ( numTwo + 1 ) % maxNum;
+		}
+		
+		switch( numOne ) {
+			case 0: {
+				colorOne = BLACK;
+				break;
+			}
+			case 1: {
+				colorOne = BLUE;
+				break;
+			}
+			case 2: {
+				colorOne = GREEN;
+				break;
+			}
+			case 3: {
+				colorOne = CYAN;
+				break;
+			}
+			case 4: {
+				colorOne = RED;
+				break;
+			}
+			case 5: {
+				colorOne = MAGENTA;
+				break;
+			}
+			case 6: {
+				colorOne = BROWN;
+				break;
+			}
+			case 7: {
+				colorOne = GRAY;
+				break;
+			}
+			case 8: {
+				colorOne = LIGHTGRAY;
+				break;
+			}
+			case 9: {
+				colorOne = LIGHTBLUE;
+				break;
+			}
+			case 10: {
+				colorOne = LIGHTGREEN;
+				break;
+			}
+			case 11: {
+				colorOne = LIGHTCYAN;
+				break;
+			}
+			case 12: {
+				colorOne = LIGHTRED;
+				break;
+			}
+			case 13: {
+				colorOne = LIGHTMAGENTA;
+				break;
+			}
+			case 14: {
+				colorOne = YELLOW;
+				break;
+			}
+			case 15: {
+				colorOne = WHITE;
+				break;
+			}
+			default: { //Just adding this to be extra careful
+				colorOne = BLACK;
+				break;
+			}
+		}
+		
+		switch( numTwo ) {
+			case 0: {
+				colorTwo = BLACK;
+				break;
+			}
+			case 1: {
+				colorTwo = BLUE;
+				break;
+			}
+			case 2: {
+				colorTwo = GREEN;
+				break;
+			}
+			case 3: {
+				colorTwo = CYAN;
+				break;
+			}
+			case 4: {
+				colorTwo = RED;
+				break;
+			}
+			case 5: {
+				colorTwo = MAGENTA;
+				break;
+			}
+			case 6: {
+				colorTwo = BROWN;
+				break;
+			}
+			case 7: {
+				colorTwo = GRAY;
+				break;
+			}
+			case 8: {
+				colorTwo = LIGHTGRAY;
+				break;
+			}
+			case 9: {
+				colorTwo = LIGHTBLUE;
+				break;
+			}
+			case 10: {
+				colorTwo = LIGHTGREEN;
+				break;
+			}
+			case 11: {
+				colorTwo = LIGHTCYAN;
+				break;
+			}
+			case 12: {
+				colorTwo = LIGHTRED;
+				break;
+			}
+			case 13: {
+				colorTwo = LIGHTMAGENTA;
+				break;
+			}
+			case 14: {
+				colorTwo = YELLOW;
+				break;
+			}
+			case 15: {
+				colorTwo = WHITE;
+				break;
+			}
+			default: { //Just adding this to be extra careful
+				colorTwo = BLACK;
+				break;
+			}
+		}
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in Object::setColorBasedOnNum(): " << e.what() << std::endl;
+	}
+	/*try {
 		switch( num % ( NUMCOLORS - 3 ) ) { //Subtract 3 because there are some colors we're not using
 			case 0: {
 				setColor( RED ); //Special case: We don't want the player to be black (color 0) against a black background;
@@ -357,7 +508,7 @@ void Object::setColorBasedOnNum( uint_fast8_t num ) {
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::setColorBasedOnNum(): " << e.what() << std::endl;
-	}
+	}*/
 }
 
 void Object::setPos( uint_fast8_t newX, uint_fast8_t newY ) {

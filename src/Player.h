@@ -54,7 +54,7 @@ class Player : public Object {
 		void removeItem();
 		void reset();
 		
-		void setColorBasedOnNum(); //We provide our own version of this function here because we know which color to use.
+		void setColorBasedOnNum(); //We provide our own version of this function here because we know which number to use.
 		void setGM( GameManager* newGM );
 		void setPlayerNumber( uint_fast8_t newNumber );
 		void setScore( intmax_t newScore );

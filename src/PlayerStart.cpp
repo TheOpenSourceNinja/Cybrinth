@@ -16,6 +16,7 @@
 
 PlayerStart::PlayerStart() {
 	try {
+		setColors( GRAY, LIGHTRED );
 		reset();
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in PlayerStart::PlayerStart(): " << e.what() << std::endl;
@@ -34,7 +35,6 @@ void PlayerStart::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size
 		irr::video::IVideoDriver* driver = device->getVideoDriver();
 		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) );
 		tempImage->fill( WHITE );
-		setColor( BLACK );
 		
 		driver->removeTexture( texture );
 		texture = driver->addTexture( L"playerStart", tempImage );

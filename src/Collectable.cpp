@@ -85,52 +85,48 @@ void Collectable::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size
 				break;
 			}
 			case ACID: {
-				texture = driver->getTexture( L"images/items/acid.png" ); //TODO: Make this able to accept formats other than png
+				//acid.c:
+				#include "compiled-images/acid.cpp"
 				
-				if( texture == nullptr ) {
-					//acid.c:
-					#include "compiled-images/acid.cpp"
-					
-					irr::video::ECOLOR_FORMAT format = irr::video::ECF_UNKNOWN;
-					switch( gimp_image_acid.bytes_per_pixel ) {
-						case 2: {
-							format = irr::video::ECF_R5G6B5;
-							break;
-						}
-						case 3: {
-							format = irr::video::ECF_R8G8B8;
-							break;
-						}
-						case 4: {
-							format = irr::video::ECF_A8R8G8B8;
-						}
+				irr::video::ECOLOR_FORMAT format = irr::video::ECF_UNKNOWN;
+				switch( gimp_image_acid.bytes_per_pixel ) {
+					case 2: {
+						format = irr::video::ECF_R5G6B5;
+						break;
 					}
+					case 3: {
+						format = irr::video::ECF_R8G8B8;
+						break;
+					}
+					case 4: {
+						format = irr::video::ECF_A8R8G8B8;
+					}
+				}
+				
+				{ //The following line works but produces the wrong colors, since GIMP outputs in RGBA and Irrlicht apparently expects ARGB
+					//irr::video::IImage* temp = driver->createImageFromData( format, irr::core::dimension2d< irr::u32 >( gimp_image.width, gimp_image.height ), const_cast< unsigned char* >( gimp_image.pixel_data ), false, false );
 					
-					{ //The following line works but produces the wrong colors, since GIMP outputs in RGBA and Irrlicht apparently expects ARGB
-						//irr::video::IImage* temp = driver->createImageFromData( format, irr::core::dimension2d< irr::u32 >( gimp_image.width, gimp_image.height ), const_cast< unsigned char* >( gimp_image.pixel_data ), false, false );
-						
-						irr::video::IImage* temp = driver->createImage( format, irr::core::dimension2d< irr::u32 >( gimp_image_acid.width, gimp_image_acid.height ) );
-						
-						for( decltype( gimp_image_acid.height ) y = 0; y < gimp_image_acid.height; ++y ) {
-							for( decltype( gimp_image_acid.width ) x = 0; x < gimp_image_acid.width; ++x ) {
-								unsigned char pixel[ 4 ];
-								pixel[ 0 ] = gimp_image_acid.pixel_data[ ( y * gimp_image_acid.width * gimp_image_acid.bytes_per_pixel ) + ( x * gimp_image_acid.bytes_per_pixel ) + 0 ]; //Red
-								pixel[ 1 ] = gimp_image_acid.pixel_data[ ( y * gimp_image_acid.width * gimp_image_acid.bytes_per_pixel ) + ( x * gimp_image_acid.bytes_per_pixel ) + 1 ]; //Green
-								pixel[ 2 ] = gimp_image_acid.pixel_data[ ( y * gimp_image_acid.width * gimp_image_acid.bytes_per_pixel ) + ( x * gimp_image_acid.bytes_per_pixel ) + 2 ]; //Blue
-								
-								//Alpha
-								if( gimp_image_acid.bytes_per_pixel == 4 ) {
-									pixel[ 3 ] = gimp_image_acid.pixel_data[ ( y * gimp_image_acid.width * gimp_image_acid.bytes_per_pixel ) + ( x * gimp_image_acid.bytes_per_pixel ) + 3 ];
-								} else {
-									pixel[ 3 ] = 255;
-								}
-								
-								temp->setPixel( x, y, irr::video::SColor( pixel[ 3 ], pixel[ 0 ], pixel[ 1 ], pixel[ 2 ] ) );
+					irr::video::IImage* temp = driver->createImage( format, irr::core::dimension2d< irr::u32 >( gimp_image_acid.width, gimp_image_acid.height ) );
+					
+					for( decltype( gimp_image_acid.height ) y = 0; y < gimp_image_acid.height; ++y ) {
+						for( decltype( gimp_image_acid.width ) x = 0; x < gimp_image_acid.width; ++x ) {
+							unsigned char pixel[ 4 ];
+							pixel[ 0 ] = gimp_image_acid.pixel_data[ ( y * gimp_image_acid.width * gimp_image_acid.bytes_per_pixel ) + ( x * gimp_image_acid.bytes_per_pixel ) + 0 ]; //Red
+							pixel[ 1 ] = gimp_image_acid.pixel_data[ ( y * gimp_image_acid.width * gimp_image_acid.bytes_per_pixel ) + ( x * gimp_image_acid.bytes_per_pixel ) + 1 ]; //Green
+							pixel[ 2 ] = gimp_image_acid.pixel_data[ ( y * gimp_image_acid.width * gimp_image_acid.bytes_per_pixel ) + ( x * gimp_image_acid.bytes_per_pixel ) + 2 ]; //Blue
+							
+							//Alpha
+							if( gimp_image_acid.bytes_per_pixel == 4 ) {
+								pixel[ 3 ] = gimp_image_acid.pixel_data[ ( y * gimp_image_acid.width * gimp_image_acid.bytes_per_pixel ) + ( x * gimp_image_acid.bytes_per_pixel ) + 3 ];
+							} else {
+								pixel[ 3 ] = 255;
 							}
+							
+							temp->setPixel( x, y, irr::video::SColor( pixel[ 3 ], pixel[ 0 ], pixel[ 1 ], pixel[ 2 ] ) );
 						}
-						
-						texture = resizer.imageToTexture( driver, temp, "acid" );
 					}
+					
+					texture = resizer.imageToTexture( driver, temp, "acid" );
 				}
 				
 				break;
@@ -159,10 +155,7 @@ void Collectable::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_f
 		//wcout << L"desired size: " << smaller << std::endl;
 
 		if( texture->getSize().Width != smaller && texture->getSize().Height != smaller ) {
-			loadTexture( device );
-			if( texture->getSize().Width != smaller && texture->getSize().Height != smaller ) {
-				texture = resizer.resize( texture, smaller, smaller, driver );
-			}
+			loadTexture( device, smaller );
 		}
 
 		Object::draw( device, width, height );
@@ -180,9 +173,22 @@ Collectable::type_t Collectable::getType() {
 }
 
 void Collectable::loadTexture( irr::IrrlichtDevice* device ) {
-	Object::loadTexture( device, 1, L"collectable" );
+	loadTexture( device, 1 );
+}
+
+void Collectable::loadTexture( irr::IrrlichtDevice* device, uint_fast8_t size ) {
+	switch( type ) {
+		case KEY: {
+			Object::loadTexture( device, size, L"key" );
+			break;
+		}
+		case ACID: {
+			Object::loadTexture( device, size, L"acid" );
+			break;
+		}
+	}
 	if( texture == nullptr || texture == NULL ) {
-		createTexture( device, 1 );
+		createTexture( device, size );
 	}
 }
 
@@ -196,10 +202,13 @@ void Collectable::setType( type_t newType ) {
 
 		switch( type ) {
 			case KEY: {
-					setColor( YELLOW );
-					break;
-				}
-			default: break;
+				setColors( BROWN, YELLOW );
+				break;
+			}
+			case ACID: {
+				setColors( BLUE, LIGHTGREEN );
+				break;
+			}
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Collectable::setType(): " << e.what() << std::endl;

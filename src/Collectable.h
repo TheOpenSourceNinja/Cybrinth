@@ -32,6 +32,7 @@ class Collectable : public Object {
 		type_t getType();
 		
 		void loadTexture( irr::IrrlichtDevice* device );
+		void loadTexture( irr::IrrlichtDevice* device, uint_fast8_t size );
 		
 		bool owned;
 		
