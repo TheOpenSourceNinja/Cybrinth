@@ -154,7 +154,7 @@ bool MazeManager::loadFromFile( boost::filesystem::path src ) {
 		}
 		
 		boost::filesystem::wifstream file; //Identical to a standard C++ fstream, except it takes Boost paths
-		file.open( src, std::ifstream::binary | std::ifstream::trunc );
+		file.open( src, boost::filesystem::wifstream::binary );
 
 		if( file.is_open() ) {
 			uint_fast16_t newRandomSeed;
@@ -163,7 +163,7 @@ bool MazeManager::loadFromFile( boost::filesystem::path src ) {
 			gameManager->newMaze( newRandomSeed );
 			return true;
 		} else {
-			throw( std::wstring( L"Cannot open file: " ) + src.wstring() );
+			throw( std::wstring( L"Cannot open file: \"" ) + src.wstring() + L"\"" );
 		}
 	} catch( const boost::filesystem::filesystem_error &e ) {
 		std::wcerr << L"Boost Filesystem error in MazeManager::loadFromFile(): " << e.what() << std::endl;
@@ -650,7 +650,7 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 		}
 		
 		boost::filesystem::wofstream file; //Identical to a standard C++ wofstream, except it takes Boost paths
-		file.open( dest, std::wofstream::binary | std::wofstream::trunc );
+		file.open( dest, boost::filesystem::wofstream::binary | boost::filesystem::wofstream::trunc );
 		
 		if( file.is_open() ) {
 			file << gameManager->randomSeed;
