@@ -83,7 +83,7 @@ class GameManager : public irr::IEventReceiver {
 		void pickLogo();
 		
 		void resetThings();
-		uint_fast8_t run();
+		uint_fast8_t run( std::wstring fileToLoad ); //If a file was specified on the command line, it will be passed to run().
 		
 		void setControls();
 		void setExitConfirmation( irr::gui::IGUIWindow* newWindow );

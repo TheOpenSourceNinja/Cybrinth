@@ -3063,14 +3063,27 @@ void GameManager::resetThings() {
  * The game's main loop. Should only be called by main() in main.cpp
  * Returns: EXIT_SUCCESS if the game exits normally, EXIT_FAILURE if an exception is caught.
  */
-uint_fast8_t GameManager::run() {
+uint_fast8_t GameManager::run( std::wstring fileToLoad ) {
 	try {
 		if( debug ) {
 			std::wcout << L"run() called" << std::endl;
 		}
 		
+		bool firstFileLoaded; //Indicates whether fileToLoad was loaded at the start of the program. If a file to load is specified on the command line, this will only be false until that file gets loaded and then will remain true for the rest of the program's run. If no file is specified, this will always be true.
+		if( !fileToLoad.empty() ) {
+			firstFileLoaded = false;
+		} else {
+			firstFileLoaded = true; //No file specified, so no need to try to load it.
+		}
+		
 		while( device->run() && !donePlaying ) {
-			newMaze();
+			if( firstFileLoaded ) {
+				newMaze();
+			} else {
+				newMaze( fileToLoad );
+				firstFileLoaded = true;
+			}
+			
 			haveShownLogo = true; //This should only ever be false at the start of the program.
 
 			while( device->run() && !won && !donePlaying ) {

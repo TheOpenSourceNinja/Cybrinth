@@ -23,12 +23,26 @@
 	//What can we do if someone doesn't have iostream? I don't know.
 #endif //HAVE_IOSTREAM
 
-int main() {
+int main( int argc, char *argv[] ) {
 	//PACKAGE_NAME, PACKAGE_VERSION, and PACKAGE_BUGREPORT are defined by Autoconf and passed to the compiler by command line arguments - you won't find them in any header. The same goes for HAVE_IOSTREAM above.
 	std::wcout << L"Now starting " << PACKAGE_NAME << L" version " << PACKAGE_VERSION << L". Please report bugs to " << PACKAGE_BUGREPORT << L". Enjoy!" << std::endl;
+	
 	try {
 		GameManager gm; //Lots of stuff gets set up in the GameManager constructor
-		return gm.run(); //Now that everything's set up, transfer control to GameManager.run()
+		
+		std::wstring fileToLoad;
+		
+		if( argc > 1 ) {
+			if( argc != 2 ) {
+				std::wcerr << L"Too many command line arguments. " << PACKAGE_NAME << L" expects only one argument on the command line: the name of a file from which to load a maze." << std::endl;
+				return EXIT_FAILURE;
+			} else {
+				StringConverter sc;
+				fileToLoad = sc.toStdWString( argv[ 1 ] );
+			}
+		}
+		
+		return gm.run( fileToLoad ); //Now that everything's set up, transfer control to GameManager.run()
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error caught by main(): " << e.what() << std::endl;
 		return EXIT_FAILURE;
