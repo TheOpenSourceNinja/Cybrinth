@@ -1,3 +1,21 @@
+/**
+ * @file
+ * @author James Dearing <dearingj@lifetime.oregonstate.edu>
+ * 
+ * @section LICENSE
+ * Copyright © 2012-2014.
+ * This file is part of Cybrinth.
+ *
+ * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @section DESCRIPTION
+ * The ImageModifier class does various things related to image manipulation and conversion.
+ */
+
 #include "ImageModifier.h"
 #include "StringConverter.h"
 
@@ -27,20 +45,6 @@ irr::video::ITexture* ImageModifier::imageToTexture( irr::video::IVideoDriver* d
 
 irr::video::ITexture* ImageModifier::resize( irr::video::ITexture* image, uint_fast32_t width, uint_fast32_t height, irr::video::IVideoDriver* driver ) {
 	try {
-		/*if( image == nullptr || image->getOriginalSize().Width < width || image->getOriginalSize().Height < height ) {
-			switch( type ) {
-				case KEY: { //COLLECTABLE_KEY loads the texture from an image, so load the image before resizing
-						loadTexture( driver );
-						break;
-					}
-				default: {
-					if( image == nullptr ) {
-						loadTexture( driver );
-					}
-					break;
-				}
-			}
-		}*/
 		irr::video::IImage* tempImage = textureToImage( driver, image );
 		//driver->removeTexture( image ); //Why does this make the program crash?
 		auto name = image->getName().getInternalName() + L"-resized";
@@ -58,20 +62,6 @@ irr::video::ITexture* ImageModifier::resize( irr::video::ITexture* image, uint_f
 
 irr::video::IImage* ImageModifier::resize( irr::video::IImage* image, uint_fast32_t width, uint_fast32_t height, irr::video::IVideoDriver* driver ) {
 	try {
-		/*if( image == nullptr || image->getOriginalSize().Width < width || image->getOriginalSize().Height < height ) {
-			switch( type ) {
-				case KEY: { //COLLECTABLE_KEY loads the texture from an image, so load the image before resizing
-						loadTexture( driver );
-						break;
-					}
-				default: {
-					if( image == nullptr ) {
-						loadTexture( driver );
-					}
-					break;
-				}
-			}
-		}*/
 		irr::video::IImage* tempImage = image;//textureToImage( driver, image );
 		//driver->removeTexture( image );
 		//image->drop();

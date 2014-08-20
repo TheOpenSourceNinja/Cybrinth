@@ -1,5 +1,9 @@
 /**
- * Copyright © 2012-2014 James Dearing.
+ * @file
+ * @author James Dearing <dearingj@lifetime.oregonstate.edu>
+ * 
+ * @section LICENSE
+ * Copyright © 2012-2014.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -7,7 +11,10 @@
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * 
+ * @section DESCRIPTION
+ * The Collectable class is a generic class for in-game items, such as keys and acid.
+ */
 
 #include "Collectable.h"
 #include "colors.h"
@@ -135,9 +142,15 @@ void Collectable::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size
 		}
 
 		if( texture == nullptr ) {
-			irr::video::IImage* temp = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( 2, 2 ) );
+			irr::video::IImage* temp = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( size, size ) );
 			temp->fill( WHITE );
 			texture = resizer.imageToTexture( driver, temp, "generic collectable" );
+		}
+		
+		if( texture != nullptr && texture->getSize() != irr::core::dimension2d< irr::u32 >( size, size ) ) {
+			auto newTexture = resizer.resize( texture, size, size, driver );
+			driver->removeTexture( texture );
+			texture = newTexture;
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Collectable::loadTexture(): " << e.what() << std::endl;
@@ -146,15 +159,12 @@ void Collectable::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size
 
 void Collectable::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height ) {
 	try {
-		irr::video::IVideoDriver* driver = device->getVideoDriver();
-		uint_fast16_t smaller = height;
+		auto smaller = height;
 		if( smaller > width ) {
 			smaller = width;
 		}
-
-		//wcout << L"desired size: " << smaller << std::endl;
-
-		if( texture->getSize().Width != smaller && texture->getSize().Height != smaller ) {
+		
+		if( texture->getSize() != irr::core::dimension2d< decltype( texture->getSize().Height ) >( smaller, smaller ) ) {
 			loadTexture( device, smaller );
 		}
 

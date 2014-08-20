@@ -1,5 +1,9 @@
 /**
- * Copyright © 2012-2014 James Dearing.
+ * @file
+ * @author James Dearing <dearingj@lifetime.oregonstate.edu>
+ * 
+ * @section LICENSE
+ * Copyright © 2012-2014.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -7,7 +11,11 @@
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * 
+ * @section DESCRIPTION
+ * This class exists just to convert between various types of strings. I have no idea whether I'm doing it right. I just want to make sure this program can work with non-English characters. If anyone can suggest a way to improve my code, fix any bugs, or whatever, PLEASE send in a patch!
+ */
+ 
 #include "StringConverter.h"
 #ifdef HAVE_IOSTREAM
 #include <iostream>
@@ -17,13 +25,11 @@
 //#include <codecvt>
 #include <locale>
 
-/**
-This class exists just to convert between various types of strings. I have no idea whether I'm doing it right. I just want to make sure this program can work with non-English characters. If anyone can suggest a way to improve my code, fix any bugs, or whatever, PLEASE send in a patch!
-**/
-
 
 StringConverter::StringConverter() {
 	try {
+		wCharArray = nullptr;
+		charArray = nullptr;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::StringConverter(): " << e.what() << std::endl;
 	}
@@ -44,6 +50,10 @@ StringConverter::StringConverter() {
 		return s;
 	}
 }*/
+
+irr::core::stringw StringConverter::toIrrlichtStringW( std::string input ) {
+	return toIrrlichtStringW( toStdWString( input ) );
+}
 
 irr::core::stringw StringConverter::toIrrlichtStringW( std::wstring input ) {
 	try {
@@ -284,24 +294,55 @@ std::wstring StringConverter::toStdWString( long double input ) {
 	}
 }
 
-/*const wchar_t* StringConverter::toWCharArray( std::wstring input ) {
-	return input.c_str();
+const wchar_t* StringConverter::toWCharArray( std::wstring input ) {
+	if( wCharArray != nullptr ) {
+		delete wCharArray;
+	}
+	
+	wCharArray = ( decltype( wCharArray ) ) input.c_str();
+	
+	return wCharArray;
 }
 
 const wchar_t* StringConverter::toWCharArray( irr::core::stringw input ) {
-	return input.c_str();
+	if( wCharArray != nullptr ) {
+		delete wCharArray;
+	}
+	
+	wCharArray = ( decltype( wCharArray ) ) input.c_str();
+	
+	return wCharArray;
 }
 
 const wchar_t* StringConverter::toWCharArray( char* input ) {
-	return toStdWString( input ).c_str();
+	if( wCharArray != nullptr ) {
+		delete wCharArray;
+	}
+	
+	wCharArray = ( decltype( wCharArray ) ) toStdWString( input ).c_str();
+	
+	return wCharArray;
 }
 
 const wchar_t* StringConverter::toWCharArray( const char* input ) {
-	return toStdWString( input ).c_str();
-}*/
+	if( wCharArray != nullptr ) {
+		delete wCharArray;
+	}
+	
+	wCharArray = ( decltype( wCharArray ) ) toStdWString( input ).c_str();
+	
+	return wCharArray;
+}
 
 StringConverter::~StringConverter() {
 	try {
+		if( wCharArray != nullptr ) {
+			delete wCharArray;
+		}
+		
+		if( charArray != nullptr ) {
+			delete charArray;
+		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in StringConverter::~StringConverter(): " << e.what() << std::endl;
 	}

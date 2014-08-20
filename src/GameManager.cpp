@@ -1,19 +1,19 @@
 /**
- * Copyright © 2012-2014 James Dearing.
+ * @file
+ * @author James Dearing <dearingj@lifetime.oregonstate.edu>
+ * 
+ * @section LICENSE
+ * Copyright © 2012-2014.
  * This file is part of Cybrinth.
  *
- * Cybrinth is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * Cybrinth is distributed in the hope that it will be fun, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public
- * License for more details.
+ * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public
- * License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @section DESCRIPTION
+ * The GameManager class is the overseer of all other classes. It's also where the game's main loop is.
  */
 
 #include "GameManager.h"
@@ -27,9 +27,9 @@
 #include <tag.h>
 
 #if defined WINDOWS //Networking stuff
-#include <winsock>
+	#include <winsock>
 #elif defined LINUX
-//don't know what to include here if anything
+	//don't know what to include here if anything
 #endif //What about other operating systems? I don't know what to include for BSD etc.
 
 //Custom user events for Irrlicht
@@ -41,7 +41,7 @@ enum user_event_t { USER_EVENT_WINDOW_RESIZE };
 //TODO: Improve AI. Add any solving algorithms we can think of.
 //TODO: Add shader to simulate old monitor?
 //TODO: Add more backgrounds.
-//TODO: Support video as backgrounds?
+//TODO: Support video or APNG as backgrounds?
 //TODO: Add theme support (theme = (zipped?) set of backgrounds, player images, collectable images)
 //TODO: If we ever add achievements, players should get an achievement for a September score (where a player's score = the current day of Eternal September)
 //TODO: Add an option to use only the built-in font. This should greatly speed up loading on underpowered systems like the Pi. Is this really necessary though? All you have to do currently is delete the font file in the working directory, right?
@@ -665,6 +665,13 @@ GameManager::~GameManager() {
 				std::wcout << L"GameManager destructor called" << std::endl;
 		}
 		
+		if( !isNull( loadMazeDialog ) ) {
+			delete loadMazeDialog;
+		}
+		if( !isNull( saveMazeDialog ) ) {
+			delete saveMazeDialog;
+		}
+		
 		driver->removeAllHardwareBuffers();
 		driver->removeAllTextures();
 
@@ -714,6 +721,8 @@ GameManager::GameManager() {
 		textFont = nullptr;
 		tipFont = nullptr;
 		backgroundTexture = nullptr;
+		loadMazeDialog = nullptr;
+		saveMazeDialog = nullptr;
 
 		loading = L"Loading...";
 		proTipPrefix = L"Pro tip: ";
@@ -2230,19 +2239,27 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 			case irr::EET_GUI_EVENT: {
 				switch( event.GUIEvent.EventType ) {
 					case irr::gui::EGET_FILE_SELECTED: {
-						if( event.GUIEvent.Caller->getID() == fileChooser->getID() ) {
+						if( !isNull( loadMazeDialog ) && event.GUIEvent.Caller->getID() == loadMazeDialog->getID() ) {
 							if( debug ) {
-								std::wcout << L"File selected. Folder: " << stringConverter.toStdWString( fileChooser->getDirectoryName() ) << L"\tFile: " << fileChooser->getFileName() << std::endl;
+								std::wcout << L"File selected for loading. Folder: " << stringConverter.toStdWString( loadMazeDialog->getDirectoryName() ) << L"\tFile: " << loadMazeDialog->getFileName() << std::endl;
 							}
 							boost::filesystem::current_path( currentDirectory ); //Resets the actual current directory to currentDirectory, since the file chooser can change the current directory.
 
-							newMaze( fileChooser->getFileName() );
+							newMaze( loadMazeDialog->getFileName() );
+							return true;
+						} else if( !isNull( saveMazeDialog ) && event.GUIEvent.Caller->getID() == saveMazeDialog->getID() ) {
+							if( debug ) {
+								std::wcout << L"File selected for saving. Folder: " << stringConverter.toStdWString( loadMazeDialog->getDirectoryName() ) << L"\tFile: " << loadMazeDialog->getFileName() << std::endl;
+							}
+							boost::filesystem::current_path( currentDirectory ); //Resets the actual current directory to currentDirectory, since the file chooser can change the current directory.
+
+							mazeManager.saveToFile( saveMazeDialog->getFileName() );
 							return true;
 						}
 						break;
 					}
 					case irr::gui::EGET_DIRECTORY_SELECTED: {
-						if( event.GUIEvent.Caller->getID() == fileChooser->getID() ) {
+						if( !isNull( loadMazeDialog ) && event.GUIEvent.Caller->getID() == loadMazeDialog->getID() ) {
 							if( debug ) {
 								std::wcout << L"Folder selected." << std::endl;
 							}
@@ -3971,9 +3988,9 @@ void GameManager::setExitConfirmation( irr::gui::IGUIWindow* newWindow ) {
 /**
  * Called by menuManager.
  */
-void GameManager::setFileChooser( irr::gui::IGUIFileOpenDialog* newChooser ) {
+/*void GameManager::setFileChooser( irr::gui::IGUIFileOpenDialog* newChooser ) {
 	fileChooser = newChooser;
-}
+}*/
 
 /**
  * Sets loadingProgress
@@ -3988,6 +4005,28 @@ void GameManager::setLoadingPercentage( float newPercent ) {
  		loadingProgress = 0;
  	}
  }
+
+/**
+ * Creates a file selection dialog for loading the maze
+ */
+void GameManager::showLoadMazeDialog() {
+	if( !isNull( loadMazeDialog ) ) {
+		delete loadMazeDialog;
+	}
+	loadMazeDialog = new FileSelectorDialog( L"Load Maze", gui, gui->getRootGUIElement(), 0, FileSelectorDialog::EFST_OPEN_DIALOG );
+	loadMazeDialog->addFileFilter( mazeManager.getFileTypeName(), mazeManager.getFileTypeExtension(), driver->getTexture( L"images/icon.png" ) );
+}
+
+/**
+ * Creates a file selection dialog for saving the maze
+ */
+void GameManager::showSaveMazeDialog() {
+	if( !isNull( saveMazeDialog ) ) {
+		delete saveMazeDialog;
+	}
+	saveMazeDialog = new FileSelectorDialog( L"Save Maze", gui, gui->getRootGUIElement(), 1, FileSelectorDialog::EFST_SAVE_DIALOG );
+	//saveMazeDialog->addFileFilter( mazeManager.getFileTypeName(), mazeManager.getFileTypeExtension(), driver->getTexture( L"images/icon.png" ) );
+}
 
 /**
  * Sets showingLoadingScreen to true and timeStartedLoading to the current time, then calls drawLoadingScreen().

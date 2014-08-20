@@ -1,5 +1,9 @@
 /**
- * Copyright © 2012-2014 James Dearing.
+ * @file
+ * @author James Dearing <dearingj@lifetime.oregonstate.edu>
+ * 
+ * @section LICENSE
+ * Copyright © 2012-2014.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -7,10 +11,13 @@
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * 
+ * @section DESCRIPTION
+ * The SystemSpecificsManager class is responsible for anything that varies from one operating system to another, such as determining which folders are likely to contain fonts.
+ */
 
 #ifdef HAVE_STDLIB_H
-#include <stdlib.h>
+	#include <stdlib.h>
 #endif //HAVE_STDLIB_H. I don't know what we'll do if we don't have this header.
 
 #include <wchar.h>
@@ -47,8 +54,11 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 	std::vector< boost::filesystem::path > fontFolders;
 	fontFolders.push_back( boost::filesystem::current_path() );
 	#if defined WINDOWS
-		fontFolders.push_back( L"C:\Windows\Fonts" );
-		fontFolders.push_back( L"C:\WINNT\Fonts" );
+		try {
+			fontFolders.push_back( getEnvironmentVariable( "%SYSTEMROOT%" ) + L"\Fonts" );
+			fontFolders.push_back( getEnvironmentVariable( "%WINDIR%" ) + L"\Fonts" );
+		} catch( std::wstring error ) {
+		}
 	#elif defined LINUX
 		fontFolders.push_back( L"/usr/share/X11/fonts/" );
 		fontFolders.push_back( L"/usr/share/fonts/opentype" ); //This and the next line are a workaround: the first font my system finds in /usr/share/fonts is invisible

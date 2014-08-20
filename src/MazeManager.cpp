@@ -1,3 +1,21 @@
+/**
+ * @file
+ * @author James Dearing <dearingj@lifetime.oregonstate.edu>
+ * 
+ * @section LICENSE
+ * Copyright © 2012-2014.
+ * This file is part of Cybrinth.
+ *
+ * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ *
+ * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @section DESCRIPTION
+ * The MazeManager class is responsible for creating, loading, and saving mazes.
+ */
+
 #include "colors.h"
 #include "MazeManager.h"
 #include "GameManager.h"
@@ -128,6 +146,14 @@ void MazeManager::draw( irr::video::IVideoDriver* driver, uint_fast16_t cellWidt
 	}
 }
 
+irr::core::stringw MazeManager::getFileTypeExtension() {
+	return fileTypeExtension;
+}
+
+irr::core::stringw MazeManager::getFileTypeName() {
+	return fileTypeName;
+}
+
 bool MazeManager::loadFromFile() {
 	try {
 		return loadFromFile( L"default.maz" );
@@ -157,7 +183,7 @@ bool MazeManager::loadFromFile( boost::filesystem::path src ) {
 		file.open( src, boost::filesystem::wifstream::binary );
 
 		if( file.is_open() ) {
-			uint_fast16_t newRandomSeed;
+			decltype( gameManager->randomSeed ) newRandomSeed;
 			file >> newRandomSeed;
 			file.close();
 			gameManager->newMaze( newRandomSeed );
@@ -512,6 +538,10 @@ MazeManager::MazeManager() {
 		rows = 0;
 		maze = nullptr;
 		gameManager = nullptr;
+		StringConverter sc;
+		fileTypeName = sc.toIrrlichtStringW( PACKAGE_NAME );
+		fileTypeName.append( L" maze" );
+		fileTypeExtension = fileTypeName.subString( 0, 1, true ) + L"maze";
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::MazeManager(): " << e.what() << std::endl;
 	}
@@ -634,17 +664,18 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 	}
 }
 
-bool MazeManager::saveToFile() {
-	try {
-		return saveToFile( L"default.maz" );
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in MazeManager::saveToFile(): " << e.what() << std::endl;
-		return false;
-	}
-}
-
 bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 	try {
+		
+		{ //Append the desired extension to the file name if it's not already present.
+			std::wstring destExtension = dest.extension().wstring();
+			destExtension.erase( destExtension.begin() ); //The first character is the '.' which we don't include in fileTypeExtension
+			if( !fileTypeExtension.equals_ignore_case( gameManager->stringConverter.toIrrlichtStringW( destExtension ) ) ) {
+				dest += L".";
+				dest += gameManager->stringConverter.toStdWString( fileTypeExtension );
+			}
+		}
+		
 		if( is_directory( dest ) ) {
 			throw( std::wstring( L"Directory specified, file needed: " ) + dest.wstring() );
 		}

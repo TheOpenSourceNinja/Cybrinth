@@ -1,8 +1,9 @@
-// *** ADDED BY HEADER FIXUP ***
-#include <cstdlib>
-// *** END ***
 /**
- * Copyright © 2012-2014 James Dearing.
+ * @file
+ * @author James Dearing <dearingj@lifetime.oregonstate.edu>
+ * 
+ * @section LICENSE
+ * Copyright © 2012-2014.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -10,13 +11,17 @@
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * 
+ * @section DESCRIPTION
+ * The GameManager class is the overseer of all other classes. It's also where the game's main loop is.
+ */
 
 #ifndef GAMEMANAGER_H
 #define GAMEMANAGER_H
 
 #include "AI.h"
 #include "Collectable.h"
+#include "FileSelectorDialog.h"
 #include "FontManager.h"
 #include "Goal.h"
 #include "GUIFreetypeFont.h"
@@ -33,6 +38,7 @@
 #include "StringConverter.h"
 #include "SystemSpecificsManager.h"
 
+#include <cstdlib>
 #include <irrlicht/irrlicht.h>
 #include <SDL_mixer.h>
 #ifdef HAVE_STRING
@@ -83,6 +89,8 @@ class GameManager : public irr::IEventReceiver {
 		void setExitConfirmation( irr::gui::IGUIWindow* newWindow );
 		void setFileChooser( irr::gui::IGUIFileOpenDialog* newChooser );
 		void setLoadingPercentage( float newPercent );
+		void showLoadMazeDialog();
+		void showSaveMazeDialog();
 		
 		//Non-functions----------------------------------
 		std::vector< AI > bot;
@@ -239,12 +247,15 @@ class GameManager : public irr::IEventReceiver {
 		
 		std::vector< ControlMapping > controls;
 		
+		FileSelectorDialog* loadMazeDialog;
+		
 		MazeManager mazeManager;
 		
 		NetworkManager network;
 		
 		ImageModifier resizer;
 		
+		FileSelectorDialog* saveMazeDialog;
 		SpellChecker spellChecker;
 		
 		SystemSpecificsManager system; // Flawfinder: ignore
@@ -274,7 +285,7 @@ class GameManager : public irr::IEventReceiver {
 		
 		irr::gui::IGUIWindow* exitConfirmation;
 		
-		irr::gui::IGUIFileOpenDialog* fileChooser;
+		//irr::gui::IGUIFileOpenDialog* fileChooser;
 		
 		irr::core::array< irr::SJoystickInfo > controllerInfo;
 		

@@ -109,8 +109,9 @@ am_cybrinth_OBJECTS = src/AI.$(OBJEXT) src/Collectable.$(OBJEXT) \
 	src/PlayerStart.$(OBJEXT) src/StringConverter.$(OBJEXT) \
 	src/SpellChecker.$(OBJEXT) src/ImageModifier.$(OBJEXT) \
 	src/SystemSpecificsManager.$(OBJEXT) src/MenuManager.$(OBJEXT) \
-	compiled-images/key.$(OBJEXT) compiled-images/acid.$(OBJEXT) \
-	compiled-images/goal.$(OBJEXT) compiled-images/start.$(OBJEXT)
+	src/FileSelectorDialog.$(OBJEXT) compiled-images/key.$(OBJEXT) \
+	compiled-images/acid.$(OBJEXT) compiled-images/goal.$(OBJEXT) \
+	compiled-images/start.$(OBJEXT)
 cybrinth_OBJECTS = $(am_cybrinth_OBJECTS)
 am__DEPENDENCIES_1 =
 cybrinth_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -327,7 +328,8 @@ cybrinth_SOURCES = src/AI.h src/AI.cpp src/Collectable.h \
 	src/SpellChecker.cpp src/ImageModifier.h src/ImageModifier.cpp \
 	src/SystemSpecificsManager.h src/SystemSpecificsManager.cpp \
 	src/PreprocessorCommands.h src/MenuManager.h \
-	src/MenuManager.cpp compiled-images/key.cpp \
+	src/MenuManager.cpp src/FileSelectorDialog.h \
+	src/FileSelectorDialog.cpp compiled-images/key.cpp \
 	compiled-images/acid.cpp compiled-images/goal.cpp \
 	compiled-images/start.cpp
 # cybrinth_SOURCES += $(wildcard compiled-images/*.cpp)
@@ -457,6 +459,8 @@ src/SystemSpecificsManager.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/MenuManager.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/FileSelectorDialog.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 compiled-images/$(am__dirstamp):
 	@$(MKDIR_P) compiled-images
 	@: > compiled-images/$(am__dirstamp)
@@ -491,6 +495,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/AI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/Collectable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ControlMapping.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/FileSelectorDialog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/FontManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/GUIFreetypeFont.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/GameManager.Po@am__quote@

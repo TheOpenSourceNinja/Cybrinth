@@ -125,6 +125,12 @@
 		<Unit filename="src/ControlMapping.h">
 			<Option target="cybrinth" />
 		</Unit>
+		<Unit filename="src/FileSelectorDialog.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/FileSelectorDialog.h">
+			<Option target="cybrinth" />
+		</Unit>
 		<Unit filename="src/FontManager.cpp">
 			<Option target="cybrinth" />
 		</Unit>
