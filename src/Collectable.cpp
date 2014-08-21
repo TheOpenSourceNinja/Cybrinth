@@ -197,6 +197,7 @@ void Collectable::loadTexture( irr::IrrlichtDevice* device, uint_fast8_t size ) 
 			break;
 		}
 	}
+	// cppcheck-suppress duplicateExpression
 	if( texture == nullptr || texture == NULL ) {
 		createTexture( device, size );
 	}

@@ -79,7 +79,7 @@ class NetworkManager {
 		int fdmax;
 		fd_set master; //Lists all the socket descriptors currently connected, as well as listener
 		fd_set read_fds; //temporary file descriptor list for select(); select() modifies this to indicate which are ready to read
-		char remoteIP[INET6_ADDRSTRLEN ];
+		char remoteIP[ INET6_ADDRSTRLEN ];
 		struct sockaddr_storage remoteaddr; // client address
 		struct timeval timeout;
 		void *get_in_addr( struct sockaddr *sa );

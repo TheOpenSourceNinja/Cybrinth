@@ -17,6 +17,8 @@
  * The GUIFreetypeFont class is used to represent fonts.
  */
 
+//TODO: See http://irrlicht.sourceforge.net/forum/viewtopic.php?f=9&t=49898
+
 #ifndef _GUI_FREETYPE_FONT_H
 #define _GUI_FREETYPE_FONT_H
 

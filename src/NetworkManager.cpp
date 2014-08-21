@@ -55,6 +55,9 @@ NetworkManager::NetworkManager() {
 		backlog = 0;
 		fdmax = 0;
 		setGameManager( nullptr );
+		for( uint_fast8_t i = 0; i < INET6_ADDRSTRLEN; ++i ) {
+			remoteIP[ i ] = '\0';
+		}
 
 		#if defined WINDOWS
 		if (WSAStartup(MAKEWORD(1,1), &wsaData) != 0) {

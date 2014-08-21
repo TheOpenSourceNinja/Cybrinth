@@ -44,7 +44,7 @@ enum user_event_t { USER_EVENT_WINDOW_RESIZE };
 //TODO: Support video or APNG as backgrounds?
 //TODO: Add theme support (theme = (zipped?) set of backgrounds, player images, collectable images)
 //TODO: If we ever add achievements, players should get an achievement for a September score (where a player's score = the current day of Eternal September)
-//TODO: Add an option to use only the built-in font. This should greatly speed up loading on underpowered systems like the Pi. Is this really necessary though? All you have to do currently is delete the font file in the working directory, right?
+//TODO: Add an option to use only the built-in font. This should greatly speed up loading on underpowered systems like the Pi.
 
 /**
  * Figures out which players are human, then figures out whether they're all at the goal.
@@ -92,8 +92,8 @@ bool GameManager::allHumansAtGoal() {
  */
 void GameManager::drawAll() {
 	try {
-		driver->beginScene();
-		//driver->beginScene( false, true );
+		driver->beginScene( true, true, BLACK );
+		//driver->beginScene( false, true, BLACK ); //Things look really trippy if you use this rather than the line above!
 
 		if( !showingLoadingScreen ) {
 			if( showBackgrounds ) {
@@ -746,21 +746,21 @@ GameManager::GameManager() {
 		donePlaying = false;
 		lastTimeControlsProcessed = 0;
 		controlProcessDelay = 100;
-
+		
 		device = irr::createDevice( irr::video::EDT_NULL ); //Must create a device before calling readPrefs();
-
+		
 		if( isNull( device ) ) {
 			throw( std::wstring( L"Cannot create null device. Something is definitely wrong here!" ) );
 		}
-
+		
 		readPrefs();
-
+		
 		if ( debug ) {
 			std::wcout << L"Read prefs, now setting controls" << std::endl;
 		}
-
+		
 		setControls();
-
+		
 		if( fullscreen ) {
 			irr::video::IVideoModeList* vmList = device->getVideoModeList();
 			if( allowSmallSize ) {
@@ -769,18 +769,18 @@ GameManager::GameManager() {
 				windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( minWidth, minHeight ), device->getVideoModeList()->getDesktopResolution() );
 			}
 		}
-
+		
 		viewportSize.set( windowSize.Width - ( windowSize.Width / sideDisplaySizeDenominator ), windowSize.Height - 1 );
-
+		
 		device->closeDevice(); //Signals to the existing device that it needs to close itself on next run() so that we can create a new device
 		device->run(); //This is next run()
 		device->drop(); //Cleans up after the device
-
+		
 		bool sbuffershadows = false; //Would not be visible anyway since this game is 2D
 		IEventReceiver* receiver = this;
-
+		
 		device = createDevice( driverType, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver ); //Most of these parameters were read from the preferences file
-
+		
 		if( isNull( device ) ) {
 			std::wcerr << L"Error: Cannot create device. Trying software renderer." << std::endl;
 			/*device = createDevice( video::EDT_SOFTWARE, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
@@ -805,14 +805,14 @@ GameManager::GameManager() {
 		} else if ( debug ) {
 			std::wcout << L"Got the new device" << std::endl;
 		}
-
+		
 		driver = device->getVideoDriver(); //Not sure if this would be possible with a null device, which is why we don't exit
 		if( isNull( driver ) ) {
 			throw( std::wstring( L"Cannot get video driver" ) );
 		} else if ( debug ) {
 			std::wcout << L"Got the video driver" << std::endl;
 		}
-
+		
 		driver->setTextureCreationFlag( irr::video::ETCF_NO_ALPHA_CHANNEL, false );
 		driver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, false );
 		if( driverType == irr::video::EDT_SOFTWARE || driverType == irr::video:: EDT_BURNINGSVIDEO ) {
@@ -3096,8 +3096,8 @@ uint_fast8_t GameManager::run( std::wstring fileToLoad ) {
 					/*These next 3 lines are for limiting processor usage. I really
 					 *doubt they're all needed, so comment one or another if you
 					 *experience slowness. Two are provided by Irrlicht and the other by SDL.*/
-					//device->yield();
-					device->sleep( 17 ); //17 = 1/60 of a second, rounded up, in milliseconds. My monitor refreshes at 60 Hz.
+					device->yield();
+					//device->sleep( 17 ); //17 = 1/60 of a second, rounded up, in milliseconds. My monitor refreshes at 60 Hz.
 					//SDL_Delay( 17 );
 				}
 

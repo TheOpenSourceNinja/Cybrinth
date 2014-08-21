@@ -542,6 +542,7 @@ MazeManager::MazeManager() {
 		fileTypeName = sc.toIrrlichtStringW( PACKAGE_NAME );
 		fileTypeName.append( L" maze" );
 		fileTypeExtension = fileTypeName.subString( 0, 1, true ) + L"maze";
+		hideUnseen = false;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::MazeManager(): " << e.what() << std::endl;
 	}
