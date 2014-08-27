@@ -82,7 +82,7 @@ void MenuManager::processSelection( GameManager* gm ) {
 		message += stringConverter.toStdWString( PACKAGE_URL );
 		message += L".\n\n";
 		message += stringConverter.toStdWString( PACKAGE_NAME );
-		message += L" is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.";
+		message += L" is distributed 'as is' in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of TITLE, MERCHANTABILITY, COMPLETE DESTRUCTION OF IMPORTANT DATA, or FITNESS FOR A PARTICULAR PURPOSE.";
 		gm->gui->addMessageBox( L"Freedom", stringConverter.toStdWString( message ).c_str() ); //stringConverter.toWCharArray( message ) );
 	}
 }

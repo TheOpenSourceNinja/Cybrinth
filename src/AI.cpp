@@ -37,6 +37,14 @@ AI::AI() : controlsPlayer(0) {
 }
 
 AI::~AI() {
+	try {
+		pathsToLockedCells.clear();
+		pathTaken.clear();
+		pretendCellsVisited.clear();
+		pretendCellsUnvisited.clear();
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in AI::~AI(): " << e.what() << std::endl;
+	}
 }
 
 void AI::allKeysFound() {
@@ -192,6 +200,10 @@ void AI::findSolution() {
 					startSolved = false;
 					break;
 				}
+				case DIJKSTRA: {
+					findSolutionDijkstra( currentPosition );
+					break;
+				}
 				default: {
 					StringConverter sc;
 					throw( std::wstring( L"Algorithm " ) + sc.toStdWString( algorithm ) + L" not yet added to findSolution()." );
@@ -200,6 +212,14 @@ void AI::findSolution() {
 
 			while( !solution.empty() && solution.back() == currentPosition ) {
 				solution.pop_back();
+			}
+			
+			if( gm->getDebugStatus() ) {
+				std::wcout << L"Solution: ";
+				for( decltype( solution.size() ) i = 0; i < solution.size(); ++i ) {
+					std::wcout << L"(" << solution.at( i ).X << L"," << solution.at( i ).Y << L") ";
+				}
+				std::wcout << std::endl;
 			}
 		}
 	} catch( std::exception &e ) {
@@ -232,6 +252,163 @@ void AI::findSolutionDFS( irr::core::position2d< uint_fast8_t > startPosition ) 
 		solution.push_back( startPosition );
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::findSolutionDFS(): " << e.what() << std::endl;
+	}
+}
+
+void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPosition ) {
+	try {
+		if( gm->getDebugStatus() ) {
+			std::wcout << L"Solving the maze using Dijkstra's algorithm. Start position is (" << startPosition.X << L"," << startPosition.Y << L")" << std::endl;
+		}
+		
+		auto maze = gm->getMazeManager();
+		if( maze->rows > 0 && maze->cols > 0 ) { //The maze size can be zero when the game first starts.
+			std::vector< std::vector< irr::core::position2d< uint_fast8_t > > > previous;
+			DijkstraDistance.clear();
+			DijkstraDistance.resize( maze->cols );
+			previous.clear();
+			previous.resize( DijkstraDistance.size() );
+			for( decltype( DijkstraDistance.size() ) i = 0; i < DijkstraDistance.size(); ++i ) {
+				DijkstraDistance.at( i ).clear();
+				DijkstraDistance.at( i ).resize( maze->rows );
+				previous.at( i ).clear();
+				previous.at( i ).resize( maze->rows );
+			}
+			auto undefined = irr::core::position2d< uint_fast8_t >( UINT_FAST8_MAX, UINT_FAST8_MAX ); //An approximation for previous[v]  := undefined
+			//irr::core::position2d< uint_fast8_t > target;
+			std::vector< irr::core::position2d< uint_fast8_t > > targets;
+			decltype( targets.size() ) targetNumber = 0; //If a target gets found, targetNumber will identify it
+			
+			for( decltype( gm->getNumCollectables() ) c = 0; c < gm->getNumCollectables(); ++c ) {
+				auto collectable = gm->getCollectable( c );
+				targets.push_back( irr::core::position2d< uint_fast8_t >( collectable->getX(), collectable->getY() ) );
+			}
+			targets.push_back( irr::core::position2d< uint_fast8_t >( gm->getGoal()->getX(), gm->getGoal()->getY() ) );
+			
+			DijkstraDistance.at( startPosition.X ).at( startPosition.Y ) = 0; //dist[source]  := 0 // Distance from source to source
+			previous.at( startPosition.X ).at( startPosition.Y ) = undefined;
+			
+			for( decltype( maze->cols ) x = 0; x < maze->cols; ++x ) {
+				for( decltype( maze->rows ) y = 0; y < maze->rows; ++y ) { //for each vertex v in Graph: // Initializations
+					auto v = irr::core::position2d< decltype( x ) >( x, y );
+					if( v != startPosition ) { //if v ≠ source
+						DijkstraDistance.at( v.X ).at( v.Y ) = UINT_FAST16_MAX; //dist[v] := infinity // Unknown distance function from source to v
+						previous.at( v.X ).at( v.Y ) = undefined; //previous[v]  := undefined
+					}
+					pretendCellsUnvisited.push_back( v ); //add v to Q // All nodes initially in Q (unvisited nodes)
+				}
+			}
+			
+			bool haveAcid = false;
+			
+			while( !pretendCellsUnvisited.empty() ) { //while Q is not empty: // The main loop
+				
+				if( gm->getDebugStatus() ) {
+					std::wcout << L"Distances: " << std::endl;
+					for( decltype( maze->rows ) y = 0; y < maze->rows; ++y ) {
+						for( decltype( maze->cols ) x = 0; x < maze->cols; ++x ) {
+							std::wcout << DijkstraDistance.at( x ).at( y ) << L"\t";
+						}
+						std::wcout << std::endl;
+					}
+				}
+				
+				uint_fast16_t minDistance = UINT_FAST16_MAX;
+				auto u = pretendCellsUnvisited.at( 0 );
+				for( decltype( pretendCellsUnvisited.size() ) i = 0; i < pretendCellsUnvisited.size(); ++i ) {
+					if( DijkstraDistance.at( pretendCellsUnvisited.at( i ).X ).at( pretendCellsUnvisited.at( i ).Y ) <= minDistance ) {
+						minDistance = DijkstraDistance.at( pretendCellsUnvisited.at( i ).X ).at( pretendCellsUnvisited.at( i ).Y );
+						u = pretendCellsUnvisited.at( i ); //u := vertex in Q with min dist[u] // Source node in first case
+					}
+				}
+				
+				for( decltype( pretendCellsUnvisited.size() ) i = 0; i < pretendCellsUnvisited.size(); ++i ) {
+					if( pretendCellsUnvisited.at( i ) == u ) {
+						pretendCellsUnvisited.erase( pretendCellsUnvisited.begin() + i ); //remove u from Q
+						break;
+					}
+				}
+				
+				bool targetFound = false;
+				for( decltype( targets.size() ) t = 0; !targetFound && t < targets.size(); ++t ) {
+					if( u == targets.at( t ) ) {
+						targetFound = true;
+						/*for( decltype( gm->getNumCollectables() ) c = 0; c < gm->getNumCollectables(); ++c ) { //TODO: Dijkstra's algorithm seems to go into an infinite loop if it recognizes acid. Fix it.
+							auto collectable = gm->getCollectable( c );
+							if( collectable->getX() == u.X && collectable->getY() == u.Y ) {
+								if( collectable->getType() == Collectable::ACID ) {
+									haveAcid = true;
+								}
+								break;
+							}
+						}*/
+						break;
+					}
+				}
+				
+				if( !targetFound ) {
+					decltype( pretendCellsUnvisited ) possibleNeighbors;
+					if( u.X > 0 && effectivelyNoLeftWall( u.X, u.Y, haveAcid ) ) {
+						possibleNeighbors.push_back( irr::core::position2d< uint_fast8_t >( u.X - 1, u.Y ) );
+					}
+					if( u.X < maze->cols - 1 && effectivelyNoLeftWall( u.X + 1, u.Y, haveAcid ) ) {
+						possibleNeighbors.push_back( irr::core::position2d< uint_fast8_t >( u.X + 1, u.Y ) );
+					}
+					if( u.Y > 0 && effectivelyNoTopWall( u.X, u.Y, haveAcid ) ) {
+						possibleNeighbors.push_back( irr::core::position2d< uint_fast8_t >( u.X, u.Y - 1 ) );
+					}
+					if( u.Y < maze->rows - 1 && effectivelyNoTopWall( u.X, u.Y + 1, haveAcid ) ) {
+						possibleNeighbors.push_back( irr::core::position2d< uint_fast8_t >( u.X, u.Y + 1 ) );
+					}
+					
+					uint_fast16_t alt = 0;
+					
+					if( possibleNeighbors.size() > 0 ) {
+						for( decltype( possibleNeighbors.size() ) i = 0; i < possibleNeighbors.size(); ++i ) {
+							bool stillUnvisited = false;
+							irr::core::position2d< uint_fast8_t > v = undefined; //for each neighbor v of u: // where v has not yet been removed from Q.
+							for( decltype( pretendCellsUnvisited.size() ) j = 0; !stillUnvisited && j < pretendCellsUnvisited.size(); ++j ) {
+								if( pretendCellsUnvisited.at( j ) == possibleNeighbors.at( i ) ) {
+									stillUnvisited = true;
+									v = possibleNeighbors.at( i );
+									break;
+								}
+							}
+							
+							if( v != undefined ) {
+								alt = DijkstraDistance.at( u.X ).at( u.Y ) + 1; //alt := dist[u] + length(u, v)
+								if( alt < DijkstraDistance.at( v.X ).at( v.Y ) ) { //if alt < dist[v]: // A shorter path to v has been found
+									DijkstraDistance.at( v.X ).at( v.Y ) = alt;
+									previous.at( v.X ).at( v.Y ) = u; //previous[v]  := u
+								} //end if
+							}
+						} //end for
+					}
+				} //end if u != target
+			} //end while
+			
+			solution.clear(); //S := empty sequence
+			auto u = targets.at( targetNumber ); //u := target
+			while( previous.at( u.X ).at( u.Y ) != undefined ) { //while previous[u] is defined: // Construct the shortest path with a stack S
+				//solution.insert( solution.begin(), u ); //insert u at the beginning of S // Push the vertex into the stack
+				solution.push_back( u );
+				u = previous.at( u.X ).at( u.Y ); //u := previous[u] // Traverse from target to source
+			} //end while
+
+		} else { //Maze size is zero
+		}
+		
+		if( solution.size() > 0 ) {
+			solved = true;
+		}
+		
+		if( gm->getDebugStatus() ) {
+			std::wcout << L"Done solving using Dijkstra's algorithm. Solution size: " << solution.size() << std::endl;
+		}
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in AI::findSolutionDijkstra(): " << e.what() << std::endl;
+	} catch( std::wstring &e ) {
+		std::wcerr << L"Error in AI::findSolutionDijkstra(): " << e << std::endl;
 	}
 }
 
@@ -451,20 +628,6 @@ void AI::move() {
 			while( !solved || solution.empty() ) {
 				findSolution();
 			}
-			/*if( !solved ) {
-				findSolution();
-			}
-			if( solved ) {
-				solved = ( !solution.empty() );
-			}
-			
-			//A workaround for a bug: on rare occasions, findSolution() fails to find a solution. Hoping that calling it again will solve that.
-			if ( !solved ) {
-				findSolution();
-			}
-			if( solved ) {
-				solved = ( !solution.empty() );
-			}*/
 			
 			if( !solution.empty() ) {
 				if( solution.back().X > currentPosition.X ) {

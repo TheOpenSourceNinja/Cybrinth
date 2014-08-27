@@ -194,7 +194,7 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 		
 		texture = driver->getTexture( fileName );
 		
-		if( texture == nullptr ) {
+		if( texture == nullptr || texture == NULL ) {
 			return;
 		}  else {
 			if( texture->getSize() != irr::core::dimension2d< irr::u32 >( size, size ) ) {

@@ -44,7 +44,8 @@ class AI {
 		 */
 		virtual ~AI();
 
-		enum algorithm_t{ DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH, RIGHT_HAND_RULE, LEFT_HAND_RULE };
+		enum algorithm_t{ DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH, RIGHT_HAND_RULE, LEFT_HAND_RULE, DIJKSTRA };
+		
 		/**
 		 * Makes the bot 'forget' that it has visited certain maze cells, specifically those in pathsToLockedCells.
 		 */
@@ -120,6 +121,8 @@ class AI {
 		
 		enum direction_t{ UP, DOWN, LEFT, RIGHT }; ///< Directions, duh.
 		
+		std::vector< std::vector< uint_fast16_t > > DijkstraDistance; 
+		
 		/**
 		 * A wrapper for the other version of this function.
 		 * @param x: the X coordinate of the cell in question.
@@ -159,15 +162,22 @@ class AI {
 		 * Finds a solution using Depth-First Search. Works by calling findSolutionIDDFS() with the max depth possible.
 		 * @param startPosition: the position from which to start searching.
 		 */
-		void findSolutionDFS( irr::core::position2d< uint_fast8_t > currentPosition );
+		void findSolutionDFS( irr::core::position2d< uint_fast8_t > startPosition );
+		
+		/**
+		 * Finds a solution using Dijkstra's algorithm
+		 * @param startPosition: the position from which to start searching.
+		 */
+		void findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPosition );
+		
 		/**
 		 * Finds a solution using the Iterative Deepening Depth-First Search algorithm. Does so by calling the other version of findSolutionIDDFS() over and over again with increasing depth limits.
 		 */
-		void findSolutionIDDFS( irr::core::position2d< uint_fast8_t > currentPosition );
+		void findSolutionIDDFS( irr::core::position2d< uint_fast8_t > startPosition );
 		/**
 		 * Finds a solution using the Iterative Deepening Depth-First Search algorithm. Does so by calling the other version of findSolutionIDDFS() over and over again with increasing depth limits.
 		 */
-		void findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > currentPosition, uint_fast16_t depthLimit, bool canDissolveWalls );
+		void findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > startPosition, uint_fast16_t depthLimit, bool canDissolveWalls );
 		
 		GameManager * gm; ///< A pointer to the GameManager.
 		
@@ -200,6 +210,7 @@ class AI {
 		std::vector< std::vector< irr::core::position2d< uint_fast8_t > > > pathsToLockedCells; ///< The paths from the current position to each locked cell found so far.
 		std::vector< irr::core::position2d< uint_fast8_t > > pathTaken; ///< The path taken so far. Some algorithms use this to backtrack.
 		std::vector< irr::core::position2d< uint_fast8_t > > pretendCellsVisited; ///< Cells 'visited' while pre-solving the maze.
+		std::vector< irr::core::position2d< uint_fast8_t > > pretendCellsUnvisited; ///< Cells 'unvisited' while pre-solving the maze. Used by Dijkstra's algorithm (more convenient than pretendCellsVisited)
 		
 		std::vector< irr::core::position2d< uint_fast8_t > > solution; ///< A list of cells to visit in order to get from start to finish.
 		bool solved; ///< Indicates whether the maze has been pre-solved.

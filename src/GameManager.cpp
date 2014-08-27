@@ -662,7 +662,7 @@ void GameManager::eraseCollectable( uint_fast8_t item ) {
 GameManager::~GameManager() {
 	try {
 		if( debug ) {
-				std::wcout << L"GameManager destructor called" << std::endl;
+			std::wcout << L"GameManager destructor called" << std::endl;
 		}
 		
 		if( !isNull( loadMazeDialog ) ) {
@@ -671,6 +671,10 @@ GameManager::~GameManager() {
 		if( !isNull( saveMazeDialog ) ) {
 			delete saveMazeDialog;
 		}
+		
+		stuff.clear(); //Calling this before removeAllTextures() because object destructors will remove their own textures
+		player.clear();
+		playerStart.clear();
 		
 		driver->removeAllHardwareBuffers();
 		driver->removeAllTextures();
@@ -692,7 +696,7 @@ GameManager::~GameManager() {
 		}
 		
 		if( debug ) {
-				std::wcout << L"end of GameManager destructor" << std::endl;
+			std::wcout << L"end of GameManager destructor" << std::endl;
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::~GameManager(): " << e.what() << std::endl;
@@ -1086,10 +1090,10 @@ Collectable* GameManager::getKey( uint_fast8_t key ) {
 
 			for( decltype( stuff.size() ) s = 0; s < stuff.size(); ++s ) {
 				if( stuff.at( s ).getType() == Collectable::KEY ) {
-					currentKey++;
 					if( currentKey == key ) {
 						result = &stuff.at( s );
 					}
+					currentKey++;
 				}
 			}
 			
@@ -2002,6 +2006,12 @@ void GameManager::newMaze( uint_fast16_t newRandomSeed ) {
 			bot.at( b ).setup( this, botsKnowSolution, botAlgorithm, botMovementDelay );
 		}
 		
+		if( numLocks == 0 ) {
+			for( decltype( numBots ) b = 0; b < numBots; ++b ) {
+				bot.at( b ).allKeysFound(); //Lets all the bots know they don't need to search for keys
+			}
+		}
+		
 		setLoadingPercentage( 100 );
 		
 		if( debug ) {
@@ -2583,7 +2593,7 @@ void GameManager::readPrefs() {
 								
 								switch( preferenceNum ) {
 									case 0: { //L"bots' solving algorithm"
-										std::vector< std::wstring > possibleChoices = { L"depth-first search", L"iterative deepening depth-first search", L"right hand rule", L"left hand rule" };
+										std::vector< std::wstring > possibleChoices = { L"depth-first search", L"iterative deepening depth-first search", L"right hand rule", L"left hand rule", L"dijkstra" };
 										choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
 										
 										if( choice == possibleChoices.at( 0 ) ) { //DFS
@@ -2606,6 +2616,11 @@ void GameManager::readPrefs() {
 												std::wcout << L"Bots will use the Left Hand Rule" << std::endl;
 											}
 											botAlgorithm = AI::LEFT_HAND_RULE;
+										} else if( choice == possibleChoices.at( 4 ) ) {
+											if( debug ) {
+												std::wcout << L"Bots will use Dijkstra's algorithm" << std::endl;
+											}
+											botAlgorithm = AI::DIJKSTRA;
 										}
 										break;
 									}
@@ -3130,10 +3145,10 @@ uint_fast8_t GameManager::run( std::wstring fileToLoad ) {
 							}
 						}
 					}
-
+					
 					device->getCursorControl()->setVisible( showingMenu || showingLoadingScreen || debug );
 					drawAll();
-
+					
 					//Check if any of the players have landed on a collectable item
 					for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 						for( decltype( stuff.size() ) s = 0; s < stuff.size(); ++s ) {
