@@ -1066,11 +1066,7 @@ bool GameManager::getDebugStatus() {
  * Returns: A pointer to the goal object.
  */
 Goal* GameManager::getGoal() {
-	try {
-		return &goal;
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::getGoal(): " << e.what() << std::endl;
-	}
+	return &goal;
 }
 
 /**
@@ -1145,11 +1141,7 @@ MazeManager* GameManager::getMazeManager() {
  * Returns: the number of Collectables.
  */
  uint_fast8_t GameManager::getNumCollectables() {
-	try {
-		return stuff.size();
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::getNumCollectables(): " << e.what() << std::endl;
-	}
+	return stuff.size();
  }
 
 /**
@@ -2163,33 +2155,6 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 					for( uint_fast8_t k = 0; k < controls.size(); ++k ) {
 						if( event.JoystickEvent.Joystick == controls.at( k ).getControllerNumber() ) {
 							{ //Handle controller axes
-								if( debug && controls.at( k ).getControllerAxis() != UINT_FAST8_MAX ) {
-									std:: wcout << L"Keymap " << k << L" axis " << controls.at( k ).getControllerAxis() << L", ";
-									if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
-										std:: wcout << L"equivalent to axis X";
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
-										std:: wcout << L"equivalent to axis Y";
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
-										std:: wcout << L"equivalent to axis Z";
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
-										std:: wcout << L"equivalent to axis R";
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
-										std:: wcout << L"equivalent to axis U";
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
-										std:: wcout << L"equivalent to axis V";
-									}
-									std::wcout << L", has controller direction ";
-									if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_INCREASE ) {
-										std::wcout << L"increase";
-									} else if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_DECREASE ) {
-										std::wcout << L"decrease";
-									} else {
-										std::wcout << L"other";
-									}
-									std::wcout << std::endl;
-								}
-								
-								
 								int_fast16_t controllerDeadZone = ( INT16_MAX / 2 ); //TODO: Make the dead zone user adjustable.
 								
 								
@@ -2274,6 +2239,11 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 								std::wcout << L"Folder selected." << std::endl;
 							}
 							return true;
+						} else if( !isNull( saveMazeDialog ) && event.GUIEvent.Caller->getID() == saveMazeDialog->getID() ) {
+							if( debug ) {
+								std::wcout << L"Folder selected." << std::endl;
+							}
+							return true;
 						}
 
 						break;
@@ -2293,8 +2263,9 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 						}
 						break;
 					}
-					default:
+					default: {
 						break;
+					}
 				}
 			}
 			default:
@@ -3015,27 +2986,39 @@ void GameManager::resetThings() {
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) score = 0;
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) additiveMultiplier = 10; //So the scores don't get too negative, numbers that add to the score get multiplied by a magic number.
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) subtractiveDivisor = 10; //Likewise, numbers that subtract from the score get divided by a magic number.
-
+			
 			if( debug ) {
 				std::wcout << L"Setting player " << winnersLoadingScreen.at( w ) << L"'s score to ";
 			}
-			score += ( winnersLoadingScreen.size() - w ) * additiveMultiplier;
-			if( debug ) {
-				std::wcout << ( winners.size() - w ) * additiveMultiplier;
+			{
+				decltype( score ) temp = ( winnersLoadingScreen.size() - w ) * additiveMultiplier;
+				score += temp;
+				if( debug ) {
+					std::wcout << temp;
+				}
 			}
-			score -= ( player.at( winnersLoadingScreen.at( w ) ).stepsTakenLastMaze ) / subtractiveDivisor;
-			if( debug ) {
-				std::wcout << L" - " << player.at( winnersLoadingScreen.at( w ) ).stepsTakenLastMaze / subtractiveDivisor;
+			{
+				decltype( score ) temp = ( player.at( winnersLoadingScreen.at( w ) ).stepsTakenLastMaze ) / subtractiveDivisor;
+				score -= temp;
+				if( debug ) {
+					std::wcout << L" - " << temp;
+				}
 			}
-			score -= player.at( winnersLoadingScreen.at( w ) ).timeTakenLastMaze / 1000 / subtractiveDivisor; //The 1000 is for converting the time to seconds
-			if( debug ) {
-				std::wcout << L" - " << player.at( winnersLoadingScreen.at( w ) ).timeTakenLastMaze / 1000 / subtractiveDivisor;
+			{
+				decltype( score ) temp = player.at( winnersLoadingScreen.at( w ) ).timeTakenLastMaze / 1000 / subtractiveDivisor; //The 1000 is for converting the time to seconds
+				score -= temp;
+				if( debug ) {
+					std::wcout << L" - " << temp;
+				}
 			}
-			score += player.at( winnersLoadingScreen.at( w ) ).keysCollectedLastMaze * additiveMultiplier;
-			if( debug ) {
-				std::wcout << L" + " << player.at( winnersLoadingScreen.at( w ) ).keysCollectedLastMaze * additiveMultiplier << L" for a total of " << score << std::endl;
+			{
+				decltype( score ) temp = player.at( winnersLoadingScreen.at( w ) ).keysCollectedLastMaze * additiveMultiplier;
+				score += temp;
+				if( debug ) {
+					std::wcout << L" + " << temp << L" for a total of " << score << std::endl;
+				}
 			}
-
+			
 			player.at( winnersLoadingScreen.at( w ) ).setScore( score );
 		}
 
@@ -3616,15 +3599,17 @@ void GameManager::setControls() {
 									if( debug ) {
 										std::wcout << L"preference before spell checking: " << preference;
 									}
-								
-									std::vector< std::wstring > possiblePrefs = { L"screenshot", L"up", L"down", L"right", L"left", L"u", L"d", L"r", L"l", L"enable controller" };
+									
+									std::vector< std::wstring > possiblePrefs = { L"screenshot", L"enable controller" };
 									preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
 									
 									if( debug ) {
 										std::wcout  << "\tand after: " << preference << std::endl;
 									}
 									
-									if( preference == possiblePrefs.at( 9 ) ) { //L"enable controller"
+									if( preference == possiblePrefs.at( 0 ) ) {
+										controls.back().setAction( ControlMapping::ACTION_SCREENSHOT );
+									} else if( preference == possiblePrefs.at( 1 ) ) { //L"enable controller"
 										std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 										choiceStr = possibleChoices.at( spellChecker.indexOfClosestString( choiceStr, possibleChoices ) );
 										
@@ -4085,26 +4070,38 @@ void GameManager::takeScreenShot() {
 			std::wcout << L"takeScreenShot() called" << std::endl;
 		}
 		
-		irr::video::IImage* image = driver->createScreenShot();
-
-		if( image ) {
-			irr::core::stringw filename;
-			filename.append( L"screenshot_" );
-
+		irr::video::IImage* image = nullptr;
+		if( !isNull( driver ) ) {
+			image = driver->createScreenShot();
+		}
+		
+		if( !isNull( image ) ) {
+			irr::core::stringw filename = stringConverter.toIrrlichtStringW( PACKAGE_NAME );
+			filename.append( L" screenshot " );
+			
 			time_t currentTime = time( nullptr );
 			wchar_t clockTime[ 20 ];
 			if( wcsftime( clockTime, 20, L"%FT%T", localtime( &currentTime ) ) == 0 ) {
 				throw( std::wstring( L"Could not convert the time to ISO 8601 format.") );
 			}
+			clockTime[ 19 ] = L'\0';
 			filename.append( clockTime );
 			filename.append( L".png" );
-
+			
 			if( !driver->writeImageToFile( image, filename ) ) {
 				throw( std::wstring( L"Failed to save screen shot to file " + stringConverter.toStdWString( filename ) ) );
-			} else if( debug ) {
-				std::wcout << L"Screen shot saved as " << stringConverter.toStdWString( filename ) << std::endl; //stringConverter.toWCharArray( filename ) << std::endl;
+			} else {
+				irr::core::stringw success = L"Screen shot saved as \"";
+				success.append( filename );
+				success.append( L"\"" );
+				if( debug ) {
+					std::wcout <<  stringConverter.toStdWString( success ) << std::endl;
+				}
+				if( !isNull( gui ) ) {
+					gui->addMessageBox( L"Screenshot saved", success.c_str() );
+				}
 			}
-
+			
 			image->drop();
 		} else {
 			throw( std::wstring( L"takeScreenShot(): Failed to take screen shot" ) );

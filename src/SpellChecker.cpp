@@ -47,7 +47,8 @@ std::wstring::size_type SpellChecker::DamerauLevenshteinDistance( std::wstring s
 			return source.size();
 		}
 		
-		std::wstring::size_type score[ source.size() + 2 ][ target.size() + 2 ]; //Where do these +2s come from? Ask Wikipedia.
+		//std::wstring::size_type score[ source.size() + 2 ][ target.size() + 2 ]; //Where do these +2s come from? Ask Wikipedia.
+		std::vector< std::vector< std::wstring::size_type > > score( source.size() + 2, std::vector< std::wstring::size_type >( target.size() + 2 ) );
 		
 		{
 			std::wstring::size_type infinity = source.size() + target.size(); //Okay, so this isn't really infinity. It's close enough.

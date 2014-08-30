@@ -175,11 +175,7 @@ void Collectable::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_f
 }
 
 Collectable::type_t Collectable::getType() {
-	try {
-		return type;
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in Collectable::getType(): " << e.what() << std::endl;
-	}
+	return type;
 }
 
 void Collectable::loadTexture( irr::IrrlichtDevice* device ) {

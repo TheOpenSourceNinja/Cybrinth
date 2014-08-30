@@ -103,7 +103,7 @@ TagLib::wstring StringConverter::toTaglibWString( std::wstring input ) {
 	}
 }
 
-std::string StringConverter::toStdString( std::wstring input ) {
+std::string StringConverter::toStdString( std::wstring input ) { //TODO: Make this function work safely.
 	try {
 		std::string result;
 		result.assign( input.begin(), input.end() ); //Definitely not the right way do to this, but the code below (which is correct according to what I've read online) does not compile for me.
@@ -145,9 +145,16 @@ std::wstring StringConverter::toStdWString( TagLib::wstring input ) {
 std::wstring StringConverter::toStdWString( std::string input ) {
 	try {
 		std::wstring result;
-		result.assign( input.begin(), input.end() );
-		/*std::wstring_convert< std::codecvt_utf8< std::wstring::value_type >, std::wstring::value_type > cv;
-		result = cv.from_bytes( input );*/
+		
+		auto currentLocale = setlocale( LC_ALL, "" );
+		const char* source = input.c_str();
+		size_t size = mbstowcs( nullptr, source, 0 ) + 1;
+		wchar_t* dest = new wchar_t[ size ];
+		wmemset( dest, 0, size );
+		mbstowcs( dest, source, size );
+		result = dest;
+		delete [] dest;
+		setlocale( LC_ALL, currentLocale );
 		
 		return result;
 	} catch ( std::exception &e ) {
@@ -268,9 +275,11 @@ std::wstring StringConverter::toStdWString( float input ) {
 }
 
 std::wstring StringConverter::toStdWString( float input, const wchar_t* format, size_t maxLength ) {
-	wchar_t buffer[ maxLength ];
-	swprintf( buffer, maxLength, format, input );
-	std::wstring result = buffer;
+	std::vector< wchar_t > buffer;
+	buffer.resize( maxLength );
+	//wchar_t buffer[ maxLength ];
+	swprintf( buffer.data(), maxLength, format, input );
+	std::wstring result = buffer.data();
 	return result;
 }
 
