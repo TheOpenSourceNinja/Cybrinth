@@ -65,7 +65,7 @@ void MenuOption::setFont( irr::gui::IGUIFont* newFont ) {
 
 void MenuOption::setDimension() {
 	try {
-		if( font != nullptr ) {
+		if( font not_eq nullptr ) {
 			StringConverter sc;
 			dimension = font->getDimension( sc.toStdWString( text ).c_str() ); //sc.toWCharArray( text ) );
 		} else {
@@ -78,7 +78,7 @@ void MenuOption::setDimension() {
 
 void MenuOption::draw( irr::video::IVideoDriver* driver ) {
 	try {
-		if( font != nullptr ) {
+		if( font not_eq nullptr ) {
 			irr::core::rect< irr::s32 > background( x, y, x + dimension.Width, y + dimension.Height );
 			driver->draw2DRectangle( BLACK, background );
 			
@@ -118,26 +118,24 @@ void MenuOption::setY( uint_fast16_t val ) {
 }
 
 uint_fast16_t MenuOption::getX() {
-	try {
-		return x;
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in MenuOption::getX(): " << e.what() << std::endl;
-		return UINT_FAST16_MAX;
-	}
+	return x;
+}
+
+uint_fast16_t MenuOption::getMiddleX() {
+	return x + ( dimension.Width / 2 );
 }
 
 uint_fast16_t MenuOption::getY() {
-	try {
-		return y;
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in MenuOption::getY(): " << e.what() << std::endl;
-		return UINT_FAST16_MAX;
-	}
+	return y;
+}
+
+uint_fast16_t MenuOption::getMiddleY() {
+	return y + ( dimension.Height / 2 );
 }
 
 bool MenuOption::contains( irr::core::position2d< uint_fast32_t > test ) {
 	try {
-		return ( ( test.X >= x && test.Y >= y ) && ( test.X <= x + dimension.Width && test.Y <= y + dimension.Height ) );
+		return ( ( test.X >= x and test.Y >= y ) and ( test.X <= x + dimension.Width and test.Y <= y + dimension.Height ) );
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::contains(): " << e.what() << std::endl;
 		return false;

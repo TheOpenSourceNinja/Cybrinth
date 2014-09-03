@@ -69,7 +69,7 @@ std::wstring::size_type SpellChecker::DamerauLevenshteinDistance( std::wstring s
 			std::map< std::wstring::value_type, std::wstring::size_type > SortedDictionary;
 			{
 				std::wstring temp = source + target;
-				for( auto i = temp.begin(); i != temp.end(); ++i ) {
+				for( auto i = temp.begin(); i not_eq temp.end(); ++i ) {
 					SortedDictionary[ *i ] = 0;
 				}
 			}

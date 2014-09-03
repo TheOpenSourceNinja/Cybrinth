@@ -44,7 +44,7 @@ Object::Object() {
 
 Object::~Object() {
 	try {
-		if( !( driver == nullptr || driver == NULL ) && !( texture == nullptr || texture == NULL ) ) {
+		if( not ( driver == nullptr or driver == NULL ) and not ( texture == nullptr or texture == NULL ) ) {
 			driver->removeTexture( texture );
 			texture = nullptr;
 		}
@@ -71,7 +71,7 @@ void Object::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16
 				yInterp -= delta;
 			}
 
-			if( ( x >= ( xInterp - delta ) ) && ( x <= ( xInterp + delta ) ) && ( y >= ( yInterp - delta ) ) && ( y <= ( yInterp + delta ) ) ) {
+			if( ( x >= ( xInterp - delta ) ) and ( x <= ( xInterp + delta ) ) and ( y >= ( yInterp - delta ) ) and ( y <= ( yInterp + delta ) ) ) {
 				moving = false;
 				xInterp = x;
 				yInterp = y;
@@ -89,7 +89,7 @@ void Object::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16
 			size = height;
 		}
 
-		if( texture != nullptr ) {
+		if( texture not_eq nullptr ) {
 			int_fast16_t cornerX = ( xInterp * width ) + ( ( width / 2 ) - ( size / 2 ) );
 			int_fast16_t cornerY = ( yInterp * height ) + ( ( height / 2 ) - ( size / 2 ) );
 			driver->draw2DImage( texture,
@@ -146,7 +146,7 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 	try {
 		driver = device->getVideoDriver();
 		
-		if( !( texture == nullptr || texture == NULL ) ) {
+		if( not ( texture == nullptr or texture == NULL ) ) {
 			driver->removeTexture( texture );
 			texture = nullptr;
 		}
@@ -158,7 +158,7 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 			path = system_complete( path );
 			//path = absolute( path );
 			
-			while( ( !exists( path ) || !is_directory( path ) ) && path.has_parent_path() ) {
+			while( ( not exists( path ) or not is_directory( path ) ) and path.has_parent_path() ) {
 				path = path.parent_path();
 			}
 			
@@ -166,14 +166,14 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 				boost::filesystem::recursive_directory_iterator end;
 				bool fileFound = false;
 				
-				for( boost::filesystem::recursive_directory_iterator i( path ); i != end && !fileFound; ++i ) {
-					if( !is_directory( i->path() ) ) { //We've found a file
+				for( boost::filesystem::recursive_directory_iterator i( path ); i not_eq end and not fileFound; ++i ) {
+					if( not is_directory( i->path() ) ) { //We've found a file
 						irr::io::IFileSystem* fileSystem = device->getFileSystem();
 						StringConverter stringConverter;
 						irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
 						if( fileSystem->getFileBasename( filePath, false ) == fileName ) {
 							//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
-							for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount() && !fileFound; ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
+							for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount() and not fileFound; ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
 								irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
 							
 								//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
@@ -194,10 +194,10 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 		
 		texture = driver->getTexture( fileName );
 		
-		if( texture == nullptr || texture == NULL ) {
+		if( texture == nullptr or texture == NULL ) {
 			return;
 		}  else {
-			if( texture->getSize() != irr::core::dimension2d< irr::u32 >( size, size ) ) {
+			if( texture->getSize() not_eq irr::core::dimension2d< irr::u32 >( size, size ) ) {
 				auto newTexture = resizer.resize( texture, size, size, driver );
 				driver->removeTexture( texture );
 				texture = newTexture;
@@ -241,7 +241,7 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 							auto newColor = colorTwo;
 							newColor.setAlpha( pixel.getAlpha() );
 							image->setPixel( x, y, newColor );
-						} else if( luminance < lightestLuminance && luminance > darkestLuminance ) {
+						} else if( luminance < lightestLuminance and luminance > darkestLuminance ) {
 							auto interpolation = ( lightestLuminance - luminance ) / 255.0f;
 							auto newColor = colorOne.getInterpolated( colorTwo, interpolation );
 							image->setPixel( x, y , newColor );
@@ -264,7 +264,7 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 
 void Object::moveX( int_fast8_t val ) {
 	try {
-		if( !moving ) {
+		if( not moving ) {
 			x += val;
 			moving = true;
 		} else {
@@ -280,7 +280,7 @@ void Object::moveX( int_fast8_t val ) {
 
 void Object::moveY( int_fast8_t val ) {
 	try {
-		if( !moving ) {
+		if( not moving ) {
 			y += val;
 			moving = true;
 		} else {

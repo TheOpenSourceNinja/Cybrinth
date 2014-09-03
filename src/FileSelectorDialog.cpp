@@ -219,7 +219,7 @@ bool FileSelectorDialog::OnEvent( const irr::SEvent& event ) {
 					break;
 				}
 				case irr::gui::EGET_BUTTON_CLICKED: {
-					if ( event.GUIEvent.Caller == CloseButton || event.GUIEvent.Caller == CancelButton ) {
+					if ( event.GUIEvent.Caller == CloseButton or event.GUIEvent.Caller == CancelButton ) {
 						if ( FileSystem ) {
 							FileSystem->changeWorkingDirectoryTo( prev_working_dir.c_str() );
 							//printf("working directory reset to: %s\n", prev_working_dir.c_str());
@@ -228,7 +228,7 @@ bool FileSelectorDialog::OnEvent( const irr::SEvent& event ) {
 						remove();
 						return true;
 					} else if ( event.GUIEvent.Caller == OKButton ) {
-						if( IsDirectoryChoosable || matchesFileFilter( FileNameText->getText() ) ) {
+						if( IsDirectoryChoosable or matchesFileFilter( FileNameText->getText() ) ) {
 							if ( FileSystem ) {
 								FileSystem->changeWorkingDirectoryTo( prev_working_dir.c_str() );
 								//printf("working directory reset to: %s\n", prev_working_dir.c_str());
@@ -242,15 +242,15 @@ bool FileSelectorDialog::OnEvent( const irr::SEvent& event ) {
 				}
 				case irr::gui::EGET_LISTBOX_CHANGED: {
 					irr::s32 selected = FileBox->getSelected();
-					if( FileList && FileSystem ) {
+					if( FileList and FileSystem ) {
 						irr::core::stringw strw;
 						strw = FileSystem->getWorkingDirectory();
 						#ifdef WINDOWS
-							if( strw[ strw.size() - 1 ] != L'\\' ) {
+							if( strw[ strw.size() - 1 ] not_eq L'\\' ) {
 								strw += L"\\";
 							}
 						#else
-							if( strw[ strw.size() - 1 ] != L'/' ) {
+							if( strw[ strw.size() - 1 ] not_eq L'/' ) {
 								strw += L"/";
 							}
 						#endif
@@ -261,7 +261,7 @@ bool FileSelectorDialog::OnEvent( const irr::SEvent& event ) {
 				}
 				case irr::gui::EGET_LISTBOX_SELECTED_AGAIN: {	  
 					irr::s32 selected = FileBox->getSelected();
-					if ( FileList && FileSystem ) {
+					if ( FileList and FileSystem ) {
 						if ( FileList->isDirectory( selected ) ) {
 							FileSystem->changeWorkingDirectoryTo( FileList->getFileName( selected ) );
 							fillListBox();
@@ -270,11 +270,11 @@ bool FileSelectorDialog::OnEvent( const irr::SEvent& event ) {
 							irr::core::stringw strw;
 							strw = FileSystem->getWorkingDirectory();
 							#ifdef WINDOWS
-								if( strw[ strw.size() - 1 ] != L'\\' ) {
+								if( strw[ strw.size() - 1 ] not_eq L'\\' ) {
 									strw += L"\\";
 								}
 							#else
-								if( strw[ strw.size() - 1 ] != L'/' ) {
+								if( strw[ strw.size() - 1 ] not_eq L'/' ) {
 									strw += L"/";
 								}
 							#endif
@@ -309,7 +309,7 @@ bool FileSelectorDialog::OnEvent( const irr::SEvent& event ) {
 					if ( Dragging ) {
 						// gui window should not be dragged outside its parent
 						if ( Parent ) {
-							if ( event.MouseInput.X < Parent->getAbsolutePosition().UpperLeftCorner.X + 1 || event.MouseInput.Y < Parent->getAbsolutePosition().UpperLeftCorner.Y + 1 || event.MouseInput.X > Parent->getAbsolutePosition().LowerRightCorner.X - 1 || event.MouseInput.Y > Parent->getAbsolutePosition().LowerRightCorner.Y -1 ) {
+							if ( event.MouseInput.X < Parent->getAbsolutePosition().UpperLeftCorner.X + 1 or event.MouseInput.Y < Parent->getAbsolutePosition().UpperLeftCorner.Y + 1 or event.MouseInput.X > Parent->getAbsolutePosition().LowerRightCorner.X - 1 or event.MouseInput.Y > Parent->getAbsolutePosition().LowerRightCorner.Y -1 ) {
 								return true;
 							}
 						}
@@ -335,7 +335,7 @@ bool FileSelectorDialog::OnEvent( const irr::SEvent& event ) {
 
 //! draws the element and its children
 void FileSelectorDialog::draw() {
-	if ( !IsVisible ) {
+	if ( not IsVisible ) {
 		return;
 	}
 	
@@ -401,7 +401,7 @@ bool FileSelectorDialog::matchesFileFilter( irr::core::stringw s, irr::core::str
 void FileSelectorDialog::fillListBox() {
 	irr::gui::IGUISkin *skin = Environment->getSkin();
 	
-	if ( !FileSystem || !FileBox || !skin ) {
+	if ( not FileSystem or not FileBox or not skin ) {
 		return;
 	}
 	
@@ -418,14 +418,14 @@ void FileSelectorDialog::fillListBox() {
 		s = FileList->getFileName( i );
 		// We just want a list of directories and those matching the file filter
 		if ( FileList->isDirectory( i ) ) {
-			if ( DirectoryIconIdx != -1 ) {
+			if ( DirectoryIconIdx not_eq -1 ) {
 				FileBox->addItem( s.c_str(), DirectoryIconIdx );
 			} else {
 				FileBox->addItem( s.c_str() );
 			}
 		} else if ( matchesFileFilter( s ) ) {
 			if ( FilterComboBox->getSelected() >= ( irr::s32 )FileFilters.size() ) {
-				if ( FileIconIdx != -1 ) {
+				if ( FileIconIdx not_eq -1 ) {
 					irr::s32 iconIdx = FileIconIdx;
 					for ( irr::u32 i = 0 ; i < FileFilters.size() ; i++ ) {
 						if ( matchesFileFilter( s, FileFilters[ i ].FileExtension) ) {
@@ -500,7 +500,7 @@ void FileSelectorDialog::addFileFilter( irr::core::stringw name, irr::core::stri
 }
 
 irr::u32 FileSelectorDialog::addIcon( irr::video::ITexture* texture ) {
-	if ( !SpriteBank || !texture ) {
+	if ( not SpriteBank or not texture ) {
 		return 0;
 	}
 	

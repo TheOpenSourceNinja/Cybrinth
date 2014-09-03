@@ -197,7 +197,7 @@ void MazeCell::removeLocks() {
 
 bool MazeCell::hasLock() {
 	try {
-		if( hasLeftLock() || hasTopLock() ) {
+		if( hasLeftLock() or hasTopLock() ) {
 			return true;
 		} else {
 			return false;
@@ -237,16 +237,16 @@ bool MazeCell::hasTopLock() {
 bool MazeCell::isDeadEnd() {
 	try {
 		bool result = false;
-		if ( top == NONE && left != NONE && bottom != NONE && right != NONE ) {
+		if ( top == NONE and left not_eq NONE and bottom not_eq NONE and right not_eq NONE ) {
 			//wcout << L"Dead end (top)" << std::endl;
 			result = true;
-		} else if ( top != NONE && left == NONE && bottom != NONE && right != NONE ) {
+		} else if ( top not_eq NONE and left == NONE and bottom not_eq NONE and right not_eq NONE ) {
 			//wcout << L"Dead end (left)" << std::endl;
 			result = true;
-		} else if ( top != NONE && left != NONE && bottom == NONE && right != NONE ) {
+		} else if ( top not_eq NONE and left not_eq NONE and bottom == NONE and right not_eq NONE ) {
 			//wcout << L"Dead end (bottom)" << std::endl;
 			result = true;
-		} else if ( top != NONE && left != NONE && bottom != NONE && right == NONE ) {
+		} else if ( top not_eq NONE and left not_eq NONE and bottom not_eq NONE and right == NONE ) {
 			//wcout << L"Dead end (right)" << std::endl;
 			result = true;
 		} else {

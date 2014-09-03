@@ -20,6 +20,7 @@
 #include "GameManager.h"
 #include "MazeManager.h"
 #include "Player.h"
+#include "SpellChecker.h"
 #include "StringConverter.h"
 
 ///TODO: Update the AI to reflect the addition of a wall dissolver item (icon: spray can labeled 'ACID')
@@ -47,6 +48,47 @@ AI::~AI() {
 	}
 }
 
+AI::algorithm_t AI::algorithmFromString( std::wstring input ) {
+	std::vector< std::wstring > possibleChoices = { stringFromAlgorithm( DEPTH_FIRST_SEARCH ), stringFromAlgorithm( ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH ), stringFromAlgorithm( RIGHT_HAND_RULE ), stringFromAlgorithm( LEFT_HAND_RULE ), stringFromAlgorithm( DIJKSTRA ) };
+	
+	std::wstring choice;
+	{
+		SpellChecker spellChecker;
+		choice = possibleChoices.at( spellChecker.indexOfClosestString( input, possibleChoices ) );
+	}
+	
+	algorithm_t result = ALGORITHM_DO_NOT_USE;
+	
+	if( choice == possibleChoices.at( 0 ) ) { //DFS
+		if( not( gm == nullptr or gm == NULL ) and gm->getDebugStatus() ) {
+			std::wcout << L"Bots will use Depth-First Search" << std::endl;
+		}
+		result = DEPTH_FIRST_SEARCH;
+	} else if( choice == possibleChoices.at( 1 ) ) { //IDDFS
+		if( not( gm == nullptr or gm == NULL ) and gm->getDebugStatus() ) {
+			std::wcout << L"Bots will use Iterative Deepening Depth-First Search" << std::endl;
+		}
+		result = ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH;
+	} else if( choice == possibleChoices.at( 2 ) ) {
+		if( not( gm == nullptr or gm == NULL ) and gm->getDebugStatus() ) {
+			std::wcout << L"Bots will use the Right Hand Rule" << std::endl;
+		}
+		result = RIGHT_HAND_RULE;
+	} else if( choice == possibleChoices.at( 3 ) ) {
+		if( not( gm == nullptr or gm == NULL ) and gm->getDebugStatus() ) {
+			std::wcout << L"Bots will use the Left Hand Rule" << std::endl;
+		}
+		result = LEFT_HAND_RULE;
+	} else if( choice == possibleChoices.at( 4 ) ) {
+		if( not( gm == nullptr or gm == NULL ) and gm->getDebugStatus() ) {
+			std::wcout << L"Bots will use Dijkstra's algorithm" << std::endl;
+		}
+		result = DIJKSTRA;
+	}
+	
+	return result;
+}
+
 void AI::allKeysFound() {
 	try {
 		noKeysLeft = true;
@@ -58,7 +100,7 @@ void AI::allKeysFound() {
 				decltype( cellsVisited.size() ) j = 0;
 				while( j < cellsVisited.size() ) {
 
-					if( ( cellsVisited.at( j ).X == pathsToLockedCells.at( o )[ i ].X && cellsVisited.at( j ).Y == pathsToLockedCells.at( o )[ i ].Y ) ) {
+					if( ( cellsVisited.at( j ).X == pathsToLockedCells.at( o )[ i ].X and cellsVisited.at( j ).Y == pathsToLockedCells.at( o )[ i ].Y ) ) {
 						cellsVisited.erase( cellsVisited.begin() + j );
 						j--;
 					}
@@ -87,8 +129,8 @@ bool AI::alreadyVisited( irr::core::position2d< uint_fast8_t > position ) {
 		bool result = false;
 
 		decltype( cellsVisited.size() ) i = 0;
-		while( i < cellsVisited.size() && result != true ) {
-			if( cellsVisited.at( i ).X == position.X && cellsVisited.at( i ).Y == position.Y ) {
+		while( i < cellsVisited.size() and result not_eq true ) {
+			if( cellsVisited.at( i ).X == position.X and cellsVisited.at( i ).Y == position.Y ) {
 				result = true;
 			}
 			++i;
@@ -105,8 +147,8 @@ bool AI::alreadyVisitedPretend( irr::core::position2d< uint_fast8_t > position )
 		bool result = false;
 
 		decltype( pretendCellsVisited.size() ) i = 0;
-		while( i < pretendCellsVisited.size() && result != true ) {
-			if( pretendCellsVisited.at( i ).X == position.X && pretendCellsVisited.at( i ).Y == position.Y ) {
+		while( i < pretendCellsVisited.size() and result not_eq true ) {
+			if( pretendCellsVisited.at( i ).X == position.X and pretendCellsVisited.at( i ).Y == position.Y ) {
 				result = true;
 			}
 			++i;
@@ -123,7 +165,7 @@ bool AI::atGoal() {
 		Player* p = gm->getPlayer( controlsPlayer );
 		irr::core::position2d< uint_fast8_t > currentPosition( p->getX(), p->getY() );
 		Goal* goal = gm->getGoal();
-		if( currentPosition.X == goal->getX() && currentPosition.Y == goal->getY() ) {
+		if( currentPosition.X == goal->getX() and currentPosition.Y == goal->getY() ) {
 			return true;
 		} else {
 			return false;
@@ -148,24 +190,24 @@ bool AI::doneWaiting() {
 }
 
 bool AI::effectivelyNoTopWall( uint_fast8_t x, uint_fast8_t y ) {
-	return effectivelyNoTopWall( x, y, ( gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) );
+	return effectivelyNoTopWall( x, y, ( gm->getPlayer( controlsPlayer )->hasItem() and gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) );
 }
 
 bool AI::effectivelyNoTopWall( uint_fast8_t x, uint_fast8_t y, bool canDissolveWalls ) {
-	if( gm != nullptr && gm->getMazeManager() != nullptr && gm->getMazeManager()->maze != nullptr ) {
-		return ( gm->getMazeManager()->maze[ x ][ y ].getTop() == MazeCell::NONE || ( gm->getMazeManager()->maze[ x ][ y ].getTop() != MazeCell::ACIDPROOF && canDissolveWalls ) );
+	if( gm not_eq nullptr and gm->getMazeManager() not_eq nullptr and gm->getMazeManager()->maze not_eq nullptr ) {
+		return ( gm->getMazeManager()->maze[ x ][ y ].getTop() == MazeCell::NONE or ( gm->getMazeManager()->maze[ x ][ y ].getTop() not_eq MazeCell::ACIDPROOF and canDissolveWalls ) );
 	} else {
 		return false;
 	}
 }
 
 bool AI::effectivelyNoLeftWall( uint_fast8_t x, uint_fast8_t y ) {
-	return effectivelyNoLeftWall( x, y, ( gm->getPlayer( controlsPlayer )->hasItem() && gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) );
+	return effectivelyNoLeftWall( x, y, ( gm->getPlayer( controlsPlayer )->hasItem() and gm->getPlayer( controlsPlayer )->getItemType() == Collectable::ACID ) );
 }
 
 bool AI::effectivelyNoLeftWall( uint_fast8_t x, uint_fast8_t y, bool canDissolveWalls ) {
-	if( gm != nullptr && gm->getMazeManager()->maze != nullptr ) {
-		return( gm->getMazeManager()->maze[ x ][ y ].getLeft() == MazeCell::NONE || ( gm->getMazeManager()->maze[ x ][ y ].getLeft() != MazeCell::ACIDPROOF && canDissolveWalls ) );
+	if( gm not_eq nullptr and gm->getMazeManager()->maze not_eq nullptr ) {
+		return( gm->getMazeManager()->maze[ x ][ y ].getLeft() == MazeCell::NONE or ( gm->getMazeManager()->maze[ x ][ y ].getLeft() not_eq MazeCell::ACIDPROOF and canDissolveWalls ) );
 	} else {
 		return false;
 	}
@@ -210,7 +252,7 @@ void AI::findSolution() {
 				}
 			}
 
-			while( !solution.empty() && solution.back() == currentPosition ) {
+			while( not solution.empty() and solution.back() == currentPosition ) {
 				solution.pop_back();
 			}
 			
@@ -240,11 +282,11 @@ void AI::findSolutionDFS( irr::core::position2d< uint_fast8_t > startPosition ) 
 
 		{ //Reverses the order of the solution, so we don't start at the wrong end
 			std::vector< irr::core::position2d< uint_fast8_t > > tempSolution;
-			while( !solution.empty() ) {
+			while( not solution.empty() ) {
 				tempSolution.push_back( solution.back() );
 				solution.pop_back();
 			}
-			while( !tempSolution.empty() ) {
+			while( not tempSolution.empty() ) {
 				solution.insert( solution.begin(), tempSolution.back() );
 				tempSolution.pop_back();
 			}
@@ -262,7 +304,7 @@ void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPositi
 		}
 		
 		auto maze = gm->getMazeManager();
-		if( maze->rows > 0 && maze->cols > 0 ) { //The maze size can be zero when the game first starts.
+		if( maze->rows > 0 and maze->cols > 0 ) { //The maze size can be zero when the game first starts.
 			std::vector< std::vector< irr::core::position2d< uint_fast8_t > > > previous;
 			DijkstraDistance.clear();
 			DijkstraDistance.resize( maze->cols );
@@ -291,7 +333,7 @@ void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPositi
 			for( decltype( maze->cols ) x = 0; x < maze->cols; ++x ) {
 				for( decltype( maze->rows ) y = 0; y < maze->rows; ++y ) { //for each vertex v in Graph: // Initializations
 					auto v = irr::core::position2d< decltype( x ) >( x, y );
-					if( v != startPosition ) { //if v ≠ source
+					if( v not_eq startPosition ) { //if v ≠ source
 						DijkstraDistance.at( v.X ).at( v.Y ) = UINT_FAST16_MAX; //dist[v] := infinity // Unknown distance function from source to v
 						previous.at( v.X ).at( v.Y ) = undefined; //previous[v]  := undefined
 					}
@@ -301,7 +343,7 @@ void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPositi
 			
 			bool haveAcid = false;
 			
-			while( !pretendCellsUnvisited.empty() ) { //while Q is not empty: // The main loop
+			while( not pretendCellsUnvisited.empty() ) { //while Q is not empty: // The main loop
 				
 				if( gm->getDebugStatus() ) {
 					std::wcout << L"Distances: " << std::endl;
@@ -330,12 +372,12 @@ void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPositi
 				}
 				
 				bool targetFound = false;
-				for( decltype( targets.size() ) t = 0; !targetFound && t < targets.size(); ++t ) {
+				for( decltype( targets.size() ) t = 0; not targetFound and t < targets.size(); ++t ) {
 					if( u == targets.at( t ) ) {
 						targetFound = true;
 						/*for( decltype( gm->getNumCollectables() ) c = 0; c < gm->getNumCollectables(); ++c ) { //TODO: Dijkstra's algorithm seems to go into an infinite loop if it recognizes acid. Fix it.
 							auto collectable = gm->getCollectable( c );
-							if( collectable->getX() == u.X && collectable->getY() == u.Y ) {
+							if( collectable->getX() == u.X and collectable->getY() == u.Y ) {
 								if( collectable->getType() == Collectable::ACID ) {
 									haveAcid = true;
 								}
@@ -346,18 +388,18 @@ void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPositi
 					}
 				}
 				
-				if( !targetFound ) {
+				if( not targetFound ) {
 					decltype( pretendCellsUnvisited ) possibleNeighbors;
-					if( u.X > 0 && effectivelyNoLeftWall( u.X, u.Y, haveAcid ) ) {
+					if( u.X > 0 and effectivelyNoLeftWall( u.X, u.Y, haveAcid ) ) {
 						possibleNeighbors.push_back( irr::core::position2d< uint_fast8_t >( u.X - 1, u.Y ) );
 					}
-					if( u.X < maze->cols - 1 && effectivelyNoLeftWall( u.X + 1, u.Y, haveAcid ) ) {
+					if( u.X < maze->cols - 1 and effectivelyNoLeftWall( u.X + 1, u.Y, haveAcid ) ) {
 						possibleNeighbors.push_back( irr::core::position2d< uint_fast8_t >( u.X + 1, u.Y ) );
 					}
-					if( u.Y > 0 && effectivelyNoTopWall( u.X, u.Y, haveAcid ) ) {
+					if( u.Y > 0 and effectivelyNoTopWall( u.X, u.Y, haveAcid ) ) {
 						possibleNeighbors.push_back( irr::core::position2d< uint_fast8_t >( u.X, u.Y - 1 ) );
 					}
-					if( u.Y < maze->rows - 1 && effectivelyNoTopWall( u.X, u.Y + 1, haveAcid ) ) {
+					if( u.Y < maze->rows - 1 and effectivelyNoTopWall( u.X, u.Y + 1, haveAcid ) ) {
 						possibleNeighbors.push_back( irr::core::position2d< uint_fast8_t >( u.X, u.Y + 1 ) );
 					}
 					
@@ -367,7 +409,7 @@ void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPositi
 						for( decltype( possibleNeighbors.size() ) i = 0; i < possibleNeighbors.size(); ++i ) {
 							bool stillUnvisited = false;
 							irr::core::position2d< uint_fast8_t > v = undefined; //for each neighbor v of u: // where v has not yet been removed from Q.
-							for( decltype( pretendCellsUnvisited.size() ) j = 0; !stillUnvisited && j < pretendCellsUnvisited.size(); ++j ) {
+							for( decltype( pretendCellsUnvisited.size() ) j = 0; not stillUnvisited and j < pretendCellsUnvisited.size(); ++j ) {
 								if( pretendCellsUnvisited.at( j ) == possibleNeighbors.at( i ) ) {
 									stillUnvisited = true;
 									v = possibleNeighbors.at( i );
@@ -375,7 +417,7 @@ void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPositi
 								}
 							}
 							
-							if( v != undefined ) {
+							if( v not_eq undefined ) {
 								alt = DijkstraDistance.at( u.X ).at( u.Y ) + 1; //alt := dist[u] + length(u, v)
 								if( alt < DijkstraDistance.at( v.X ).at( v.Y ) ) { //if alt < dist[v]: // A shorter path to v has been found
 									DijkstraDistance.at( v.X ).at( v.Y ) = alt;
@@ -384,12 +426,12 @@ void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPositi
 							}
 						} //end for
 					}
-				} //end if u != target
+				} //end if u not_eq target
 			} //end while
 			
 			solution.clear(); //S := empty sequence
 			auto u = targets.at( targetNumber ); //u := target
-			while( previous.at( u.X ).at( u.Y ) != undefined ) { //while previous[u] is defined: // Construct the shortest path with a stack S
+			while( previous.at( u.X ).at( u.Y ) not_eq undefined ) { //while previous[u] is defined: // Construct the shortest path with a stack S
 				//solution.insert( solution.begin(), u ); //insert u at the beginning of S // Push the vertex into the stack
 				solution.push_back( u );
 				u = previous.at( u.X ).at( u.Y ); //u := previous[u] // Traverse from target to source
@@ -424,7 +466,7 @@ void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > startPosition 
 			findSolutionIDDFS( partialSolution, startPosition, maxDepth, false );
 		} else {
 			IDDFSDeadEnds.clear();
-			for( decltype( maxDepth ) i = 1; solution.empty() && i <= maxDepth; ++i ) {
+			for( decltype( maxDepth ) i = 1; solution.empty() and i <= maxDepth; ++i ) {
 				if( gm->getDebugStatus() ) {
 					std::wcout << L"In IDDFS loop, i=" << i << std::endl;
 				}
@@ -435,11 +477,11 @@ void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > startPosition 
 
 		{ //Reverses the order of the solution, so we don't start at the wrong end
 			std::vector< irr::core::position2d< uint_fast8_t > > tempSolution;
-			while( !solution.empty() ) {
+			while( not solution.empty() ) {
 				tempSolution.push_back( solution.back() );
 				solution.pop_back();
 			}
-			while( !tempSolution.empty() ) {
+			while( not tempSolution.empty() ) {
 				solution.insert( solution.begin(), tempSolution.back() );
 				tempSolution.pop_back();
 			}
@@ -458,12 +500,12 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 
 		if( depthLimit == 0 ) {
 			partialSolution.push_back( currentPosition );
-			if( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) {
+			if( currentPosition.X == gm->getGoal()->getX() and currentPosition.Y == gm->getGoal()->getY() ) {
 				solution = partialSolution;
 				return;
 			} else {
 				for( decltype( gm->getNumCollectables() ) c = 0; c < gm->getNumCollectables(); ++c ) {
-					if( ( currentPosition.X == gm->getCollectable( c )->getX() && currentPosition.Y == gm->getCollectable( c )->getY() ) ) {
+					if( ( currentPosition.X == gm->getCollectable( c )->getX() and currentPosition.Y == gm->getCollectable( c )->getY() ) ) {
 						switch( gm->getCollectable( c )->getType() ) {
 							case Collectable::ACID: {
 								canDissolveWalls = true;
@@ -489,10 +531,10 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 			pretendCellsVisited.push_back( currentPosition );
 			partialSolution.push_back( currentPosition );
 			std::vector< direction_t > possibleDirections;
-			if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
+			if( not ( currentPosition.X == gm->getGoal()->getX() and currentPosition.Y == gm->getGoal()->getY() ) ) {
 				
 				for( decltype( gm->getNumCollectables() ) c = 0; c < gm->getNumCollectables(); ++c ) {
-					if( currentPosition.X == gm->getCollectable( c )->getX() && currentPosition.Y == gm->getCollectable( c )->getY() ) {
+					if( currentPosition.X == gm->getCollectable( c )->getX() and currentPosition.Y == gm->getCollectable( c )->getY() ) {
 						switch( gm->getCollectable( c )->getType() ) {
 							case Collectable::ACID: {
 								canDissolveWalls = true;
@@ -510,16 +552,16 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 				}
 
 				//See which direction(s) the bot can move
-				if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) && !IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+				if( currentPosition.Y > 0 and effectivelyNoTopWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) and not alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) and not IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 					possibleDirections.push_back( UP );
 				}
-				if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) && !IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+				if( currentPosition.X > 0 and effectivelyNoLeftWall( currentPosition.X, currentPosition.Y, canDissolveWalls ) and not alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) and not IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 					possibleDirections.push_back( LEFT );
 				}
-				if( currentPosition.Y < (gm->getMazeManager()->rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) && !IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+				if( currentPosition.Y < (gm->getMazeManager()->rows - 1) and effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1, canDissolveWalls ) and not alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) and not IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 					possibleDirections.push_back( DOWN );
 				}
-				if( currentPosition.X < (gm->getMazeManager()->cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y, canDissolveWalls ) && !alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) && !IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+				if( currentPosition.X < (gm->getMazeManager()->cols - 1) and effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y, canDissolveWalls ) and not alreadyVisitedPretend( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) and not IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 					possibleDirections.push_back( RIGHT );
 				}
 				
@@ -527,10 +569,10 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 					IDDFSDeadEnds.push_back( currentPosition );
 				}
 				
-				if( possibleDirections.empty() && partialSolution.size() != 0 ) {
+				if( possibleDirections.empty() and partialSolution.size() not_eq 0 ) {
 					partialSolution.pop_back();
 				} else {
-					while( !possibleDirections.empty() ) { //for( uint_fast8_t i = 0; ( i < possibleDirections.size() && solution.empty() ); ++i ) { //changed decltype( possibleDirections.size() ) to uint_fast8_t because the size of possibleDirections can never exceed 4 but could be stored in a needlessly large integer type.
+					while( not possibleDirections.empty() ) { //for( uint_fast8_t i = 0; ( i < possibleDirections.size() and solution.empty() ); ++i ) { //changed decltype( possibleDirections.size() ) to uint_fast8_t because the size of possibleDirections can never exceed 4 but could be stored in a needlessly large integer type.
 						uint_fast8_t choiceInt = rand() % possibleDirections.size();
 						direction_t choice = possibleDirections.at( choiceInt );
 						//direction_t choice = possibleDirections.at( i );
@@ -539,7 +581,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 							case UP: {
 								irr::core::position2d< uint_fast8_t > newPosition( currentPosition.X, currentPosition.Y - 1 );
 								
-								if ( gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y ].getTop() != MazeCell::ACIDPROOF && canDissolveWalls ) {
+								if ( gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y ].getTop() not_eq MazeCell::ACIDPROOF and canDissolveWalls ) {
 									canDissolveWalls = false;
 								}
 								
@@ -548,7 +590,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 							case DOWN: {
 								irr::core::position2d< uint_fast8_t > newPosition( currentPosition.X, currentPosition.Y + 1 );
 								
-								if ( gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() != MazeCell::ACIDPROOF && canDissolveWalls ) {
+								if ( gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y + 1 ].getTop() not_eq MazeCell::ACIDPROOF and canDissolveWalls ) {
 									canDissolveWalls = false;
 								}
 								
@@ -557,7 +599,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 							case LEFT: {
 								irr::core::position2d< uint_fast8_t > newPosition( currentPosition.X - 1, currentPosition.Y );
 								
-								if ( gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOF && canDissolveWalls ) {
+								if ( gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y ].getLeft() not_eq MazeCell::ACIDPROOF and canDissolveWalls ) {
 									canDissolveWalls = false;
 								}
 								
@@ -566,7 +608,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 							case RIGHT: {
 								irr::core::position2d< uint_fast8_t > newPosition( currentPosition.X + 1, currentPosition.Y );
 								
-								if ( gm->getMazeManager()->maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() != MazeCell::ACIDPROOF && canDissolveWalls ) {
+								if ( gm->getMazeManager()->maze[ currentPosition.X + 1 ][ currentPosition.Y ].getLeft() not_eq MazeCell::ACIDPROOF and canDissolveWalls ) {
 									canDissolveWalls = false;
 								}
 								
@@ -625,11 +667,11 @@ void AI::move() {
 		irr::core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 
 		if( startSolved ) {
-			while( !solved || solution.empty() ) {
+			while( not solved or solution.empty() ) {
 				findSolution();
 			}
 			
-			if( !solution.empty() ) {
+			if( not solution.empty() ) {
 				if( solution.back().X > currentPosition.X ) {
 					gm->movePlayerOnX( controlsPlayer, 1 );
 				} else if( solution.back().X < currentPosition.X ) {
@@ -657,12 +699,12 @@ void AI::move() {
 						pathTaken.push_back( currentPosition );
 					}
 					
-					if( !alreadyVisited( currentPosition ) ) {
+					if( not alreadyVisited( currentPosition ) ) {
 						cellsVisited.push_back( currentPosition );
 					}
 					
 					std::vector< direction_t > possibleDirections;
-					if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
+					if( not ( currentPosition.X == gm->getGoal()->getX() and currentPosition.Y == gm->getGoal()->getY() ) ) {
 
 						//Check for locks
 						if( gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y ].hasLock() ) {
@@ -670,28 +712,28 @@ void AI::move() {
 							pathsToLockedCells.back().push_back( currentPosition );
 							pathsToLockedCells.back().push_back( currentPosition );
 						}
-						if( currentPosition.X < ( gm->getMazeManager()->cols - 1 ) && gm->getMazeManager()->maze[ currentPosition.X + 1 ][ currentPosition.Y ].hasLeftLock() ) {
+						if( currentPosition.X < ( gm->getMazeManager()->cols - 1 ) and gm->getMazeManager()->maze[ currentPosition.X + 1 ][ currentPosition.Y ].hasLeftLock() ) {
 							pathsToLockedCells.push_back( std::vector< irr::core::position2d< uint_fast8_t > >() );
 							pathsToLockedCells.back().push_back( currentPosition );
 							pathsToLockedCells.back().push_back( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) );
 						}
-						if( currentPosition.Y < ( gm->getMazeManager()->rows - 1 ) && gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y + 1 ].hasTopLock() ) {
+						if( currentPosition.Y < ( gm->getMazeManager()->rows - 1 ) and gm->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y + 1 ].hasTopLock() ) {
 							pathsToLockedCells.push_back( std::vector< irr::core::position2d< uint_fast8_t > >() );
 							pathsToLockedCells.back().push_back( currentPosition );
 							pathsToLockedCells.back().push_back( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) );
 						}
 
 						//See which direction(s) the bot can move
-						if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+						if( currentPosition.Y > 0 and effectivelyNoTopWall( currentPosition.X, currentPosition.Y ) and not alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 							possibleDirections.push_back( UP );
 						}
-						if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X > 0 and effectivelyNoLeftWall( currentPosition.X, currentPosition.Y ) and not alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( LEFT );
 						}
-						if( currentPosition.Y < (gm->getMazeManager()->rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1 ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+						if( currentPosition.Y < (gm->getMazeManager()->rows - 1) and effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1 ) and not alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 							possibleDirections.push_back( DOWN );
 						}
-						if( currentPosition.X < (gm->getMazeManager()->cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X < (gm->getMazeManager()->cols - 1) and effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y ) and not alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( RIGHT );
 						}
 					}
@@ -699,12 +741,12 @@ void AI::move() {
 					
 					
 					//If we can't go anywhere new, go back to previous position
-					if( possibleDirections.size() == 0 && pathTaken.size() != 0 && !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
+					if( possibleDirections.size() == 0 and pathTaken.size() not_eq 0 and not ( currentPosition.X == gm->getGoal()->getX() and currentPosition.Y == gm->getGoal()->getY() ) ) {
 						pathTaken.pop_back();
 						irr::core::position2d< uint_fast8_t > oldPosition = pathTaken.back();
 						
 						for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
-							if( pathsToLockedCells.at( o ).back() != currentPosition ) {
+							if( pathsToLockedCells.at( o ).back() not_eq currentPosition ) {
 								pathsToLockedCells.at( o ).push_back( currentPosition );
 							} else {
 								pathsToLockedCells.at( o ).pop_back();
@@ -720,7 +762,7 @@ void AI::move() {
 						} else { //if( oldPosition.Y > currentPosition.Y ) {
 							gm->movePlayerOnY( controlsPlayer, 1 );
 						}
-					} else if ( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) { //Go to next position
+					} else if ( not ( currentPosition.X == gm->getGoal()->getX() and currentPosition.Y == gm->getGoal()->getY() ) ) { //Go to next position
 						
 						direction_t choice = possibleDirections.at( rand() % possibleDirections.size() );
 						switch( choice ) {
@@ -728,7 +770,7 @@ void AI::move() {
 								irr::core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y - 1 );
 								pathTaken.push_back( position );
 								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
-									if( pathsToLockedCells.at( o ).back() != position ) {
+									if( pathsToLockedCells.at( o ).back() not_eq position ) {
 										pathsToLockedCells.at( o ).push_back( position );
 									} else {
 										pathsToLockedCells.at( o ).pop_back();
@@ -740,7 +782,7 @@ void AI::move() {
 								irr::core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y + 1 );
 								pathTaken.push_back( position );
 								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
-									if( pathsToLockedCells.at( o ).back() != position ) {
+									if( pathsToLockedCells.at( o ).back() not_eq position ) {
 										pathsToLockedCells.at( o ).push_back( position );
 									} else {
 										pathsToLockedCells.at( o ).pop_back();
@@ -752,7 +794,7 @@ void AI::move() {
 								irr::core::position2d< uint_fast8_t > position( currentPosition.X - 1, currentPosition.Y );
 								pathTaken.push_back( position );
 								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
-									if( pathsToLockedCells.at( o ).back() != position ) {
+									if( pathsToLockedCells.at( o ).back() not_eq position ) {
 										pathsToLockedCells.at( o ).push_back( position );
 									} else {
 										pathsToLockedCells.at( o ).pop_back();
@@ -764,7 +806,7 @@ void AI::move() {
 								irr::core::position2d< uint_fast8_t > position( currentPosition.X + 1, currentPosition.Y );
 								pathTaken.push_back( position );
 								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
-									if( pathsToLockedCells.at( o ).back() != position ) {
+									if( pathsToLockedCells.at( o ).back() not_eq position ) {
 										pathsToLockedCells.at( o ).push_back( position );
 									} else {
 										pathsToLockedCells.at( o ).pop_back();
@@ -787,30 +829,30 @@ void AI::move() {
 					
 					irr::core::position2d< uint_fast8_t > currentPosition( gm->getPlayer( controlsPlayer )->getX(), gm->getPlayer( controlsPlayer )->getY() );
 					
-					if( pathTaken.empty() ) {//currentPosition.X == gm->getStart( controlsPlayer )->getX() && currentPosition.Y == gm->getStart( controlsPlayer )->getY() ) {
+					if( pathTaken.empty() ) {//currentPosition.X == gm->getStart( controlsPlayer )->getX() and currentPosition.Y == gm->getStart( controlsPlayer )->getY() ) {
 						IDDFSDepthLimit += 1;
 						cellsVisited.clear();
 						pathTaken.push_back( currentPosition );
 					}
 					
-					if( !alreadyVisited( currentPosition ) ) {
+					if( not alreadyVisited( currentPosition ) ) {
 						cellsVisited.push_back( currentPosition );
 					}
 					
 					std::vector< direction_t > possibleDirections;
-					if( !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
+					if( not ( currentPosition.X == gm->getGoal()->getX() and currentPosition.Y == gm->getGoal()->getY() ) ) {
 
 						//See which direction(s) the bot can move
-						if( currentPosition.Y > 0 && effectivelyNoTopWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+						if( currentPosition.Y > 0 and effectivelyNoTopWall( currentPosition.X, currentPosition.Y ) and not alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
 							possibleDirections.push_back( UP );
 						}
-						if( currentPosition.X > 0 && effectivelyNoLeftWall( currentPosition.X, currentPosition.Y ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X > 0 and effectivelyNoLeftWall( currentPosition.X, currentPosition.Y ) and not alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( LEFT );
 						}
-						if( currentPosition.Y < (gm->getMazeManager()->rows - 1) && effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1 ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+						if( currentPosition.Y < (gm->getMazeManager()->rows - 1) and effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1 ) and not alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
 							possibleDirections.push_back( DOWN );
 						}
-						if( currentPosition.X < (gm->getMazeManager()->cols - 1) && effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y ) && !alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+						if( currentPosition.X < (gm->getMazeManager()->cols - 1) and effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y ) and not alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
 							possibleDirections.push_back( RIGHT );
 						}
 					}
@@ -820,7 +862,7 @@ void AI::move() {
 					}
 
 					//If we can't go anywhere new, go back to previous position
-					if( possibleDirections.empty() && !pathTaken.empty() && !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) {
+					if( possibleDirections.empty() and not pathTaken.empty() and not ( currentPosition.X == gm->getGoal()->getX() and currentPosition.Y == gm->getGoal()->getY() ) ) {
 						pathTaken.pop_back();
 						irr::core::position2d< uint_fast8_t > oldPosition = pathTaken.back();
 
@@ -833,7 +875,7 @@ void AI::move() {
 						} else { //if( oldPosition.Y > currentPosition.Y ) {
 							gm->movePlayerOnY( controlsPlayer, 1 );
 						}
-					} else if ( !possibleDirections.empty() && !( currentPosition.X == gm->getGoal()->getX() && currentPosition.Y == gm->getGoal()->getY() ) ) { //Go to next position
+					} else if ( not possibleDirections.empty() and not ( currentPosition.X == gm->getGoal()->getX() and currentPosition.Y == gm->getGoal()->getY() ) ) { //Go to next position
 						uint_fast8_t choiceNum = 0;//rand() % possibleDirections.size();
 						direction_t choice = possibleDirections.at( choiceNum );
 						switch( choice ) {
@@ -863,13 +905,13 @@ void AI::move() {
 				}
 				case RIGHT_HAND_RULE: {
 					
-					if( !alreadyVisited( currentPosition ) ) {
+					if( not alreadyVisited( currentPosition ) ) {
 						cellsVisited.push_back( currentPosition );
 					}
 					
 					switch( hand ) {
 						case RIGHT: {
-							if( currentPosition.Y > 0 && noOriginalTopWall( currentPosition.X, currentPosition.Y ) ) {
+							if( currentPosition.Y > 0 and noOriginalTopWall( currentPosition.X, currentPosition.Y ) ) {
 								gm->movePlayerOnY( controlsPlayer, -1 );
 								hand = DOWN;
 							} else {
@@ -879,7 +921,7 @@ void AI::move() {
 							break;
 						}
 						case UP: {
-							if( currentPosition.X > 0 && noOriginalLeftWall( currentPosition.X, currentPosition.Y ) ) {
+							if( currentPosition.X > 0 and noOriginalLeftWall( currentPosition.X, currentPosition.Y ) ) {
 								gm->movePlayerOnX( controlsPlayer, -1 );
 								hand = RIGHT;
 							} else {
@@ -889,7 +931,7 @@ void AI::move() {
 							break;
 						}
 						case LEFT: {
-							if( currentPosition.Y < ( gm->getMazeManager()->rows - 1 ) && noOriginalTopWall( currentPosition.X, currentPosition.Y + 1 ) ) {
+							if( currentPosition.Y < ( gm->getMazeManager()->rows - 1 ) and noOriginalTopWall( currentPosition.X, currentPosition.Y + 1 ) ) {
 								gm->movePlayerOnY( controlsPlayer, 1 );
 								hand = UP;
 							} else {
@@ -899,7 +941,7 @@ void AI::move() {
 							break;
 						}
 						case DOWN: {
-							if( currentPosition.X < ( gm->getMazeManager()->cols - 1 ) && noOriginalLeftWall( currentPosition.X + 1, currentPosition.Y ) ) {
+							if( currentPosition.X < ( gm->getMazeManager()->cols - 1 ) and noOriginalLeftWall( currentPosition.X + 1, currentPosition.Y ) ) {
 								gm->movePlayerOnX( controlsPlayer, 1 );
 								hand = LEFT;
 							} else {
@@ -913,13 +955,13 @@ void AI::move() {
 				}
 				case LEFT_HAND_RULE: {
 									
-					if( !alreadyVisited( currentPosition ) ) {
+					if( not alreadyVisited( currentPosition ) ) {
 						cellsVisited.push_back( currentPosition );
 					}
 					
 					switch( hand ) {
 						case RIGHT: {
-							if( currentPosition.Y > 0 && noOriginalTopWall( currentPosition.X, currentPosition.Y ) ) {
+							if( currentPosition.Y > 0 and noOriginalTopWall( currentPosition.X, currentPosition.Y ) ) {
 								gm->movePlayerOnY( controlsPlayer, -1 );
 								hand = UP;
 							} else {
@@ -929,7 +971,7 @@ void AI::move() {
 							break;
 						}
 						case UP: {
-							if( currentPosition.X > 0 && noOriginalLeftWall( currentPosition.X, currentPosition.Y ) ) {
+							if( currentPosition.X > 0 and noOriginalLeftWall( currentPosition.X, currentPosition.Y ) ) {
 								gm->movePlayerOnX( controlsPlayer, -1 );
 								hand = LEFT;
 							} else {
@@ -939,7 +981,7 @@ void AI::move() {
 							break;
 						}
 						case LEFT: {
-							if( currentPosition.Y < (gm->getMazeManager()->rows - 1) && noOriginalTopWall( currentPosition.X, currentPosition.Y + 1 ) ) {
+							if( currentPosition.Y < (gm->getMazeManager()->rows - 1) and noOriginalTopWall( currentPosition.X, currentPosition.Y + 1 ) ) {
 								gm->movePlayerOnY( controlsPlayer, 1 );
 								hand = DOWN;
 							} else {
@@ -949,7 +991,7 @@ void AI::move() {
 							break;
 						}
 						case DOWN: {
-							if( currentPosition.X < (gm->getMazeManager()->cols - 1) && noOriginalLeftWall( currentPosition.X + 1, currentPosition.Y ) ) {
+							if( currentPosition.X < (gm->getMazeManager()->cols - 1) and noOriginalLeftWall( currentPosition.X + 1, currentPosition.Y ) ) {
 								gm->movePlayerOnX( controlsPlayer, 1 );
 								hand = RIGHT;
 							} else {
@@ -973,11 +1015,11 @@ void AI::move() {
 }
 
 bool AI::noOriginalLeftWall( uint_fast8_t x, uint_fast8_t y ) {
-	return( gm->getMazeManager()->maze[ x ][ y ].getOriginalLeft() == MazeCell::NONE || ( gm->getMazeManager()->maze[ x ][ y ].getOriginalLeft() == MazeCell::LOCK && gm->getMazeManager()->maze[ x ][ y ].getLeft() == MazeCell::NONE ) );
+	return( gm->getMazeManager()->maze[ x ][ y ].getOriginalLeft() == MazeCell::NONE or ( gm->getMazeManager()->maze[ x ][ y ].getOriginalLeft() == MazeCell::LOCK and gm->getMazeManager()->maze[ x ][ y ].getLeft() == MazeCell::NONE ) );
 }
 
 bool AI::noOriginalTopWall( uint_fast8_t x, uint_fast8_t y ) {
-	return( gm->getMazeManager()->maze[ x ][ y ].getOriginalTop() == MazeCell::NONE || ( gm->getMazeManager()->maze[ x ][ y ].getOriginalTop() == MazeCell::LOCK && gm->getMazeManager()->maze[ x ][ y ].getTop() == MazeCell::NONE ) );
+	return( gm->getMazeManager()->maze[ x ][ y ].getOriginalTop() == MazeCell::NONE or ( gm->getMazeManager()->maze[ x ][ y ].getOriginalTop() == MazeCell::LOCK and gm->getMazeManager()->maze[ x ][ y ].getTop() == MazeCell::NONE ) );
 }
 
 void AI::reset() {
@@ -997,7 +1039,7 @@ void AI::reset() {
 		pathTaken.clear();
 		cellsVisited.clear();
 
-		if( startSolved && gm != nullptr ) {
+		if( startSolved and gm not_eq nullptr ) {
 			findSolution();
 		}
 	} catch( std::exception &e ) {
@@ -1018,5 +1060,28 @@ void AI::setup( GameManager *newGM, bool newStartSolved, algorithm_t newAlgorith
 		reset();
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::setup(): " << e.what() << std::endl;
+	}
+}
+
+std::wstring AI::stringFromAlgorithm( algorithm_t input ) {
+	switch( input ) {
+		case DEPTH_FIRST_SEARCH: {
+			return L"depth-first search";
+		}
+		case ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH: {
+			return L"iterative deepening depth-first search";
+		}
+		case RIGHT_HAND_RULE: {
+			return L"right hand rule";
+		}
+		case LEFT_HAND_RULE: {
+			return L"left hand rule";
+		}
+		case DIJKSTRA: {
+			return L"dijkstra";
+		}
+		default: {
+			return L"Unrecognized algorithm";
+		}
 	}
 }

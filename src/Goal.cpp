@@ -86,9 +86,9 @@ void Goal::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t
 			size = height;
 		}
 
-		if( texture->getSize().Width != size ) {
+		if( texture->getSize().Width not_eq size ) {
 			Object::loadTexture( device, size, L"goal" ); //NOTE:The "goal" string should be the same as in the loadTexture() function below
-			if( texture == nullptr || texture == NULL ) {
+			if( texture == nullptr or texture == NULL ) {
 				createTexture( device, size );
 			}
 		}
@@ -101,7 +101,7 @@ void Goal::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t
 
 void Goal::loadTexture( irr::IrrlichtDevice* device ) {
 	Object::loadTexture( device, 1, L"goal" ); //NOTE:The "goal" string should be the same as in the draw() function above
-	if( texture == nullptr || texture == NULL ) {
+	if( texture == nullptr or texture == NULL ) {
 		createTexture( device, 1 );
 	}
 }

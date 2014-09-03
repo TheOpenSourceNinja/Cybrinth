@@ -33,22 +33,22 @@ bool MazeManager::canGetTo( uint_fast8_t startX, uint_fast8_t startY, uint_fast8
 
 		maze[ startX ][ startY ].visited = true;
 
-		if( startX == goalX && startY == goalY ) {
+		if( startX == goalX and startY == goalY ) {
 			found = true;
 		} else {
-			if( startY > 0 && maze[ startX ][ startY ].getTop() == MazeCell::NONE && maze[ startX ][ startY - 1 ].visited == false ) {
+			if( startY > 0 and maze[ startX ][ startY ].getTop() == MazeCell::NONE and maze[ startX ][ startY - 1 ].visited == false ) {
 				found = canGetTo( startX, startY - 1, goalX, goalY );
 			}
 
-			if( found == false && startY < ( rows - 1 ) && maze[ startX ][ startY + 1 ].getTop() == MazeCell::NONE && maze[ startX ][ startY + 1 ].visited == false ) {
+			if( found == false and startY < ( rows - 1 ) and maze[ startX ][ startY + 1 ].getTop() == MazeCell::NONE and maze[ startX ][ startY + 1 ].visited == false ) {
 				found = canGetTo( startX, startY + 1, goalX, goalY );
 			}
 
-			if( found == false && startX < ( cols - 1 ) && maze[ startX + 1 ][ startY ].getLeft() == MazeCell::NONE && maze[ startX + 1 ][ startY ].visited == false ) {
+			if( found == false and startX < ( cols - 1 ) and maze[ startX + 1 ][ startY ].getLeft() == MazeCell::NONE and maze[ startX + 1 ][ startY ].visited == false ) {
 				found = canGetTo( startX + 1, startY, goalX, goalY );
 			}
 
-			if( found == false && startX > 0 && maze[ startX ][ startY ].getLeft() == MazeCell::NONE && maze[ startX - 1 ][ startY ].visited == false ) {
+			if( found == false and startX > 0 and maze[ startX ][ startY ].getLeft() == MazeCell::NONE and maze[ startX - 1 ][ startY ].visited == false ) {
 				found = canGetTo( startX - 1, startY, goalX, goalY );
 			}
 		}
@@ -65,7 +65,7 @@ bool MazeManager::canGetToAllCollectables( uint_fast8_t startX, uint_fast8_t sta
 	try {
 		bool result = true;
 
-		for( decltype( gameManager->stuff.size() ) i = 0; ( i < gameManager->stuff.size() && result == true ); ++i ) {
+		for( decltype( gameManager->stuff.size() ) i = 0; ( i < gameManager->stuff.size() and result == true ); ++i ) {
 
 			//Do this here because canGetTo() uses the visited variable
 			for( decltype( cols ) x = 0; x < cols; ++x ) {
@@ -166,14 +166,14 @@ bool MazeManager::loadFromFile() {
 bool MazeManager::loadFromFile( boost::filesystem::path src ) {
 	try {
 		//cppcheck-suppress duplicateIf
-		if( gameManager == 0 || gameManager == NULL || gameManager == nullptr ) {
+		if( gameManager == 0 or gameManager == NULL or gameManager == nullptr ) {
 			throw( L"setGameManager() has not been called yet." );
 		}
 		if( gameManager->getDebugStatus() ) {
 			std::wcout << L"Trying to load from file " << src.wstring() << std::endl;
 		}
 		
-		if( !exists( src ) ) {
+		if( not exists( src ) ) {
 			throw( std::wstring( L"File not found: " ) + src.wstring() );
 		} else if( is_directory( src ) ) {
 			throw( std::wstring( L"Directory specified, file needed: " ) + src.wstring() );
@@ -206,25 +206,25 @@ void MazeManager::makeCellsVisible( uint_fast8_t x, uint_fast8_t y ) {
 	if( hideUnseen ) { //No need to do anything if they're all visible anyway
 		for( auto yprime = y; yprime <= y; --yprime ) { //When yprime wraps around, we're done
 			maze[ x ][ yprime ].topVisible = true;
-			if( maze[ x ][ yprime ].getTop() != MazeCell::NONE ) {
+			if( maze[ x ][ yprime ].getTop() not_eq MazeCell::NONE ) {
 				break;
 			}
 		}
 		for( auto yprime = y + 1; yprime < rows; ++yprime ) {
 			maze[ x ][ yprime ].topVisible = true;
-			if( maze[ x ][ yprime ].getTop() != MazeCell::NONE ) {
+			if( maze[ x ][ yprime ].getTop() not_eq MazeCell::NONE ) {
 				break;
 			}
 		}
 		for( auto xprime = x; xprime <= x; --xprime ) { //When xprime wraps around, we're done
 			maze[ xprime ][ y ].leftVisible = true;
-			if( maze[ xprime ][ y ].getLeft() != MazeCell::NONE ) {
+			if( maze[ xprime ][ y ].getLeft() not_eq MazeCell::NONE ) {
 				break;
 			}
 		}
 		for( auto xprime = x + 1; xprime < cols; ++xprime ) {
 			maze[ xprime ][ y ].leftVisible = true;
-			if( maze[ xprime ][ y ].getLeft() != MazeCell::NONE ) {
+			if( maze[ xprime ][ y ].getLeft() not_eq MazeCell::NONE ) {
 				break;
 			}
 		}
@@ -248,8 +248,8 @@ void MazeManager::makeRandomLevel() {
 		//Set whether the cells are visible. Those on the border are changed later.
 		for( decltype( cols ) x = 0; x < cols; ++x ) {
 			for( decltype( rows ) y = 0; y < rows; ++y ) {
-				maze[ x ][ y ].topVisible = !hideUnseen;
-				maze[ x ][ y ].leftVisible = !hideUnseen;
+				maze[ x ][ y ].topVisible = not hideUnseen;
+				maze[ x ][ y ].leftVisible = not hideUnseen;
 			}
 		}
 		
@@ -343,7 +343,7 @@ void MazeManager::makeRandomLevel() {
 		//Remove player starts from list of dead ends
 		for( decltype( gameManager->numPlayers ) p = 0; p < gameManager->numPlayers; ++p ) {
 			for( decltype( deadEndsX.size() ) i = 0; i < deadEndsX.size(); ++i ) {
-				if( gameManager->playerStart.at( p ).getX() == deadEndsX.at( i ) && gameManager->playerStart.at( p ).getY() == deadEndsY.at( i ) ) {
+				if( gameManager->playerStart.at( p ).getX() == deadEndsX.at( i ) and gameManager->playerStart.at( p ).getY() == deadEndsY.at( i ) ) {
 					deadEndsX.erase( deadEndsX.begin() + i );
 					deadEndsY.erase( deadEndsY.begin() + i );
 				}
@@ -355,7 +355,7 @@ void MazeManager::makeRandomLevel() {
 
 		//Remove goal from list of dead ends
 		for( decltype( deadEndsX.size() ) i = 0; i < deadEndsX.size(); ++i ) {
-			if( gameManager->goal.getX() == deadEndsX.at( i ) && gameManager->goal.getY() == deadEndsY.at( i ) ) {
+			if( gameManager->goal.getX() == deadEndsX.at( i ) and gameManager->goal.getY() == deadEndsY.at( i ) ) {
 				deadEndsX.erase( deadEndsX.begin() + i );
 				deadEndsY.erase( deadEndsY.begin() + i );
 			}
@@ -403,10 +403,10 @@ void MazeManager::makeRandomLevel() {
 		gameManager->drawAll();
 		
 		{
-			uint_fast8_t InverseProbabilityOfAcid = UINT_FAST8_MAX; //Acid is supposed to be really rare. I call this inverse probability because the higher this number is, the less the probability is.
-			//uint_fast8_t InverseProbabilityOfAcid = 1; //For debugging. 1 means total, 100% probability. Never set this to zero.
+			uint_fast8_t InverseProbabilityOfAcid = std::min( UINT_FAST8_MAX, RAND_MAX ); //Acid is supposed to be really rare. I call this inverse probability because the higher this number is, the less the probability is. 1 means total, 100% probability. Never set this to zero.
+			
 			if( gameManager->getDebugStatus() ) {
-				InverseProbabilityOfAcid = 1; //If the game is being debugged, ensure the acid is always there - it may be what's being debugged.
+				InverseProbabilityOfAcid = 1; //If the game is being debugged, ensure the acid is always there - it may be what's being debugged. As Keith Curtis says in 'After the Software Wars', "if the code isn't executed, it probably doesn't work.".
 			}
 			if( rand() % InverseProbabilityOfAcid == 0 ) {
 				if( deadEndsX.empty() ) { //If all the dead ends have been filled with other collectables
@@ -455,7 +455,7 @@ void MazeManager::makeRandomLevel() {
 
 			decltype( gameManager->numLocks ) numLocksPlaced = 1;
 
-			while( gameManager->device->run() != false && numLocksPlaced < gameManager->numLocks && gameManager->timer->getTime() < gameManager->timeStartedLoading + gameManager->loadingDelay ) {
+			while( gameManager->device->run() not_eq false and numLocksPlaced < gameManager->numLocks and gameManager->timer->getTime() < gameManager->timeStartedLoading + gameManager->loadingDelay ) {
 				decltype( cols ) tempX = rand() % cols;
 				decltype( rows ) tempY = rand() % rows;
 
@@ -493,7 +493,7 @@ void MazeManager::makeRandomLevel() {
 			if( numLocksPlaced < gameManager->numLocks ) {
 				decltype( numLocksPlaced ) keysToRemove = gameManager->numLocks - numLocksPlaced;
 
-				for( uint_fast16_t i = 0; ( i < gameManager->stuff.size() && keysToRemove > 0 ); ++i ) {
+				for( uint_fast16_t i = 0; ( i < gameManager->stuff.size() and keysToRemove > 0 ); ++i ) {
 					if( gameManager->getDebugStatus() ) {
 						std::wcout << L"keysToRemove: " << keysToRemove << std::endl;
 					}
@@ -611,7 +611,7 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 			switch( rand() % 4 ) { //4 = number of directions (up, down, left, right)
 				case 0: //Left
 					
-					if( x > 0 && maze[ x-1 ][ y ].visited == false ) {
+					if( x > 0 and maze[ x-1 ][ y ].visited == false ) {
 						maze[ x ][ y ].setOriginalLeft( MazeCell::NONE );
 						
 						recurseRandom( x - 1, y, depth + 1, numSoFar );
@@ -621,7 +621,7 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 				
 				case 1: //Right
 					
-					if( x < cols - 1 && maze[ x+1 ][ y ].visited == false ) {
+					if( x < cols - 1 and maze[ x+1 ][ y ].visited == false ) {
 						maze[ x+1 ][ y ].setOriginalLeft( MazeCell::NONE );
 						
 						recurseRandom( x + 1, y, depth + 1, numSoFar );
@@ -631,7 +631,7 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 				
 				case 2: //Up
 					
-					if( y > 0 && maze[ x ][ y-1 ].visited == false ) {
+					if( y > 0 and maze[ x ][ y-1 ].visited == false ) {
 						maze[ x ][ y ].setOriginalTop( MazeCell::NONE );
 						
 						recurseRandom( x, y - 1, depth + 1, numSoFar );
@@ -641,7 +641,7 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 				
 				case 3: //Down
 					
-					if( y < rows - 1 && maze[ x ][ y+1 ].visited == false ) {
+					if( y < rows - 1 and maze[ x ][ y+1 ].visited == false ) {
 						maze[ x ][ y+1 ].setOriginalTop( MazeCell::NONE );
 						
 						recurseRandom( x, y + 1, depth + 1, numSoFar );
@@ -652,10 +652,10 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 			
 			//If we've reached a dead end, don't keep going. Otherwise do.
 			keepGoing = false;
-			if( ( x > 0 && maze[ x - 1 ][ y ].visited == false )
-					|| ( x < cols - 1 && maze[ x + 1 ][ y ].visited == false )
-					|| ( y > 0 && maze[ x ][ y - 1 ].visited == false )
-					|| ( y < rows - 1 && maze[ x ][ y + 1 ].visited == false )
+			if( ( x > 0 and maze[ x - 1 ][ y ].visited == false )
+					or ( x < cols - 1 and maze[ x + 1 ][ y ].visited == false )
+					or ( y > 0 and maze[ x ][ y - 1 ].visited == false )
+					or ( y < rows - 1 and maze[ x ][ y + 1 ].visited == false )
 			  ) {
 				keepGoing = true;
 			}
@@ -671,7 +671,7 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 		{ //Append the desired extension to the file name if it's not already present.
 			std::wstring destExtension = dest.extension().wstring();
 			destExtension.erase( destExtension.begin() ); //The first character is the '.' which we don't include in fileTypeExtension
-			if( !fileTypeExtension.equals_ignore_case( gameManager->stringConverter.toIrrlichtStringW( destExtension ) ) ) {
+			if( not fileTypeExtension.equals_ignore_case( gameManager->stringConverter.toIrrlichtStringW( destExtension ) ) ) {
 				dest += L".";
 				dest += gameManager->stringConverter.toStdWString( fileTypeExtension );
 			}
@@ -682,7 +682,7 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 		}
 		
 		boost::filesystem::wofstream file; //Identical to a standard C++ wofstream, except it takes Boost paths
-		file.open( dest, boost::filesystem::wofstream::binary | boost::filesystem::wofstream::trunc );
+		file.open( dest, boost::filesystem::wofstream::binary bitor boost::filesystem::wofstream::trunc );
 		
 		if( file.is_open() ) {
 			file << gameManager->randomSeed;

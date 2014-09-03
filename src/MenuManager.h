@@ -32,32 +32,40 @@ class MenuManager {
 		MenuManager();
 		virtual ~MenuManager();
 		
+		enum selection_t { NEXT_MAZE, RESTART_MAZE, LOAD_MAZE, SAVE_MAZE, EXIT_GAME, BACK_TO_GAME, FREEDOM };
+		
 		void draw( irr::video::IVideoDriver* driver );
 		
 		void findHighlights( int_fast32_t x, int_fast32_t y );
 		
 		void processSelection( GameManager* gm );
 		
-		void scrollHighlights( bool up );
+		void scrollSelection( bool up );
 		
 		void setFont( irr::gui::IGUIFont* font );
 		
 		void setPositions( uint_fast32_t windowHeight );
+		
+		void setSelection( selection_t selection );
 	protected:
 	private:
-		MenuOption backToGame;
+		std::vector< MenuOption > options;
 		
-		MenuOption freedom;
+		uint_fast8_t backToGame;
+		
+		uint_fast8_t freedom;
 
-		MenuOption exitGame;
+		uint_fast8_t exitGame;
 		
-		MenuOption loadMaze;
+		uint_fast8_t highlightedOption;
 		
-		MenuOption nextMaze;
+		uint_fast8_t loadMaze;
 		
-		MenuOption restartMaze;
+		uint_fast8_t nextMaze;
 		
-		MenuOption saveMaze;
+		uint_fast8_t restartMaze;
+		
+		uint_fast8_t saveMaze;
 		StringConverter stringConverter;
 };
 

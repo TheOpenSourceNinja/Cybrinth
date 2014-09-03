@@ -27,7 +27,7 @@
 std::wstring SystemSpecificsManager::getEnvironmentVariable( std::string name ) {
 	char * result = getenv( name.c_str() );
 	//cppcheck-suppress duplicateExpression
-	if( result != 0 && result != NULL && result != nullptr ) {
+	if( result not_eq 0 and result not_eq NULL and result not_eq nullptr ) {
 		return sc.toStdWString( result );
 	} else {
 		std::wstring error = L"Environment variable ";
@@ -43,7 +43,7 @@ std::wstring SystemSpecificsManager::getEnvironmentVariable( std::wstring name )
 		result = _wgetenv( name.c_str() );
 	#endif // HAVE__WGETENV
 	//cppcheck-suppress duplicateExpression
-	if( result != 0 && result != NULL && result != nullptr ) {
+	if( result not_eq 0 and result not_eq NULL and result not_eq nullptr ) {
 		return sc.toStdWString( result );
 	} else {
 		return getEnvironmentVariable( sc.toStdString( name ) );
@@ -84,10 +84,10 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 		fontFolders.push_back( L"/usr/local/lib/X11/fonts/" );
 	#endif //What about other operating systems? I don't know where BSD etc. put their font files.
 	
-	//for( std::vector< boost::filesystem::path >::iterator i = fontFolders.begin(); i != fontFolders.end(); i++ ) {
+	//for( std::vector< boost::filesystem::path >::iterator i = fontFolders.begin(); i not_eq fontFolders.end(); i++ ) {
 	for( decltype( fontFolders.size() ) i = 0; i < fontFolders.size(); i++ ) {
-		//if( !exists( &i ) ) {
-		if( !exists( fontFolders.at( i ) ) || ( !is_directory( fontFolders.at( i ) ) && ( is_symlink( fontFolders.at( i ) ) && !is_directory( read_symlink( fontFolders.at( i ) ) ) ) ) ) {
+		//if( not exists( &i ) ) {
+		if( not exists( fontFolders.at( i ) ) or ( not is_directory( fontFolders.at( i ) ) and ( is_symlink( fontFolders.at( i ) ) and not is_directory( read_symlink( fontFolders.at( i ) ) ) ) ) ) {
 			//fontFolders.erase( i );
 			fontFolders.erase( fontFolders.begin() + i );
 		}
@@ -151,7 +151,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 	#endif //What about other operating systems? I don't know where BSD etc. put their config files.
 	
 	for( decltype( configFolders.size() ) i = 0; i < configFolders.size(); i++ ) {
-		if( !exists( configFolders.at( i ) ) ) {
+		if( not exists( configFolders.at( i ) ) ) {
 			configFolders.erase( configFolders.begin() + i );
 		}
 	}

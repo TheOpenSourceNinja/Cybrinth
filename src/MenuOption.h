@@ -29,8 +29,10 @@ class MenuOption {
 		MenuOption();
 		virtual ~MenuOption();
 		uint_fast16_t getX();
+		uint_fast16_t getMiddleX();
 		void setX( uint_fast16_t val );
 		uint_fast16_t getY();
+		uint_fast16_t getMiddleY();
 		void setY( uint_fast16_t val );
 		void setFont( irr::gui::IGUIFont* newFont );
 		void draw( irr::video::IVideoDriver* driver );

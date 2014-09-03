@@ -114,13 +114,13 @@ class CGUIFreetypeFont : public irr::gui::IGUIFont {
 		virtual irr::s32 getCharacterFromPos( const wchar_t* text, irr::s32 pixel_x ) const;
 
 		//! Not yet supported
-		virtual void setKerningWidth( irr::s32 kerning ) {}
+		virtual void setKerningWidth( irr::s32 kerning __attribute__ ((unused)) ) {}
 
 		//! Not yet supported
-		virtual void setKerningHeight( irr::s32 kerning ) {}
+		virtual void setKerningHeight( irr::s32 kerning __attribute__ ((unused)) ) {}
 
 		//! Not yet supported
-		virtual irr::s32 getKerningWidth( const wchar_t* thisLetter = 0, const wchar_t* previousLetter = 0 )	const {
+		virtual irr::s32 getKerningWidth( const wchar_t* thisLetter __attribute__ ((unused)) = 0, const wchar_t* previousLetter __attribute__ ((unused)) = 0)	const {
 			return 0;
 		}
 
@@ -130,7 +130,7 @@ class CGUIFreetypeFont : public irr::gui::IGUIFont {
 		}
 
 		//! Not yet supported
-		virtual void setInvisibleCharacters( const wchar_t *s ) {}
+		virtual void setInvisibleCharacters( const wchar_t *s __attribute__ ((unused)) ) {}
 
 
 		bool AntiAlias;

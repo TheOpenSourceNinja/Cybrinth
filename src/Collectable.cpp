@@ -147,7 +147,7 @@ void Collectable::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size
 			texture = resizer.imageToTexture( driver, temp, "generic collectable" );
 		}
 		
-		if( texture != nullptr && texture->getSize() != irr::core::dimension2d< irr::u32 >( size, size ) ) {
+		if( texture not_eq nullptr and texture->getSize() not_eq irr::core::dimension2d< irr::u32 >( size, size ) ) {
 			auto newTexture = resizer.resize( texture, size, size, driver );
 			driver->removeTexture( texture );
 			texture = newTexture;
@@ -164,7 +164,7 @@ void Collectable::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_f
 			smaller = width;
 		}
 		
-		if( texture->getSize() != irr::core::dimension2d< decltype( texture->getSize().Height ) >( smaller, smaller ) ) {
+		if( texture->getSize() not_eq irr::core::dimension2d< decltype( texture->getSize().Height ) >( smaller, smaller ) ) {
 			loadTexture( device, smaller );
 		}
 
@@ -194,7 +194,7 @@ void Collectable::loadTexture( irr::IrrlichtDevice* device, uint_fast8_t size ) 
 		}
 	}
 	// cppcheck-suppress duplicateExpression
-	if( texture == nullptr || texture == NULL ) {
+	if( texture == nullptr or texture == NULL ) {
 		createTexture( device, size );
 	}
 }

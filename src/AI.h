@@ -44,8 +44,12 @@ class AI {
 		 */
 		virtual ~AI();
 
-		enum algorithm_t{ DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH, RIGHT_HAND_RULE, LEFT_HAND_RULE, DIJKSTRA };
+		enum algorithm_t { DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH, RIGHT_HAND_RULE, LEFT_HAND_RULE, DIJKSTRA, ALGORITHM_DO_NOT_USE };
 		
+		/**
+		 * Returns the algorithm most closely matching a given string
+		 */
+		algorithm_t algorithmFromString( std::wstring input );
 		/**
 		 * Makes the bot 'forget' that it has visited certain maze cells, specifically those in pathsToLockedCells.
 		 */
@@ -100,6 +104,10 @@ class AI {
 		 */
 		//void setup( MazeCell ** newMaze, uint_fast8_t newCols, uint_fast8_t newRows, GameManager * newGM, bool newStartSolved, algorithm_t newAlgorithm, uint_fast16_t newMovementDelay );
 		void setup( GameManager * newGM, bool newStartSolved, algorithm_t newAlgorithm, uint_fast16_t newMovementDelay );
+		/**
+		 * Given an algorithm, returns a string representation of the algorithm
+		 */
+		std::wstring stringFromAlgorithm( algorithm_t input );
 	protected:
 	private:
 		algorithm_t algorithm;

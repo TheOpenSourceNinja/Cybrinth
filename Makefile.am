@@ -2,7 +2,7 @@
 
 DEB_BUILD_HARDENING = 1 #If you have hardening wrapper scripts installed (Ubuntu/Debian package "hardening-wrapper"), this should make them harden the program
 
-AM_CPPFLAGS = -std=c++0x -Wpedantic -Wall -Wextra -Og $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS) $(SDLDEPS_CFLAGS)
+AM_CPPFLAGS = -std=c++0x -Wpedantic -Wall -Wextra $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS) $(SDLDEPS_CFLAGS)
 AM_LDFLAGS = -lstdc++ -lm
 bin_PROGRAMS = cybrinth
 
@@ -15,25 +15,3 @@ cybrinth_SOURCES += compiled-images/key.cpp compiled-images/acid.cpp compiled-im
 # cybrinth_SOURCES += $(wildcard compiled-images/*.cpp)
 cybrinth_LDADD = $(IRRLICHT_LIBS) $(BOOSTFILESYSTEM_LIBS) $(BOOSTFILESYSTEM_LIBS_TWO) $(BOOSTSYSTEM_LIBS) $(BOOSTSYSTEM_LIBS_TWO) $(DEPS_LIBS) $(SDLDEPS_LIBS)
 
-#LIST_OF_XCFS = ` find ./images -d -iname "*.xcf" -type f -print0 `
-#convert-images : $(LIST_OF_XCFS)
-#	$(foreach FILE, $(LIST_OF_XCFS), $(shell xcf2png $(FILE) -o $(FILE).png))
-
-# All lines below (in the file Makefile.am) are copied from the Autoconf documentation: https://www.gnu.org/savannah-checkouts/gnu/autoconf/manual/autoconf-2.69/html_node/Automatic-Remaking.html#Automatic-Remaking
-#$(srcdir)/configure: configure.ac aclocal.m4
-#	cd '$(srcdir)' && autoconf
-# autoheader might not change config.h.in, so touch a stamp file.
-#$(srcdir)/config.h.in: stamp-h.in
-#$(srcdir)/stamp-h.in: configure.ac aclocal.m4
-#	cd '$(srcdir)' && autoheader
-#	date -uI > '$(srcdir)/stamp-h.in'
-
-#config.h: stamp-h
-#stamp-h: config.h.in config.status
-#	./config.status
-
-#Makefile: Makefile.in config.status
-#	./config.status
-
-#config.status: configure
-#	./config.status --recheck

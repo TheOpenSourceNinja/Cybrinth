@@ -33,7 +33,7 @@ int main( int argc, char *argv[] ) {
 		std::wstring fileToLoad;
 		
 		if( argc > 1 ) {
-			if( argc != 2 ) {
+			if( argc not_eq 2 ) {
 				std::wcerr << L"Too many command line arguments. " << PACKAGE_NAME << L" expects only one argument on the command line: the name of a file from which to load a maze." << std::endl;
 				return EXIT_FAILURE;
 			} else {

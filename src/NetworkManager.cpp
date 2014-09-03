@@ -60,7 +60,7 @@ NetworkManager::NetworkManager() {
 		}
 
 		#if defined WINDOWS
-		if (WSAStartup(MAKEWORD(1,1), &wsaData) != 0) {
+		if (WSAStartup(MAKEWORD(1,1), &wsaData) not_eq 0) {
 			fprintf(stderr, "WSAStartup failed.\n");
 			exit(1);
 		}
@@ -85,7 +85,7 @@ void NetworkManager::setPort( uint_fast16_t newPort ) {
 		} else if( newPort <= 49151 ) {
 			std::wcerr << L"Warning: Port " << newPort << L" is in the \"registered ports\" range (1024-49151). This may not work. Recommend using ports above 49151." << std::endl;
 		} else {
-			if( gm != nullptr && gm->getDebugStatus() ) {
+			if( gm not_eq nullptr and gm->getDebugStatus() ) {
 				std::wcout << L"Setting port to " << newPort << L"." << std::endl;
 			}
 		}
@@ -114,12 +114,12 @@ bool NetworkManager::setup( bool isServer ) {
 
 		rv = getaddrinfo( nullptr, irr::core::stringc( port ).c_str(), &hints, &ai );
 
-		if( rv != 0 ) {
+		if( rv not_eq 0 ) {
 			//throw( std::wstring( "getaddrinfo: " + std::string( gai_strerror( rv ) ) ) );
 			std::wcerr << gai_strerror( rv ) << std::endl;
 		}
 
-		for( p = ai; p != nullptr; p = p->ai_next ) {
+		for( p = ai; p not_eq nullptr; p = p->ai_next ) {
 			listener = socket( p->ai_family, p->ai_socktype, p->ai_protocol );
 
 			if( listener < 0 ) {
@@ -157,7 +157,7 @@ bool NetworkManager::setup( bool isServer ) {
 			}
 		}*/
 
-		if ( !isServer ) { //Client
+		if ( not isServer ) { //Client
 			inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), remoteIP, sizeof remoteIP);
 			std::wcout << L"client: connecting to " << remoteIP << std::endl;
 		}
@@ -326,14 +326,14 @@ void NetworkManager::sendMaze( MazeCell ** maze, uint_fast8_t cols, uint_fast8_t
 
 		for( int i = 0; i <= fdmax; ++i ) {
 			//send to everyone! except the listener
-			if( FD_ISSET( i, &master ) && i != listener ) {
+			if( FD_ISSET( i, &master ) and i not_eq listener ) {
 				size_t size = toSend.size();
 
-				if( !sendData( i, &toSend.at( 0 ), &size ) ) {
+				if( not sendData( i, &toSend.at( 0 ), &size ) ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 
-				if( size != toSend.size() ) {
+				if( size not_eq toSend.size() ) {
 					std::wcerr << L"sendData() error: Not all data was sent" << std::endl;
 				}
 			}
@@ -365,14 +365,14 @@ void NetworkManager::sendPlayerPos( uint_fast8_t player, uint_fast8_t x, uint_fa
 
 		for( int j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
-			if( FD_ISSET( j, &master ) && j != listener ) {
+			if( FD_ISSET( j, &master ) and j not_eq listener ) {
 				size_t size = toSend.size();
 
-				if( !sendData( j, &toSend.at( 0 ), &size ) ) {
+				if( not sendData( j, &toSend.at( 0 ), &size ) ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 
-				if( size != toSend.size() ) {
+				if( size not_eq toSend.size() ) {
 					std::wcerr << L"sendData() error: Not all data was sent" << std::endl;
 				}
 			}
@@ -403,14 +403,14 @@ void NetworkManager::sendGoal( Goal goal ) {
 
 		for( int j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
-			if( FD_ISSET( j, &master ) && j != listener ) {
+			if( FD_ISSET( j, &master ) and j not_eq listener ) {
 				size_t size = toSend.size();
 
-				if( !sendData( j, &toSend.at( 0 ), &size ) ) {
+				if( not sendData( j, &toSend.at( 0 ), &size ) ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 
-				if( size != toSend.size() ) {
+				if( size not_eq toSend.size() ) {
 					std::wcerr << L"sendData() error: Not all data was sent" << std::endl;
 				}
 			}
@@ -448,14 +448,14 @@ void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 
 		for( int j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
-			if( FD_ISSET( j, &master ) && j != listener ) {
+			if( FD_ISSET( j, &master ) and j not_eq listener ) {
 				size_t size = toSend.size();
 
-				if( !sendData( j, &toSend.at( 0 ), &size ) ) {
+				if( not sendData( j, &toSend.at( 0 ), &size ) ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 
-				if( size != toSend.size() ) {
+				if( size not_eq toSend.size() ) {
 					std::wcerr << L"sendData() error: Not all data was sent" << std::endl;
 				}
 			}
@@ -494,14 +494,14 @@ void NetworkManager::sendU8( uint_fast8_t num, std::wstring desc ) {
 
 		for( int j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
-			if( FD_ISSET( j, &master ) && j != listener ) {
+			if( FD_ISSET( j, &master ) and j not_eq listener ) {
 				size_t size = toSend.size();
 
-				if( !sendData( j, &toSend.at( 0 ), &size ) ) {
+				if( not sendData( j, &toSend.at( 0 ), &size ) ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 
-				if( size != toSend.size() ) {
+				if( size not_eq toSend.size() ) {
 					std::wcerr << L"sendData() error: Not all data was sent" << std::endl;
 				}
 			}
@@ -537,14 +537,14 @@ void NetworkManager::sendCollectables( std::vector< Collectable > stuff ) {
 
 		for( int j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
-			if( FD_ISSET( j, &master ) && j != listener ) {
+			if( FD_ISSET( j, &master ) and j not_eq listener ) {
 				size_t size = toSend.size();
 
-				if( !sendData( j, &toSend[0 ], &size ) ) {
+				if( not sendData( j, &toSend[0 ], &size ) ) {
 					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
 				}
 
-				if( size != toSend.size() ) {
+				if( size not_eq toSend.size() ) {
 					std::wcerr << L"sendData() error: Not all data was sent" << std::endl;
 				}
 			}

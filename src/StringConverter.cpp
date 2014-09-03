@@ -304,7 +304,7 @@ std::wstring StringConverter::toStdWString( long double input ) {
 }
 
 const wchar_t* StringConverter::toWCharArray( std::wstring input ) {
-	if( wCharArray != nullptr ) {
+	if( wCharArray not_eq nullptr ) {
 		delete wCharArray;
 	}
 	
@@ -314,7 +314,7 @@ const wchar_t* StringConverter::toWCharArray( std::wstring input ) {
 }
 
 const wchar_t* StringConverter::toWCharArray( irr::core::stringw input ) {
-	if( wCharArray != nullptr ) {
+	if( wCharArray not_eq nullptr ) {
 		delete wCharArray;
 	}
 	
@@ -324,7 +324,7 @@ const wchar_t* StringConverter::toWCharArray( irr::core::stringw input ) {
 }
 
 const wchar_t* StringConverter::toWCharArray( char* input ) {
-	if( wCharArray != nullptr ) {
+	if( wCharArray not_eq nullptr ) {
 		delete wCharArray;
 	}
 	
@@ -334,7 +334,7 @@ const wchar_t* StringConverter::toWCharArray( char* input ) {
 }
 
 const wchar_t* StringConverter::toWCharArray( const char* input ) {
-	if( wCharArray != nullptr ) {
+	if( wCharArray not_eq nullptr ) {
 		delete wCharArray;
 	}
 	
@@ -345,11 +345,11 @@ const wchar_t* StringConverter::toWCharArray( const char* input ) {
 
 StringConverter::~StringConverter() {
 	try {
-		if( wCharArray != nullptr ) {
+		if( wCharArray not_eq nullptr ) {
 			delete wCharArray;
 		}
 		
-		if( charArray != nullptr ) {
+		if( charArray not_eq nullptr ) {
 			delete charArray;
 		}
 	} catch ( std::exception &e ) {

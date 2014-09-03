@@ -112,9 +112,9 @@ void Player::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16
 			size = height;
 		}
 
-		if( texture->getSize().Width != size ) {
+		if( texture->getSize().Width not_eq size ) {
 			loadTexture( device, size );
-			if( texture == nullptr || texture == NULL ) {
+			if( texture == nullptr or texture == NULL ) {
 				createTexture( device, size );
 			}
 		}
@@ -143,7 +143,7 @@ intmax_t Player::getScoreTotal() {
 void Player::giveItem( uint_fast8_t item, Collectable::type_t type ) {
 	heldItem = item;
 	heldItemType = type;
-	if( gm != nullptr ) {
+	if( gm not_eq nullptr ) {
 		gm->getCollectable( heldItem )->setX( x );
 		gm->getCollectable( heldItem )->setY( y );
 		gm->getCollectable( heldItem )->owned = true;
@@ -151,7 +151,7 @@ void Player::giveItem( uint_fast8_t item, Collectable::type_t type ) {
 }
 
 bool Player::hasItem() {
-	return heldItem != UINT_FAST8_MAX;
+	return heldItem not_eq UINT_FAST8_MAX;
 }
 
 bool Player::hasItem( uint_fast8_t item ) {
@@ -160,12 +160,12 @@ bool Player::hasItem( uint_fast8_t item ) {
 
 void Player::loadTexture( irr::IrrlichtDevice* device ) {
 	try {
-		if( !( texture == nullptr || texture == NULL ) ) {
+		if( not ( texture == nullptr or texture == NULL ) ) {
 			device->getVideoDriver()->removeTexture( texture );
 			texture = nullptr;
 		}
 		loadTexture( device, 1 );
-		if( texture == nullptr || texture == NULL ) {
+		if( texture == nullptr or texture == NULL ) {
 			createTexture( device, 1 );
 		}
 	} catch( std::exception &e ) {
@@ -175,13 +175,13 @@ void Player::loadTexture( irr::IrrlichtDevice* device ) {
 
 void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 	irr::core::stringw fileName = L"player";
-	if( !( texture == nullptr || texture == NULL ) ) {
+	if( not ( texture == nullptr or texture == NULL ) ) {
 		device->getVideoDriver()->removeTexture( texture );
 		texture = nullptr;
 	}
 	Object::loadTexture( device, size, fileName );
 	
-	if( texture == nullptr || texture == NULL ) {
+	if( texture == nullptr or texture == NULL ) {
 		if( playerNumber < 10 ) {
 			fileName += L"00";
 		} else if( playerNumber < 100 ) {
@@ -191,7 +191,7 @@ void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 		Object::loadTexture( device, size, fileName );
 	}
 	
-	if( texture == nullptr || texture == NULL ) {
+	if( texture == nullptr or texture == NULL ) {
 		createTexture( device, size );
 	}
 }
@@ -200,7 +200,7 @@ void Player::moveX( int_fast8_t val ) {
 	try {
 		Object::moveX( val );
 		stepsTakenThisMaze += 1;
-		if( hasItem() && gm != nullptr ) {
+		if( hasItem() and gm not_eq nullptr ) {
 			gm->getCollectable( heldItem )->moveX( val );
 		}
 	} catch( std::exception &e ) {
@@ -212,7 +212,7 @@ void Player::moveY( int_fast8_t val ) {
 	try {
 		Object::moveY( val );
 		stepsTakenThisMaze += 1;
-		if( hasItem() && gm != nullptr ) {
+		if( hasItem() and gm not_eq nullptr ) {
 			gm->getCollectable( heldItem )->moveY( val );
 		}
 	} catch( std::exception &e ) {

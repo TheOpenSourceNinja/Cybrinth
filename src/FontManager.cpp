@@ -39,13 +39,13 @@ FontManager::~FontManager() {
 	try {
 		FontMap::iterator itFont = mFontMap.begin();
 
-		for( ; itFont != mFontMap.end(); ++itFont ) {
+		for( ; itFont not_eq mFontMap.end(); ++itFont ) {
 			itFont->second->drop();
 		}
 
 		FaceMap::iterator itFace = mFaceMap.begin();
 
-		for( ; itFace != mFaceMap.end(); ++itFace ) {
+		for( ; itFace not_eq mFaceMap.end(); ++itFace ) {
 			itFace->second->drop();
 		}
 	} catch ( std::exception &e ) {
@@ -71,7 +71,7 @@ bool FontManager::canLoadFont( irr::core::stringw filename_ ) {
 
 bool FontManager::canLoadFont( boost::filesystem::path filename_ ) {
 	try {
-		if ( !is_directory( filename_ ) ) {
+		if ( not is_directory( filename_ ) ) {
 			StringConverter sc;
 			return canLoadFont( sc.toIrrlichtStringW( filename_.wstring() ) );
 		}
@@ -92,7 +92,7 @@ irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, ir
 		irr::core::stringw fontString( MakeFontIdentifier( filename_, size_, antiAlias_, transparency_ ) );
 		FontMap::iterator itFont = mFontMap.find( fontString );
 
-		if( itFont != mFontMap.end() )
+		if( itFont not_eq mFontMap.end() )
 			return itFont->second;
 
 		// check if the face is already loaded
@@ -100,16 +100,16 @@ irr::gui::IGUIFont* FontManager::GetTtFont( irr::video::IVideoDriver* driver, ir
 		CGUITTFace * face = nullptr;
 		FaceMap::iterator itFace = mFaceMap.find( faceName );
 
-		if( itFace != mFaceMap.end() ) {
+		if( itFace not_eq mFaceMap.end() ) {
 			face = itFace->second;
 		}
 
 		// no face loaded
-		if( !face ) {
+		if( not face ) {
 			// make a new face
 			face = new CGUITTFace;
 
-			if( !face->load( filename_ ) ) {
+			if( not face->load( filename_ ) ) {
 				face->drop();
 				return nullptr;
 			}
