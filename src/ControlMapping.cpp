@@ -144,19 +144,34 @@ void ControlMapping::setPlayer( uint_fast8_t val ) {
 	}
 }
 
-ControlMapping::controllerDirection_t ControlMapping::getControllerDirection() {
-	return controllerDirection;
+ControlMapping::joystickDirection_t ControlMapping::getJoystickDirection() {
+	return joystickDirection;
 }
 
-void ControlMapping::setControllerDirection( controllerDirection_t val ) {
-	controllerDirection = val;
+void ControlMapping::setJoystickDirection( joystickDirection_t val ) {
+	joystickDirection = val;
 }
 
-uint_fast8_t ControlMapping::getControllerAxis() {
-	return controllerAxis;
+uint_fast8_t ControlMapping::getJoystickAxis() {
+	return joystickAxis;
 }
-void ControlMapping::setControllerAxis( uint_fast8_t val ) {
-	controllerAxis = val;
+
+void ControlMapping::setJoystickAxis( uint_fast8_t val ) {
+	joystickAxis = val;
+}
+
+void ControlMapping::setJoystickDeadZonePercent( uint_fast8_t percent ) {
+	if( percent > 100 ) {
+		percent = 100;
+	}
+	int_fast32_t percent32 = percent;
+	percent32 *= INT_FAST16_MAX;
+	percent32 /= 100;
+	joystickDeadZone = percent32;
+}
+
+int_fast16_t ControlMapping::getJoystickDeadZone() {
+	return joystickDeadZone;
 }
 
 ControlMapping::ControlMapping() {
@@ -167,10 +182,11 @@ ControlMapping::ControlMapping() {
 		setAction( ACTION_DO_NOT_USE );
 		controllerButton = UINT_FAST8_MAX;
 		controllerNumber = UINT_FAST8_MAX;
-		controllerDirection = CONTROLLER_DO_NOT_USE;
+		joystickDirection = JOYSTICK_DO_NOT_USE;
 		mouseDirection = MOUSE_DO_NOT_USE;
 		activated = false;
-		controllerAxis = UINT_FAST8_MAX;
+		joystickAxis = UINT_FAST8_MAX;
+		joystickDeadZone = ( INT_FAST16_MAX / 2 );
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in ControlMapping::ControlMapping(): " << e.what() << std::endl;
 	}

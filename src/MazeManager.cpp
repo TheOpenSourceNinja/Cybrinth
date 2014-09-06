@@ -361,12 +361,14 @@ void MazeManager::makeRandomLevel() {
 			}
 		}
 		
-		{ //Decide how many keys/locks to use (# of keys = # of locks)
+		if( cols > 0 ) { //Decide how many keys/locks to use (# of keys = # of locks)
 			decltype( gameManager->numLocks ) temp = rand() % cols;
 			if( deadEndsX.size() > 0 ) {
 				temp = temp % deadEndsX.size();
 			}
 			gameManager->numLocks = temp;
+		} else {
+			gameManager->numLocks = 0;
 		}
 
 		//gameManager->numLocks = rand() % ( cols * rows ); //Uncomment this for a crazy number of keys!
@@ -411,8 +413,13 @@ void MazeManager::makeRandomLevel() {
 			if( rand() % InverseProbabilityOfAcid == 0 ) {
 				if( deadEndsX.empty() ) { //If all the dead ends have been filled with other collectables
 					Collectable temp;
-					temp.setX( rand() % cols );
-					temp.setY( rand() % rows );
+					if( cols > 0 ) { //Clang's static analyzer thinks rows and cols may be zero
+						temp.setX( rand() % cols );
+					}
+					if( rows > 0 ) {
+						temp.setY( rand() % rows );
+					}
+					
 					temp.setType( Collectable::ACID );
 					temp.loadTexture( gameManager->device );
 					gameManager->stuff.push_back( temp );
@@ -455,7 +462,7 @@ void MazeManager::makeRandomLevel() {
 
 			decltype( gameManager->numLocks ) numLocksPlaced = 1;
 
-			while( gameManager->device->run() not_eq false and numLocksPlaced < gameManager->numLocks and gameManager->timer->getTime() < gameManager->timeStartedLoading + gameManager->loadingDelay ) {
+			while( gameManager->device->run() not_eq false and numLocksPlaced < gameManager->numLocks and gameManager->timer->getTime() < gameManager->timeStartedLoading + gameManager->loadingDelay and cols > 0 and rows > 0 ) {
 				decltype( cols ) tempX = rand() % cols;
 				decltype( rows ) tempY = rand() % rows;
 
@@ -506,7 +513,7 @@ void MazeManager::makeRandomLevel() {
 				}
 			}
 
-			numKeys = gameManager->numLocks = numLocksPlaced;
+			gameManager->numLocks = numLocksPlaced;
 		}
 		
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );

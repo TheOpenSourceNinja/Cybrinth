@@ -92,9 +92,8 @@ bool GameManager::allHumansAtGoal() {
  */
 void GameManager::drawAll() {
 	try {
-		driver->beginScene( true, true, BLACK );
-		//driver->beginScene( false, true, BLACK ); //Things look really trippy if you use this rather than the line above!
-
+		driver->beginScene( true, true, backgroundColor );
+		
 		if( not showingLoadingScreen ) {
 			if( showBackgrounds ) {
 				drawBackground();
@@ -107,8 +106,8 @@ void GameManager::drawAll() {
 						if( mazeManager.maze[ x ][ y ].visited ) {
 							auto dotSize = cellWidth / 5;
 
-							if( dotSize < 2 ) {
-								dotSize = 2;
+							if( dotSize < 1 ) { //No point drawing these if they're less than a pixel big!
+								dotSize = 1;
 							}
 
 							driver->draw2DRectangle( mazeManager.maze[ x ][ y ].getVisitorColor() , irr::core::rect< irr::s32 >( irr::core::position2d< irr::s32 >(( x * cellWidth ) + ( 0.5 * cellWidth ) - ( 0.5 * dotSize ), ( y * cellHeight ) + ( 0.5 * cellHeight ) - ( 0.5 * dotSize ) ), irr::core::dimension2d< irr::s32 >( dotSize, dotSize ) ) );
@@ -305,7 +304,7 @@ void GameManager::drawAll() {
 		} else {
 			drawLoadingScreen();
 		}
-
+		
 		driver->endScene();
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in GameManager::drawAll(): " << e.what() << std::endl;
@@ -318,12 +317,9 @@ void GameManager::drawAll() {
 void GameManager::drawBackground() {
 	try {
 		switch( backgroundChosen ) {
-			case 0: {
-				bgscene->drawAll();
-				break;
-			}
+			case 0:
 			case 1: {
-				bgscene->drawAll();
+				backgroundSceneManager->drawAll();
 				break;
 			}
 			case 2: {
@@ -333,6 +329,14 @@ void GameManager::drawBackground() {
 					}
 					driver->draw2DImage( backgroundTexture, irr::core::position2d< irr::s32 >( 0, 0 ) );
 				}
+				break;
+			}
+			case 3: {
+				driver->setRenderTarget( backgroundTexture, false, true, backgroundColor );
+				backgroundSceneManager->drawAll();
+				driver->setRenderTarget( irr::video::ERT_FRAME_BUFFER, false, false, backgroundColor );
+				driver->draw2DImage( backgroundTexture, irr::core::position2d< irr::s32 >( 0, 0 ) );
+				break;
 			}
 		}
 	} catch( std::exception &e ) {
@@ -457,11 +461,11 @@ void GameManager::drawStats( int_fast32_t textY ) {
 		int_fast16_t textX = 0;
 		decltype( textX ) textXOriginal = textX;
 		decltype( textY ) textYOriginal = textY;
-		decltype( textYOriginal ) textYSteps = textYOriginal;
-		decltype( textYOriginal ) textYTimes = textYOriginal;
-		decltype( textYOriginal ) textYKeys = textYOriginal;
-		decltype( textYOriginal ) textYScores = textYOriginal;
-		decltype( textYOriginal ) textYScoresTotal = textYOriginal;
+		decltype( textYOriginal ) textYSteps;// = textYOriginal;
+		decltype( textYOriginal ) textYTimes;// = textYOriginal;
+		decltype( textYOriginal ) textYKeys;// = textYOriginal;
+		decltype( textYOriginal ) textYScores;// = textYOriginal;
+		decltype( textYOriginal ) textYScoresTotal;// = textYOriginal;
 		//To determine how tall each row of text is, we draw the row labels first (their text could conceivably have hangy-down bits like a lower-case y)
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( winnersLabel ).c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
@@ -727,6 +731,7 @@ GameManager::GameManager() {
 		backgroundTexture = nullptr;
 		loadMazeDialog = nullptr;
 		saveMazeDialog = nullptr;
+		exitConfirmation = nullptr;
 
 		loading = L"Loading...";
 		proTipPrefix = L"Pro tip: ";
@@ -750,6 +755,8 @@ GameManager::GameManager() {
 		donePlaying = false;
 		lastTimeControlsProcessed = 0;
 		controlProcessDelay = 100;
+		backgroundColor = BLACK; //Every background should set this in setupBackground(); putting it here just in case.
+		backgroundFilePath = L"";
 		
 		device = irr::createDevice( irr::video::EDT_NULL ); //Must create a device before calling readPrefs();
 		
@@ -852,8 +859,8 @@ GameManager::GameManager() {
 			device->getLogger()->setLogLevel( irr::ELL_ERROR );
 		}
 		
-		bgscene = device->getSceneManager(); //Not sure if this would be possible with a null device, which is why we don't exit
-		if( isNull( bgscene ) ) {
+		backgroundSceneManager = device->getSceneManager(); //Not sure if this would be possible with a null device, which is why we don't exit
+		if( isNull( backgroundSceneManager ) ) {
 			throw( std::wstring( L"Cannot get scene manager" ) );
 		} else if ( debug ) {
 			std::wcout << L"Got the scene manager" << std::endl;
@@ -1260,7 +1267,7 @@ void GameManager::loadFonts() {
 			uint_fast32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
 
 			if( fontFile not_eq "" ) {
-				do { //Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
+				do { //TODO: Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
 					loadingFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 					if( not isNull( loadingFont ) ) {
 						fontDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
@@ -2032,7 +2039,7 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 				if( showingMenu ) {
 					if( event.MouseInput.Event == irr::EMIE_MOUSE_MOVED ) {
 						menuManager.findHighlights( event.MouseInput.X, event.MouseInput.Y );
-					} else if( event.MouseInput.Event == irr::EMIE_LMOUSE_PRESSED_DOWN ) {
+					} else if( event.MouseInput.Event == irr::EMIE_LMOUSE_PRESSED_DOWN and ( gui->getRootGUIElement()->getChildren().getSize() == 0 ) ) {
 						menuManager.processSelection( this );
 					}
 				}
@@ -2121,18 +2128,23 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 						menuManager.setPositions( windowSize.Height );
 						
 						if( showBackgrounds ) {
-							irr::scene::ICameraSceneNode* camera = bgscene->getActiveCamera();
+							
+							irr::scene::ICameraSceneNode* camera = backgroundSceneManager->getActiveCamera();
 							if( not isNull( camera ) ) {
 								camera->setAspectRatio( static_cast< decltype( camera->getAspectRatio() ) >( windowSize.Width ) / windowSize.Height );
 							}
-
-							if( not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq windowSize ) {
+							
+							//See setupBackgrounds() to find out what each background number means
+							if( backgroundChosen == 2 and not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq windowSize ) {
 								if( backgroundFilePath.size() > 0 ) {// not backgroundFilePath.empty() ) { Irrlicht 1.8+ has .empty() but Raspbian only has 1.7 in its repositories
 									backgroundTexture = driver->getTexture( backgroundFilePath );
 								}
 								if( not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq windowSize ) {
 									backgroundTexture = resizer.resize( backgroundTexture, windowSize.Width, windowSize.Height, driver );
 								}
+							} else if( backgroundChosen == 3 and backgroundTexture->getSize() not_eq windowSize ) {
+								driver->removeTexture( backgroundTexture );
+								backgroundTexture = driver->addRenderTargetTexture( windowSize );
 							}
 						}
 						return true;
@@ -2148,47 +2160,47 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 				if( enableController ) {
 					for( uint_fast8_t k = 0; k < controls.size(); ++k ) {
 						if( event.JoystickEvent.Joystick == controls.at( k ).getControllerNumber() ) {
-							{ //Handle controller axes
-								int_fast16_t controllerDeadZone = ( INT16_MAX / 2 ); //TODO: Make the dead zone user adjustable.
+							{ //Handle joystick axes
+								int_fast16_t joystickDeadZone = controls.at( k ).getJoystickDeadZone(); //TODO: Make the dead zone user adjustable.
 								
-								if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_INCREASE ) {
-									if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] > controllerDeadZone );
+								if( controls.at( k ).getJoystickDirection() == ControlMapping::JOYSTICK_INCREASE ) {
+									if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] > joystickDeadZone );
 										
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] > controllerDeadZone );
+									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] > joystickDeadZone );
 										
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] > controllerDeadZone );
+									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] > joystickDeadZone );
 										
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] > controllerDeadZone );
+									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] > joystickDeadZone );
 										
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] > controllerDeadZone );
+									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] > joystickDeadZone );
 										
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] > controllerDeadZone );
+									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] > joystickDeadZone );
 										
 									}
-								} else if( controls.at( k ).getControllerDirection() == ControlMapping::CONTROLLER_DECREASE ) {
-									if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] < -controllerDeadZone );
+								} else if( controls.at( k ).getJoystickDirection() == ControlMapping::JOYSTICK_DECREASE ) {
+									if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] < -joystickDeadZone );
 										
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] < -controllerDeadZone );
+									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] < -joystickDeadZone );
 										
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] < -controllerDeadZone );
+									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] < -joystickDeadZone );
 										
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] < -controllerDeadZone );
+									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] < -joystickDeadZone );
 										
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] < -controllerDeadZone );
+									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] < -joystickDeadZone );
 										
-									} else if( controls.at( k ).getControllerAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] < -controllerDeadZone );
+									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] < -joystickDeadZone );
 										
 									}
 								}
@@ -2214,6 +2226,7 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 							boost::filesystem::current_path( currentDirectory ); //Resets the actual current directory to currentDirectory, since the file chooser can change the current directory.
 
 							newMaze( loadMazeDialog->getFileName() );
+							loadMazeDialog = nullptr;
 							return true;
 						} else if( not isNull( saveMazeDialog ) and event.GUIEvent.Caller->getID() == saveMazeDialog->getID() ) {
 							if( debug ) {
@@ -2222,6 +2235,7 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 							boost::filesystem::current_path( currentDirectory ); //Resets the actual current directory to currentDirectory, since the file chooser can change the current directory.
 
 							mazeManager.saveToFile( saveMazeDialog->getFileName() );
+							saveMazeDialog = nullptr;
 							return true;
 						}
 						break;
@@ -2245,14 +2259,29 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 						if( event.GUIEvent.Caller->getID() == exitConfirmation->getID() ) {
 							device->closeDevice();
 							donePlaying = true;
+							exitConfirmation = nullptr;
 							return true;
 						}
 						break;
 					}
 					case irr::gui::EGET_MESSAGEBOX_NO: {
 						if( event.GUIEvent.Caller->getID() == exitConfirmation->getID() ) {
-							//do nothing
+							exitConfirmation = nullptr;
 							return true;
+						}
+						break;
+					}
+					case irr::gui::EGET_FILE_CHOOSE_DIALOG_CANCELLED: //Deliberate fall-through
+					case irr::gui::EGET_ELEMENT_CLOSED: {
+						auto caller = event.GUIEvent.Caller;
+						if( caller == exitConfirmation ) {
+							exitConfirmation = nullptr;
+						} else if( caller == loadMazeDialog ) {
+							loadMazeDialog = nullptr;
+						} else if( caller == saveMazeDialog ) {
+							saveMazeDialog = nullptr;
+						} else {
+							std::wcerr << L"An unrecognized element was just closed." << std::endl;
 						}
 						break;
 					}
@@ -2814,10 +2843,12 @@ void GameManager::readPrefs() {
 				prefsFile.open( prefsPath, boost::filesystem::wfstream::out bitor boost::filesystem::wfstream::app );
 				
 				if( prefsFile.is_open() ) {
-					prefsFile << std::boolalpha << std::endl;
+					prefsFile << std::boolalpha;
 					uintmax_t lineNum = 0;
 					
 					while( prefsFile.good() and not prefsNotFound.empty() ) {
+						prefsFile << std::endl;
+						
 						auto preferenceNum = spellChecker.indexOfClosestString( prefsNotFound.at( 0 ), possiblePrefs );
 						
 						prefsFile << prefsNotFound.at( 0 ) << L"\t";
@@ -2928,7 +2959,6 @@ void GameManager::readPrefs() {
 							}
 						}
 						
-						prefsFile << std::endl;
 						++lineNum;
 					}
 					
@@ -3047,7 +3077,7 @@ void GameManager::resetThings() {
 		}
 
 		won = false;
-		bgscene->clear();
+		backgroundSceneManager->clear();
 
 		if( showBackgrounds ) {
 			setupBackground();
@@ -3292,6 +3322,11 @@ void GameManager::setControls() {
 		//Yeah, these are the only defaults so far.
 		//TODO: Add default controls.
 		enableController = false;
+		joystickDeadZoneDefaultPercent = 50;
+		std::map< uint_fast8_t, uint_fast8_t > joystickDeadZones;
+		for( uint_fast8_t i = 0; i < UINT_FAST8_MAX; ++i ) {
+			joystickDeadZones[ i ] = joystickDeadZoneDefaultPercent;
+		}
 		
 		std::vector< boost::filesystem::path > configFolders = system.getConfigFolders(); // Flawfinder: ignore
 		bool controlsFileFound = false;
@@ -3378,43 +3413,45 @@ void GameManager::setControls() {
 												std::wcout << L" converts to integer " << choice << std::endl;
 											}
 										} else { //L"joystick"
-											std::wstring controllerAxisStr = boost::algorithm::trim_copy( choiceStr.substr( buttonOrJoystick.length(), 2 ) );
+											std::wstring joystickAxisStr = boost::algorithm::trim_copy( choiceStr.substr( buttonOrJoystick.length(), 2 ) );
 											
 											if( debug ) {
-												std::wcout << L"controller axis (string) \"" << controllerAxisStr << L"\"" << std::endl;
+												std::wcout << L"joystick axis (string) \"" << joystickAxisStr << L"\"" << std::endl;
 											}
 											
 											{
 												std::vector< std::wstring > possibleChoices = { L"x", L"y", L"z", L"r", L"u", L"v" };
-												std::wstring choice = possibleChoices.at( spellChecker.indexOfClosestString( controllerAxisStr, possibleChoices ) );
+												std::wstring choice = possibleChoices.at( spellChecker.indexOfClosestString( joystickAxisStr, possibleChoices ) );
 												
 												if( debug ) {
 													std::wcout << L" converts to string " << choice << std::endl;
 												}
 												
 												if( choice == possibleChoices.at( 0 ) ) { //L"x"
-													controls.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X );
+													controls.back().setJoystickAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X );
 												} else if( choice == possibleChoices.at( 1 ) ) { //L"y"
-													controls.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y );
+													controls.back().setJoystickAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y );
 												} else if( choice == possibleChoices.at( 2 ) ) { //L"z"
-													controls.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z );
+													controls.back().setJoystickAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z );
 												} else if( choice == possibleChoices.at( 3 ) ) { //L"r"
-													controls.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R );
+													controls.back().setJoystickAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R );
 												} else if( choice == possibleChoices.at( 4 ) ) { //L"u"
-													controls.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U );
+													controls.back().setJoystickAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U );
 												} else if( choice == possibleChoices.at( 5 ) ) { //L"v"
-													controls.back().setControllerAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V );
-												}
+													controls.back().setJoystickAxis( ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V );
+												} /*else if( choice == possibleChoices.at( 6 ) ) { // L"deadzone"
+													//joystickDeadZones.at( controls.back().getControllerNumber() );
+												}*/
 											}
 											
 											{
-												std::wstring increaseOrDecrease = boost::algorithm::trim_copy( choiceStr.substr( 2 + buttonOrJoystick.length() + controllerAxisStr.length() ) );
+												std::wstring increaseOrDecrease = boost::algorithm::trim_copy( choiceStr.substr( 2 + buttonOrJoystick.length() + joystickAxisStr.length() ) );
 												std::vector< std::wstring > possibleChoices = { L"increase", L"decrease" };
 												std::wstring choice = possibleChoices.at( spellChecker.indexOfClosestString( increaseOrDecrease, possibleChoices ) );
 												if( choice == possibleChoices.at( 0 ) ) { //L"increase"
-													controls.back().setControllerDirection( ControlMapping::CONTROLLER_INCREASE );
+													controls.back().setJoystickDirection( ControlMapping::JOYSTICK_INCREASE );
 												} else if( choice == possibleChoices.at( 1 ) ) { //L"decrease"
-													controls.back().setControllerDirection( ControlMapping::CONTROLLER_DECREASE );
+													controls.back().setJoystickDirection( ControlMapping::JOYSTICK_DECREASE );
 												}
 											}
 										}
@@ -3617,7 +3654,18 @@ void GameManager::setControls() {
 									} else { //L"down"
 										controls.back().setAction( ControlMapping::ACTION_VOLUME_DOWN );
 									}
-								} else {
+								} /*else if( preference.substr( 0, 1 ) == L"j" ) {
+									std::wcout << preference.length() << std::endl;
+									try {
+										if( preference.substr( 0, 18 ) == L"joystick dead zone" ) {
+											std::wstring deadZoneString = boost::algorithm::trim_copy( preference.substr( 18 ) );
+											std::wcout << L"deadZoneString: \"" << deadZoneString << L"\"" << std::endl;
+										}
+									} catch( std::exception &e ) {
+										//do nothing;
+									}
+									
+								}*/ else {
 									if( debug ) {
 										std::wcout << L"preference before spell checking: " << preference;
 									}
@@ -3685,22 +3733,24 @@ void GameManager::setupBackground() {
 			std::wcout << L"setupBackground() called" << std::endl;
 		}
 		
-		uint_fast8_t availableBackgrounds = 3; //The number of different background animations to choose from
-
+		uint_fast8_t availableBackgrounds = 4; //The number of different background animations to choose from
+		
 		backgroundChosen = rand() % availableBackgrounds;
-		//backgroundChosen = 3;
+		backgroundChosen = 3;
 		if( debug ) {
 			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;
 		}
-
+		
 		backgroundTexture = nullptr;
-
+		
 		switch( backgroundChosen ) {
 			case 0: { //Original starfield: just flies straight forward.
+				backgroundColor = BLACK;
+				
 				// create a particle system
-				irr::scene::ICameraSceneNode* camera = bgscene->addCameraSceneNode();
+				irr::scene::ICameraSceneNode* camera = backgroundSceneManager->addCameraSceneNode();
 				camera->setPosition( irr::core::vector3df( 0, 0, -150 ) );
-				irr::scene::IParticleSystemSceneNode* ps = bgscene->addParticleSystemSceneNode( false );
+				irr::scene::IParticleSystemSceneNode* ps = backgroundSceneManager->addParticleSystemSceneNode( false );
 
 				irr::video::SColor darkStarColor;
 				irr::video::SColor lightStarColor;
@@ -3780,10 +3830,30 @@ void GameManager::setupBackground() {
 				ps->setMaterialTexture( 0, pixelTexture );
 				break;
 			}
+			case 3: { //"Paint" background (deliberately falls through to starfield, do not add a break). This smearing background started out as a bug, but I liked the look so much I decided to replicate it as a feature.
+				if( driver->queryFeature( irr::video::EVDF_RENDER_TO_TARGET  ) ) {
+					backgroundTexture = driver->addRenderTargetTexture( windowSize );
+					backgroundColor = BLACK;
+					
+					{ //Fill the texture with the background color;
+						driver->beginScene( false, false, backgroundColor );
+						driver->setRenderTarget( backgroundTexture, true, true, backgroundColor );
+						driver->setRenderTarget( irr::video::ERT_FRAME_BUFFER, false, false, backgroundColor );
+						driver->endScene();
+					}
+					
+				} else {
+					backgroundChosen = 1;
+				}
+			}
 			case 1: { //New starfield: rotates the camera around.
+				if( backgroundChosen == 1 ) {
+					backgroundColor = BLACK;
+				}
+				
 				// create a particle system
-				irr::scene::ICameraSceneNode* camera = bgscene->addCameraSceneNode();
-
+				irr::scene::ICameraSceneNode* camera = backgroundSceneManager->addCameraSceneNode();
+				
 				//Decide which direction to rotate
 				float x, y, z;
 				float magnitude = 0.02;
@@ -3829,9 +3899,9 @@ void GameManager::setupBackground() {
 						break;
 					}
 				}
-
+				
 				//Create rotation animator and bind it to the camera
-				irr::scene::ISceneNodeAnimator* rotator = bgscene->createRotationAnimator( irr::core::vector3df( x, y, z ) );
+				irr::scene::ISceneNodeAnimator* rotator = backgroundSceneManager->createRotationAnimator( irr::core::vector3df( x, y, z ) );
 				if( rotator ) {
 					camera->bindTargetAndRotation( true );
 					camera->addAnimator( rotator );
@@ -3840,13 +3910,13 @@ void GameManager::setupBackground() {
 					}
 					rotator->drop();
 				}
-
+				
 				camera->setPosition( irr::core::vector3df( 0, 0, -150 ) );
-				irr::scene::IParticleSystemSceneNode* ps = bgscene->addParticleSystemSceneNode( false );
-
+				irr::scene::IParticleSystemSceneNode* ps = backgroundSceneManager->addParticleSystemSceneNode( false );
+				
 				irr::video::SColor darkStarColor;
 				irr::video::SColor lightStarColor;
-
+				
 				switch( rand() % 8 ) { //Not a magic number: count the cases
 					case 0: {
 						darkStarColor = BLACK;
@@ -3889,7 +3959,7 @@ void GameManager::setupBackground() {
 						break;
 					}
 				}
-
+				
 				irr::scene::IParticleEmitter* em = ps->createBoxEmitter(
 												  camera->getViewFrustum()->getBoundingBox(), //core::aabbox3d< float >(-7,-7,-7,7,7,7), // emitter size
 												  irr::core::vector3df( 0.0f, 0.0f, -0.1f ), // initial direction
@@ -3899,22 +3969,22 @@ void GameManager::setupBackground() {
 												  4000, 40000, 0,					   // min and max age, angle
 												  irr::core::dimension2df( 1.f, 1.f ),	  // min size
 												  irr::core::dimension2df( 20.f, 20.f ) );	// max size
-
+				
 				ps->setEmitter( em ); // this grabs the emitter
 				em->drop(); // so we can drop it here without deleting it
-
+				
 				//scene::IParticleAffector* paf = ps->createFadeOutParticleAffector();
-
+				
 				//ps->addAffector(paf); // same goes for the affector
 				//paf->drop();
-
+				
 				ps->setPosition( irr::core::vector3df( 0, 0, 40 ) );
 				ps->setScale( irr::core::vector3df( 1, 1, 1 ) );
 				ps->setMaterialFlag( irr::video::EMF_LIGHTING, false );
 				ps->setMaterialFlag( irr::video::EMF_ZWRITE_ENABLE, false );
 				//ps->setMaterialTexture( 0, driver->getTexture( "star.png" ) );
 				ps->setMaterialType( irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL );
-
+				
 				irr::video::IImage* pixelImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( 1, 1 ) );
 				//pixelImage->fill( WHITE );
 				pixelImage->setPixel( 0, 0, WHITE, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
@@ -4084,7 +4154,7 @@ void GameManager::startLoadingScreen() {
 }
 
 /**
- * Takes a screenshot and saves it to a dated png file.
+ * Takes a screenshot and saves it to a time-stamped png file.
  */
 void GameManager::takeScreenShot() {
 	try {

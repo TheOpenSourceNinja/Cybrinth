@@ -28,7 +28,7 @@
 
 class ControlMapping {
 	public:
-		enum controllerDirection_t { CONTROLLER_INCREASE, CONTROLLER_DECREASE, CONTROLLER_DO_NOT_USE };
+		enum joystickDirection_t { JOYSTICK_INCREASE, JOYSTICK_DECREASE, JOYSTICK_DO_NOT_USE };
 		enum mouseDirection_t { MOUSE_UP, MOUSE_DOWN, MOUSE_RIGHT, MOUSE_LEFT, MOUSE_DO_NOT_USE };
 		enum action_t { ACTION_MENU_ACTIVATE, ACTION_MENU_UP, ACTION_MENU_DOWN, ACTION_SCREENSHOT, ACTION_VOLUME_UP, ACTION_VOLUME_DOWN, ACTION_PLAYER_UP, ACTION_PLAYER_DOWN, ACTION_PLAYER_RIGHT, ACTION_PLAYER_LEFT, ACTION_DO_NOT_USE };
 		ControlMapping();
@@ -47,14 +47,16 @@ class ControlMapping {
 		void setPlayer( uint_fast8_t val );
 		void setMouseEvent( irr::EMOUSE_INPUT_EVENT val );
 		void setMouseWheelUp( bool val );
-		controllerDirection_t getControllerDirection();
-		void setControllerDirection( controllerDirection_t val );
-		uint_fast8_t getControllerAxis();
-		void setControllerAxis( uint_fast8_t val );
+		joystickDirection_t getJoystickDirection();
+		void setJoystickDirection( joystickDirection_t val );
+		uint_fast8_t getJoystickAxis();
+		void setJoystickAxis( uint_fast8_t val );
 		void setMouseDirection( mouseDirection_t val );
 		mouseDirection_t getMouseDirection();
+		int_fast16_t getJoystickDeadZone();
+		void setJoystickDeadZonePercent( uint_fast8_t percent );
 		
-		bool activated; //To be set, unset, and accessed by GameManager. Indicates whether the relevant button has been pressed, or controller moved, etc. Ensures smooth player movements.
+		bool activated; //To be set, unset, and accessed by GameManager. Indicates whether the relevant button has been pressed, or joystick moved, etc. Ensures smooth player movements.
 	protected:
 	private:
 		irr::EKEY_CODE key;
@@ -64,9 +66,10 @@ class ControlMapping {
 		bool mouseWheelUp;
 		action_t action;
 		uint_fast8_t player;
-		controllerDirection_t controllerDirection;
-		uint_fast8_t controllerAxis;
+		joystickDirection_t joystickDirection;
+		uint_fast8_t joystickAxis;
 		mouseDirection_t mouseDirection;
+		int_fast16_t joystickDeadZone;
 };
 
 #endif // CONTROLMAPPING_H

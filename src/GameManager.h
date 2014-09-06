@@ -183,6 +183,8 @@ class GameManager : public irr::IEventReceiver {
 		//unsigned 8-bit integers----------------------------------
 		uint_fast8_t backgroundChosen;
 		
+		uint_fast8_t joystickDeadZoneDefaultPercent;
+		
 		uint_fast8_t myPlayer; //If in client mode, control only one player
 		
 		uint_fast8_t numKeysFound;
@@ -247,15 +249,12 @@ class GameManager : public irr::IEventReceiver {
 		
 		std::vector< ControlMapping > controls;
 		
-		FileSelectorDialog* loadMazeDialog;
-		
 		MazeManager mazeManager;
 		
 		NetworkManager network;
 		
 		ImageModifier resizer;
 		
-		FileSelectorDialog* saveMazeDialog;
 		SpellChecker spellChecker;
 		
 		SystemSpecificsManager system; // Flawfinder: ignore
@@ -277,9 +276,12 @@ class GameManager : public irr::IEventReceiver {
 		irr::gui::IGUIFont* tipFont;
 		
 		//Misc. Irrlicht types----------------------------------
-		irr::scene::ISceneManager* bgscene;
-		irr::video::ITexture* backgroundTexture;
+		irr::video::SColor backgroundColor;
 		irr::io::path backgroundFilePath;
+		irr::scene::ISceneManager* backgroundSceneManager;
+		irr::video::ITexture* backgroundTexture;
+		
+		irr::core::array< irr::SJoystickInfo > controllerInfo;
 		
 		irr::video::E_DRIVER_TYPE driverType;
 		
@@ -287,9 +289,10 @@ class GameManager : public irr::IEventReceiver {
 		
 		//irr::gui::IGUIFileOpenDialog* fileChooser;
 		
-		irr::core::array< irr::SJoystickInfo > controllerInfo;
-		
+		FileSelectorDialog* loadMazeDialog;
 		irr::video::ITexture* logoTexture;
+		
+		FileSelectorDialog* saveMazeDialog;
 		
 		
 		//Misc. SDL/SDL_Mixer types----------------------------------
@@ -299,7 +302,7 @@ class GameManager : public irr::IEventReceiver {
 		boost::filesystem::path currentDirectory;
 		boost::filesystem::directory_iterator currentFile;
 		boost::filesystem::path currentMusic;
-
+		
 		std::vector<boost::filesystem::path> musicList;
 		
 		//Other types----------------------------------

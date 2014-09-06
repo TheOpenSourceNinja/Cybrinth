@@ -118,7 +118,9 @@ void AI::allKeysFound() {
 		pathsToLockedCells.shrink_to_fit(); //If your compiler doesn't support C++11 or later, comment this line and uncomment the next
 		//std::vector< std::vector< core::position2d< uint_fast8_t > > >().swap( pathsToLockedCells );
 		
-		findSolution();
+		if( startSolved ) {
+			findSolution();
+		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::allKeysFound(): " << e.what() << std::endl;
 	}
@@ -413,7 +415,6 @@ void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPositi
 								if( pretendCellsUnvisited.at( j ) == possibleNeighbors.at( i ) ) {
 									stillUnvisited = true;
 									v = possibleNeighbors.at( i );
-									break;
 								}
 							}
 							
@@ -508,7 +509,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 					if( ( currentPosition.X == gm->getCollectable( c )->getX() and currentPosition.Y == gm->getCollectable( c )->getY() ) ) {
 						switch( gm->getCollectable( c )->getType() ) {
 							case Collectable::ACID: {
-								canDissolveWalls = true;
+								//canDissolveWalls = true; //Commenting this out because Clang's static analyzer says canDissolveWalls is never read after this point.
 								//solution = partialSolution;
 								break;
 							}
