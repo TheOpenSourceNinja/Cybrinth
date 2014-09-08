@@ -2037,10 +2037,20 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 
 			case irr::EET_MOUSE_INPUT_EVENT: {
 				if( showingMenu ) {
-					if( event.MouseInput.Event == irr::EMIE_MOUSE_MOVED ) {
-						menuManager.findHighlights( event.MouseInput.X, event.MouseInput.Y );
-					} else if( event.MouseInput.Event == irr::EMIE_LMOUSE_PRESSED_DOWN and ( gui->getRootGUIElement()->getChildren().getSize() == 0 ) ) {
-						menuManager.processSelection( this );
+					switch( event.MouseInput.Event ) {
+						case irr::EMIE_MOUSE_MOVED: {
+							menuManager.findHighlights( event.MouseInput.X, event.MouseInput.Y );
+							break;
+						}
+						case irr::EMIE_LMOUSE_PRESSED_DOWN: {
+							if( ( gui->getRootGUIElement()->getChildren().getSize() == 0 ) ) {
+								menuManager.processSelection( this );
+							}
+							break;
+						}
+						default: {
+							break;
+						}
 					}
 				}
 
@@ -3735,10 +3745,11 @@ void GameManager::setupBackground() {
 		
 		uint_fast8_t availableBackgrounds = 4; //The number of different background animations to choose from
 		
-		backgroundChosen = rand() % availableBackgrounds;
-		backgroundChosen = 3;
 		if( debug ) {
+			backgroundChosen = availableBackgrounds - 1; //If we're debugging, we may be testing the last background added.
 			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;
+		} else {
+			backgroundChosen = rand() % availableBackgrounds;
 		}
 		
 		backgroundTexture = nullptr;
@@ -3810,19 +3821,14 @@ void GameManager::setupBackground() {
 
 				ps->setEmitter( em ); // this grabs the emitter
 				em->drop(); // so we can drop it here without deleting it
-
-				//scene::IParticleAffector* paf = ps->createFadeOutParticleAffector();
-
-				//ps->addAffector(paf); // same goes for the affector
-				//paf->drop();
-
+				
 				ps->setPosition( irr::core::vector3df( 0, 0, 40 ) );
 				ps->setScale( irr::core::vector3df( 1, 1, 1 ) );
 				ps->setMaterialFlag( irr::video::EMF_LIGHTING, false );
-				ps->setMaterialFlag( irr::video::EMF_ZWRITE_ENABLE, false );
+				//ps->setMaterialFlag( irr::video::EMF_ZWRITE_ENABLE, false ); //Don't remember why I put this here; it doesn't seem to make any difference
 				//ps->setMaterialTexture( 0, driver->getTexture( "star.png" ) );
 				ps->setMaterialType( irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL );
-
+				
 				irr::video::IImage* pixelImage = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( 1, 1 ) );
 				//pixelImage->fill( WHITE );
 				pixelImage->setPixel( 0, 0, WHITE, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
@@ -3912,7 +3918,7 @@ void GameManager::setupBackground() {
 				}
 				
 				camera->setPosition( irr::core::vector3df( 0, 0, -150 ) );
-				irr::scene::IParticleSystemSceneNode* ps = backgroundSceneManager->addParticleSystemSceneNode( false );
+				irr::scene::IParticleSystemSceneNode* ps = backgroundSceneManager->addParticleSystemSceneNode( false ); //False means don't use the default particle emitter; we're using our own.
 				
 				irr::video::SColor darkStarColor;
 				irr::video::SColor lightStarColor;
@@ -3973,15 +3979,10 @@ void GameManager::setupBackground() {
 				ps->setEmitter( em ); // this grabs the emitter
 				em->drop(); // so we can drop it here without deleting it
 				
-				//scene::IParticleAffector* paf = ps->createFadeOutParticleAffector();
-				
-				//ps->addAffector(paf); // same goes for the affector
-				//paf->drop();
-				
 				ps->setPosition( irr::core::vector3df( 0, 0, 40 ) );
 				ps->setScale( irr::core::vector3df( 1, 1, 1 ) );
 				ps->setMaterialFlag( irr::video::EMF_LIGHTING, false );
-				ps->setMaterialFlag( irr::video::EMF_ZWRITE_ENABLE, false );
+				//ps->setMaterialFlag( irr::video::EMF_ZWRITE_ENABLE, false ); //Don't remember why I put this here; it doesn't seem to make any difference
 				//ps->setMaterialTexture( 0, driver->getTexture( "star.png" ) );
 				ps->setMaterialType( irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL );
 				
@@ -4049,7 +4050,7 @@ void GameManager::setupBackground() {
 					}
 				}
 
-				if( backgroundList.size() > 0 ) {
+				if( not backgroundList.empty() ) {
 					std::vector< boost::filesystem::path >::iterator newEnd = std::unique( backgroundList.begin(), backgroundList.end() ); //unique "removes all but the first element from every consecutive group of equivalent elements in the range [first,last)." (source: http://www.cplusplus.com/reference/algorithm/unique/ )
 					backgroundList.resize( std::distance( backgroundList.begin(), newEnd ) );
 
@@ -4091,13 +4092,6 @@ void GameManager::setExitConfirmation( irr::gui::IGUIWindow* newWindow ) {
 }
 
 /**
- * Called by menuManager.
- */
-/*void GameManager::setFileChooser( irr::gui::IGUIFileOpenDialog* newChooser ) {
-	fileChooser = newChooser;
-}*/
-
-/**
  * Sets loadingProgress
  * Arguments: Yes please.
  **/
@@ -4137,16 +4131,12 @@ void GameManager::showSaveMazeDialog() {
  * Sets showingLoadingScreen to true and timeStartedLoading to the current time, then calls drawLoadingScreen().
  */
 void GameManager::startLoadingScreen() {
-	try {
-		if( debug ) {
-			std::wcout << L"startLoadingScreen() called" << std::endl;
-		}
-		showingLoadingScreen = true;
-		timeStartedLoading = timer->getRealTime();
-		//drawLoadingScreen();
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::startLoadingScreen(): " << e.what() << std::endl;
+	if( debug ) {
+		std::wcout << L"startLoadingScreen() called" << std::endl;
 	}
+	showingLoadingScreen = true;
+	timeStartedLoading = timer->getRealTime();
+	//drawLoadingScreen();
 	
 	if( debug ) {
 		std::wcout << L"end of startLoadingScreen()" << std::endl;
