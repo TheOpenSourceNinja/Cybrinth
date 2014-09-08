@@ -127,7 +127,7 @@ class GameManager : public irr::IEventReceiver {
 		void drawBackground();
 		void drawLoadingScreen();
 		void drawLogo();
-		void drawStats( int_fast32_t textY );
+		void drawStats( uint_fast32_t textY );
 		
 		bool haveShownLogo;
 		

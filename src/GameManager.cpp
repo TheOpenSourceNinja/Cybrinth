@@ -452,13 +452,13 @@ void GameManager::drawLoadingScreen() {
  * Should only be called from drawLoadingScreen(). Just putting it here for code separation/readability.
  * //TODO: Add more stats (estimated difficulty of maze, number of cells backtracked, etc) to loading screen.
  */
-void GameManager::drawStats( int_fast32_t textY ) {
+void GameManager::drawStats( uint_fast32_t textY ) {
 	try {
 		if( isNull( statsFont ) ) {
 			statsFont = gui->getBuiltInFont();
 		}
 
-		int_fast16_t textX = 0;
+		uint_fast16_t textX = 0;
 		decltype( textX ) textXOriginal = textX;
 		decltype( textY ) textYOriginal = textY;
 		decltype( textYOriginal ) textYSteps;// = textYOriginal;
