@@ -20,12 +20,16 @@ AC_PROG_CXX
 PKG_CHECK_MODULES([DEPS], [freetype2 >= 14.1.8 taglib >= 1.7.2]) # Some libraries provide files for pkg-config
 PKG_CHECK_EXISTS([SDL2_mixer >= 2.0.0], [PKG_CHECK_MODULES([SDLDEPS], [SDL2_mixer >= 2.0.0])], [PKG_CHECK_MODULES([SDLDEPS], [SDL_mixer >= 1.2.12])]) # Checks for both SDL2_mixer and SDL_mixer 1.2. At the time of this writing, they're the same as far as API goes.
 
-AC_ARG_WITH([irrlicht-include-path], [AS_HELP_STRING([--with-irrlicht-include-path], [location of the Irrlicht headers, defaults to /usr/include/])], [IRRLICHT_CFLAGS="-I$withval"], [IRRLICHT_CFLAGS='-I/usr/include/'])
-AC_SUBST([IRRLICHT_CFLAGS])
-AC_CHECK_HEADER([irrlicht/irrlicht.h], [], [AC_MSG_ERROR(You need the Irrlicht graphics library installed)])
-AC_ARG_WITH([irrlicht-lib-path], [AS_HELP_STRING([--with-irrlicht-lib-path], [location of the Irrlicht library])], [IRRLICHT_LIBS="-L$withval"], [IRRLICHT_LIBS=""])
-AC_SUBST([IRRLICHT_LIBS])
-AC_CHECK_LIB([Irrlicht], [createDevice])
+#Note: To specify custom library header locations (i.e. for Irrlicht), set the CXXFLAGS and CPPFLAGS variables.
+#CXXFLAGS="$CXXFLAGS -I/home/james/Programming/irrlicht-1.8.1/include"
+#CPPFLAGS="$CPPFLAGS -I/home/james/Programming/irrlicht-1.8.1/include"
+
+AC_ARG_WITH([irrlicht-include-path], [AS_HELP_STRING([--with-irrlicht-include-path], [location of the Irrlicht headers, defaults to /usr/include/])], [CXXFLAGS="CXXFLAGS -I$withval" CPPFLAGS="CPPFLAGS -I$withval"], []) #CXXFLAGS="$CXXFLAGS -I/home/james/Programming/irrlicht-1.8.1/include" CPPFLAGS="$CPPFLAGS -I/home/james/Programming/irrlicht-1.8.1/include"
+#AC_SUBST([IRRLICHT_CFLAGS])
+AC_CHECK_HEADER([irrlicht/irrlicht.h], [], [AC_CHECK_HEADER([irrlicht.h], [], [AC_MSG_ERROR(You need the Irrlicht graphics library installed)])])
+AC_ARG_WITH([irrlicht-lib-path], [AS_HELP_STRING([--with-irrlicht-lib-path], [location of the Irrlicht library])], [LDFLAGS="$LDFLAGS -L$withval"], []) #LDFLAGS="$LDFLAGS -L/home/james/Programming/irrlicht-1.8.1/lib/Win64-gcc"
+#AC_SUBST([IRRLICHT_LIBS])
+AC_CHECK_LIB([Irrlicht], [createDevice], [], [AC_MSG_ERROR(You need the Irrlicht graphics library installed)])
 
 AC_ARG_WITH([boostfilesystem-include-path], [AS_HELP_STRING([--with-boostfilesystem-include-path], [location of the Boost Filesystem headers, defaults to /usr/include/])], [BOOSTFILESYSTEM_CFLAGS="-I$withval"], [BOOSTFILESYSTEM_CFLAGS='-I/usr/include/'])
 AC_SUBST([BOOSTFILESYSTEM_CFLAGS])

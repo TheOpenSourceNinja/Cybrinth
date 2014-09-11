@@ -183,7 +183,7 @@ bool MazeManager::loadFromFile( boost::filesystem::path src ) {
 		file.open( src, boost::filesystem::wifstream::binary );
 
 		if( file.is_open() ) {
-			decltype( gameManager->randomSeed ) newRandomSeed;
+			decltype( gameManager->getRandomSeed() ) newRandomSeed;
 			file >> newRandomSeed;
 			file.close();
 			gameManager->newMaze( newRandomSeed );
@@ -236,10 +236,10 @@ void MazeManager::makeRandomLevel() {
 	try {
 		gameManager->drawAll();
 		// Flawfinder: ignore
-		srand( gameManager->randomSeed ); //randomSeed is set either by resetThings() or by loadFromFile()
+		//srand( gameManager->randomSeed ); //randomSeed is set either by resetThings() or by loadFromFile()
 		{
-			decltype( cols ) tempCols = rand() % 28 + 2; //I don't remember where I got the 28. The 2 is arbitrary so there's some minimum amount.
-			decltype( rows ) tempRows = tempCols + ( rand() % 5 ); //Again, no idea where the 5 came from.
+			decltype( cols ) tempCols = gameManager->getRandomNumber() % 28 + 2; //I don't remember where I got the 28. The 2 is arbitrary so there's some minimum amount.
+			decltype( rows ) tempRows = tempCols + ( gameManager->getRandomNumber() % 5 ); //Again, no idea where the 5 came from.
 			newMaze( tempCols, tempRows );
 		}
 		gameManager->setLoadingPercentage( gameManager->getLoadingPercentage() + 1 );
@@ -271,8 +271,8 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		{
-			decltype( cols ) goalX = rand() % cols;
-			decltype( rows ) goalY = rand() % rows;
+			decltype( cols ) goalX = gameManager->getRandomNumber() % cols;
+			decltype( rows ) goalY = gameManager->getRandomNumber() % rows;
 			gameManager->goal.setX( goalX );
 			gameManager->goal.setY( goalY );
 			//Make the goal inaccessible unless we've found all the keys (locks are place elsewhere in the code but one lock does get placed at the goal)
@@ -362,7 +362,7 @@ void MazeManager::makeRandomLevel() {
 		}
 		
 		if( cols > 0 ) { //Decide how many keys/locks to use (# of keys = # of locks)
-			decltype( gameManager->numLocks ) temp = rand() % cols;
+			decltype( gameManager->numLocks ) temp = gameManager->getRandomNumber() % cols;
 			if( deadEndsX.size() > 0 ) {
 				temp = temp % deadEndsX.size();
 			}
@@ -371,7 +371,7 @@ void MazeManager::makeRandomLevel() {
 			gameManager->numLocks = 0;
 		}
 
-		//gameManager->numLocks = rand() % ( cols * rows ); //Uncomment this for a crazy number of keys!
+		//gameManager->numLocks = gameManager->getRandomNumber() % ( cols * rows ); //Uncomment this for a crazy number of keys!
 
 		decltype( gameManager->numLocks ) numKeys = gameManager->numLocks;
 
@@ -384,7 +384,7 @@ void MazeManager::makeRandomLevel() {
 			}
 			
 			{ //Pick one of the dead ends randomly.
-				decltype( deadEndsX.size() ) chosen = rand() % deadEndsX.size();
+				decltype( deadEndsX.size() ) chosen = gameManager->getRandomNumber() % deadEndsX.size();
 
 				{ //Finally, create a key and put it there.
 					Collectable temp;
@@ -405,19 +405,19 @@ void MazeManager::makeRandomLevel() {
 		gameManager->drawAll();
 		
 		{
-			uint_fast8_t InverseProbabilityOfAcid = std::min( UINT_FAST8_MAX, RAND_MAX ); //Acid is supposed to be really rare. I call this inverse probability because the higher this number is, the less the probability is. 1 means total, 100% probability. Never set this to zero.
+			uint_fast8_t InverseProbabilityOfAcid = std::min( ( uint_fast8_t ) UINT_FAST8_MAX, ( uint_fast8_t ) gameManager->getMaxRandomNumber() ); //Acid is supposed to be really rare. I call this inverse probability because the higher this number is, the less the probability is. 1 means total, 100% probability. Never set this to zero.
 			
 			if( gameManager->getDebugStatus() ) {
 				InverseProbabilityOfAcid = 1; //If the game is being debugged, ensure the acid is always there - it may be what's being debugged. As Keith Curtis says in 'After the Software Wars', "if the code isn't executed, it probably doesn't work.".
 			}
-			if( rand() % InverseProbabilityOfAcid == 0 ) {
+			if( gameManager->getRandomNumber() % InverseProbabilityOfAcid == 0 ) {
 				if( deadEndsX.empty() ) { //If all the dead ends have been filled with other collectables
 					Collectable temp;
 					if( cols > 0 ) { //Clang's static analyzer thinks rows and cols may be zero
-						temp.setX( rand() % cols );
+						temp.setX( gameManager->getRandomNumber() % cols );
 					}
 					if( rows > 0 ) {
-						temp.setY( rand() % rows );
+						temp.setY( gameManager->getRandomNumber() % rows );
 					}
 					
 					temp.setType( Collectable::ACID );
@@ -425,7 +425,7 @@ void MazeManager::makeRandomLevel() {
 					gameManager->stuff.push_back( temp );
 				} else {
 					//Pick one of the dead ends randomly.
-					decltype( deadEndsX.size() ) chosen = rand() % deadEndsX.size();
+					decltype( deadEndsX.size() ) chosen = gameManager->getRandomNumber() % deadEndsX.size();
 
 					{ //Finally, create an acid and put it there.
 						Collectable temp;
@@ -463,8 +463,8 @@ void MazeManager::makeRandomLevel() {
 			decltype( gameManager->numLocks ) numLocksPlaced = 1;
 
 			while( gameManager->device->run() not_eq false and numLocksPlaced < gameManager->numLocks and gameManager->timer->getTime() < gameManager->timeStartedLoading + gameManager->loadingDelay and cols > 0 and rows > 0 ) {
-				decltype( cols ) tempX = rand() % cols;
-				decltype( rows ) tempY = rand() % rows;
+				decltype( cols ) tempX = gameManager->getRandomNumber() % cols;
+				decltype( rows ) tempY = gameManager->getRandomNumber() % rows;
 
 				if( maze[ tempX ][ tempY ].getTop() == MazeCell::NONE ) {
 					maze[ tempX ][ tempY ].setOriginalTop( MazeCell::LOCK );
@@ -500,7 +500,7 @@ void MazeManager::makeRandomLevel() {
 			if( numLocksPlaced < gameManager->numLocks ) {
 				decltype( numLocksPlaced ) keysToRemove = gameManager->numLocks - numLocksPlaced;
 
-				for( uint_fast16_t i = 0; ( i < gameManager->stuff.size() and keysToRemove > 0 ); ++i ) {
+				for( decltype( gameManager->stuff.size() ) i = 0; ( i < gameManager->stuff.size() and keysToRemove > 0 ); ++i ) {
 					if( gameManager->getDebugStatus() ) {
 						std::wcout << L"keysToRemove: " << keysToRemove << std::endl;
 					}
@@ -616,7 +616,7 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 		while( keepGoing ) {
 			numSoFar += 1;
 			
-			switch( rand() % 4 ) { //4 = number of directions (up, down, left, right)
+			switch( gameManager->getRandomNumber() % 4 ) { //4 = number of directions (up, down, left, right)
 				case 0: //Left
 					
 					if( x > 0 and maze[ x-1 ][ y ].visited == false ) {
@@ -693,7 +693,9 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 		file.open( dest, boost::filesystem::wofstream::binary bitor boost::filesystem::wofstream::trunc );
 		
 		if( file.is_open() ) {
-			file << gameManager->randomSeed;
+			auto newRandomSeed = gameManager->getRandomSeed();
+			file << newRandomSeed;
+			gameManager->setRandomSeed( newRandomSeed );
 			/*auto rs = gameManager->randomSeed;
 			file.write( reinterpret_cast<boost::filesystem::wofstream::char_type *>( &rs ), sizeof( rs ) / sizeof( boost::filesystem::wofstream::char_type ) );*/
 			file.close();

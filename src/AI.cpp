@@ -574,7 +574,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 					partialSolution.pop_back();
 				} else {
 					while( not possibleDirections.empty() ) { //for( uint_fast8_t i = 0; ( i < possibleDirections.size() and solution.empty() ); ++i ) { //changed decltype( possibleDirections.size() ) to uint_fast8_t because the size of possibleDirections can never exceed 4 but could be stored in a needlessly large integer type.
-						uint_fast8_t choiceInt = rand() % possibleDirections.size();
+						uint_fast8_t choiceInt = gm->getRandomNumber() % possibleDirections.size(); //rand() % possibleDirections.size();
 						direction_t choice = possibleDirections.at( choiceInt );
 						//direction_t choice = possibleDirections.at( i );
 						auto newDepthLimit = depthLimit - 1;
@@ -765,7 +765,7 @@ void AI::move() {
 						}
 					} else if ( not ( currentPosition.X == gm->getGoal()->getX() and currentPosition.Y == gm->getGoal()->getY() ) ) { //Go to next position
 						
-						direction_t choice = possibleDirections.at( rand() % possibleDirections.size() );
+						direction_t choice = possibleDirections.at( gm->getRandomNumber() % possibleDirections.size() ); //rand() % possibleDirections.size() );
 						switch( choice ) {
 							case UP: {
 								irr::core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y - 1 );

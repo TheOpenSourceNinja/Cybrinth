@@ -33,7 +33,7 @@
 #endif //What about other operating systems? I don't know what to include for BSD etc.
 
 //Custom user events for Irrlicht
-enum user_event_t { USER_EVENT_WINDOW_RESIZE };
+enum user_event_t : uint_fast8_t { USER_EVENT_WINDOW_RESIZE };
 
 //TODO: Implement an options screen
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
@@ -98,33 +98,33 @@ void GameManager::drawAll() {
 			if( showBackgrounds ) {
 				drawBackground();
 			}
-
+			
 			//Draws player trails ("footprints")
 			if( markTrails ) {
 				for( decltype( mazeManager.cols ) x = 0; x < mazeManager.cols; ++x ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
 					for( decltype( mazeManager.rows ) y = 0; y < mazeManager.rows; ++y ) {
 						if( mazeManager.maze[ x ][ y ].visited ) {
 							auto dotSize = cellWidth / 5;
-
+							
 							if( dotSize < 1 ) { //No point drawing these if they're less than a pixel big!
 								dotSize = 1;
 							}
-
+							
 							driver->draw2DRectangle( mazeManager.maze[ x ][ y ].getVisitorColor() , irr::core::rect< irr::s32 >( irr::core::position2d< irr::s32 >(( x * cellWidth ) + ( 0.5 * cellWidth ) - ( 0.5 * dotSize ), ( y * cellHeight ) + ( 0.5 * cellHeight ) - ( 0.5 * dotSize ) ), irr::core::dimension2d< irr::s32 >( dotSize, dotSize ) ) );
 						}
 					}
 				}
 			}
-
+			
 			for( decltype( numPlayers ) ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts. Changed decltype( playerStart.size() ) to decltype( numPlayers ) because playerStart.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 				playerStart.at( ps ).draw( device, cellWidth, cellHeight );
 			}
-
+			
 			//Drawing bots before human players makes it easier to play against large numbers of bots
 			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
 				player.at( bot.at( i ).getPlayer() ).draw( device, cellWidth, cellHeight );
 			}
-
+			
 			//Now we draw the players
 			for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 				if( player.at( p ).isHuman ) {
@@ -536,7 +536,7 @@ void GameManager::drawStats( uint_fast32_t textY ) {
 		textY = textYOriginal;
 		//Now we go through and draw the actual player stats
 		for( decltype( numPlayers ) p = 0; p < winnersLoadingScreen.size(); ++p ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
-			int_fast16_t textXOld = textX;
+			auto textXOld = textX;
 			
 			auto backgroundColor = player.at( winnersLoadingScreen.at( p ) ).getColorOne();
 			auto textColor = player.at( winnersLoadingScreen.at( p ) ).getColorTwo();
@@ -552,7 +552,7 @@ void GameManager::drawStats( uint_fast32_t textY ) {
 					textX = 0;
 					textXOld = 0;
 					decltype( textY ) separatorY = textYScoresTotal + tempDimensions.Height + 1;
-					driver->draw2DLine( irr::core::position2d< irr::s32 >( 0, separatorY ), irr::core::position2d< irr::s32 >( windowSize.Width, separatorY ) );
+					driver->draw2DLine( irr::core::position2d< irr::s32  >( 0, separatorY ), irr::core::position2d< irr::s32 >( windowSize.Width, separatorY ) );
 					textY = separatorY + 1;
 					textYSteps += ( textY - textYOriginal );
 					textYTimes += ( textY - textYOriginal );
@@ -796,7 +796,7 @@ GameManager::GameManager() {
 			std::wcerr << L"Error: Cannot create device. Trying other driver types." << std::endl;
 			
 			//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
-			for( uint_fast8_t i = ( uint_fast8_t ) irr::video::EDT_COUNT; isNull( device ) and i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
+			for( auto i = ( uint_fast8_t ) irr::video::EDT_COUNT; isNull( device ) and i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
 				if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
 					driverType = ( irr::video::E_DRIVER_TYPE ) i;
 					device = createDevice( driverType, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
@@ -842,7 +842,7 @@ GameManager::GameManager() {
 			if ( debug ) {
 				std::wcout << L"Got the gui environment" << std::endl;
 			}
-			for( uint_fast16_t i = 0; i < irr::gui::EGDC_COUNT ; ++i ) {
+			for( uint_fast8_t i = 0; i < ( decltype( i ) )irr::gui::EGDC_COUNT ; ++i ) {
 				irr::video::SColor guiSkinColor = gui->getSkin()->getColor( static_cast< irr::gui::EGUI_DEFAULT_COLOR >( i ) );
 				guiSkinColor.setAlpha( 255 );
 				gui->getSkin()->setColor( static_cast< irr::gui::EGUI_DEFAULT_COLOR >( i ), guiSkinColor );
@@ -878,7 +878,7 @@ GameManager::GameManager() {
 				int audioRate = MIX_DEFAULT_FREQUENCY; //MIX_DEFAULT_FREQUENCY is 22050 Hz, half the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
 				Uint16 audioFormat = MIX_DEFAULT_FORMAT; //AUDIO_S16SYS according to documentation. CDs use signed 16-bit audio. SYS means use the system's native endianness.
 				int audioChannels = MIX_DEFAULT_CHANNELS; //2 according to documentation. Almost everything uses stereo. I wish surround sound were more common.
-				int audioChunkSize = 4096; //Magic number! Change it if you dare, and see what happens. There is no default, but SDL_Mixer's documentation says 4096 is good if all we're playing is music. Too small and sound may skip on a slow system, too large and sound effects may lag behind the action.
+				int audioChunkSize = 4096; //Magic number! Change it if you dare, and see what happens. SDL_Mixer has no default, but its documentation says 4096 is good if all we're playing is music. Too small and sound may skip on a slow system, too large and sound effects may lag behind the action.
 
 				if( Mix_OpenAudio( audioRate, audioFormat, audioChannels, audioChunkSize ) not_eq 0 ) {
 					std::wcerr << L"Unable to initialize audio: " << Mix_GetError() << std::endl;
@@ -994,7 +994,7 @@ GameManager::GameManager() {
 		if( enableController and device->activateJoysticks( controllerInfo ) and debug ) { //activateJoysticks fills controllerInfo with info about each controller
 			std::wcout << L"controller support is enabled and " << controllerInfo.size() << L" controller(s) are present." << std::endl;
 
-			for( uint_fast16_t controller = 0; controller < controllerInfo.size(); ++controller ) {
+			for( decltype( controllerInfo.size() ) controller = 0; controller < controllerInfo.size(); ++controller ) {
 				std::wcout << L"controller " << controller << L":" << std::endl;
 				std::wcout << L"\tName: '" << stringConverter.toStdWString( controllerInfo[ controller ].Name ).c_str() << L"'" << std::endl; //stringConverter.toWCharArray( controllerInfo[ controller ].Name ) << L"'" << std::endl;
 				std::wcout << L"\tAxes: " << controllerInfo[ controller ].Axes << std::endl;
@@ -1126,6 +1126,13 @@ float GameManager::getLoadingPercentage() {
 }
 
 /**
+ * Returns the highest number that the random number generator can output
+ **/
+std::minstd_rand::result_type GameManager::getMaxRandomNumber() {
+	return randomNumberGenerator.max();
+}
+
+/**
  * Lets other objects get a pointer to the maze manager, perhaps to get the maze.
  * Returns: A pointer to the mazeManager object.
  */
@@ -1172,7 +1179,7 @@ uint_fast8_t GameManager::getNumKeys() {
  * Arguments:
  * --- uint_fast8_t p: the desired player
  * Returns: A pointer to the desired player if that player exists and if no exception is caught, nullptr otherwise.
- */
+ **/
 Player* GameManager::getPlayer( uint_fast8_t p ) {
 	try {
 		if( p < numPlayers ) {
@@ -1187,6 +1194,20 @@ Player* GameManager::getPlayer( uint_fast8_t p ) {
 		std::wcerr << L"Error in GameManager::getPlayer(): " << e << std::endl;
 		return nullptr;
 	}
+}
+
+/**
+ * Lets objects get random numbers using this object's generator.
+ **/
+std::minstd_rand::result_type GameManager::getRandomNumber() {
+	return randomNumberGenerator();
+}
+
+/**
+ * Lets objects see what the RNG was seeded with.
+ **/
+std::minstd_rand::result_type GameManager::getRandomSeed() {
+	return randomSeed;
 }
 
 /**
@@ -1663,11 +1684,11 @@ void GameManager::loadProTips() {
 				}
 				boost::filesystem::wifstream proTipsFile;
 				proTipsFile.open( proTipsPath );
-
+				
 				if( proTipsFile.is_open() ) {
 					std::wstring line;
 					uint_fast16_t lineNum = 0;
-
+					
 					while( proTipsFile.good() ) {
 						++lineNum;
 						getline( proTipsFile, line );
@@ -1680,10 +1701,10 @@ void GameManager::loadProTips() {
 							}
 						}
 					}
-
+					
 					proTipsFile.close();
-
-					srand( time( nullptr ) ); // Flawfinder: ignore
+					
+					setRandomSeed( time( nullptr ) ); //srand( time( nullptr ) ); // Flawfinder: ignore
 					random_shuffle( proTips.begin(), proTips.end() );
 				} else {
 					throw( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) );
@@ -1820,9 +1841,9 @@ void GameManager::makeMusicList() {
 		if( musicList.size() > 0 ) {
 			//Do we want music sorted or random?
 			//sort( musicList.begin(), musicList.end() );
-			srand( time( nullptr ) ); // Flawfinder: ignore
+			setRandomSeed( time( nullptr ) ); //srand( time( nullptr ) ); // Flawfinder: ignore
 			random_shuffle( musicList.begin(), musicList.end() );
-
+			
 			currentMusic = musicList.back();
 		} else {
 			std::wcerr << L"Could not find any music to play. Turning off playback." << std::endl;
@@ -1955,7 +1976,7 @@ void GameManager::newMaze() {
 			std::wcout << L"newMaze() called with no arguments" << std::endl;
 		}
 		
-		newMaze( rand() );
+		newMaze( getRandomNumber() );
 		
 		if( debug ) {
 			std::wcout << L"end of newMaze() with no arguments" << std::endl;
@@ -1973,24 +1994,24 @@ void GameManager::newMaze() {
 void GameManager::newMaze( boost::filesystem::path src ) {
 	if( not mazeManager.loadFromFile( src ) ) {
 		//If we get this far, it's an error. Probably a file not found. Fail gracefully by starting a new maze anyway.
-		newMaze( rand() );
+		gui->addMessageBox( L"Could not use file", L"Unable to load maze from file. Generating a new maze." );
+		newMaze( getRandomNumber() );
 	}
 }
 
 /**
  * Calls resetThings(), makes the maze manager load a maze from a file, then adjusts cellWidth and cellHeight.
  * Arguments:
- * --- uint_fast16_t newRandomSeed: The random seed to use.
+ * --- std::minstd_rand::result_type newRandomSeed: The random seed to use.
  */
-void GameManager::newMaze( uint_fast16_t newRandomSeed ) {
+void GameManager::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 	try {
 		if( debug ) {
 			std::wcout << L"newMaze() called with an argument" << std::endl;
 		}
 		
 		resetThings();
-		randomSeed = newRandomSeed;
-		srand( randomSeed ); // Flawfinder: ignore
+		setRandomSeed( newRandomSeed );
 		
 		mazeManager.makeRandomLevel();
 		
@@ -2168,48 +2189,48 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 
 			case irr::EET_JOYSTICK_INPUT_EVENT: {
 				if( enableController ) {
-					for( uint_fast8_t k = 0; k < controls.size(); ++k ) {
+					for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
 						if( event.JoystickEvent.Joystick == controls.at( k ).getControllerNumber() ) {
 							{ //Handle joystick axes
 								int_fast16_t joystickDeadZone = controls.at( k ).getJoystickDeadZone(); //TODO: Make the dead zone user adjustable.
 								
 								if( controls.at( k ).getJoystickDirection() == ControlMapping::JOYSTICK_INCREASE ) {
-									if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+									if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_X ) {
 										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] > joystickDeadZone );
 										
-									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
 										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] > joystickDeadZone );
 										
-									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
 										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] > joystickDeadZone );
 										
-									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_R ) {
 										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] > joystickDeadZone );
 										
-									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_U ) {
 										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] > joystickDeadZone );
 										
-									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_V ) {
 										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] > joystickDeadZone );
 										
 									}
 								} else if( controls.at( k ).getJoystickDirection() == ControlMapping::JOYSTICK_DECREASE ) {
-									if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+									if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_X ) {
 										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] < -joystickDeadZone );
 										
-									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
 										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] < -joystickDeadZone );
 										
-									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
 										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] < -joystickDeadZone );
 										
-									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_R ) {
 										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] < -joystickDeadZone );
 										
-									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_U ) {
 										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] < -joystickDeadZone );
 										
-									} else if( controls.at( k ).getJoystickAxis() == ( uint_fast8_t ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_V ) {
 										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] < -joystickDeadZone );
 										
 									}
@@ -2377,7 +2398,7 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 			logoList.resize( std::distance( logoList.begin(), newEnd ) );
 
 			//Pick a random logo and load it
-			auto logoChosen = rand() % logoList.size();
+			auto logoChosen = getRandomNumber() % logoList.size();
 			if( debug ) {
 				std::wcout << L"Logo chosen: #" << logoChosen;
 				std::wcout << L" " << logoList.at( logoChosen ).wstring() << std::endl;
@@ -2836,7 +2857,7 @@ void GameManager::readPrefs() {
 					
 					driverType = irr::video::EDT_NULL;
 					//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
-					for( uint_fast8_t i = ( uint_fast8_t ) irr::video::EDT_COUNT; i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
+					for( auto i = ( uint_fast8_t ) irr::video::EDT_COUNT; i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
 						if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
 							driverType = ( irr::video::E_DRIVER_TYPE ) i;
 							break;
@@ -3010,13 +3031,13 @@ void GameManager::resetThings() {
 		
 		setLoadingPercentage( 0 );
 		
-		randomSeed = time( nullptr );
-
+		setRandomSeed( time( nullptr ) );
+		
 		//The delay exists so that people can admire the logo artwork or read the pro tips on the loading screen. Actual loading happens in the blink of an eye on my computer.
 		if( not haveShownLogo ) {
 			loadingDelay = 6000;
 		} else {
-			loadingDelay = 1000 + ( rand() % 5000 ); //Adds some randomness just to make it seem less artificial.
+			loadingDelay = 1000 + ( getRandomNumber() % 5000 ); //Adds some randomness just to make it seem less artificial.
 		}
 
 		winnersLoadingScreen = winners;
@@ -3749,7 +3770,7 @@ void GameManager::setupBackground() {
 			backgroundChosen = availableBackgrounds - 1; //If we're debugging, we may be testing the last background added.
 			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;
 		} else {
-			backgroundChosen = rand() % availableBackgrounds;
+			backgroundChosen = getRandomNumber() % availableBackgrounds;
 		}
 		
 		backgroundTexture = nullptr;
@@ -3766,7 +3787,7 @@ void GameManager::setupBackground() {
 				irr::video::SColor darkStarColor;
 				irr::video::SColor lightStarColor;
 
-				switch( rand() % 8 ) { //Not a magic number: count the cases
+				switch( getRandomNumber() % 8 ) { //Not a magic number: count the cases
 					case 0: {
 						darkStarColor = BLACK;
 						lightStarColor = WHITE;
@@ -3863,7 +3884,7 @@ void GameManager::setupBackground() {
 				//Decide which direction to rotate
 				float x, y, z;
 				float magnitude = 0.02;
-				switch( rand() % 3 ) {
+				switch( getRandomNumber() % 3 ) {
 					case 0: {
 						x = -magnitude;
 						break;
@@ -3877,7 +3898,7 @@ void GameManager::setupBackground() {
 						break;
 					}
 				}
-				switch( rand() % 3 ) {
+				switch( getRandomNumber() % 3 ) {
 					case 0: {
 						y = -magnitude;
 						break;
@@ -3891,7 +3912,7 @@ void GameManager::setupBackground() {
 						break;
 					}
 				}
-				switch( rand() % 3 ) {
+				switch( getRandomNumber() % 3 ) {
 					case 0: {
 						z = -magnitude;
 						break;
@@ -3923,7 +3944,7 @@ void GameManager::setupBackground() {
 				irr::video::SColor darkStarColor;
 				irr::video::SColor lightStarColor;
 				
-				switch( rand() % 8 ) { //Not a magic number: count the cases
+				switch( getRandomNumber() % 8 ) { //Not a magic number: count the cases
 					case 0: {
 						darkStarColor = BLACK;
 						lightStarColor = WHITE;
@@ -4055,7 +4076,7 @@ void GameManager::setupBackground() {
 					backgroundList.resize( std::distance( backgroundList.begin(), newEnd ) );
 
 					//Pick a random background and load it
-					backgroundFilePath = stringConverter.toIrrlichtStringW( backgroundList.at( rand() % backgroundList.size() ).wstring() );
+					backgroundFilePath = stringConverter.toIrrlichtStringW( backgroundList.at( getRandomNumber() % backgroundList.size() ).wstring() );
 					backgroundTexture = driver->getTexture( backgroundFilePath );
 					if( backgroundTexture == 0 ) {
 						std::wstring error = L"Cannot load background texture, even though Irrlicht said it was loadable?!?";
@@ -4104,6 +4125,21 @@ void GameManager::setLoadingPercentage( float newPercent ) {
  		loadingProgress = 0;
  	}
  }
+
+/**
+ * Sets the random number generator's seed.
+ * Arguments:
+ * std::minstd_rand::result_type newSeed - The new seed to use. CPlusPlus.com says this type is equal to uint_fast32_t.
+ **/
+void GameManager::setRandomSeed( std::minstd_rand::result_type newSeed ) {
+	randomSeed = newSeed;
+	randomNumberGenerator.seed( randomSeed );
+	
+	if( debug ) {
+		std::wcout << L"New random seed: " << randomSeed << std::endl;
+	}
+	
+}
 
 /**
  * Creates a file selection dialog for loading the maze

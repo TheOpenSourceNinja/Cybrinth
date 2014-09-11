@@ -26,11 +26,14 @@
 	#include <iostream>
 #endif
 
+#include "PreprocessorCommands.h"
+#include "Integers.h"
+
 /** Class for opening/saving files. */
 class FileSelectorDialog : public irr::gui::IGUIFileOpenDialog {
 	public:
 		/** Enum to specify the usage of the instance of the class */   
-		enum E_FILESELECTOR_TYPE {
+		enum E_FILESELECTOR_TYPE : uint_fast8_t {
 			EFST_OPEN_DIALOG, //<! For opening files
 			EFST_SAVE_DIALOG, //<! For saving files
 			EFST_NUM_TYPES    //<! Not used, just specifies how many possible types there are

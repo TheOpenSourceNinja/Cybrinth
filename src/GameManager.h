@@ -38,8 +38,8 @@
 #include "StringConverter.h"
 #include "SystemSpecificsManager.h"
 
-#include <cstdlib>
 #include <irrlicht/irrlicht.h>
+#include <random>
 #include <SDL_mixer.h>
 #ifdef HAVE_STRING
 	#include <string>
@@ -65,17 +65,20 @@ class GameManager : public irr::IEventReceiver {
 		Goal* getGoal();
 		Collectable* getKey( uint_fast8_t key );
 		float getLoadingPercentage();
+		std::minstd_rand::result_type getMaxRandomNumber(); //The highest value the random number generator can output.
 		MazeManager* getMazeManager();
 		uint_fast8_t getNumCollectables();
 		uint_fast8_t getNumKeys();
 		Player* getPlayer( uint_fast8_t p );
+		std::minstd_rand::result_type getRandomNumber(); //C++'s rand() function can very between platforms or compilers; for consistency, therefore, we use a specific one of C++11's random number generators.
+		std::minstd_rand::result_type getRandomSeed();
 		PlayerStart* getStart( uint_fast8_t ps );
 		
 		void movePlayerOnX( uint_fast8_t p, int_fast8_t direction );
 		void movePlayerOnY( uint_fast8_t p, int_fast8_t direction );
 		
 		void newMaze();
-		void newMaze( uint_fast16_t newRandomSeed );
+		void newMaze( std::minstd_rand::result_type newRandomSeed );
 		void newMaze( boost::filesystem::path src );
 		
 		bool OnEvent( const irr::SEvent& );
@@ -89,6 +92,7 @@ class GameManager : public irr::IEventReceiver {
 		void setExitConfirmation( irr::gui::IGUIWindow* newWindow );
 		void setFileChooser( irr::gui::IGUIFileOpenDialog* newChooser );
 		void setLoadingPercentage( float newPercent );
+		void setRandomSeed( std::minstd_rand::result_type newSeed );
 		void showLoadMazeDialog();
 		void showSaveMazeDialog();
 		
@@ -109,8 +113,6 @@ class GameManager : public irr::IEventReceiver {
 		
 		std::vector< Player > player;
 		std::vector< PlayerStart > playerStart;
-		
-		uint_fast16_t randomSeed;
 		
 		bool showingMenu;
 		StringConverter stringConverter;
@@ -307,6 +309,8 @@ class GameManager : public irr::IEventReceiver {
 		
 		//Other types----------------------------------
 		size_t currentProTip;
+		std::minstd_rand randomNumberGenerator;
+		std::minstd_rand::result_type randomSeed;
 };
 
 #endif // GAMEMANAGER_H

@@ -70,7 +70,7 @@ MenuManager::~MenuManager() {
 }
 
 void MenuManager::draw( irr::video::IVideoDriver* driver ) {
-	for( uint_fast8_t o = 0; o < options.size(); ++o ) {
+	for( decltype( options.size() ) o = 0; o < options.size(); ++o ) {
 		options.at( o ).draw( driver );
 	}
 }
@@ -83,17 +83,17 @@ void MenuManager::draw( irr::video::IVideoDriver* driver ) {
  **/
 void MenuManager::findHighlights( int_fast32_t x, int_fast32_t y ) {
 	
-	uint_fast8_t currentHighlight = 0;
-	for( uint_fast8_t o = 0; o < options.size(); ++o ) {
+	decltype( options.size() ) currentHighlight = 0;
+	for( decltype( options.size() ) o = 0; o < options.size(); ++o ) {
 		if( options.at( o ).highlighted ) {
 			currentHighlight = o;
 			break;
 		}
 	}
 	
-	uint_fast64_t minDistance = UINT_FAST32_MAX;
-	for( uint_fast8_t o = 0; o < options.size(); ++o ) {
-		decltype( minDistance ) distance = sqrt( pow( (int_fast32_t) x - (int_fast32_t) options.at( o ).getMiddleX(), 2 ) + pow( (int_fast32_t) y - (int_fast32_t) options.at( o ).getMiddleY(), 2 ) );
+	uint_fast64_t minDistance = UINT_FAST64_MAX;
+	for( decltype( options.size() ) o = 0; o < options.size(); ++o ) {
+		decltype( minDistance ) distance = sqrt( pow( abs( ( decltype( minDistance ) ) x - ( decltype( minDistance ) ) options.at( o ).getMiddleX() ), 2 ) + pow( abs( ( decltype( minDistance ) ) y - ( decltype( minDistance ) ) options.at( o ).getMiddleY() ), 2 ) );
 		if( distance < minDistance ) {
 			options.at( currentHighlight ).highlighted = false;
 			currentHighlight = o;
@@ -131,7 +131,7 @@ void MenuManager::processSelection( GameManager* gm ) {
 	} else if( options.at( nextMaze ).highlighted ) {
 		gm->newMaze();
 	} else if( options.at( restartMaze ).highlighted ) {
-		gm->newMaze( gm->randomSeed );
+		gm->newMaze( gm->getRandomSeed() );
 	} else if( options.at( backToGame ).highlighted ) {
 		gm->showingMenu = false;
 	} else if( options.at( freedom ).highlighted ) {
@@ -146,15 +146,15 @@ void MenuManager::processSelection( GameManager* gm ) {
 }
 
 void MenuManager::scrollSelection( bool up ) {
-	uint_fast8_t currentHighlight = 0;
-	for( uint_fast8_t o = 0; o < options.size(); ++o ) {
+	decltype( options.size() ) currentHighlight = 0;
+	for( decltype( options.size() ) o = 0; o < options.size(); ++o ) {
 		if( options.at( o ).highlighted ) {
 			currentHighlight = o;
 			break;
 		}
 	}
 	
-	uint_fast8_t nextHighlight;
+	decltype( options.size() ) nextHighlight;
 	
 	if( up ) {
 		if( currentHighlight > 0 ) {
@@ -221,7 +221,7 @@ void MenuManager::scrollSelection( bool up ) {
 }
 
 void MenuManager::setFont( irr::gui::IGUIFont* font ) {
-	for( uint_fast8_t o = 0; o < options.size(); ++o ) {
+	for( decltype( options.size() ) o = 0; o < options.size(); ++o ) {
 		options.at( o ).setFont( font );
 	}
 	/*nextMaze.setFont( font );
@@ -238,7 +238,7 @@ void MenuManager::setFont( irr::gui::IGUIFont* font ) {
  */
 void MenuManager::setPositions( uint_fast32_t windowHeight ) {
 	try {
-		for( uint_fast8_t o = 0; o < options.size(); ++o ) {
+		for( decltype( options.size() ) o = 0; o < options.size(); ++o ) {
 			options.at( o ).setY( o * windowHeight / options.size() );
 		}
 		

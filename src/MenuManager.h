@@ -32,7 +32,7 @@ class MenuManager {
 		MenuManager();
 		virtual ~MenuManager();
 		
-		enum selection_t { NEXT_MAZE, RESTART_MAZE, LOAD_MAZE, SAVE_MAZE, EXIT_GAME, BACK_TO_GAME, FREEDOM };
+		enum selection_t : uint_fast8_t { NEXT_MAZE, RESTART_MAZE, LOAD_MAZE, SAVE_MAZE, EXIT_GAME, BACK_TO_GAME, FREEDOM };
 		
 		void draw( irr::video::IVideoDriver* driver );
 		

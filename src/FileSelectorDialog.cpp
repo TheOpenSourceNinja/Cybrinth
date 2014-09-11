@@ -360,11 +360,11 @@ void FileSelectorDialog::draw() {
 
 bool FileSelectorDialog::matchesFileFilter( irr::core::stringw s ) {
 	if ( FileFilters.size() > 1 ) {
-		irr::s32 selected = FilterComboBox->getSelected();
+		auto selected = FilterComboBox->getSelected();
 		if ( selected == 0 ) {
-			for ( irr::u32 i = 0; i < FileFilters.size(); i++ ) {
-				irr::s32 pos = s.findLast( L'.' ) + 1; // Find the last '.' so we can check the file extension
-				irr::core::stringw extension( s.subString( pos, s.size() - pos ) );
+			for ( decltype( FileFilters.size() ) i = 0; i < FileFilters.size(); i++ ) {
+				auto pos = s.findLast( L'.' ) + 1; // Find the last '.' so we can check the file extension
+				auto extension = s.subString( pos, s.size() - pos );
 				if ( extension.equals_ignore_case( FileFilters[ FilterComboBox->getSelected() ].FileExtension ) ) {
 					return true;
 				}
@@ -414,7 +414,7 @@ void FileSelectorDialog::fillListBox() {
 	FileList = FileSystem->createFileList();
 	irr::core::stringw s;
 	
-	for ( irr::u32 i = 0; i < FileList->getFileCount(); ++i ) {
+	for ( decltype( FileList->getFileCount() ) i = 0; i < FileList->getFileCount(); ++i ) {
 		s = FileList->getFileName( i );
 		// We just want a list of directories and those matching the file filter
 		if ( FileList->isDirectory( i ) ) {
@@ -424,10 +424,10 @@ void FileSelectorDialog::fillListBox() {
 				FileBox->addItem( s.c_str() );
 			}
 		} else if ( matchesFileFilter( s ) ) {
-			if ( FilterComboBox->getSelected() >= ( irr::s32 )FileFilters.size() ) {
+			if ( FilterComboBox->getSelected() >= ( decltype(  FilterComboBox->getSelected() ) )FileFilters.size() ) {
 				if ( FileIconIdx not_eq -1 ) {
-					irr::s32 iconIdx = FileIconIdx;
-					for ( irr::u32 i = 0 ; i < FileFilters.size() ; i++ ) {
+					auto iconIdx = FileIconIdx;
+					for ( decltype( FileFilters.size() ) i = 0 ; i < FileFilters.size() ; i++ ) {
 						if ( matchesFileFilter( s, FileFilters[ i ].FileExtension) ) {
 							iconIdx = FileFilters[ i ].FileIconIdx;
 						}
@@ -479,7 +479,7 @@ void FileSelectorDialog::addFileFilter( irr::core::stringw name, irr::core::stri
 	
 	if ( FileFilters.size() > 1 ) {
 		strw = L"Supported ";
-		for ( irr::u32 i = 0 ; i < FileFilters.size() ; i++ ) {
+		for ( decltype( FileFilters.size() ) i = 0 ; i < FileFilters.size() ; i++ ) {
 			strw += L".";
 			strw += FileFilters[ i ].FileExtension;
 			strw += L" ";
@@ -487,7 +487,7 @@ void FileSelectorDialog::addFileFilter( irr::core::stringw name, irr::core::stri
 		FilterComboBox->addItem(strw.c_str());
 	}
 	
-	for ( irr::u32 i = 0 ; i < FileFilters.size() ; i++ ) {
+	for ( decltype( FileFilters.size() ) i = 0 ; i < FileFilters.size() ; i++ ) {
 		strw = FileFilters[ i ].FilterName;
 		strw += L" (*.";
 		strw += FileFilters[ i ].FileExtension;

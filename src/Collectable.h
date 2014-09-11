@@ -27,7 +27,7 @@
 
 class Collectable : public Object {
 	public:
-		enum type_t { KEY, ACID };
+		enum type_t : uint_fast8_t { KEY, ACID };
 		
 		void createTexture( irr::IrrlichtDevice* device, uint_fast16_t size = 1 );
 		

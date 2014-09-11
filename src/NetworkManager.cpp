@@ -55,7 +55,7 @@ NetworkManager::NetworkManager() {
 		backlog = 0;
 		fdmax = 0;
 		setGameManager( nullptr );
-		for( uint_fast8_t i = 0; i < INET6_ADDRSTRLEN; ++i ) {
+		for( decltype( INET6_ADDRSTRLEN ) i = 0; i < INET6_ADDRSTRLEN; ++i ) {
 			remoteIP[ i ] = '\0';
 		}
 
@@ -324,7 +324,7 @@ void NetworkManager::sendMaze( MazeCell ** maze, uint_fast8_t cols, uint_fast8_t
 		toSend.push_back( 'Z' );
 		toSend.push_back( 'E' );
 
-		for( int i = 0; i <= fdmax; ++i ) {
+		for( decltype( fdmax ) i = 0; i <= fdmax; ++i ) {
 			//send to everyone! except the listener
 			if( FD_ISSET( i, &master ) and i not_eq listener ) {
 				size_t size = toSend.size();
@@ -363,7 +363,7 @@ void NetworkManager::sendPlayerPos( uint_fast8_t player, uint_fast8_t x, uint_fa
 		toSend.push_back( 'D' );
 		toSend.push_back( 'P' );
 
-		for( int j = 0; j <= fdmax; ++j ) {
+		for( decltype( fdmax ) j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
 			if( FD_ISSET( j, &master ) and j not_eq listener ) {
 				size_t size = toSend.size();
@@ -401,7 +401,7 @@ void NetworkManager::sendGoal( Goal goal ) {
 
 		std::wcout << L"Sending goal at " << goal.getX() << L"," << goal.getY() << std::endl;
 
-		for( int j = 0; j <= fdmax; ++j ) {
+		for( decltype( fdmax ) j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
 			if( FD_ISSET( j, &master ) and j not_eq listener ) {
 				size_t size = toSend.size();
@@ -446,7 +446,7 @@ void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
 		toSend.push_back( 'P' );
 		toSend.push_back( 'S' );
 
-		for( int j = 0; j <= fdmax; ++j ) {
+		for( decltype( fdmax ) j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
 			if( FD_ISSET( j, &master ) and j not_eq listener ) {
 				size_t size = toSend.size();
@@ -492,7 +492,7 @@ void NetworkManager::sendU8( uint_fast8_t num, std::wstring desc ) {
 			toSend.push_back( desc[ i ] );
 		}
 
-		for( int j = 0; j <= fdmax; ++j ) {
+		for( decltype( fdmax ) j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
 			if( FD_ISSET( j, &master ) and j not_eq listener ) {
 				size_t size = toSend.size();
@@ -535,7 +535,7 @@ void NetworkManager::sendCollectables( std::vector< Collectable > stuff ) {
 		toSend.push_back( 'D' );
 		toSend.push_back( 'C' );
 
-		for( int j = 0; j <= fdmax; ++j ) {
+		for( decltype( fdmax ) j = 0; j <= fdmax; ++j ) {
 			//send to everyone! except the listener
 			if( FD_ISSET( j, &master ) and j not_eq listener ) {
 				size_t size = toSend.size();

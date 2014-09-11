@@ -25,7 +25,7 @@
 
 class MazeCell {
 	public:
-		enum border_t { ACIDPROOF, LOCK, WALL, NONE };
+		enum border_t : uint_fast8_t { ACIDPROOF, LOCK, WALL, NONE };
 		MazeCell();
 		virtual ~MazeCell();
 		border_t getTop();

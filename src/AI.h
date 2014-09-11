@@ -44,7 +44,7 @@ class AI {
 		 */
 		virtual ~AI();
 
-		enum algorithm_t { DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH, RIGHT_HAND_RULE, LEFT_HAND_RULE, DIJKSTRA, ALGORITHM_DO_NOT_USE };
+		enum algorithm_t : uint_fast8_t { DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH, RIGHT_HAND_RULE, LEFT_HAND_RULE, DIJKSTRA, ALGORITHM_DO_NOT_USE };
 		
 		/**
 		 * Returns the algorithm most closely matching a given string
@@ -127,7 +127,7 @@ class AI {
 		std::vector< irr::core::position2d< uint_fast8_t > > cellsVisited; ///< A vector listing all the cells that have been visited so far.
 		uint_fast8_t controlsPlayer; ///< The number of the player controlled by this bot.
 		
-		enum direction_t{ UP, DOWN, LEFT, RIGHT }; ///< Directions, duh.
+		enum direction_t : uint_fast8_t { UP, DOWN, LEFT, RIGHT }; ///< Directions, duh.
 		
 		std::vector< std::vector< uint_fast16_t > > DijkstraDistance; 
 		

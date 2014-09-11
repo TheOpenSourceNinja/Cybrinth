@@ -46,11 +46,11 @@ void Goal::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) ); //Colorspace should be irr::video::A1R5G5B5 but that causes a bug on my current laptop.
 		tempImage->fill( irr::video::SColor( 0, 0, 0, 0) ); //Fills the image with invisibility!
 		
-		for( uint_fast16_t x = 0; x <= ( size / 2 ); ++x ) {
+		for( decltype( size ) x = 0; x <= ( size / 2 ); ++x ) {
 			tempImage->setPixel( x, ( size / 2 ), colorOne );
 			tempImage->setPixel( size - x, ( size / 2 ), colorOne );
 			
-			for( uint_fast16_t y = 1; y <= x; ++y ) {
+			for( decltype( x ) y = 1; y <= x; ++y ) {
 				tempImage->setPixel( x, y + ( size / 2 ), colorOne );
 				tempImage->setPixel( size - x, y + ( size / 2 ), colorOne );
 				tempImage->setPixel( x, size - ( y + ( size / 2 ) ), colorOne );
@@ -60,8 +60,8 @@ void Goal::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 		
 		size /= 2;
 		
-		for( uint_fast16_t x = ( size / 2 ); x <= size; ++x ) {
-			for( uint_fast16_t y = ( size / 2 ); y <= x; ++y ) {
+		for( decltype( size ) x = ( size / 2 ); x <= size; ++x ) {
+			for( decltype( x ) y = ( size / 2 ); y <= x; ++y ) {
 				tempImage->setPixel( x, y + ( size / 2 ), colorTwo );
 				tempImage->setPixel( ( size * 2 ) - x, y + ( size / 2 ), colorTwo );
 				tempImage->setPixel( x, ( size * 2 ) - ( y + ( size / 2 ) ), colorTwo );
