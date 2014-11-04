@@ -100,7 +100,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_cybrinth_OBJECTS = src/AI.$(OBJEXT) src/Collectable.$(OBJEXT) \
-	src/FontManager.$(OBJEXT) src/GameManager.$(OBJEXT) \
+	src/FontManager.$(OBJEXT) src/MainGame.$(OBJEXT) \
 	src/Goal.$(OBJEXT) src/GUIFreetypeFont.$(OBJEXT) \
 	src/ControlMapping.$(OBJEXT) src/main.$(OBJEXT) \
 	src/MazeCell.$(OBJEXT) src/MazeManager.$(OBJEXT) \
@@ -109,9 +109,108 @@ am_cybrinth_OBJECTS = src/AI.$(OBJEXT) src/Collectable.$(OBJEXT) \
 	src/PlayerStart.$(OBJEXT) src/StringConverter.$(OBJEXT) \
 	src/SpellChecker.$(OBJEXT) src/ImageModifier.$(OBJEXT) \
 	src/SystemSpecificsManager.$(OBJEXT) src/MenuManager.$(OBJEXT) \
-	src/FileSelectorDialog.$(OBJEXT) compiled-images/key.$(OBJEXT) \
-	compiled-images/acid.$(OBJEXT) compiled-images/goal.$(OBJEXT) \
-	compiled-images/start.$(OBJEXT)
+	src/FileSelectorDialog.$(OBJEXT) \
+	src/RakNet/Base64Encoder.$(OBJEXT) \
+	src/RakNet/BitStream.$(OBJEXT) \
+	src/RakNet/CCRakNetSlidingWindow.$(OBJEXT) \
+	src/RakNet/CCRakNetUDT.$(OBJEXT) src/RakNet/CheckSum.$(OBJEXT) \
+	src/RakNet/CloudClient.$(OBJEXT) \
+	src/RakNet/CloudCommon.$(OBJEXT) \
+	src/RakNet/CloudServer.$(OBJEXT) \
+	src/RakNet/CommandParserInterface.$(OBJEXT) \
+	src/RakNet/ConnectionGraph2.$(OBJEXT) \
+	src/RakNet/ConsoleServer.$(OBJEXT) \
+	src/RakNet/DataCompressor.$(OBJEXT) \
+	src/RakNet/DirectoryDeltaTransfer.$(OBJEXT) \
+	src/RakNet/DR_SHA1.$(OBJEXT) src/RakNet/DS_BytePool.$(OBJEXT) \
+	src/RakNet/DS_ByteQueue.$(OBJEXT) \
+	src/RakNet/DS_HuffmanEncodingTree.$(OBJEXT) \
+	src/RakNet/DS_Table.$(OBJEXT) src/RakNet/DynDNS.$(OBJEXT) \
+	src/RakNet/EmailSender.$(OBJEXT) \
+	src/RakNet/EpochTimeToString.$(OBJEXT) \
+	src/RakNet/FileList.$(OBJEXT) \
+	src/RakNet/FileListTransfer.$(OBJEXT) \
+	src/RakNet/FileOperations.$(OBJEXT) \
+	src/RakNet/_FindFirst.$(OBJEXT) \
+	src/RakNet/FormatString.$(OBJEXT) \
+	src/RakNet/FullyConnectedMesh2.$(OBJEXT) \
+	src/RakNet/Getche.$(OBJEXT) src/RakNet/Gets.$(OBJEXT) \
+	src/RakNet/GetTime.$(OBJEXT) src/RakNet/gettimeofday.$(OBJEXT) \
+	src/RakNet/GridSectorizer.$(OBJEXT) \
+	src/RakNet/HTTPConnection2.$(OBJEXT) \
+	src/RakNet/HTTPConnection.$(OBJEXT) \
+	src/RakNet/IncrementalReadInterface.$(OBJEXT) \
+	src/RakNet/Itoa.$(OBJEXT) src/RakNet/LinuxStrings.$(OBJEXT) \
+	src/RakNet/LocklessTypes.$(OBJEXT) \
+	src/RakNet/LogCommandParser.$(OBJEXT) \
+	src/RakNet/MessageFilter.$(OBJEXT) \
+	src/RakNet/NatPunchthroughClient.$(OBJEXT) \
+	src/RakNet/NatPunchthroughServer.$(OBJEXT) \
+	src/RakNet/NatTypeDetectionClient.$(OBJEXT) \
+	src/RakNet/NatTypeDetectionCommon.$(OBJEXT) \
+	src/RakNet/NatTypeDetectionServer.$(OBJEXT) \
+	src/RakNet/NetworkIDManager.$(OBJEXT) \
+	src/RakNet/NetworkIDObject.$(OBJEXT) \
+	src/RakNet/PacketConsoleLogger.$(OBJEXT) \
+	src/RakNet/PacketFileLogger.$(OBJEXT) \
+	src/RakNet/PacketizedTCP.$(OBJEXT) \
+	src/RakNet/PacketLogger.$(OBJEXT) \
+	src/RakNet/PacketOutputWindowLogger.$(OBJEXT) \
+	src/RakNet/PluginInterface2.$(OBJEXT) \
+	src/RakNet/PS4Includes.$(OBJEXT) \
+	src/RakNet/Rackspace.$(OBJEXT) \
+	src/RakNet/RakMemoryOverride.$(OBJEXT) \
+	src/RakNet/RakNetCommandParser.$(OBJEXT) \
+	src/RakNet/RakNetSocket2_360_720.$(OBJEXT) \
+	src/RakNet/RakNetSocket2_Berkley.$(OBJEXT) \
+	src/RakNet/RakNetSocket2_Berkley_NativeClient.$(OBJEXT) \
+	src/RakNet/RakNetSocket2.$(OBJEXT) \
+	src/RakNet/RakNetSocket2_NativeClient.$(OBJEXT) \
+	src/RakNet/RakNetSocket2_PS3_PS4.$(OBJEXT) \
+	src/RakNet/RakNetSocket2_PS4.$(OBJEXT) \
+	src/RakNet/RakNetSocket2_Vita.$(OBJEXT) \
+	src/RakNet/RakNetSocket2_Windows_Linux_360.$(OBJEXT) \
+	src/RakNet/RakNetSocket2_Windows_Linux.$(OBJEXT) \
+	src/RakNet/RakNetSocket2_WindowsStore8.$(OBJEXT) \
+	src/RakNet/RakNetSocket.$(OBJEXT) \
+	src/RakNet/RakNetStatistics.$(OBJEXT) \
+	src/RakNet/RakNetTransport2.$(OBJEXT) \
+	src/RakNet/RakNetTypes.$(OBJEXT) src/RakNet/RakPeer.$(OBJEXT) \
+	src/RakNet/RakSleep.$(OBJEXT) src/RakNet/RakString.$(OBJEXT) \
+	src/RakNet/RakThread.$(OBJEXT) src/RakNet/RakWString.$(OBJEXT) \
+	src/RakNet/Rand.$(OBJEXT) src/RakNet/RandSync.$(OBJEXT) \
+	src/RakNet/ReadyEvent.$(OBJEXT) \
+	src/RakNet/RelayPlugin.$(OBJEXT) \
+	src/RakNet/ReliabilityLayer.$(OBJEXT) \
+	src/RakNet/ReplicaManager3.$(OBJEXT) \
+	src/RakNet/Router2.$(OBJEXT) src/RakNet/RPC4Plugin.$(OBJEXT) \
+	src/RakNet/SecureHandshake.$(OBJEXT) \
+	src/RakNet/SendToThread.$(OBJEXT) \
+	src/RakNet/SignaledEvent.$(OBJEXT) \
+	src/RakNet/SimpleMutex.$(OBJEXT) \
+	src/RakNet/SocketLayer.$(OBJEXT) \
+	src/RakNet/StatisticsHistory.$(OBJEXT) \
+	src/RakNet/StringCompressor.$(OBJEXT) \
+	src/RakNet/StringTable.$(OBJEXT) \
+	src/RakNet/SuperFastHash.$(OBJEXT) \
+	src/RakNet/TableSerializer.$(OBJEXT) \
+	src/RakNet/TCPInterface.$(OBJEXT) \
+	src/RakNet/TeamBalancer.$(OBJEXT) \
+	src/RakNet/TeamManager.$(OBJEXT) \
+	src/RakNet/TelnetTransport.$(OBJEXT) \
+	src/RakNet/ThreadsafePacketLogger.$(OBJEXT) \
+	src/RakNet/TwoWayAuthentication.$(OBJEXT) \
+	src/RakNet/UDPForwarder.$(OBJEXT) \
+	src/RakNet/UDPProxyClient.$(OBJEXT) \
+	src/RakNet/UDPProxyCoordinator.$(OBJEXT) \
+	src/RakNet/UDPProxyServer.$(OBJEXT) \
+	src/RakNet/VariableDeltaSerializer.$(OBJEXT) \
+	src/RakNet/VariableListDeltaTracker.$(OBJEXT) \
+	src/RakNet/VariadicSQLParser.$(OBJEXT) \
+	src/RakNet/VitaIncludes.$(OBJEXT) \
+	src/RakNet/WSAStartupSingleton.$(OBJEXT) \
+	compiled-images/key.$(OBJEXT) compiled-images/acid.$(OBJEXT) \
+	compiled-images/goal.$(OBJEXT) compiled-images/start.$(OBJEXT)
 cybrinth_OBJECTS = $(am_cybrinth_OBJECTS)
 am__DEPENDENCIES_1 =
 cybrinth_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -305,30 +404,191 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 DEB_BUILD_HARDENING = 1 #If you have hardening wrapper scripts installed (Ubuntu/Debian package "hardening-wrapper"), this should make them harden the program
 AM_CPPFLAGS = -std=c++11 -Wpedantic -Wall -Wextra $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS) $(SDLDEPS_CFLAGS)
-AM_LDFLAGS = -lstdc++ -lm
+AM_LDFLAGS = -lstdc++ -lm -pthread
 
 #do-stuff : convert-images cybrinth
 #.PHONY : do-stuff
+
 # cybrinth_SOURCES = $(wildcard src/*.h src/*.cpp)
 cybrinth_SOURCES = src/AI.h src/AI.cpp src/Collectable.h \
 	src/Collectable.cpp src/colors.h src/FontManager.h \
-	src/FontManager.cpp src/GameManager.h src/GameManager.cpp \
-	src/Goal.h src/Goal.cpp src/GUIFreetypeFont.h \
-	src/GUIFreetypeFont.cpp src/ControlMapping.h \
-	src/ControlMapping.cpp src/main.cpp src/MazeCell.h \
-	src/MazeCell.cpp src/MazeManager.h src/MazeManager.cpp \
-	src/MenuOption.h src/MenuOption.cpp src/NetworkManager.h \
-	src/NetworkManager.cpp src/Object.h src/Object.cpp \
-	src/Player.h src/Player.cpp src/PlayerStart.h \
+	src/FontManager.cpp src/MainGame.h src/MainGame.cpp src/Goal.h \
+	src/Goal.cpp src/GUIFreetypeFont.h src/GUIFreetypeFont.cpp \
+	src/ControlMapping.h src/ControlMapping.cpp src/main.cpp \
+	src/MazeCell.h src/MazeCell.cpp src/MazeManager.h \
+	src/MazeManager.cpp src/MenuOption.h src/MenuOption.cpp \
+	src/NetworkManager.h src/NetworkManager.cpp src/Object.h \
+	src/Object.cpp src/Player.h src/Player.cpp src/PlayerStart.h \
 	src/PlayerStart.cpp src/StringConverter.h \
 	src/StringConverter.cpp src/SpellChecker.h \
 	src/SpellChecker.cpp src/ImageModifier.h src/ImageModifier.cpp \
 	src/SystemSpecificsManager.h src/SystemSpecificsManager.cpp \
 	src/PreprocessorCommands.h src/MenuManager.h \
 	src/MenuManager.cpp src/FileSelectorDialog.h \
-	src/FileSelectorDialog.cpp compiled-images/key.cpp \
-	compiled-images/acid.cpp compiled-images/goal.cpp \
-	compiled-images/start.cpp
+	src/FileSelectorDialog.cpp \
+	src/RakNet/AutopatcherPatchContext.h \
+	src/RakNet/AutopatcherRepositoryInterface.h \
+	src/RakNet/Base64Encoder.cpp src/RakNet/Base64Encoder.h \
+	src/RakNet/BitStream.cpp src/RakNet/BitStream.h \
+	src/RakNet/CCRakNetSlidingWindow.cpp \
+	src/RakNet/CCRakNetSlidingWindow.h src/RakNet/CCRakNetUDT.cpp \
+	src/RakNet/CCRakNetUDT.h src/RakNet/CheckSum.cpp \
+	src/RakNet/CheckSum.h src/RakNet/CloudClient.cpp \
+	src/RakNet/CloudClient.h src/RakNet/CloudCommon.cpp \
+	src/RakNet/CloudCommon.h src/RakNet/CloudServer.cpp \
+	src/RakNet/CloudServer.h src/RakNet/CMakeLists.txt \
+	src/RakNet/CommandParserInterface.cpp \
+	src/RakNet/CommandParserInterface.h \
+	src/RakNet/ConnectionGraph2.cpp src/RakNet/ConnectionGraph2.h \
+	src/RakNet/ConsoleServer.cpp src/RakNet/ConsoleServer.h \
+	src/RakNet/DataCompressor.cpp src/RakNet/DataCompressor.h \
+	src/RakNet/DirectoryDeltaTransfer.cpp \
+	src/RakNet/DirectoryDeltaTransfer.h src/RakNet/DR_SHA1.cpp \
+	src/RakNet/DR_SHA1.h src/RakNet/DS_BinarySearchTree.h \
+	src/RakNet/DS_BPlusTree.h src/RakNet/DS_BytePool.cpp \
+	src/RakNet/DS_BytePool.h src/RakNet/DS_ByteQueue.cpp \
+	src/RakNet/DS_ByteQueue.h src/RakNet/DS_Hash.h \
+	src/RakNet/DS_Heap.h src/RakNet/DS_HuffmanEncodingTree.cpp \
+	src/RakNet/DS_HuffmanEncodingTreeFactory.h \
+	src/RakNet/DS_HuffmanEncodingTree.h \
+	src/RakNet/DS_HuffmanEncodingTreeNode.h \
+	src/RakNet/DS_LinkedList.h src/RakNet/DS_List.h \
+	src/RakNet/DS_Map.h src/RakNet/DS_MemoryPool.h \
+	src/RakNet/DS_Multilist.h src/RakNet/DS_OrderedChannelHeap.h \
+	src/RakNet/DS_OrderedList.h src/RakNet/DS_Queue.h \
+	src/RakNet/DS_QueueLinkedList.h src/RakNet/DS_RangeList.h \
+	src/RakNet/DS_Table.cpp src/RakNet/DS_Table.h \
+	src/RakNet/DS_ThreadsafeAllocatingQueue.h src/RakNet/DS_Tree.h \
+	src/RakNet/DS_WeightedGraph.h src/RakNet/DynDNS.cpp \
+	src/RakNet/DynDNS.h src/RakNet/EmailSender.cpp \
+	src/RakNet/EmailSender.h src/RakNet/EmptyHeader.h \
+	src/RakNet/EpochTimeToString.cpp \
+	src/RakNet/EpochTimeToString.h src/RakNet/Export.h \
+	src/RakNet/FileList.cpp src/RakNet/FileList.h \
+	src/RakNet/FileListNodeContext.h \
+	src/RakNet/FileListTransferCBInterface.h \
+	src/RakNet/FileListTransfer.cpp src/RakNet/FileListTransfer.h \
+	src/RakNet/FileOperations.cpp src/RakNet/FileOperations.h \
+	src/RakNet/_FindFirst.cpp src/RakNet/_FindFirst.h \
+	src/RakNet/FormatString.cpp src/RakNet/FormatString.h \
+	src/RakNet/FullyConnectedMesh2.cpp \
+	src/RakNet/FullyConnectedMesh2.h src/RakNet/Getche.cpp \
+	src/RakNet/Getche.h src/RakNet/Gets.cpp src/RakNet/Gets.h \
+	src/RakNet/GetTime.cpp src/RakNet/GetTime.h \
+	src/RakNet/gettimeofday.cpp src/RakNet/gettimeofday.h \
+	src/RakNet/GridSectorizer.cpp src/RakNet/GridSectorizer.h \
+	src/RakNet/HTTPConnection2.cpp src/RakNet/HTTPConnection2.h \
+	src/RakNet/HTTPConnection.cpp src/RakNet/HTTPConnection.h \
+	src/RakNet/IncrementalReadInterface.cpp \
+	src/RakNet/IncrementalReadInterface.h \
+	src/RakNet/InternalPacket.h src/RakNet/Itoa.cpp \
+	src/RakNet/Itoa.h src/RakNet/Kbhit.h \
+	src/RakNet/LinuxStrings.cpp src/RakNet/LinuxStrings.h \
+	src/RakNet/LocklessTypes.cpp src/RakNet/LocklessTypes.h \
+	src/RakNet/LogCommandParser.cpp src/RakNet/LogCommandParser.h \
+	src/RakNet/MessageFilter.cpp src/RakNet/MessageFilter.h \
+	src/RakNet/MessageIdentifiers.h src/RakNet/MTUSize.h \
+	src/RakNet/NativeFeatureIncludes.h \
+	src/RakNet/NativeFeatureIncludesOverrides.h \
+	src/RakNet/NativeTypes.h src/RakNet/NatPunchthroughClient.cpp \
+	src/RakNet/NatPunchthroughClient.h \
+	src/RakNet/NatPunchthroughServer.cpp \
+	src/RakNet/NatPunchthroughServer.h \
+	src/RakNet/NatTypeDetectionClient.cpp \
+	src/RakNet/NatTypeDetectionClient.h \
+	src/RakNet/NatTypeDetectionCommon.cpp \
+	src/RakNet/NatTypeDetectionCommon.h \
+	src/RakNet/NatTypeDetectionServer.cpp \
+	src/RakNet/NatTypeDetectionServer.h \
+	src/RakNet/NetworkIDManager.cpp src/RakNet/NetworkIDManager.h \
+	src/RakNet/NetworkIDObject.cpp src/RakNet/NetworkIDObject.h \
+	src/RakNet/PacketConsoleLogger.cpp \
+	src/RakNet/PacketConsoleLogger.h \
+	src/RakNet/PacketFileLogger.cpp src/RakNet/PacketFileLogger.h \
+	src/RakNet/PacketizedTCP.cpp src/RakNet/PacketizedTCP.h \
+	src/RakNet/PacketLogger.cpp src/RakNet/PacketLogger.h \
+	src/RakNet/PacketOutputWindowLogger.cpp \
+	src/RakNet/PacketOutputWindowLogger.h src/RakNet/PacketPool.h \
+	src/RakNet/PacketPriority.h src/RakNet/PluginInterface2.cpp \
+	src/RakNet/PluginInterface2.h src/RakNet/PS3Includes.h \
+	src/RakNet/PS4Includes.cpp src/RakNet/PS4Includes.h \
+	src/RakNet/Rackspace.cpp src/RakNet/Rackspace.h \
+	src/RakNet/RakAlloca.h src/RakNet/RakAssert.h \
+	src/RakNet/RakMemoryOverride.cpp \
+	src/RakNet/RakMemoryOverride.h \
+	src/RakNet/RakNetCommandParser.cpp \
+	src/RakNet/RakNetCommandParser.h src/RakNet/RakNetDefines.h \
+	src/RakNet/RakNetDefinesOverrides.h \
+	src/RakNet/RakNetSmartPtr.h \
+	src/RakNet/RakNetSocket2_360_720.cpp \
+	src/RakNet/RakNetSocket2_Berkley.cpp \
+	src/RakNet/RakNetSocket2_Berkley_NativeClient.cpp \
+	src/RakNet/RakNetSocket2.cpp src/RakNet/RakNetSocket2.h \
+	src/RakNet/RakNetSocket2_NativeClient.cpp \
+	src/RakNet/RakNetSocket2_PS3_PS4.cpp \
+	src/RakNet/RakNetSocket2_PS4.cpp \
+	src/RakNet/RakNetSocket2_Vita.cpp \
+	src/RakNet/RakNetSocket2_Windows_Linux_360.cpp \
+	src/RakNet/RakNetSocket2_Windows_Linux.cpp \
+	src/RakNet/RakNetSocket2_WindowsStore8.cpp \
+	src/RakNet/RakNetSocket.cpp src/RakNet/RakNetSocket.h \
+	src/RakNet/RakNetStatistics.cpp src/RakNet/RakNetStatistics.h \
+	src/RakNet/RakNetTime.h src/RakNet/RakNetTransport2.cpp \
+	src/RakNet/RakNetTransport2.h src/RakNet/RakNetTypes.cpp \
+	src/RakNet/RakNetTypes.h src/RakNet/RakNet_vc8.vcproj \
+	src/RakNet/RakNet_vc9.vcproj src/RakNet/RakNet.vcproj \
+	src/RakNet/RakNetVersion.h src/RakNet/RakPeer.cpp \
+	src/RakNet/RakPeer.h src/RakNet/RakPeerInterface.h \
+	src/RakNet/RakSleep.cpp src/RakNet/RakSleep.h \
+	src/RakNet/RakString.cpp src/RakNet/RakString.h \
+	src/RakNet/RakThread.cpp src/RakNet/RakThread.h \
+	src/RakNet/RakWString.cpp src/RakNet/RakWString.h \
+	src/RakNet/Rand.cpp src/RakNet/Rand.h src/RakNet/RandSync.cpp \
+	src/RakNet/RandSync.h src/RakNet/ReadyEvent.cpp \
+	src/RakNet/ReadyEvent.h src/RakNet/RefCountedObj.h \
+	src/RakNet/RelayPlugin.cpp src/RakNet/RelayPlugin.h \
+	src/RakNet/ReliabilityLayer.cpp src/RakNet/ReliabilityLayer.h \
+	src/RakNet/ReplicaEnums.h src/RakNet/ReplicaManager3.cpp \
+	src/RakNet/ReplicaManager3.h src/RakNet/Router2.cpp \
+	src/RakNet/Router2.h src/RakNet/RPC4Plugin.cpp \
+	src/RakNet/RPC4Plugin.h src/RakNet/SecureHandshake.cpp \
+	src/RakNet/SecureHandshake.h src/RakNet/SendToThread.cpp \
+	src/RakNet/SendToThread.h src/RakNet/SignaledEvent.cpp \
+	src/RakNet/SignaledEvent.h src/RakNet/SimpleMutex.cpp \
+	src/RakNet/SimpleMutex.h src/RakNet/SimpleTCPServer.h \
+	src/RakNet/SingleProducerConsumer.h src/RakNet/SocketDefines.h \
+	src/RakNet/SocketIncludes.h src/RakNet/SocketLayer.cpp \
+	src/RakNet/SocketLayer.h src/RakNet/StatisticsHistory.cpp \
+	src/RakNet/StatisticsHistory.h src/RakNet/StringCompressor.cpp \
+	src/RakNet/StringCompressor.h src/RakNet/StringTable.cpp \
+	src/RakNet/StringTable.h src/RakNet/SuperFastHash.cpp \
+	src/RakNet/SuperFastHash.h src/RakNet/TableSerializer.cpp \
+	src/RakNet/TableSerializer.h src/RakNet/TCPInterface.cpp \
+	src/RakNet/TCPInterface.h src/RakNet/TeamBalancer.cpp \
+	src/RakNet/TeamBalancer.h src/RakNet/TeamManager.cpp \
+	src/RakNet/TeamManager.h src/RakNet/TelnetTransport.cpp \
+	src/RakNet/TelnetTransport.h src/RakNet/ThreadPool.h \
+	src/RakNet/ThreadsafePacketLogger.cpp \
+	src/RakNet/ThreadsafePacketLogger.h \
+	src/RakNet/TransportInterface.h \
+	src/RakNet/TwoWayAuthentication.cpp \
+	src/RakNet/TwoWayAuthentication.h src/RakNet/UDPForwarder.cpp \
+	src/RakNet/UDPForwarder.h src/RakNet/UDPProxyClient.cpp \
+	src/RakNet/UDPProxyClient.h src/RakNet/UDPProxyCommon.h \
+	src/RakNet/UDPProxyCoordinator.cpp \
+	src/RakNet/UDPProxyCoordinator.h src/RakNet/UDPProxyServer.cpp \
+	src/RakNet/UDPProxyServer.h \
+	src/RakNet/VariableDeltaSerializer.cpp \
+	src/RakNet/VariableDeltaSerializer.h \
+	src/RakNet/VariableListDeltaTracker.cpp \
+	src/RakNet/VariableListDeltaTracker.h \
+	src/RakNet/VariadicSQLParser.cpp \
+	src/RakNet/VariadicSQLParser.h src/RakNet/VitaIncludes.cpp \
+	src/RakNet/VitaIncludes.h src/RakNet/WindowsIncludes.h \
+	src/RakNet/WSAStartupSingleton.cpp \
+	src/RakNet/WSAStartupSingleton.h src/RakNet/XBox360Includes.h \
+	compiled-images/key.cpp compiled-images/acid.cpp \
+	compiled-images/goal.cpp compiled-images/start.cpp
 # cybrinth_SOURCES += $(wildcard compiled-images/*.cpp)
 cybrinth_LDADD = $(IRRLICHT_LIBS) $(BOOSTFILESYSTEM_LIBS) $(BOOSTFILESYSTEM_LIBS_TWO) $(BOOSTSYSTEM_LIBS) $(BOOSTSYSTEM_LIBS_TWO) $(DEPS_LIBS) $(SDLDEPS_LIBS)
 all: all-am
@@ -424,7 +684,7 @@ src/Collectable.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/FontManager.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
-src/GameManager.$(OBJEXT): src/$(am__dirstamp) \
+src/MainGame.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/Goal.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/GUIFreetypeFont.$(OBJEXT): src/$(am__dirstamp) \
@@ -458,6 +718,254 @@ src/MenuManager.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/FileSelectorDialog.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/$(am__dirstamp):
+	@$(MKDIR_P) src/RakNet
+	@: > src/RakNet/$(am__dirstamp)
+src/RakNet/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/RakNet/$(DEPDIR)
+	@: > src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/Base64Encoder.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/BitStream.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/CCRakNetSlidingWindow.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/CCRakNetUDT.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/CheckSum.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/CloudClient.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/CloudCommon.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/CloudServer.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/CommandParserInterface.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/ConnectionGraph2.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/ConsoleServer.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/DataCompressor.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/DirectoryDeltaTransfer.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/DR_SHA1.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/DS_BytePool.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/DS_ByteQueue.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/DS_HuffmanEncodingTree.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/DS_Table.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/DynDNS.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/EmailSender.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/EpochTimeToString.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/FileList.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/FileListTransfer.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/FileOperations.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/_FindFirst.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/FormatString.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/FullyConnectedMesh2.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/Getche.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/Gets.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/GetTime.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/gettimeofday.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/GridSectorizer.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/HTTPConnection2.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/HTTPConnection.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/IncrementalReadInterface.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/Itoa.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/LinuxStrings.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/LocklessTypes.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/LogCommandParser.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/MessageFilter.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/NatPunchthroughClient.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/NatPunchthroughServer.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/NatTypeDetectionClient.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/NatTypeDetectionCommon.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/NatTypeDetectionServer.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/NetworkIDManager.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/NetworkIDObject.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/PacketConsoleLogger.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/PacketFileLogger.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/PacketizedTCP.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/PacketLogger.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/PacketOutputWindowLogger.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/PluginInterface2.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/PS4Includes.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/Rackspace.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakMemoryOverride.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetCommandParser.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetSocket2_360_720.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetSocket2_Berkley.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetSocket2_Berkley_NativeClient.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetSocket2.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetSocket2_NativeClient.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetSocket2_PS3_PS4.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetSocket2_PS4.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetSocket2_Vita.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetSocket2_Windows_Linux_360.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetSocket2_Windows_Linux.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetSocket2_WindowsStore8.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetSocket.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetStatistics.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetTransport2.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakNetTypes.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakPeer.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakSleep.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakString.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakThread.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RakWString.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/Rand.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RandSync.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/ReadyEvent.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RelayPlugin.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/ReliabilityLayer.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/ReplicaManager3.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/Router2.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/RPC4Plugin.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/SecureHandshake.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/SendToThread.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/SignaledEvent.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/SimpleMutex.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/SocketLayer.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/StatisticsHistory.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/StringCompressor.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/StringTable.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/SuperFastHash.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/TableSerializer.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/TCPInterface.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/TeamBalancer.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/TeamManager.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/TelnetTransport.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/ThreadsafePacketLogger.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/TwoWayAuthentication.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/UDPForwarder.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/UDPProxyClient.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/UDPProxyCoordinator.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/UDPProxyServer.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/VariableDeltaSerializer.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/VariableListDeltaTracker.$(OBJEXT):  \
+	src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/VariadicSQLParser.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/VitaIncludes.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
+src/RakNet/WSAStartupSingleton.$(OBJEXT): src/RakNet/$(am__dirstamp) \
+	src/RakNet/$(DEPDIR)/$(am__dirstamp)
 compiled-images/$(am__dirstamp):
 	@$(MKDIR_P) compiled-images
 	@: > compiled-images/$(am__dirstamp)
@@ -481,6 +989,7 @@ mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f compiled-images/*.$(OBJEXT)
 	-rm -f src/*.$(OBJEXT)
+	-rm -f src/RakNet/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -495,9 +1004,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/FileSelectorDialog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/FontManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/GUIFreetypeFont.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/GameManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/Goal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ImageModifier.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/MainGame.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/MazeCell.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/MazeManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/MenuManager.Po@am__quote@
@@ -510,6 +1019,116 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/StringConverter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/SystemSpecificsManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/Base64Encoder.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/BitStream.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/CCRakNetSlidingWindow.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/CCRakNetUDT.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/CheckSum.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/CloudClient.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/CloudCommon.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/CloudServer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/CommandParserInterface.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/ConnectionGraph2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/ConsoleServer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/DR_SHA1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/DS_BytePool.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/DS_ByteQueue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/DS_HuffmanEncodingTree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/DS_Table.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/DataCompressor.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/DirectoryDeltaTransfer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/DynDNS.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/EmailSender.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/EpochTimeToString.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/FileList.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/FileListTransfer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/FileOperations.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/FormatString.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/FullyConnectedMesh2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/GetTime.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/Getche.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/Gets.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/GridSectorizer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/HTTPConnection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/HTTPConnection2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/IncrementalReadInterface.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/Itoa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/LinuxStrings.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/LocklessTypes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/LogCommandParser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/MessageFilter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/NatPunchthroughClient.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/NatPunchthroughServer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/NatTypeDetectionClient.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/NatTypeDetectionCommon.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/NatTypeDetectionServer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/NetworkIDManager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/NetworkIDObject.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/PS4Includes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/PacketConsoleLogger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/PacketFileLogger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/PacketLogger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/PacketOutputWindowLogger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/PacketizedTCP.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/PluginInterface2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RPC4Plugin.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/Rackspace.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakMemoryOverride.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetCommandParser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetSocket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetSocket2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetSocket2_360_720.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetSocket2_Berkley.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetSocket2_Berkley_NativeClient.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetSocket2_NativeClient.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetSocket2_PS3_PS4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetSocket2_PS4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetSocket2_Vita.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetSocket2_WindowsStore8.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetSocket2_Windows_Linux.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetSocket2_Windows_Linux_360.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetStatistics.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetTransport2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakNetTypes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakPeer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakSleep.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakString.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakThread.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RakWString.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/Rand.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RandSync.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/ReadyEvent.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/RelayPlugin.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/ReliabilityLayer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/ReplicaManager3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/Router2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/SecureHandshake.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/SendToThread.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/SignaledEvent.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/SimpleMutex.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/SocketLayer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/StatisticsHistory.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/StringCompressor.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/StringTable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/SuperFastHash.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/TCPInterface.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/TableSerializer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/TeamBalancer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/TeamManager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/TelnetTransport.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/ThreadsafePacketLogger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/TwoWayAuthentication.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/UDPForwarder.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/UDPProxyClient.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/UDPProxyCoordinator.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/UDPProxyServer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/VariableDeltaSerializer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/VariableListDeltaTracker.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/VariadicSQLParser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/VitaIncludes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/WSAStartupSingleton.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/_FindFirst.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/gettimeofday.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -786,6 +1405,8 @@ distclean-generic:
 	-rm -f compiled-images/$(am__dirstamp)
 	-rm -f src/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/$(am__dirstamp)
+	-rm -f src/RakNet/$(DEPDIR)/$(am__dirstamp)
+	-rm -f src/RakNet/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -796,7 +1417,7 @@ clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf compiled-images/$(DEPDIR) src/$(DEPDIR)
+	-rm -rf compiled-images/$(DEPDIR) src/$(DEPDIR) src/RakNet/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -844,7 +1465,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf compiled-images/$(DEPDIR) src/$(DEPDIR)
+	-rm -rf compiled-images/$(DEPDIR) src/$(DEPDIR) src/RakNet/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

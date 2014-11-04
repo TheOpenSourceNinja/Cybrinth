@@ -30,8 +30,8 @@
 #include "MazeCell.h"
 #include "PreprocessorCommands.h"
 
-//#include "GameManager.h"
-class GameManager; //Avoids circular dependency
+//#include "MainGame.h"
+class MainGame; //Avoids circular dependency
 
 class AI {
 	public:
@@ -60,30 +60,30 @@ class AI {
 		bool atGoal();
 		
 		/**
-		 * Used by GameManager to see if it's time to call this bot's move() function.
+		 * Used by MainGame to see if it's time to call this bot's move() function.
 		 * @return a Boolean indicating whether enough time has passed to move again.
 		 */
 		bool doneWaiting();
 		
 		/**
-		 * Used by GameManager to see which player this bot controls.
+		 * Used by MainGame to see which player this bot controls.
 		 * @return the number of the player controlled by this AI.
 		 */
 		uint_fast8_t getPlayer();
 		
 		/**
-		 * Called by GameManager to tell this bot that a key has been found.
+		 * Called by MainGame to tell this bot that a key has been found.
 		 * @param key: the number of the key which has been found.
 		 */
 		void keyFound( uint_fast8_t s );
 		
 		/**
-		 * Called by GameManager. Moves the player. If the maze is pre-solved, we just follow the solution. If the maze is not pre-solved, this is where the non-pre-solved versions of each algorithm are implemented.
+		 * Called by MainGame. Moves the player. If the maze is pre-solved, we just follow the solution. If the maze is not pre-solved, this is where the non-pre-solved versions of each algorithm are implemented.
 		 */
-		void move(); //Needs to call GameManager's movePlayerOnX and movePlayerOnY functions.
+		void move(); //Needs to call MainGame's movePlayerOnX and movePlayerOnY functions.
 		
 		/**
-		 * Cleans up between mazes. Called by GameManager and by setup().
+		 * Cleans up between mazes. Called by MainGame and by setup().
 		 */
 		void reset();
 		
@@ -93,17 +93,17 @@ class AI {
 		 */
 		void setPlayer( uint_fast8_t newPlayer );
 		/**
-		 * Anything that needs to be passed from GameManager and used by this bot, such as pointers to various stuff, gets passed here.
+		 * Anything that needs to be passed from MainGame and used by this bot, such as pointers to various stuff, gets passed here.
 		 * @param newMaze: A pointer to a two-dimensional array of maze cells
 		 * @param newCols: The width of the maze
 		 * @param newRols: The height of the maze
-		 * @param newGM: A pointer to the GameManager
+		 * @param newGM: A pointer to the MainGame
 		 * @param newStartSolved: A Boolean indicating whether this bot should pre-solve the maze.
 		 * @param newAlgorithm: Which algorithm to solve the maze with.
 		 * @param newMovementDelay: The amount of time to wait between moves.
 		 */
-		//void setup( MazeCell ** newMaze, uint_fast8_t newCols, uint_fast8_t newRows, GameManager * newGM, bool newStartSolved, algorithm_t newAlgorithm, uint_fast16_t newMovementDelay );
-		void setup( GameManager * newGM, bool newStartSolved, algorithm_t newAlgorithm, uint_fast16_t newMovementDelay );
+		//void setup( MazeCell ** newMaze, uint_fast8_t newCols, uint_fast8_t newRows, MainGame * newGM, bool newStartSolved, algorithm_t newAlgorithm, uint_fast16_t newMovementDelay );
+		void setup( MainGame * newGM, bool newStartSolved, algorithm_t newAlgorithm, uint_fast16_t newMovementDelay );
 		/**
 		 * Given an algorithm, returns a string representation of the algorithm
 		 */
@@ -187,7 +187,7 @@ class AI {
 		 */
 		void findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > startPosition, uint_fast16_t depthLimit, bool canDissolveWalls );
 		
-		GameManager * gm; ///< A pointer to the GameManager.
+		MainGame * mg; ///< A pointer to the MainGame.
 		
 		direction_t hand; ///< Used in Right Hand Rule and Left Hand Rule
 		

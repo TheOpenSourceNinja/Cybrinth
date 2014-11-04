@@ -13,14 +13,14 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
  * 
  * @section DESCRIPTION
- * The MenuManager class is responsible for showing the in-game pause menu, and telling the GameManager how to proceed when a menu item is clicked.
+ * The MenuManager class is responsible for showing the in-game pause menu, and telling the MainGame how to proceed when a menu item is clicked.
  */
 
 #ifndef MENUMANAGER_H
 #define MENUMANAGER_H
 
-//#include "GameManager.h"
-class GameManager; //Avoids circular dependency
+//#include "MainGame.h"
+class MainGame; //Avoids circular dependency
 #include <iostream>
 #include <irrlicht/irrlicht.h>
 #include "MenuOption.h"
@@ -38,7 +38,7 @@ class MenuManager {
 		
 		void findHighlights( int_fast32_t x, int_fast32_t y );
 		
-		void processSelection( GameManager* gm );
+		void processSelection( MainGame* mg );
 		
 		void scrollSelection( bool up );
 		

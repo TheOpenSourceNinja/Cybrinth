@@ -25,8 +25,8 @@
 #include "colors.h"
 #include "PreprocessorCommands.h"
 
-//#include "GameManager.h"
-class GameManager; //Avoids circular dependency
+//#include "MainGame.h"
+class MainGame; //Avoids circular dependency
 
 class Player : public Object {
 	public:
@@ -62,7 +62,7 @@ class Player : public Object {
 		void reset();
 		
 		void setColorBasedOnNum(); //We provide our own version of this function here because we know which number to use.
-		void setGM( GameManager* newGM );
+		void setGM( MainGame* newGM );
 		void setPlayerNumber( uint_fast8_t newNumber );
 		void setScore( intmax_t newScore );
 		
@@ -73,7 +73,7 @@ class Player : public Object {
 		uint_fast32_t timeTakenThisMaze;
 	protected:
 	private:
-		GameManager* gm;
+		MainGame* mg;
 		
 		uint_fast8_t heldItem;
 		Collectable::type_t heldItemType;

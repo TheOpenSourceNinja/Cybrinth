@@ -44,10 +44,11 @@ Object::Object() {
 
 Object::~Object() {
 	try {
-		if( not ( driver == nullptr or driver == NULL ) and not ( texture == nullptr or texture == NULL ) ) {
+		//We should be doing the following stuff, I think, but if we do it crashes the program.
+		/*if( not ( driver == nullptr or driver == NULL ) and not ( texture == nullptr or texture == NULL ) ) {
 			driver->removeTexture( texture );
 			texture = nullptr;
-		}
+		}*/
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::~Object(): " << e.what() << std::endl;
 	}

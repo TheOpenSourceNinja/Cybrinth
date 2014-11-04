@@ -19,12 +19,10 @@
 #ifndef NETWORKMANAGER_H
 #define NETWORKMANAGER_H
 
-#include "Goal.h"
-#include "MazeCell.h"
-#include "PlayerStart.h"
-#include "Collectable.h"
+#include "Integers.h"
+#include "MazeManager.h"
 #include "PreprocessorCommands.h"
-#include <irrlicht/irrlicht.h>
+#include "RakNet/RakPeerInterface.h"
 #ifdef HAVE_SSTREAM
 	#include <sstream>
 #endif //HAVE_SSTREAM
@@ -32,64 +30,43 @@
 	#include <vector>
 #endif //HAVE_VECTOR
 
-#if defined WINDOWS
-	#include <winsock2.h>
-	#include <ws2tcpip.h>
-#else
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <netdb.h>
-#endif
-#include <string>
-
-//#include "GameManager.h"
-class GameManager; //Avoids circular dependency
+//#include "MainGame.h"
+class MainGame; //Avoids circular dependency
 
 class NetworkManager {
 	public:
 		NetworkManager();
 		virtual ~NetworkManager();
-		bool setup( bool isServer );
-		void setGameManager( GameManager * newGM );
-		bool hasNewPlayerConnected();
-		uint_fast8_t getNewPlayer();
-		int checkForConnections();
-		void sendMaze( MazeCell ** maze, uint_fast8_t cols, uint_fast8_t rows );
-		void sendPlayerPos( uint_fast8_t player, uint_fast8_t x, uint_fast8_t y );
-		void setPort( uint_fast16_t newPort );
-		uint_fast16_t getPort();
-		void sendGoal( Goal goal );
-		void sendPlayerStarts( std::vector<PlayerStart> starts );
-		void sendU8( uint_fast8_t num, std::wstring desc );
-		void sendCollectables( std::vector<Collectable> stuff );
-		bool receiveData();
+		
+		bool getConnectionStatus();
+		void processPackets();
+		void sendMaze( std::minstd_rand::result_type randomSeed );
+		void setup( MainGame* newGM, bool newIsServer );
 	protected:
 	private:
-		GameManager * gm;
-		unsigned int newPlayer;
-		struct addrinfo hints;
-		uint_fast16_t port;
-		int rv;
-		struct addrinfo *ai;
-		int listener;
-		struct addrinfo *p;
-		int yes;
-		int backlog;
-		int fdmax;
-		fd_set master; //Lists all the socket descriptors currently connected, as well as listener
-		fd_set read_fds; //temporary file descriptor list for select(); select() modifies this to indicate which are ready to read
-		char remoteIP[ INET6_ADDRSTRLEN ];
-		struct sockaddr_storage remoteaddr; // client address
-		struct timeval timeout;
-		void *get_in_addr( struct sockaddr *sa );
-		bool sendData( int sockfd, unsigned char *buf, size_t *len );
-		uint_fast8_t receivedData[51 ]; //51 is the maximum possible size of a maze plus "STARTMAZE" and "ENDMAZE"
-
-		#if defined WINDOWS
-		WSADATA wsaData;   // if this doesn't work
-		//WSAData wsaData; // then try this instead
-		#endif
+		
+		RakNet::SystemAddress clientID; //This is in both the client and server examples
+		std::string clientPort; //Clients need to know this
+		
+		uint16_t deSerializeU16( std::string input );
+		int16_t deSerializeS16( std::string input );
+		uint32_t deSerializeU32( std::string input );
+		int32_t deSerializeS32( std::string input );
+		
+		MainGame* mg;
+		bool isConnected;
+		bool isServer;
+		RakNet::SystemAddress latestClientAddress;
+		RakNet::RakPeerInterface* me; //A representation of the local peer
+		std::string password; //No real security provided by passwords, especially since we're using an unencrypted connection. It just helps prevent other programs from accidentally connecting.
+		
+		std::string serializeU16( uint16_t input );
+		std::string serializeS16( int16_t input );
+		std::string serializeU32( uint32_t input );
+		std::string serializeS32( int32_t input );
+		
+		std::string serverIP; //Clients need to know this
+		std::string serverPort;
 };
 
 #endif // NETWORKMANAGER_H

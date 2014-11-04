@@ -1,8 +1,10 @@
 ﻿(character encoding: UTF-8)
 
-Images and music files not created for or as part of Cybrinth may be under separate licenses, see the "License" and "Source" files associated with each file. The Ubuntu font (Ubuntu-R.ttf) is copyrighted 2011 Canonical Ltd and licensed under the Ubuntu Fonts Licence 1.0 (reproduced below). All other files, including images and music created for Cybrinth, are licensed under the GNU AGPL version 3 (reproduced below) or any later version. 
+Cybrinth comes with a copy of the RakNet networking library. RakNet is owned by Oculus VR, Inc. It is available under the terms of a modified 2-clause BSD license. See src/RakNet/LICENSE for the copyright license, and src/RakNet/PATENTS for patent information, and src/RakNet/ORIGIN for the URL from which this copy of RakNet was downloaded; copies of LICENSE and PATENTS can also be obtained from there. The creators of Cybrinth claim no connection to RakNet or Oculus VR, and no responsibility for any bugs or features in RakNet.
 
-For image files licensed under the GNU AGPL, the preferred form for editing ("source code") is either a "Portable Network Graphics" (.png), Inkscape-compatible "Scalable Vector Graphics" (.svg), or GIMP-compatible "eXperimental Computing Facility" (.xcf)  or "OpenRaster" (.ora) file; any other formats including C/C++ files shall be considered "object code".
+Images and music files not created for or as part of Cybrinth may be under separate licenses, see the "License" and "Source" files associated with each file. The Ubuntu font (Ubuntu-R.ttf) is copyrighted 2011 Canonical Ltd and licensed under the Ubuntu Fonts Licence 1.0 (reproduced below). All other files, excluding RakNet but including images and music created for Cybrinth, are licensed under the GNU AGPL version 3 (reproduced below) or any later version. 
+
+For image files licensed under the GNU AGPL, the preferred form for editing ("source code") is either a "Portable Network Graphics" (.png), Inkscape-compatible "Scalable Vector Graphics" (.svg), GIMP-compatible "eXperimental Computing Facility" (.xcf)  or GIMP-compatible "OpenRaster" (.ora) file; any other formats including C/C++ files shall be considered "object code".
 
 ---------------------------------------
                     GNU AFFERO GENERAL PUBLIC LICENSE

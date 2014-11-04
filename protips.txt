@@ -1,3 +1,5 @@
+// Obviously, these are not real tips. Some are just nonsense; all are meant to be funny.
+// Like this game's other config files, this file can have single-line comments. Anything following the double slashes will be ignored.
 Mash the buttons really fast. You'll play SO much better that way!
 These aren't the droids you're looking for.
 Can't find yourself in a sea of bots? Tough luck.
@@ -28,7 +30,7 @@ Knowledge is absence.
 Regarding "etc.": It's only 3 letters; you'd think you could memorize the correct order.
 In these mazes, paradoxically, moving away from where you want to go will often get you there faster.
 If you die in the maze, you die in REAL LIFE!
-Early to bed and early to rise makes a baby out with the bathwater.
+Early to bed and early to rise throws the baby out with the bathwater.
 An apple a day saves nine.
 Slow and steady catches the worm.
 The early bird wins the race.
@@ -41,3 +43,4 @@ Do not show to horses.
 Pay attention, there will be a test.
 Do nothing unless you must, and when you must act -- hesitate.
 Do not point laser at remaining eye.
+Hit all the buttons as fast as possible and move the control stick(s) wildly without direction. //Paraphrased this one from TV Tropes http://tvtropes.org/pmwiki/pmwiki.php/Main/PacmanFever

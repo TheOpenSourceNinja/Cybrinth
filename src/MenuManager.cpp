@@ -13,11 +13,11 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
  * 
  * @section DESCRIPTION
- * The MenuManager class is responsible for showing the in-game pause menu, and telling the GameManager how to proceed when a menu item is clicked.
+ * The MenuManager class is responsible for showing the in-game pause menu, and telling the MainGame how to proceed when a menu item is clicked.
  */
 
 #include "MenuManager.h"
-#include "GameManager.h"
+#include "MainGame.h"
 
 MenuManager::MenuManager() {
 	{
@@ -114,26 +114,26 @@ void MenuManager::findHighlights( int_fast32_t x, int_fast32_t y ) {
 /**
 * Should be called only by OnEvent() or processControls().
 * Arguments:
-* A pointer to the GameManager.
+* A pointer to the MainGame.
 */
-void MenuManager::processSelection( GameManager* gm ) {
-	if( gm == nullptr or gm == NULL ) {
+void MenuManager::processSelection( MainGame* mg ) {
+	if( mg == nullptr or mg == NULL ) {
 		return;
 	}
 	
 	if( options.at( exitGame ).highlighted ) {
-		gm->setExitConfirmation( gm->gui->addMessageBox( L"Exit?", L"Are you sure you want to exit?", true, ( irr::gui::EMBF_YES bitor irr::gui::EMBF_NO ) ) );
+		mg->setExitConfirmation( mg->gui->addMessageBox( L"Exit?", L"Are you sure you want to exit?", true, ( irr::gui::EMBF_YES bitor irr::gui::EMBF_NO ) ) );
 	} else if( options.at( loadMaze ).highlighted ) {
-		//gm->setFileChooser( gm->gui->addFileOpenDialog( L"Select a Maze", true, 0, -1, true ) );
-		gm->showLoadMazeDialog();
+		//mg->setFileChooser( mg->gui->addFileOpenDialog( L"Select a Maze", true, 0, -1, true ) );
+		mg->showLoadMazeDialog();
 	} else if( options.at( saveMaze ).highlighted ) {
-		gm->showSaveMazeDialog();
+		mg->showSaveMazeDialog();
 	} else if( options.at( nextMaze ).highlighted ) {
-		gm->newMaze();
+		mg->newMaze();
 	} else if( options.at( restartMaze ).highlighted ) {
-		gm->newMaze( gm->getRandomSeed() );
+		mg->newMaze( mg->getRandomSeed() );
 	} else if( options.at( backToGame ).highlighted ) {
-		gm->showingMenu = false;
+		mg->showingMenu = false;
 	} else if( options.at( freedom ).highlighted ) {
 		std::wstring message = stringConverter.toStdWString( PACKAGE_NAME );
 		message += L" is copyright 2012-2014 by James Dearing. Licensed under the GNU Affero General Public License, version 3.0 or (at your option) any later version, as published by the Free Software Foundation. See the file \"COPYING\" or https://www.gnu.org/licenses/agpl.html.\n\nThis means you're free to do what you want with this game: mod it, give copies to friends, sell it if you want. Whatever. It's Free software, Free as in Freedom. You should have received the program's source code with this copy; if you don't have it, you can get it from ";
@@ -141,7 +141,9 @@ void MenuManager::processSelection( GameManager* gm ) {
 		message += L".\n\n";
 		message += stringConverter.toStdWString( PACKAGE_NAME );
 		message += L" is distributed 'as is' in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of TITLE, MERCHANTABILITY, COMPLETE DESTRUCTION OF IMPORTANT DATA, or FITNESS FOR A PARTICULAR PURPOSE.";
-		gm->gui->addMessageBox( L"Freedom", stringConverter.toStdWString( message ).c_str() ); //stringConverter.toWCharArray( message ) );
+		message += L"\n\n";
+		message += L"Cybrinth uses a copy of the RakNet networking library. RakNet is owned by Oculus VR, Inc. It is available under the terms of a modified 2-clause BSD license. See src/RakNet/LICENSE for the copyright license, and src/RakNet/PATENTS for patent information, and src/RakNet/ORIGIN for the URL from which this copy of RakNet was downloaded; copies of LICENSE and PATENTS can also be obtained from there. The creators of Cybrinth claim no connection to RakNet or Oculus VR, and no responsibility for any bugs or features in RakNet.";
+		mg->gui->addMessageBox( L"Freedom", stringConverter.toStdWString( message ).c_str() ); //stringConverter.toWCharArray( message ) );
 	}
 }
 

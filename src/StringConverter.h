@@ -44,6 +44,7 @@ class StringConverter {
 		std::wstring toStdWString( TagLib::wstring input );
 		std::wstring toStdWString( std::string input );
 		std::wstring toStdWString( char* input );
+		std::wstring toStdWString( unsigned char* input );
 		std::wstring toStdWString( wchar_t* input );
 		std::wstring toStdWString( const char* input );
 		std::wstring toStdWString( const wchar_t* input );

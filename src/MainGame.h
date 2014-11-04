@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
  * 
  * @section DESCRIPTION
- * The GameManager class is the overseer of all other classes. It's also where the game's main loop is.
+ * The MainGame class is the overseer of all other classes. It's also where the game's main loop is.
  */
 
 #ifndef GAMEMANAGER_H
@@ -50,11 +50,11 @@
 
 //using boost::asio::ip::tcp;
 
-class GameManager : public irr::IEventReceiver {
+class MainGame : public irr::IEventReceiver {
 	public:
 		//Functions----------------------------------
-		GameManager();
-		virtual ~GameManager();
+		MainGame();
+		virtual ~MainGame();
 		
 		void drawAll(); //Public because it's called by MazeManager. Otherwise the loading screen wouldn't get drawn during maze generation.
 		
@@ -77,6 +77,7 @@ class GameManager : public irr::IEventReceiver {
 		void movePlayerOnX( uint_fast8_t p, int_fast8_t direction );
 		void movePlayerOnY( uint_fast8_t p, int_fast8_t direction );
 		
+		void networkHasNewConnection(); //Called by NetworkManager
 		void newMaze();
 		void newMaze( std::minstd_rand::result_type newRandomSeed );
 		void newMaze( boost::filesystem::path src );

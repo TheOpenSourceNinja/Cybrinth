@@ -13,10 +13,10 @@
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
  * 
  * @section DESCRIPTION
- * The GameManager class is the overseer of all other classes. It's also where the game's main loop is.
+ * The MainGame class is the overseer of all other classes. It's also where the game's main loop is.
  */
 
-#include "GameManager.h"
+#include "MainGame.h"
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -50,7 +50,7 @@ enum user_event_t : uint_fast8_t { USER_EVENT_WINDOW_RESIZE };
  * Figures out which players are human, then figures out whether they're all at the goal.
  * Returns: True if all humans are at the goal, false otherwise.
  */
-bool GameManager::allHumansAtGoal() {
+bool MainGame::allHumansAtGoal() {
 	try {
 		std::vector< uint_fast8_t > humanPlayers; //Get a list of players
 
@@ -82,7 +82,7 @@ bool GameManager::allHumansAtGoal() {
 		}
 		return result;
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::allHumansAtGoal(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::allHumansAtGoal(): " << e.what() << std::endl;
 		return false;
 	}
 }
@@ -90,7 +90,7 @@ bool GameManager::allHumansAtGoal() {
 /**
  * Draws everything onto the screen. Calls other draw functions, including those of objects.
  */
-void GameManager::drawAll() {
+void MainGame::drawAll() {
 	try {
 		driver->beginScene( true, true, backgroundColor );
 		
@@ -307,14 +307,14 @@ void GameManager::drawAll() {
 		
 		driver->endScene();
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::drawAll(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::drawAll(): " << e.what() << std::endl;
 	}
 }
 
 /**
  * Draws background animations. Assumes that driver->beginScene() has already been called. Should be called by drawAll().
  */
-void GameManager::drawBackground() {
+void MainGame::drawBackground() {
 	try {
 		switch( backgroundChosen ) {
 			case 0:
@@ -340,14 +340,14 @@ void GameManager::drawBackground() {
 			}
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::drawBackground(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::drawBackground(): " << e.what() << std::endl;
 	}
 }
 
 /**
  * Draws the loading screen. Assumes that driver->beginScene() has already been called. Should be called by drawAll().
  */
-void GameManager::drawLoadingScreen() {
+void MainGame::drawLoadingScreen() {
 	try {
 		if( not haveShownLogo ) { //This is an ugly hack, but it works and I can't think of a better way to do it.
 			drawLogo();
@@ -414,17 +414,17 @@ void GameManager::drawLoadingScreen() {
 			drawStats( Y );
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::drawLoadingScreen(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::drawLoadingScreen(): " << e.what() << std::endl;
 	}
 	catch( std::wstring e ) {
-		std::wcerr << L"Error in GameManager::drawLoadingScreen(): " << e << std::endl;
+		std::wcerr << L"Error in MainGame::drawLoadingScreen(): " << e << std::endl;
 	}
 }
 
 /**
  * Randomly selects a logo and draws it on screen. Should NOT be called by drawAll().
  */
- void GameManager::drawLogo() {
+ void MainGame::drawLogo() {
 	try {
 		if( isNull( logoTexture ) ) {
 			std::wstring error = L"drawLogo() called but logoTexture is null.";
@@ -452,7 +452,7 @@ void GameManager::drawLoadingScreen() {
  * Should only be called from drawLoadingScreen(). Just putting it here for code separation/readability.
  * //TODO: Add more stats (estimated difficulty of maze, number of cells backtracked, etc) to loading screen.
  */
-void GameManager::drawStats( uint_fast32_t textY ) {
+void MainGame::drawStats( uint_fast32_t textY ) {
 	try {
 		if( isNull( statsFont ) ) {
 			statsFont = gui->getBuiltInFont();
@@ -637,7 +637,7 @@ void GameManager::drawStats( uint_fast32_t textY ) {
 /**
  * Removes one item from stuff.
  */
-void GameManager::eraseCollectable( uint_fast8_t item ) {
+void MainGame::eraseCollectable( uint_fast8_t item ) {
 	try {
 		if( debug ) {
 			std::wcout << L"eraseCollectable() called" << std::endl;
@@ -663,10 +663,10 @@ void GameManager::eraseCollectable( uint_fast8_t item ) {
  * This object's destructor. Destroys stuff.
  * I... am... DESTRUCTOOOOOOORRRRR!!!!!!!!!
  */
-GameManager::~GameManager() {
+MainGame::~MainGame() {
 	try {
 		if( debug ) {
-			std::wcout << L"GameManager destructor called" << std::endl;
+			std::wcout << L"MainGame destructor called" << std::endl;
 		}
 		
 		if( not isNull( loadMazeDialog ) ) {
@@ -700,10 +700,10 @@ GameManager::~GameManager() {
 		}
 		
 		if( debug ) {
-			std::wcout << L"end of GameManager destructor" << std::endl;
+			std::wcout << L"end of MainGame destructor" << std::endl;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::~GameManager(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::~MainGame(): " << e.what() << std::endl;
 	}
 }
 
@@ -711,7 +711,7 @@ GameManager::~GameManager() {
  * This object's constructor. Does lots of very important stuff.
  * Since this constructor is so big, maybe some parts should be split off into separate functions for readability.
  */
-GameManager::GameManager() {
+MainGame::MainGame() {
 	try {
 		#ifdef DEBUG //Not the last place debug is set to true or false; look at readPrefs()
 			debug = true;
@@ -719,7 +719,7 @@ GameManager::GameManager() {
 			debug = false;
 		#endif
 		if( debug ) {
-			std::wcout << L"GameManager constructor called" << std::endl;
+			std::wcout << L"MainGame constructor called" << std::endl;
 		}
 		//Just wanted to be totally sure that these point to nullptr before being set otherwise
 		clockFont = nullptr;
@@ -741,8 +741,8 @@ GameManager::GameManager() {
 		keysFoundPerPlayer = L"Keys found: ";
 		scores = L"Scores: ";
 		scoresTotal = L"Total scores: ";
-		network.setGameManager( this );
-		mazeManager.setGameManager( this );
+		//network.setMainGame( this ); //NOTE: Network stuff here.
+		mazeManager.setMainGame( this );
 		isServer = false;
 		antiAliasFonts = true;
 		currentProTip = 0;
@@ -1022,17 +1022,17 @@ GameManager::GameManager() {
 		}
 
 		//Set up networking
-		network.setup( isServer );
+		network.setup( this, isServer ); //NOTE: Network stuff here.
 
 		timer = device->getTimer();
 
 		if( debug ) {
-			std::wcout << L"end of GameManager constructor" << std::endl;
+			std::wcout << L"end of MainGame constructor" << std::endl;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::GameManager(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::MainGame(): " << e.what() << std::endl;
 	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in GameManager::GameManager(): " << e << std::endl;
+		std::wcerr << L"Error in MainGame::MainGame(): " << e << std::endl;
 	}
 }
 
@@ -1041,11 +1041,11 @@ GameManager::GameManager() {
  * @param uint_fast8_t collectable: The number of the item desired.
  * @return A pointer to a Collectable.
  */
-Collectable* GameManager::getCollectable( uint_fast8_t collectable ) {
+Collectable* MainGame::getCollectable( uint_fast8_t collectable ) {
 	try {
 		return &stuff.at( collectable );
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::getCollectable(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::getCollectable(): " << e.what() << std::endl;
 	}
 	return nullptr;
 }
@@ -1054,11 +1054,11 @@ Collectable* GameManager::getCollectable( uint_fast8_t collectable ) {
  * Lets other objects know whether we're in debug mode.
  * Returns: True if debug is true, false otherwise.
  */
-bool GameManager::getDebugStatus() {
+bool MainGame::getDebugStatus() {
 	try {
 		return debug;
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::getDebugStatus(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::getDebugStatus(): " << e.what() << std::endl;
 		return true;
 	}
 }
@@ -1067,7 +1067,7 @@ bool GameManager::getDebugStatus() {
  * Lets other objects get a pointer to the goal, perhaps to get its location.
  * Returns: A pointer to the goal object.
  */
-Goal* GameManager::getGoal() {
+Goal* MainGame::getGoal() {
 	return &goal;
 }
 
@@ -1076,7 +1076,7 @@ Goal* GameManager::getGoal() {
  * @param uint_fast8_t key: The number of the key desired.
  * @return A pointer to a key.
  */
-Collectable* GameManager::getKey( uint_fast8_t key ) {
+Collectable* MainGame::getKey( uint_fast8_t key ) {
 	try {
 		if( debug ) {
 			std::wcout << L"getKey() called" << std::endl;
@@ -1107,9 +1107,9 @@ Collectable* GameManager::getKey( uint_fast8_t key ) {
 			throw error;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::getKey(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::getKey(): " << e.what() << std::endl;
 	} catch( std::wstring e ) {
-		std::wcerr << L"Error in GameManager::getKey(): " << e << std::endl;
+		std::wcerr << L"Error in MainGame::getKey(): " << e << std::endl;
 	}
 	
 	if( debug ) {
@@ -1121,14 +1121,14 @@ Collectable* GameManager::getKey( uint_fast8_t key ) {
 /**
  * Other objects can't properly add to the loading percentage if they can't see what it is first
  */
-float GameManager::getLoadingPercentage() {
+float MainGame::getLoadingPercentage() {
 	return loadingProgress;
 }
 
 /**
  * Returns the highest number that the random number generator can output
  **/
-std::minstd_rand::result_type GameManager::getMaxRandomNumber() {
+std::minstd_rand::result_type MainGame::getMaxRandomNumber() {
 	return randomNumberGenerator.max();
 }
 
@@ -1136,11 +1136,11 @@ std::minstd_rand::result_type GameManager::getMaxRandomNumber() {
  * Lets other objects get a pointer to the maze manager, perhaps to get the maze.
  * Returns: A pointer to the mazeManager object.
  */
-MazeManager* GameManager::getMazeManager() {
+MazeManager* MainGame::getMazeManager() {
 	try {
 		return &mazeManager;
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::getMazeManager(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::getMazeManager(): " << e.what() << std::endl;
 	}
 	return nullptr;
 }
@@ -1149,7 +1149,7 @@ MazeManager* GameManager::getMazeManager() {
  * Lets other objects know how many collectables there are.
  * Returns: the number of Collectables.
  */
- uint_fast8_t GameManager::getNumCollectables() {
+ uint_fast8_t MainGame::getNumCollectables() {
 	return stuff.size();
  }
 
@@ -1157,7 +1157,7 @@ MazeManager* GameManager::getMazeManager() {
  * Lets other objects know how many locks there are.
  * Returns: the number of keys.
  */
-uint_fast8_t GameManager::getNumKeys() {
+uint_fast8_t MainGame::getNumKeys() {
 	try {
 		
 		uint_fast8_t result = 0;
@@ -1169,7 +1169,7 @@ uint_fast8_t GameManager::getNumKeys() {
 		
 		return result;
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::getNumKeys(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::getNumKeys(): " << e.what() << std::endl;
 		return UINT_FAST8_MAX;
 	}
 }
@@ -1180,7 +1180,7 @@ uint_fast8_t GameManager::getNumKeys() {
  * --- uint_fast8_t p: the desired player
  * Returns: A pointer to the desired player if that player exists and if no exception is caught, nullptr otherwise.
  **/
-Player* GameManager::getPlayer( uint_fast8_t p ) {
+Player* MainGame::getPlayer( uint_fast8_t p ) {
 	try {
 		if( p < numPlayers ) {
 			return &player.at( p );
@@ -1188,10 +1188,10 @@ Player* GameManager::getPlayer( uint_fast8_t p ) {
 			throw( std::wstring( L"Request for player (" ) + stringConverter.toStdWString( p ) + L") >= numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")" );
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::getPlayer(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::getPlayer(): " << e.what() << std::endl;
 		return nullptr;
 	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in GameManager::getPlayer(): " << e << std::endl;
+		std::wcerr << L"Error in MainGame::getPlayer(): " << e << std::endl;
 		return nullptr;
 	}
 }
@@ -1199,14 +1199,14 @@ Player* GameManager::getPlayer( uint_fast8_t p ) {
 /**
  * Lets objects get random numbers using this object's generator.
  **/
-std::minstd_rand::result_type GameManager::getRandomNumber() {
+std::minstd_rand::result_type MainGame::getRandomNumber() {
 	return randomNumberGenerator();
 }
 
 /**
  * Lets objects see what the RNG was seeded with.
  **/
-std::minstd_rand::result_type GameManager::getRandomSeed() {
+std::minstd_rand::result_type MainGame::getRandomSeed() {
 	return randomSeed;
 }
 
@@ -1216,7 +1216,7 @@ std::minstd_rand::result_type GameManager::getRandomSeed() {
  * --- uint_fast8_t ps: The desired player start
  * Returns: A pointer to the desired player start object if it exists, nullptr otherwise.
  */
-PlayerStart* GameManager::getStart( uint_fast8_t ps ) {
+PlayerStart* MainGame::getStart( uint_fast8_t ps ) {
 	try {
 		if( debug ) {
 			std::wcout << L"getStart() called" << std::endl;
@@ -1224,7 +1224,7 @@ PlayerStart* GameManager::getStart( uint_fast8_t ps ) {
 		
 		return &playerStart.at( ps );
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::getStart(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::getStart(): " << e.what() << std::endl;
 		return nullptr;
 	}
 }
@@ -1235,7 +1235,7 @@ PlayerStart* GameManager::getStart( uint_fast8_t ps ) {
  * --- void* ptr: Some pointer.
  * Returns: Guess.
  */
-bool GameManager::isNull( void* ptr ) {
+bool MainGame::isNull( void* ptr ) {
 	// cppcheck-suppress duplicateExpression
 	return ( ptr == 0 and ptr == NULL and ptr == nullptr );
 }
@@ -1243,7 +1243,7 @@ bool GameManager::isNull( void* ptr ) {
 /**
  * Loads fonts. Calls loadMusicFont() and loadTipFont().
  */
-void GameManager::loadFonts() {
+void MainGame::loadFonts() {
 	try {
 		if( debug ) {
 			std::wcout << L"loadFonts() called" << std::endl;
@@ -1474,14 +1474,14 @@ void GameManager::loadFonts() {
 			std::wcout << L"end of loadFonts()" << std::endl;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::loadFonts(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::loadFonts(): " << e.what() << std::endl;
 	}
 }
 
 /**
  * Loads the music font. Like loadTipFont() below, this guesses a good font size, then repeatedly adjusts the size and reloads the font until everything fits.
  */
-void GameManager::loadMusicFont() {
+void MainGame::loadMusicFont() {
 	try {
 		if( debug ) {
 			std::wcout << L"loadMusicFont() called" << std::endl;
@@ -1550,14 +1550,14 @@ void GameManager::loadMusicFont() {
 			std::wcout << L"end of loadMusicFont()" << std::endl;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::loadMusicFont(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::loadMusicFont(): " << e.what() << std::endl;
 	}
 }
 
 /**
  * Loads the next song on the list.
  */
-void GameManager::loadNextSong() {
+void MainGame::loadNextSong() {
 	try {
 		if( debug ) {
 			std::wcout << L"loadNextSong() called" << std::endl;
@@ -1659,16 +1659,16 @@ void GameManager::loadNextSong() {
 			std::wcout << L"end of loadNextSong()" << std::endl;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::loadNextSong(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::loadNextSong(): " << e.what() << std::endl;
 	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in GameManager::loadNextSong(): " << e << std::endl;
+		std::wcerr << L"Error in MainGame::loadNextSong(): " << e << std::endl;
 	}
 }
 
 /**
  * Loads "pro tips" from file proTips.txt if that file exists.
  */
-void GameManager::loadProTips() {
+void MainGame::loadProTips() {
 	try {
 		if( debug ) {
 			std::wcout << L"loadProTips() called" << std::endl;
@@ -1676,7 +1676,7 @@ void GameManager::loadProTips() {
 		
 		proTips.clear(); //This line is unnecessary because loadProTips() is only called once, but I just feel safer clearing this anyway.
 		boost::filesystem::path proTipsPath( boost::filesystem::current_path()/L"protips.txt" );
-
+		
 		if( exists( proTipsPath ) ) {
 			if( not is_directory( proTipsPath ) ) {
 				if( debug ) {
@@ -1692,12 +1692,17 @@ void GameManager::loadProTips() {
 					while( proTipsFile.good() ) {
 						++lineNum;
 						getline( proTipsFile, line );
-
+						
 						if( not line.empty() ) {
-							proTips.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
-
-							if( debug ) {
-								std::wcout << line << std::endl;
+							line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
+							boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
+							
+							if( not line.empty() ) {
+								proTips.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
+								
+								if( debug ) {
+									std::wcout << line << std::endl;
+								}
 							}
 						}
 					}
@@ -1720,16 +1725,16 @@ void GameManager::loadProTips() {
 			std::wcout << L"end of loadProTips()" << std::endl;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::loadProTips(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::loadProTips(): " << e.what() << std::endl;
 	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in GameManager::loadProTips(): " << e << std::endl;
+		std::wcerr << L"Error in MainGame::loadProTips(): " << e << std::endl;
 	}
 }
 
 /**
  * Loads the tip font. Guesses a size that will work, keeps adjusting the size and reloading the font until everything fits.
  */
-void GameManager::loadTipFont() {
+void MainGame::loadTipFont() {
 	try {
 		if( debug ) {
 			std::wcout << L"loadTipFont() called" << std::endl;
@@ -1778,14 +1783,14 @@ void GameManager::loadTipFont() {
 			std::wcout << L"end of loadTipFont()" << std::endl;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::loadTipFont(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::loadTipFont(): " << e.what() << std::endl;
 	}
 }
 
 /**
  * Finds all playable music files in the ./music folder and compiles them into a list. If ./music does not exist or is not a folder, it uses the parent path instead.
  */
-void GameManager::makeMusicList() {
+void MainGame::makeMusicList() {
 	try {
 		if( debug ) {
 			std::wcout << L"makeMusicList() called" << std::endl;
@@ -1854,7 +1859,7 @@ void GameManager::makeMusicList() {
 			std::wcout << L"end of makeMusicList()" << std::endl;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::makeMusicList(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::makeMusicList(): " << e.what() << std::endl;
 	}
 }
 
@@ -1863,16 +1868,16 @@ void GameManager::makeMusicList() {
  * Arguments:
  * --- p: The player to move
  */
- void GameManager::movePlayerCommon( uint_fast8_t p ) {
- 	network.sendPlayerPos( p, player.at( p ).getX(), player.at( p ).getY() );
- 	mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].visited = true;
- 	if( player.at( p ).stepsTakenThisMaze % 2 == 0 ) {
+ void MainGame::movePlayerCommon( uint_fast8_t p ) {
+	//network.sendPlayerPos( p, player.at( p ).getX(), player.at( p ).getY() ); //NOTE: Network stuff here.
+	mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].visited = true;
+	if( player.at( p ).stepsTakenThisMaze % 2 == 0 ) {
 		mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorTwo() );
 	} else {
 		mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorOne() );
 	}
 	mazeManager.makeCellsVisible( player.at( p ).getX(), player.at( p ).getY() );
- }
+}
 
 /**
  * If the maze allows it, moves a player one unit in the indicated direction along the X axis.
@@ -1880,7 +1885,7 @@ void GameManager::makeMusicList() {
  * --- p: the player to move
  * --- direction: a signed integer representing the direction to move.
  */
-void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
+void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 	try {
 		if( numPlayers > p and mazeManager.cols > 0 ) {
 			if( direction < 0 ) {
@@ -1914,9 +1919,9 @@ void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
 			throw e;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::movePlayerOnX(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::movePlayerOnX(): " << e.what() << std::endl;
 	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in GameManager::movePlayerOnX(): " << e << std::endl;
+		std::wcerr << L"Error in MainGame::movePlayerOnX(): " << e << std::endl;
 	}
 }
 
@@ -1926,7 +1931,7 @@ void GameManager::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
  * --- p: the player to move
  * --- direction: a signed integer representing the direction to move.
  */
-void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
+void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 	try {
 		if( numPlayers > p and mazeManager.rows > 0 ) {
 			if( direction < 0 ) {
@@ -1961,16 +1966,23 @@ void GameManager::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
 			throw e;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::movePlayerOnY(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::movePlayerOnY(): " << e.what() << std::endl;
 	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in GameManager::movePlayerOnY(): " << e << std::endl;
+		std::wcerr << L"Error in MainGame::movePlayerOnY(): " << e << std::endl;
 	}
+}
+
+/**
+ * The network manager calls this as a way of requesting data to send to a new client.
+ */
+void MainGame::networkHasNewConnection() {
+	network.sendMaze( randomSeed );
 }
 
 /**
  * Calls the other newMaze()
  */
-void GameManager::newMaze() {
+void MainGame::newMaze() {
 	try {
 		if( debug ) {
 			std::wcout << L"newMaze() called with no arguments" << std::endl;
@@ -1982,7 +1994,7 @@ void GameManager::newMaze() {
 			std::wcout << L"end of newMaze() with no arguments" << std::endl;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::newMaze(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::newMaze(): " << e.what() << std::endl;
 	}
 }
 
@@ -1991,7 +2003,7 @@ void GameManager::newMaze() {
  * Arguments:
  * --- boost::filesystem::path src: the file from which to load the maze.
  */
-void GameManager::newMaze( boost::filesystem::path src ) {
+void MainGame::newMaze( boost::filesystem::path src ) {
 	if( not mazeManager.loadFromFile( src ) ) {
 		//If we get this far, it's an error. Probably a file not found. Fail gracefully by starting a new maze anyway.
 		gui->addMessageBox( L"Could not use file", L"Unable to load maze from file. Generating a new maze." );
@@ -2004,7 +2016,7 @@ void GameManager::newMaze( boost::filesystem::path src ) {
  * Arguments:
  * --- std::minstd_rand::result_type newRandomSeed: The random seed to use.
  */
-void GameManager::newMaze( std::minstd_rand::result_type newRandomSeed ) {
+void MainGame::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 	try {
 		if( debug ) {
 			std::wcout << L"newMaze() called with an argument" << std::endl;
@@ -2033,7 +2045,7 @@ void GameManager::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 			std::wcout << L"end of newMaze() with an argument" << std::endl;
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::newMaze(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::newMaze(): " << e.what() << std::endl;
 	}
 }
 
@@ -2044,7 +2056,7 @@ void GameManager::newMaze( std::minstd_rand::result_type newRandomSeed ) {
  * Returns: True if the event was handled by this function and does not involve any game controls (since the relationship of controls:actions can be many:many), false otherwise.
  */
 //cppcheck-suppress unusedFunction
-bool GameManager::OnEvent( const irr::SEvent& event ) {
+bool MainGame::OnEvent( const irr::SEvent& event ) {
 	try {
 		switch( event.EventType ) {
 			case irr::EET_KEY_INPUT_EVENT: {
@@ -2326,7 +2338,7 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 		}
 
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::OnEvent(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::OnEvent(): " << e.what() << std::endl;
 	}
 
 	return false;
@@ -2335,7 +2347,7 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
 /**
  * Randomly selects a logo and draws it on screen. Should NOT be called by drawAll().
  */
- void GameManager::pickLogo() {
+ void MainGame::pickLogo() {
 	try {
 		if( debug ) {
 			std::wcout << L"pickLogo() called" << std::endl;
@@ -2431,7 +2443,7 @@ bool GameManager::OnEvent( const irr::SEvent& event ) {
  * --- std::wstring choice: a string which should be either "true" or "false"
  * Returns: A Boolean indicating whether choice is closer to "true" or to "false"
  */
-bool GameManager::prefIsTrue( std::wstring choice ) {
+bool MainGame::prefIsTrue( std::wstring choice ) {
 	std::vector< std::wstring > possibleChoices = { L"true", L"false" };
 	auto choiceNum = spellChecker.indexOfClosestString( choice, possibleChoices );
 	return( choiceNum == 0 );
@@ -2442,7 +2454,7 @@ bool GameManager::prefIsTrue( std::wstring choice ) {
 * Arguments:
 * None.
 */
-void GameManager::processControls() {
+void MainGame::processControls() {
 	try {
 		for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
 			if( controls.at( k ).activated ) {
@@ -2533,14 +2545,14 @@ void GameManager::processControls() {
 			}
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::processControls(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::processControls(): " << e.what() << std::endl;
 	}
 }
 
 /**
  * Reads preferences from prefs.cfg. Sets defaults for any preference not found in the file. If the file does not exist, creates it.
  */
-void GameManager::readPrefs() {
+void MainGame::readPrefs() {
 	try {
 		if( debug ) {
 			std::wcout << L"readPrefs() called" << std::endl;
@@ -2559,7 +2571,7 @@ void GameManager::readPrefs() {
 		numPlayers = 1;
 		markTrails = false;
 		musicVolume = 50;
-		network.setPort( 61187 );
+		//network.setPort( 61187 ); //NOTE: Network stuff here.
 		isServer = true;
 		botsKnowSolution = false;
 		botAlgorithm = AI::DEPTH_FIRST_SEARCH;
@@ -2807,7 +2819,7 @@ void GameManager::readPrefs() {
 										
 										try {
 											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-											network.setPort( choiceAsInt );
+											//network.setPort( choiceAsInt ); //NOTE: Network stuff here.
 										} catch( boost::bad_lexical_cast &e ) {
 											std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 										}
@@ -2864,7 +2876,7 @@ void GameManager::readPrefs() {
 						}
 					}
 					
-					//Note: Just because the library supports a driver type doesn't mean we can actually use it. A loop similar to the above is used in the GameManager constructor where we call createDevice(). Therefore, the final driverType may not be what is set here.
+					//Note: Just because the library supports a driver type doesn't mean we can actually use it. A loop similar to the above is used in the MainGame constructor where we call createDevice(). Therefore, the final driverType may not be what is set here.
 					if( driverType == irr::video::EDT_NULL ) {
 						std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
 						debug = true;
@@ -2969,7 +2981,7 @@ void GameManager::readPrefs() {
 								break;
 							}
 							case 13: { //L"network port"
-								prefsFile << network.getPort();
+								//prefsFile << network.getPort(); //NOTE: Network stuff here.
 								break;
 							}
 							case 14: { //L"always server"
@@ -3010,9 +3022,9 @@ void GameManager::readPrefs() {
 			throw( L"prefs.cfg does not exist or is not readable in any of the folders that were searched." );
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::readPrefs(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::readPrefs(): " << e.what() << std::endl;
 	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in GameManager::readPrefs(): " << e << std::endl;
+		std::wcerr << L"Error in MainGame::readPrefs(): " << e << std::endl;
 	}
 	
 	if( debug ) {
@@ -3023,7 +3035,7 @@ void GameManager::readPrefs() {
 /**
  * Resets miscellaneous stuff between mazes.
  */
-void GameManager::resetThings() {
+void MainGame::resetThings() {
 	try {
 		if( debug ) {
 			std::wcout << L"resetThings() called" << std::endl;
@@ -3120,7 +3132,7 @@ void GameManager::resetThings() {
 		startLoadingScreen();
 		lastTimeControlsProcessed = timer->getTime();
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::resetThings(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::resetThings(): " << e.what() << std::endl;
 	}
 	
 	if( debug ) {
@@ -3132,7 +3144,7 @@ void GameManager::resetThings() {
  * The game's main loop. Should only be called by main() in main.cpp
  * Returns: EXIT_SUCCESS if the game exits normally, EXIT_FAILURE if an exception is caught.
  */
-uint_fast8_t GameManager::run( std::wstring fileToLoad ) {
+uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 	try {
 		if( debug ) {
 			std::wcout << L"run() called" << std::endl;
@@ -3280,37 +3292,9 @@ uint_fast8_t GameManager::run( std::wstring fileToLoad ) {
 				}
 
 				//TODO: add networking stuff here
-				/*if( isServer ) {
-					if( network.checkForConnections() not_eq 0 ) {
-						std::wcerr << L"Networking error." << std::endl;
-					} else {
-						if( network.hasNewPlayerConnected() ) {
-							if( debug ) {
-								std::wcout << L"New connections exist." << std::endl;
-							}
-							network.sendMaze( mazeManager.maze, mazeManager.cols, mazeManager.rows );
-							network.sendGoal( goal );
-							network.sendPlayerStarts( playerStart );
-							network.sendU8( numKeysFound, L"NUMKEYSFOUND" );
-							network.sendU8( numLocks, L"NUMLOCKS" );
-							network.sendCollectables( stuff );
-						}
-					}
+				if( isServer or network.getConnectionStatus() ) {
+					network.processPackets();
 				}
-
-				if( network.checkForConnections() < 0 ) {
-					std::wcerr << L"Networking error." << std::endl;
-				} else {
-					if( network.receiveData() ) {
-						if( debug ) {
-							std::wcout << L"Received data" << std::endl;
-						}
-					} else {
-						if( debug ) {
-							//std::wcout << L"Did not receive data" << std::endl;
-						}
-					}
-				}*/
 			}
 
 			timer->stop();
@@ -3330,7 +3314,7 @@ uint_fast8_t GameManager::run( std::wstring fileToLoad ) {
 			}
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::run(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::run(): " << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
 	
@@ -3344,7 +3328,7 @@ uint_fast8_t GameManager::run( std::wstring fileToLoad ) {
 /**
  * Loads control settings from controls.cfg.
  */
-void GameManager::setControls() {
+void MainGame::setControls() {
 	try {
 		if( debug ) {
 			std::wcout << L"setControls() called" << std::endl;
@@ -3729,9 +3713,9 @@ void GameManager::setControls() {
 								}
 								
 							} catch( std::exception &e ) {
-								std::wcerr << L"Error in GameManager::setControls(): " << e.what() << std::endl;
+								std::wcerr << L"Error in MainGame::setControls(): " << e.what() << std::endl;
 							} catch( std::wstring &e ) {
-							std::wcerr << L"Error in GameManager::setControls(): " << e << std::endl;
+							std::wcerr << L"Error in MainGame::setControls(): " << e << std::endl;
 							}
 						}
 					}
@@ -3745,9 +3729,9 @@ void GameManager::setControls() {
 			throw( std::wstring( L"controls.cfg does not exist or is not readable in any of the folders that were searched." ) );
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::setControls(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::setControls(): " << e.what() << std::endl;
 	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in GameManager::setControls(): " << e << std::endl;
+		std::wcerr << L"Error in MainGame::setControls(): " << e << std::endl;
 	}
 	
 	if( debug ) {
@@ -3758,7 +3742,7 @@ void GameManager::setControls() {
 /**
  * Randomly picks a background animation and does whatever it needs to do to set it up.
  */
-void GameManager::setupBackground() {
+void MainGame::setupBackground() {
 	try {
 		if( debug ) {
 			std::wcout << L"setupBackground() called" << std::endl;
@@ -4095,9 +4079,9 @@ void GameManager::setupBackground() {
 			}
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::setupBackground(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::setupBackground(): " << e.what() << std::endl;
 	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in GameManager::setupBackground(): " << e << std::endl;
+		std::wcerr << L"Error in MainGame::setupBackground(): " << e << std::endl;
 	}
 	
 	if( debug ) {
@@ -4108,7 +4092,7 @@ void GameManager::setupBackground() {
 /**
  * Called by menuManager.
  */
-void GameManager::setExitConfirmation( irr::gui::IGUIWindow* newWindow ) {
+void MainGame::setExitConfirmation( irr::gui::IGUIWindow* newWindow ) {
 	exitConfirmation = newWindow;
 }
 
@@ -4116,7 +4100,7 @@ void GameManager::setExitConfirmation( irr::gui::IGUIWindow* newWindow ) {
  * Sets loadingProgress
  * Arguments: Yes please.
  **/
-void GameManager::setLoadingPercentage( float newPercent ) {
+void MainGame::setLoadingPercentage( float newPercent ) {
  	if( newPercent < 100 and newPercent > 0 ) {
 		loadingProgress = newPercent;
  	} else if( newPercent >= 100 ) {
@@ -4131,7 +4115,7 @@ void GameManager::setLoadingPercentage( float newPercent ) {
  * Arguments:
  * std::minstd_rand::result_type newSeed - The new seed to use. CPlusPlus.com says this type is equal to uint_fast32_t.
  **/
-void GameManager::setRandomSeed( std::minstd_rand::result_type newSeed ) {
+void MainGame::setRandomSeed( std::minstd_rand::result_type newSeed ) {
 	randomSeed = newSeed;
 	randomNumberGenerator.seed( randomSeed );
 	
@@ -4144,7 +4128,7 @@ void GameManager::setRandomSeed( std::minstd_rand::result_type newSeed ) {
 /**
  * Creates a file selection dialog for loading the maze
  */
-void GameManager::showLoadMazeDialog() {
+void MainGame::showLoadMazeDialog() {
 	if( not isNull( loadMazeDialog ) ) {
 		delete loadMazeDialog;
 	}
@@ -4155,7 +4139,7 @@ void GameManager::showLoadMazeDialog() {
 /**
  * Creates a file selection dialog for saving the maze
  */
-void GameManager::showSaveMazeDialog() {
+void MainGame::showSaveMazeDialog() {
 	if( not isNull( saveMazeDialog ) ) {
 		delete saveMazeDialog;
 	}
@@ -4166,7 +4150,7 @@ void GameManager::showSaveMazeDialog() {
 /**
  * Sets showingLoadingScreen to true and timeStartedLoading to the current time, then calls drawLoadingScreen().
  */
-void GameManager::startLoadingScreen() {
+void MainGame::startLoadingScreen() {
 	if( debug ) {
 		std::wcout << L"startLoadingScreen() called" << std::endl;
 	}
@@ -4182,7 +4166,7 @@ void GameManager::startLoadingScreen() {
 /**
  * Takes a screenshot and saves it to a time-stamped png file.
  */
-void GameManager::takeScreenShot() {
+void MainGame::takeScreenShot() {
 	try {
 		if( debug ) {
 			std::wcout << L"takeScreenShot() called" << std::endl;
@@ -4225,9 +4209,9 @@ void GameManager::takeScreenShot() {
 			throw( std::wstring( L"takeScreenShot(): Failed to take screen shot" ) );
 		}
 	} catch( std::exception &e ) {
-		std::wcerr << L"Error in GameManager::takeScreenShot(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MainGame::takeScreenShot(): " << e.what() << std::endl;
 	} catch( std::wstring e ) {
-		std::wcerr << L"Error in GameManager::takeScreenShot(): " << e << std::endl;
+		std::wcerr << L"Error in MainGame::takeScreenShot(): " << e << std::endl;
 	}
 	
 	if( debug ) {

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type = Application
+Version = 1.1
+Name = Cybrinth
+GenericName = A maze-solving game
+NoDisplay = false
+Icon = cybrinth
+Exec = cybrinth
+Terminal = false
+Categories = Game;ArcadeGame;
+Keywords = maze;labyrinth;retro;cyber;

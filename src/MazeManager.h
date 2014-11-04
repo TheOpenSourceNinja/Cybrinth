@@ -19,7 +19,7 @@
 #ifndef MAZEMANAGER_H
 #define MAZEMANAGER_H
 
-//#include "GameManager.h"
+//#include "MainGame.h"
 #include "MazeCell.h"
 #include "PreprocessorCommands.h"
 
@@ -27,7 +27,7 @@
 
 #include <irrlicht/irrlicht.h>
 
-class GameManager;
+class MainGame;
 
 class MazeManager {
 	public:
@@ -59,11 +59,11 @@ class MazeManager {
 
 		bool saveToFile( boost::filesystem::path dest );
 
-		void setGameManager( GameManager* newGM );
+		void setMainGame( MainGame* newGM );
 
 		uint_fast8_t cols;
 
-		GameManager* gameManager;
+		MainGame* mainGame;
 
 		uint_fast8_t rows;
 	protected:

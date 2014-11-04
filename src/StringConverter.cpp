@@ -173,6 +173,16 @@ std::wstring StringConverter::toStdWString( char* input ) {
 	}
 }
 
+std::wstring StringConverter::toStdWString( unsigned char* input ) {
+	try {
+		return toStdWString( ( char * ) input );
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in StringConverter::toStdWString" << e.what() << std::endl;
+		std::wstring w;
+		return w;
+	}
+}
+
 std::wstring StringConverter::toStdWString( wchar_t* input ) {
 	try {
 		return std::wstring( input );

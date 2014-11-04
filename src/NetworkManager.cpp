@@ -15,559 +15,281 @@
  * @section DESCRIPTION
  * The NetworkManager class is responsible for networking stuff. It will probably be completely rewritten, as it does not work now.
  */
- 
+
+#include "MainGame.h"
+#include "Integers.h"
 #include "NetworkManager.h"
-#include "GameManager.h"
-#include <boost/algorithm/string.hpp>
-#ifdef HAVE_IOSTREAM
+#include "RakNet/MessageIdentifiers.h"
+#include "RakNet/RakNetStatistics.h"
+#include "StringConverter.h"
 #include <iostream>
-#endif //HAVE_IOSTREAM
-#ifdef HAVE_STRING
-#include <string>
-#endif //HAVE_STRING
+#include <vector>
 
-// get sockaddr, IPv4 or IPv6:
-void *NetworkManager::get_in_addr( struct sockaddr *sa ) {
-	try {
-		if( sa->sa_family == AF_INET ) {
-			return &( ( ( struct sockaddr_in* ) sa )->sin_addr );
-		}
+//All that matters about these numbers is that they not be the same, and I'm not even sure about that. See RakNet/RakPeerInterface.h
+#define CLIENT_SEND_CHANNEL 0
+#define SERVER_SEND_CHANNEL 1
 
-		return &( ( ( struct sockaddr_in6* ) sa )->sin6_addr );
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::get_in_addr(): " << e.what() << std::endl;
-		return nullptr;
-	}
-}
-
-//The following comment prevents cppcheck from complaining about remoteIP not being initialized in the constructor. Don't worry, it gets initialized soon enough.
-// cppcheck-suppress uninitMemberVar
 NetworkManager::NetworkManager() {
 	try {
-		//ctor
-		port = 61187; //I use this port a lot: it's my birthday.
-		newPlayer = 0;
-		rv = 0;
-		ai = nullptr;
-		listener = 0;
-		p = nullptr;
-		yes = 1;
-		backlog = 0;
-		fdmax = 0;
-		setGameManager( nullptr );
-		for( decltype( INET6_ADDRSTRLEN ) i = 0; i < INET6_ADDRSTRLEN; ++i ) {
-			remoteIP[ i ] = '\0';
-		}
-
-		#if defined WINDOWS
-		if (WSAStartup(MAKEWORD(1,1), &wsaData) not_eq 0) {
-			fprintf(stderr, "WSAStartup failed.\n");
-			exit(1);
-		}
-		#endif
+		password = PACKAGE_STRING;
+		serverPort = "61187";
+		serverIP = "::1";
+		me = nullptr;
+		isConnected = false;
+		mg = nullptr;
+		clientID = RakNet::UNASSIGNED_SYSTEM_ADDRESS; // Record the first client that connects to us so we can pass it to the ping function
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::NetworkManager(): " << e.what() << std::endl;
 	}
 }
 
-void NetworkManager::setGameManager( GameManager* newGM ) {
-	try {
-		gm = newGM;
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::setGameManager(): " << e.what() << std::endl;
-	}
-}
-
-void NetworkManager::setPort( uint_fast16_t newPort ) {
-	try {
-		if( newPort <= 1023 ) {
-			std::wcerr << L"Warning: Port " << newPort << L" is in the \"well-known\" range (0-1023). This may not work. Recommend using ports above 49151." << std::endl;
-		} else if( newPort <= 49151 ) {
-			std::wcerr << L"Warning: Port " << newPort << L" is in the \"registered ports\" range (1024-49151). This may not work. Recommend using ports above 49151." << std::endl;
-		} else {
-			if( gm not_eq nullptr and gm->getDebugStatus() ) {
-				std::wcout << L"Setting port to " << newPort << L"." << std::endl;
-			}
-		}
-
-		port = newPort;
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::setPort(): " << e.what() << std::endl;
-	}
-}
-
-uint_fast16_t NetworkManager::getPort() {
-	try {
-		return port;
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::getPort(): " << e.what() << std::endl;
-		return UINT_FAST16_MAX;
-	}
-}
-
-bool NetworkManager::setup( bool isServer ) {
-	try {
-		memset( &hints, 0, sizeof hints );
-		hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version, AF_UNSPEC otherwise
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_flags = AI_PASSIVE; //fill in my IP for me
-
-		rv = getaddrinfo( nullptr, irr::core::stringc( port ).c_str(), &hints, &ai );
-
-		if( rv not_eq 0 ) {
-			//throw( std::wstring( "getaddrinfo: " + std::string( gai_strerror( rv ) ) ) );
-			std::wcerr << gai_strerror( rv ) << std::endl;
-		}
-
-		for( p = ai; p not_eq nullptr; p = p->ai_next ) {
-			listener = socket( p->ai_family, p->ai_socktype, p->ai_protocol );
-
-			if( listener < 0 ) {
-				if( gm->getDebugStatus() ) {
-					std::wcerr << L"NetworkManager::setup(): listener is less than zero: " << listener << std::endl;
-				}
-				continue;
-			}
-
-			if (isServer) {
-				setsockopt( listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof( int ) );
-
-				if( bind( listener, p->ai_addr, p->ai_addrlen ) < 0 ) { //Commenting this out because I'm not focusing on networking right now, so don't want to debug
-					std::wcerr << L"server bind() error: " << strerror( errno ) << std::endl;
-					close( listener );
-					continue;
-				}
-			} else { //client
-				if ( connect( listener, p->ai_addr, p->ai_addrlen ) < 0) {
-					close( listener );
-					std::wcerr << L"client connect() error: " << strerror( errno ) << std::endl;
-					continue;
-				}
-			}
-
-			break; //Cannot be reached if bind() works or if listener < 0
-		}
-
-		//Getting out of the loop means bind failed for some p.
-		/*if( p == nullptr ) {
-			if (isServer) {
-				std::wcerr << L"Server: Failed to bind" << std::endl;
-			} else { //client
-				std::wcerr << L"Client: Failed to connect" << std::endl;
-			}
-		}*/
-
-		if ( not isServer ) { //Client
-			inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), remoteIP, sizeof remoteIP);
-			std::wcout << L"client: connecting to " << remoteIP << std::endl;
-		}
-
-		freeaddrinfo( ai ); // All done with ai
-
-		backlog = 10;//Number of incoming connections listen() allows in its queue
-
-		if ( isServer ) {
-			if( listen( listener, backlog ) == -1 ) {
-				//throw( std::wstring( "listen() error: " + std::string( strerror( errno ) ) ) );
-				std::wcerr << "listen() error: " << strerror( errno ) << std::endl;
-			}
-
-			FD_ZERO( &master ); //Empty the two sets
-			FD_ZERO( &read_fds );
-			FD_SET( listener, &master ); //Put listener as the only (at first) item in master
-
-			timeout.tv_sec = 0;
-			timeout.tv_usec = 50000;
-
-			fdmax = listener;
-		}
-
-		return true;
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::setup(): " << e.what() << std::endl;
-		return false;
-	}
-}
-
 NetworkManager::~NetworkManager() {
 	try {
-		for( int i = 0; i < fdmax; ++i ) {
-			#if defined WINDOWS
-			closesocket( i );
-			#else
-			close( i );
-			#endif
+		if( me != nullptr ) {
+			me->Shutdown( 300 ); //The number of milliseconds to wait for remaining messages to go out. Both the client and server examples used 300, so that's what I put here too.
+			RakNet::RakPeerInterface::DestroyInstance( me );
 		}
-
-		#if defined WINDOWS
-		WSACleanup();
-		#endif
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in NetworkManager::~NetworkManager(): " << e.what() << std::endl;
 	}
 }
 
-int NetworkManager::checkForConnections() {
-	try {
-		read_fds = master;
-
-		int result = select( fdmax + 1, &read_fds, nullptr, nullptr, &timeout );
-
-		if( result < 0 ) {
-			//throw( std::wstring( "select() error: " + strerror( errno ) ) ;
-			std::wcerr << "select() error: " << strerror( errno ) << std::endl;
-			return -1;
-		} else {
-			return result;
-		}
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::checkForConnections(): " << e.what() << std::endl;
-		return -1;
-	}
+bool NetworkManager::getConnectionStatus() {
+	return isConnected;
 }
 
-bool NetworkManager::sendData( int sockfd, unsigned char *buf, size_t *len ) {
-	try {
-		size_t bytesSent = 0;
-		int bytesLeft = *len;
-		int n = 0;
-
-		while( bytesSent < *len ) {
-			n = send( sockfd, buf + bytesSent, bytesLeft, 0 );
-
-			if( n < 0 ) {
+void NetworkManager::processPackets() {
+	for( RakNet::Packet* p = me->Receive(); p != 0; me->DeallocatePacket( p ), p = me->Receive() ) {
+		if( p == 0 ) {
+			return;
+		}
+		
+		unsigned char messageID = p->data[ 0 ];
+		if( messageID == ID_TIMESTAMP ) {
+			auto skipLength = sizeof( RakNet::MessageID ) + sizeof( RakNet::Time );
+			if( p->length <= skipLength ) {
+				std::wcerr << L"Received packet of invalid length " << p->length << L" > " << skipLength << std::endl;
+			}
+			messageID = p->data[ skipLength ]; //The timestamp, which we ignore, is followed by another message ID.
+		}
+		
+		StringConverter sc;
+		
+		switch( messageID ) {
+			case ID_DISCONNECTION_NOTIFICATION: {
+				if( isServer ) {
+					if( mg != nullptr and mg->getDebugStatus() ) {
+						std::wcout << L"Client disconnected: " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
+					}
+				} else {
+					isConnected = false;
+				}
 				break;
 			}
-
-			bytesSent += n;
-			bytesLeft -= n;
+			case ID_ALREADY_CONNECTED: {
+				if( mg != nullptr and mg->getDebugStatus() ) {
+					std::wcout << L"Already connected." << std::endl;
+				}
+				break;
+			}
+			case ID_NEW_INCOMING_CONNECTION: { //Only the server should receive incoming connections
+				if( mg not_eq nullptr ) {
+					if( mg->getDebugStatus() ) {
+						std::wcout << L"New incoming connection from " << sc.toStdWString( p->systemAddress.ToString() ) << L" with GUID " << sc.toStdWString( p->guid.ToString() ) << L". ";
+						clientID=p->systemAddress;
+						
+						std::wcout << L"Remote IDs: " << std::endl;
+						for ( decltype( MAXIMUM_NUMBER_OF_INTERNAL_IDS ) i = 0; i < MAXIMUM_NUMBER_OF_INTERNAL_IDS; ++i ) {
+							RakNet::SystemAddress internalID = me->GetInternalID( p->systemAddress, i );
+							if ( internalID not_eq RakNet::UNASSIGNED_SYSTEM_ADDRESS ) {
+								std::wcout << i << L". " << sc.toStdWString( internalID.ToString() ) << std::endl;
+							}
+						}
+					}
+					
+					latestClientAddress = p->systemAddress;
+					mg->networkHasNewConnection();
+				}
+				break;
+			}
+			case ID_INCOMPATIBLE_PROTOCOL_VERSION: {
+				std::wcerr << L"Error: Incompatible RakNet protocol versions. Ensure that the server and client are using the same version of the software." << std::endl;
+				break;
+			}
+			case ID_REMOTE_DISCONNECTION_NOTIFICATION: { //Should only be received by clients
+				if( mg not_eq nullptr and mg->getDebugStatus() ) {
+					std::wcout << L"Another client has disconnected." << std::endl;
+				}
+				break;
+			}
+			case ID_REMOTE_CONNECTION_LOST: { //Should only be received by clients
+				if( mg not_eq nullptr and mg->getDebugStatus() ) {
+					std::wcout << L"Another client has lost its connection to the server." << std::endl;
+				}
+				break;
+			}
+			case ID_REMOTE_NEW_INCOMING_CONNECTION: { //Should only be received by clients
+				if( mg not_eq nullptr and mg->getDebugStatus() ) {
+					std::wcout << L"Another client has connected to the server." << std::endl;
+				}
+				break;
+			}
+			case ID_CONNECTION_BANNED: { //Should only be received by clients
+				std::wcerr << L"The server has banned this client. Cannot connect." << std::endl;
+				break;
+			}
+			case ID_CONNECTION_ATTEMPT_FAILED: { //Should only be received by clients
+				std::wcerr << L"Connection attempt failed." << std::endl;
+				break;
+			}
+			case ID_NO_FREE_INCOMING_CONNECTIONS: { //Should only be received by clients
+				std::wcerr << L"The server is full." << std::endl;
+				break;
+			}
+			case ID_INVALID_PASSWORD: { //Should only be received by clients
+				std::wcerr << L"Cannot connect to server: Invalid  program name and/or version." << std::endl;
+				break;
+			}
+			case ID_CONNECTED_PING: //Should only be received by the server
+			case ID_UNCONNECTED_PING: { //Should only be received by the server
+				if( mg not_eq nullptr and mg->getDebugStatus() ) {
+					std::wcout << L"Ping received from " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
+				}
+				break;
+			}
+			case ID_CONNECTION_LOST: {
+				std::wcerr << L"Connection to " << sc.toStdWString( p->systemAddress.ToString() ) << L" lost." << std::endl;
+				break;
+			}
+			case ID_CONNECTION_REQUEST_ACCEPTED: { //Should only be received by clients
+				if( mg not_eq nullptr and mg->getDebugStatus() ) {
+					std::wcout << L"Connection request accepted by " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
+				}
+				break;
+			}
+			case ID_IP_RECENTLY_CONNECTED: {
+				std::wcerr << L"Connected too recently; can't connect again so soon." << std::endl;
+				break;
+			}
+			default: { //Message received, the server should forward it to the clients. Clients should react accordingly.
+				std::wcout << L"Message received, the server should forward it to the clients. Clients should react accordingly." << std::endl;
+				if( isServer ) {
+					me->Send( ( const char * ) p->data, p->length, HIGH_PRIORITY, RELIABLE_ORDERED, SERVER_SEND_CHANNEL, p->systemAddress, true ); //p->systemAddress tells it who (not) to send to (the address we just received from), and the bool means broadcast to all other connected systems.
+				} else {
+					std::wcout << sc.toStdWString( p->data ) << std::endl;
+				}
+			}
 		}
+	}
+}
 
-		*len = bytesSent; //Sets the variable pointed to by len to bytesSent, so that the caller can see how many bytes were sent.
-
-		if( n < 0 ) {
-			return false;
+void NetworkManager::sendMaze( std::minstd_rand::result_type randomSeed ) {
+	if( me not_eq nullptr and isConnected ) {
+		auto data = serializeU32( randomSeed );
+		char channel;
+		if( isServer ) {
+			channel = SERVER_SEND_CHANNEL;
 		} else {
-			return true;
+			channel = CLIENT_SEND_CHANNEL;
 		}
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::sendData(): " << e.what() << std::endl;
-		return false;
+		me->Send( data.c_str(), data.length(), MEDIUM_PRIORITY, RELIABLE_ORDERED, channel, latestClientAddress, false ); //The Boolean being false means we will send only to the specified address.
+	} else {
+		std::wcerr << L"Error: Cannot send data, not yet connected to anything." << std::endl;
 	}
 }
 
+std::string NetworkManager::serializeS16( int16_t input ) {
+	std::stringstream ss;
+	ss << htons( input );
+	return ss.str();
+}
 
-bool NetworkManager::hasNewPlayerConnected() {
-	try {
-		//std::wcout << L"read_fds count: " << read_fds.fd_count << std::endl;
-		//getchar();
-		//checkForConnections();
-		if( FD_ISSET( listener, &read_fds ) ) {
-			socklen_t addrlen = sizeof remoteaddr;
-			int newfd = accept( listener, ( struct sockaddr * ) &remoteaddr, &addrlen );
+std::string NetworkManager::serializeU16( uint16_t input ) {
+	std::stringstream ss;
+	ss << htons( input );
+	return ss.str();
+}
 
-			if( newfd < 0 ) {
-				//throw( std::wstring( "accept() error: " + strerror( errno ) ) ;
-				std::wcerr << "accept() error: " << strerror( errno ) << std::endl;
-			} else {
-				FD_SET( newfd, &master ); //add newfd to master set
+std::string NetworkManager::serializeS32( int32_t input ) {
+	std::stringstream ss;
+	ss << htonl( input );
+	return ss.str();
+}
 
-				if( newfd > fdmax ) {
-					fdmax = newfd;
-				}
+std::string NetworkManager::serializeU32( uint32_t input ) {
+	std::stringstream ss;
+	ss << htonl( input );
+	return ss.str();
+}
 
-				std::wcout << L"Server: New connection from " << inet_ntop( remoteaddr.ss_family, get_in_addr(( struct sockaddr* )&remoteaddr ), remoteIP, INET6_ADDRSTRLEN ) << L" on socket " << newfd << std::endl;
-				//getchar();
-				return true;
-			}
+void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
+	isServer = newIsServer;
+	mg = newGM;
+	me = RakNet::RakPeerInterface::GetInstance(); //In RakNet's examples, this is called "client" in the client program and "server" in the server program.
+	RakNet::RakNetStatistics* rss;
+	
+	if( isServer ) {
+		me->SetIncomingPassword( password.c_str(), password.length() );
+		me->SetTimeoutTime( 30000, RakNet::UNASSIGNED_SYSTEM_ADDRESS ); //30000 comes from the chat server example
+	}
+	
+	unsigned char packetIdentifier;
+	
+	std::vector< RakNet::SocketDescriptor > socketDescriptors;
+	
+	if( isServer ) {
+		socketDescriptors.resize( UINT_FAST8_MAX ); //A server can have many clients
+	} else {
+		socketDescriptors.resize( 1 ); //A client only connects to one server
+	}
+	
+	for( decltype( socketDescriptors.size() ) sd = 0; sd < socketDescriptors.size(); ++sd ) {
+		if( isServer ) {
+			socketDescriptors.at( sd ).port = atoi( serverPort.c_str() );
 		} else {
-			//std::wcout << L"No new connections at this time." << std::endl;
-			return false;
+			socketDescriptors.at( sd ).port = atoi( clientPort.c_str() );
 		}
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::hasNewPlayerConnected(): " << e.what() << std::endl;
+		socketDescriptors.at( sd ).socketFamily = AF_INET6;
 	}
-	return false;
-}
-
-void NetworkManager::sendMaze( MazeCell ** maze, uint_fast8_t cols, uint_fast8_t rows ) {
-	try {
-		//char buffer[sizeof(cols) + sizeof(rows) + (cols * rows) ];
-		std::vector< decltype( cols ) > toSend;
-		toSend.reserve( 9 + 7 + 2 + ( cols * rows * 4 ) );
-		toSend.push_back( 'S' );
-		toSend.push_back( 'T' );
-		toSend.push_back( 'A' );
-		toSend.push_back( 'R' );
-		toSend.push_back( 'T' );
-		toSend.push_back( 'M' );
-		toSend.push_back( 'A' );
-		toSend.push_back( 'Z' );
-		toSend.push_back( 'E' );
-		toSend.push_back( cols );
-		toSend.push_back( rows );
-
-		for( decltype( cols ) c = 0; c < cols; ++c ) {
-			for( decltype( rows ) r = 0; r < rows; ++r ) {
-				toSend.push_back( maze[c ][r ].getTop() );
-				toSend.push_back( maze[c ][r ].getLeft() );
-				toSend.push_back( maze[c ][r ].getBottom() );
-				toSend.push_back( maze[c ][r ].getRight() );
-			}
-		}
-
-		toSend.push_back( 'E' );
-		toSend.push_back( 'N' );
-		toSend.push_back( 'D' );
-		toSend.push_back( 'M' );
-		toSend.push_back( 'A' );
-		toSend.push_back( 'Z' );
-		toSend.push_back( 'E' );
-
-		for( decltype( fdmax ) i = 0; i <= fdmax; ++i ) {
-			//send to everyone! except the listener
-			if( FD_ISSET( i, &master ) and i not_eq listener ) {
-				size_t size = toSend.size();
-
-				if( not sendData( i, &toSend.at( 0 ), &size ) ) {
-					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
-				}
-
-				if( size not_eq toSend.size() ) {
-					std::wcerr << L"sendData() error: Not all data was sent" << std::endl;
-				}
-			}
-		}
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::sendMaze(): " << e.what() << std::endl;
+	
+	uint_fast8_t maxConnections;
+	if( isServer ) {
+		maxConnections = UINT_FAST8_MAX;
+	} else {
+		maxConnections = 1;
 	}
-}
-
-void NetworkManager::sendPlayerPos( uint_fast8_t player, uint_fast8_t x, uint_fast8_t y ) {
-	try {
-		//std::wcout << L"Sending player " << player << L" position " << x << L"," << y << std::endl;
-
-		std::vector< decltype( x ) > toSend;
-		toSend.reserve( 6 + 3 + 4 );
-		toSend.push_back( 'S' );
-		toSend.push_back( 'T' );
-		toSend.push_back( 'A' );
-		toSend.push_back( 'R' );
-		toSend.push_back( 'T' );
-		toSend.push_back( 'P' );
-		toSend.push_back( player );
-		toSend.push_back( x );
-		toSend.push_back( y );
-		toSend.push_back( 'E' );
-		toSend.push_back( 'N' );
-		toSend.push_back( 'D' );
-		toSend.push_back( 'P' );
-
-		for( decltype( fdmax ) j = 0; j <= fdmax; ++j ) {
-			//send to everyone! except the listener
-			if( FD_ISSET( j, &master ) and j not_eq listener ) {
-				size_t size = toSend.size();
-
-				if( not sendData( j, &toSend.at( 0 ), &size ) ) {
-					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
+	
+	bool b = me->Startup( maxConnections, socketDescriptors.data(), socketDescriptors.size() ) == RakNet::RAKNET_STARTED;
+	if( b ) {
+		if( isServer ) {
+			me->SetMaximumIncomingConnections( maxConnections ); //Ensures that all the allowed connections ( set with Startup() above ) are for incoming use only.
+		}
+		
+		me->SetUnreliableTimeout( 5000 ); //The number of milliseconds to wait before timing out an unreliable connection. Set to 0 or less to disable timeout. No magic number here; I just guessed that 5 seconds would be good.
+		
+		if( not isServer ) {
+			RakNet::ConnectionAttemptResult car = me->Connect( serverIP.c_str(), atoi( serverPort.c_str() ), password.c_str(), password.length() );
+			isConnected = ( car == RakNet::CONNECTION_ATTEMPT_STARTED );
+		}
+		
+		if( mg->getDebugStatus() ) {
+			StringConverter sc;
+			std::wcout << L"My IP addresses:" << std::endl;
+			for( decltype( me->GetNumberOfAddresses() ) a = 0; a < me->GetNumberOfAddresses(); ++a ) {
+				std::wcout << a << L". ";
+				if( isServer ) {
+					RakNet::SystemAddress sa = me->GetInternalID( RakNet::UNASSIGNED_SYSTEM_ADDRESS, a ); //Gets both local and non-local IPs
+					std::wcout << sc.toStdWString( sa.ToString() );
+					if( sa.IsLANAddress() ) {
+						std::wcout << L" which is a LAN address";
+					}
+				} else {
+					std::wcout << sc.toStdWString( me->GetLocalIP( a ) ); //Clients only need to know their local IP(s). Actually not even that really.
 				}
-
-				if( size not_eq toSend.size() ) {
-					std::wcerr << L"sendData() error: Not all data was sent" << std::endl;
-				}
+				std::wcout << std::endl;
 			}
+			
+			std::wcout << L"My GUID is " << sc.toStdWString( me->GetGuidFromSystemAddress( RakNet::UNASSIGNED_SYSTEM_ADDRESS ).ToString() ) << std::endl;
 		}
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::sendPlayerPos(): " << e.what() << std::endl;
-	}
-}
-
-void NetworkManager::sendGoal( Goal goal ) {
-	try {
-		std::vector< decltype( goal.getX() ) > toSend;
-		toSend.reserve( 6 + 2 + 4 );
-		toSend.push_back( 'S' );
-		toSend.push_back( 'T' );
-		toSend.push_back( 'A' );
-		toSend.push_back( 'R' );
-		toSend.push_back( 'T' );
-		toSend.push_back( 'G' );
-		toSend.push_back( goal.getX() );
-		toSend.push_back( goal.getY() );
-		toSend.push_back( 'E' );
-		toSend.push_back( 'N' );
-		toSend.push_back( 'D' );
-		toSend.push_back( 'G' );
-
-		std::wcout << L"Sending goal at " << goal.getX() << L"," << goal.getY() << std::endl;
-
-		for( decltype( fdmax ) j = 0; j <= fdmax; ++j ) {
-			//send to everyone! except the listener
-			if( FD_ISSET( j, &master ) and j not_eq listener ) {
-				size_t size = toSend.size();
-
-				if( not sendData( j, &toSend.at( 0 ), &size ) ) {
-					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
-				}
-
-				if( size not_eq toSend.size() ) {
-					std::wcerr << L"sendData() error: Not all data was sent" << std::endl;
-				}
-			}
-		}
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::sendGoal(): " << e.what() << std::endl;
-	}
-}
-
-void NetworkManager::sendPlayerStarts( std::vector<PlayerStart> starts ) {
-	try {
-		std::vector< uint_fast8_t > toSend;
-		toSend.reserve( 7 + starts.size() + 5 );
-		toSend.push_back( 'S' );
-		toSend.push_back( 'T' );
-		toSend.push_back( 'A' );
-		toSend.push_back( 'R' );
-		toSend.push_back( 'T' );
-		toSend.push_back( 'P' );
-		toSend.push_back( 'S' );
-		toSend.push_back( starts.size() );
-
-		for( decltype( starts.size() ) i = 0; i < starts.size(); ++i ) {
-			toSend.push_back( i );
-			toSend.push_back( starts.at( i ).getX() );
-			toSend.push_back( starts.at( i ).getY() );
-			std::wcout << L"Send player start #" << i << L" at " << starts.at( i ).getX() << L"," << starts.at( i ).getY() << std::endl;
-		}
-
-		toSend.push_back( 'E' );
-		toSend.push_back( 'N' );
-		toSend.push_back( 'D' );
-		toSend.push_back( 'P' );
-		toSend.push_back( 'S' );
-
-		for( decltype( fdmax ) j = 0; j <= fdmax; ++j ) {
-			//send to everyone! except the listener
-			if( FD_ISSET( j, &master ) and j not_eq listener ) {
-				size_t size = toSend.size();
-
-				if( not sendData( j, &toSend.at( 0 ), &size ) ) {
-					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
-				}
-
-				if( size not_eq toSend.size() ) {
-					std::wcerr << L"sendData() error: Not all data was sent" << std::endl;
-				}
-			}
-		}
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::sendPlayerStarts(): " << e.what() << std::endl;
-	}
-}
-
-void NetworkManager::sendU8( uint_fast8_t num, std::wstring desc ) {
-	try {
-		std::wcout << L"Sending uint_fast8_t " << desc << L": " << num << std::endl;
-
-		std::vector< decltype( num ) > toSend;
-		toSend.reserve( 5 + ( desc.size() * 2 ) + 1 + 3 );
-		toSend.push_back( 'S' );
-		toSend.push_back( 'T' );
-		toSend.push_back( 'A' );
-		toSend.push_back( 'R' );
-		toSend.push_back( 'T' );
-		boost::algorithm::to_upper( desc );
-
-		for( decltype( desc.size() ) i = 0; i < desc.size(); ++i ) {
-			toSend.push_back( desc[ i ] );
-		}
-
-		toSend.push_back( num );
-
-		toSend.push_back( 'E' );
-		toSend.push_back( 'N' );
-		toSend.push_back( 'D' );
-
-		for( decltype( desc.size() ) i = 0; i < desc.size(); ++i ) {
-			toSend.push_back( desc[ i ] );
-		}
-
-		for( decltype( fdmax ) j = 0; j <= fdmax; ++j ) {
-			//send to everyone! except the listener
-			if( FD_ISSET( j, &master ) and j not_eq listener ) {
-				size_t size = toSend.size();
-
-				if( not sendData( j, &toSend.at( 0 ), &size ) ) {
-					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
-				}
-
-				if( size not_eq toSend.size() ) {
-					std::wcerr << L"sendData() error: Not all data was sent" << std::endl;
-				}
-			}
-		}
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::sendU8(): " << e.what() << std::endl;
-	}
-}
-
-void NetworkManager::sendCollectables( std::vector< Collectable > stuff ) {
-	try {
-		std::vector< uint_fast8_t > toSend;
-		toSend.reserve( 6 + stuff.size() + 4 );
-		toSend.push_back( 'S' );
-		toSend.push_back( 'T' );
-		toSend.push_back( 'A' );
-		toSend.push_back( 'R' );
-		toSend.push_back( 'T' );
-		toSend.push_back( 'C' );
-
-		for( decltype( stuff.size() ) i = 0; i < stuff.size(); ++i ) {
-			toSend.push_back( i );
-			toSend.push_back( stuff.at( i ).getType() ); //Will this work? GetType() returns an enum, not a char or int.
-			toSend.push_back( stuff.at( i ).getX() );
-			toSend.push_back( stuff.at( i ).getY() );
-			std::wcout << L"Sending collectable #" << i << L" of type " << stuff.at( i ).getType() << L" at " << stuff.at( i ).getX() << L"," << stuff.at( i ).getY() << std::endl;
-		}
-
-		toSend.push_back( 'E' );
-		toSend.push_back( 'N' );
-		toSend.push_back( 'D' );
-		toSend.push_back( 'C' );
-
-		for( decltype( fdmax ) j = 0; j <= fdmax; ++j ) {
-			//send to everyone! except the listener
-			if( FD_ISSET( j, &master ) and j not_eq listener ) {
-				size_t size = toSend.size();
-
-				if( not sendData( j, &toSend[0 ], &size ) ) {
-					std::wcerr << L"sendData() " << strerror( errno ) << std::endl;
-				}
-
-				if( size not_eq toSend.size() ) {
-					std::wcerr << L"sendData() error: Not all data was sent" << std::endl;
-				}
-			}
-		}
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::sendCollectables(): " << e.what() << std::endl;
-	}
-}
-
-bool NetworkManager::receiveData() {
-	try {
-		int numBytesReceived = recv(listener, receivedData, 50, 0); //See comment in networkManager.h next to receivedData. Subtract 1 from that.
-		if (numBytesReceived < 1) {
-			//throw( std::wstring( "recv(): " + strerror(errno) ) );
-			//std::wcerr << "recv(): " << strerror(errno) << std::endl;
-			return false;
-		} else if (numBytesReceived == 0) {
-			return false;
-		} else {
-			return true;
-		}
-	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in NetworkManager::receiveData(): " << e.what() << std::endl;
-		return false;
 	}
 }

@@ -23,7 +23,7 @@
 #endif //HAVE_IOSTREAM
 #include "colors.h"
 #include <boost/filesystem.hpp>
-#include "GameManager.h"
+#include "MainGame.h"
 
 // cppcheck-suppress uninitMemberVar
 Player::Player() {
@@ -143,10 +143,10 @@ intmax_t Player::getScoreTotal() {
 void Player::giveItem( uint_fast8_t item, Collectable::type_t type ) {
 	heldItem = item;
 	heldItemType = type;
-	if( gm not_eq nullptr ) {
-		gm->getCollectable( heldItem )->setX( x );
-		gm->getCollectable( heldItem )->setY( y );
-		gm->getCollectable( heldItem )->owned = true;
+	if( mg not_eq nullptr ) {
+		mg->getCollectable( heldItem )->setX( x );
+		mg->getCollectable( heldItem )->setY( y );
+		mg->getCollectable( heldItem )->owned = true;
 	}
 }
 
@@ -200,8 +200,8 @@ void Player::moveX( int_fast8_t val ) {
 	try {
 		Object::moveX( val );
 		stepsTakenThisMaze += 1;
-		if( hasItem() and gm not_eq nullptr ) {
-			gm->getCollectable( heldItem )->moveX( val );
+		if( hasItem() and mg not_eq nullptr ) {
+			mg->getCollectable( heldItem )->moveX( val );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::moveX(): " << e.what() << std::endl;
@@ -212,8 +212,8 @@ void Player::moveY( int_fast8_t val ) {
 	try {
 		Object::moveY( val );
 		stepsTakenThisMaze += 1;
-		if( hasItem() and gm not_eq nullptr ) {
-			gm->getCollectable( heldItem )->moveY( val );
+		if( hasItem() and mg not_eq nullptr ) {
+			mg->getCollectable( heldItem )->moveY( val );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::moveY(): " << e.what() << std::endl;
@@ -222,7 +222,7 @@ void Player::moveY( int_fast8_t val ) {
 
 void Player::removeItem() {
 	if( hasItem() ) {
-		gm->eraseCollectable( heldItem );
+		mg->eraseCollectable( heldItem );
 		heldItem = UINT_FAST8_MAX;
 	}
 }
@@ -246,8 +246,8 @@ void Player::setColorBasedOnNum() {
 	Object::setColorBasedOnNum( playerNumber );
 }
 
-void Player::setGM( GameManager* newGM ) {
-	gm = newGM;
+void Player::setGM( MainGame* newGM ) {
+	mg = newGM;
 }
 
 void Player::setPlayerNumber( uint_fast8_t newNumber ) {
