@@ -422,7 +422,7 @@ void MainGame::drawLoadingScreen() {
 }
 
 /**
- * Randomly selects a logo and draws it on screen. Should NOT be called by drawAll().
+ * draws the logo (already loaded) on screen. Should NOT be called by drawAll().
  */
  void MainGame::drawLogo() {
 	try {
@@ -829,7 +829,8 @@ MainGame::MainGame() {
 		if( driverType == irr::video::EDT_SOFTWARE ) {
 			driver->setTextureCreationFlag( irr::video::ETCF_ALLOW_NON_POWER_2, false );
 		}
-
+		
+		setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
 		pickLogo();
 		driver->beginScene( false, false ); //These falses specify whether the back buffer and z buffer should be cleared. Since this is the first time drawing anything, there's no need to clear anything beforehand.
 		drawLogo(); //Why the fuck isn't this working consistently? Sometimes it draws, sometimes it only thinks it draws. Had to hack the drawLoadingScreen() function (which gets called several times, therefore is likely to work at least once).
@@ -1709,7 +1710,7 @@ void MainGame::loadProTips() {
 					
 					proTipsFile.close();
 					
-					setRandomSeed( time( nullptr ) ); //srand( time( nullptr ) ); // Flawfinder: ignore
+					setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows random_shuffle() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
 					random_shuffle( proTips.begin(), proTips.end() );
 				} else {
 					throw( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) );
@@ -1846,7 +1847,7 @@ void MainGame::makeMusicList() {
 		if( musicList.size() > 0 ) {
 			//Do we want music sorted or random?
 			//sort( musicList.begin(), musicList.end() );
-			setRandomSeed( time( nullptr ) ); //srand( time( nullptr ) ); // Flawfinder: ignore
+			setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows random_shuffle() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
 			random_shuffle( musicList.begin(), musicList.end() );
 			
 			currentMusic = musicList.back();
@@ -2345,7 +2346,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 }
 
 /**
- * Randomly selects a logo and draws it on screen. Should NOT be called by drawAll().
+ * Randomly selects a logo. Should NOT be called by drawAll().
  */
  void MainGame::pickLogo() {
 	try {
@@ -2412,7 +2413,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 			//Pick a random logo and load it
 			auto logoChosen = getRandomNumber() % logoList.size();
 			if( debug ) {
-				std::wcout << L"Logo chosen: #" << logoChosen;
+				std::wcout << L"Logo chosen: #" << logoChosen << L"/" << logoList.size();
 				std::wcout << L" " << logoList.at( logoChosen ).wstring() << std::endl;
 			}
 			irr::io::path logoFilePath = stringConverter.toIrrlichtStringW( logoList.at( logoChosen ).wstring() );
