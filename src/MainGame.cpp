@@ -2819,7 +2819,7 @@ void MainGame::readPrefs() {
 										}
 										
 										try {
-											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
+											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice ); //If your compiler gives you a warning about this unused variable, that's because we don't have networking working yet. Do not remove this variable.
 											//network.setPort( choiceAsInt ); //NOTE: Network stuff here.
 										} catch( boost::bad_lexical_cast &e ) {
 											std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
