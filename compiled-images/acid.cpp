@@ -10,7 +10,7 @@ static const struct {
   640, 480, 4,
   "If you see this comment in a .c or .h file, such files ARE NOT CONSIDERED SOURCE CODE. They are compiled (\"binary\") files. The preferred form for editing (\"source code\") is an image file, either PNG or GIMP-compatible XCF.\n"
   "\n"
-  "Copyright 2012-2014 James Dearing.\n"
+  "Copyright 2012-2015 James Dearing.\n"
   "This file is part of Cybrinth.\n"
   "Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n"
   "Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.\n"

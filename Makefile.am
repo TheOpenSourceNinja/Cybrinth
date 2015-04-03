@@ -1,4 +1,6 @@
-# Cybrinth created by James Dearing, copyright 2012-2014 and licensed under the GNU AGPL (see the file COPYING)
+# Cybrinth created by James Dearing, copyright 2012-2015 and licensed under the GNU AGPL (see the file COPYING)
+
+#Note: Consider making a new makefile based on examples from http://nuclear.mutantstargoat.com/articles/make/
 
 DEB_BUILD_HARDENING = 1 #If you have hardening wrapper scripts installed (Ubuntu/Debian package "hardening-wrapper"), this should make them harden the program
 

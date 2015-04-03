@@ -1,6 +1,6 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-# Cybrinth created by James Dearing, copyright 2012-2014 and licensed under the GNU AGPL (see the file COPYING).
+# Cybrinth created by James Dearing, copyright 2012-2015 and licensed under the GNU AGPL (see the file COPYING).
 
 AC_PREREQ([2.69])
 AC_INIT([Cybrinth], m4_esyscmd_s(date -uI), [dearingj@lifetime.oregonstate.edu], [cybrinth], [https://github.com/dearingj/Cybrinth])
