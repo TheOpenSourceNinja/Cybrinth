@@ -770,6 +770,7 @@ MainGame::MainGame() {
 			std::wcout << L"Read prefs, now setting controls" << std::endl;
 		}
 		
+		setMyPlayer( UINT8_MAX ); //Must call this before setControls() so that controls which affect player number "mine" will work. setMyPlayer() will be called again later to set the correct player number; the number used here doesn't matter.
 		setControls();
 		
 		if( fullscreen ) {
@@ -963,35 +964,44 @@ MainGame::MainGame() {
 
 		player.resize( numPlayers );
 		playerStart.resize( numPlayers );
-
-		if( numBots > numPlayers ) {
-			numBots = numPlayers;
-		}
-
-		if( numBots > 0 ) {
-			if ( debug ) {
-				std::wcout << L"Resizing numBots vector to " << numBots << std::endl;
-			}
-
-			bot.resize( numBots );
-
-			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
-				bot.at( i ).setPlayer( numPlayers - ( i + 1 ) ) ;
-				player.at( bot.at( i ).getPlayer() ).isHuman = false;
-				//bot.at( i ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm, botMovementDelay );
-				bot.at( i ).setup( this, botsKnowSolution, botAlgorithm, botMovementDelay );
-			}
-		}
-
+		playerAssigned.resize( numPlayers );
+		
 		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 			player.at( p ).setPlayerNumber( p );
 			player.at( p ).setColorBasedOnNum();
 			player.at( p ).loadTexture( device );
 			player.at( p ).setGM( this );
+			playerAssigned.at( p ) = false;
 		}
-
+		
+		if( isServer ) {
+			setMyPlayer( 0 );
+			numBots = 0; //Only the server can control the bots. Clients should see them as other players.
+		}
+		
+		if( numBots > numPlayers ) {
+			numBots = numPlayers;
+		}
+		
+		if( numBots > 0 ) {
+			if ( debug ) {
+				std::wcout << L"Resizing numBots vector to " << numBots << std::endl;
+			}
+			
+			bot.resize( numBots );
+			
+			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
+				decltype( bot.at( i ).getPlayer() ) p = numPlayers - ( i + 1 );
+				bot.at( i ).setPlayer( p ) ;
+				playerAssigned.at( p ) = true;
+				player.at( bot.at( i ).getPlayer() ).isHuman = false;
+				//bot.at( i ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm, botMovementDelay );
+				bot.at( i ).setup( this, botsKnowSolution, botAlgorithm, botMovementDelay );
+			}
+		}
+		
 		goal.loadTexture( device );
-
+		
 		if( enableController and device->activateJoysticks( controllerInfo ) and debug ) { //activateJoysticks fills controllerInfo with info about each controller
 			std::wcout << L"controller support is enabled and " << controllerInfo.size() << L" controller(s) are present." << std::endl;
 
@@ -1021,10 +1031,10 @@ MainGame::MainGame() {
 		} else if( debug ) {
 			std::wcout << L"controller support is not enabled." << std::endl;
 		}
-
+		
 		//Set up networking
 		network.setup( this, isServer ); //NOTE: Network stuff here.
-
+		
 		timer = device->getTimer();
 
 		if( debug ) {
@@ -1885,9 +1895,15 @@ void MainGame::makeMusicList() {
  * Arguments:
  * --- p: the player to move
  * --- direction: a signed integer representing the direction to move.
+ * --- fromServer: Indicates whether this was triggered as a result of the server sending a position update
  */
-void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
+void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromServer ) {
 	try {
+		
+		if( not fromServer and( isServer or ( not isServer and p == myPlayer ) ) ) {
+			network.sendPlayerPosXMove( p, direction );
+		}
+		
 		if( numPlayers > p and mazeManager.cols > 0 ) {
 			if( direction < 0 ) {
 				if( player.at( p ).hasItem() and player.at( p ).getItemType() == Collectable::ACID and player.at( p ).getX() > 0 and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() not_eq MazeCell::ACIDPROOF and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() not_eq MazeCell::LOCK  and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() not_eq MazeCell::NONE ) {
@@ -1931,9 +1947,15 @@ void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction ) {
  * Arguments:
  * --- p: the player to move
  * --- direction: a signed integer representing the direction to move.
+ * --- fromServer: Indicates whether this was triggered as a result of the server sending a position update
  */
-void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
+void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromServer ) {
 	try {
+		
+		if( not fromServer and ( isServer or ( not isServer and p == myPlayer ) ) ) {
+			network.sendPlayerPosYMove( p, direction );
+		}
+		
 		if( numPlayers > p and mazeManager.rows > 0 ) {
 			if( direction < 0 ) {
 				if( player.at( p ).hasItem() and player.at( p ).getItemType() == Collectable::ACID and player.at( p ).getY() > 0 and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() not_eq MazeCell::ACIDPROOF and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() not_eq MazeCell::LOCK and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() not_eq MazeCell::NONE ) {
@@ -1978,6 +2000,28 @@ void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction ) {
  */
 void MainGame::networkHasNewConnection() {
 	network.sendMaze( randomSeed );
+	
+	for( decltype( myPlayer ) p = 0; p < numPlayers; ++p ) {
+		std::wcout << p << " ";
+		if( !playerAssigned.at( p ) ) {
+			std::wcout << "false";
+		} else {
+			std::wcout << "true";
+		}
+		std::wcout << std::endl;
+	}
+	
+	for( decltype( myPlayer ) p = 0; p < numPlayers; ++p ) {
+		if( !playerAssigned.at( p ) ) {
+			network.tellNewClientItsPlayer( p );
+			playerAssigned.at( p ) = true;
+			break;
+		}
+	}
+	
+	for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
+		network.sendPlayerPos( p );
+	}
 }
 
 /**
@@ -2030,7 +2074,7 @@ void MainGame::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 		
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
-		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
+		for( decltype( numBots ) b = 0; not isServer and b < numBots; ++b ) {
 			bot.at( b ).setup( this, botsKnowSolution, botAlgorithm, botMovementDelay );
 		}
 		
@@ -2511,28 +2555,32 @@ void MainGame::processControls() {
 							ignoreKey = true;
 						}
 						
-						for( decltype( numBots ) b = 0; not ignoreKey and b < numBots; ++b ) { //Ignore controls that affect bots
+						for( decltype( numBots ) b = 0; not isServer and not ignoreKey and b < numBots; ++b ) { //Ignore controls that affect bots
 							if( controls.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
 								ignoreKey = true;
 							}
 						}
-
+						
+						if( not isServer and controls.at( k ).getPlayer() not_eq myPlayer ) {
+							ignoreKey = true;
+						}
+						
 						if( not ignoreKey ) {
 							switch( controls.at( k ).getAction() ) {
 								case ControlMapping::ACTION_PLAYER_UP: {
-									movePlayerOnY( controls.at( k ).getPlayer(), -1);
+									movePlayerOnY( controls.at( k ).getPlayer(), -1, false );
 									break;
 								}
 								case ControlMapping::ACTION_PLAYER_DOWN: {
-									movePlayerOnY( controls.at( k ).getPlayer(), 1);
+									movePlayerOnY( controls.at( k ).getPlayer(), 1, false );
 									break;
 								}
 								case ControlMapping::ACTION_PLAYER_RIGHT: {
-									movePlayerOnX( controls.at( k ).getPlayer(), 1);
+									movePlayerOnX( controls.at( k ).getPlayer(), 1, false );
 									break;
 								}
 								case ControlMapping::ACTION_PLAYER_LEFT: {
-									movePlayerOnX( controls.at( k ).getPlayer(), -1);
+									movePlayerOnX( controls.at( k ).getPlayer(), -1, false );
 									break;
 								}
 								default: {
@@ -3016,7 +3064,6 @@ void MainGame::readPrefs() {
 			wchar_t a;
 			std::wcin >> a;
 			isServer = ( a == L's' or a == L'S' );
-			myPlayer = 0;
 		}
 		
 		if( not prefsFileFound ) {
@@ -3615,9 +3662,15 @@ void MainGame::setControls() {
 										preference = preference.substr( 7 );
 										std::wstring playerNumStr = boost::algorithm::trim_copy( preference.substr( 0, preference.find( L' ' ) ) );
 										std::wstring actionStr = boost::algorithm::trim_copy( preference.substr( preference.find( L' ' ) ) );
-										decltype( numPlayers ) playerNum = boost::lexical_cast< unsigned short int >( playerNumStr ); //Boost doesn't like casting to uint_fast8_t
 										
-										if( playerNum < numPlayers ) {
+										decltype( numPlayers ) playerNum;
+										if( spellChecker.DamerauLevenshteinDistance( playerNumStr, L"mine" ) <= 1 ) {
+											playerNum = myPlayer;
+										} else {
+											playerNum = boost::lexical_cast< unsigned short int >( playerNumStr ); //Boost doesn't like casting to uint_fast8_t
+										}
+										
+										if( playerNum < numPlayers or playerNum == myPlayer ) {
 											std::vector< std::wstring > possibleActions = { L"up", L"u", L"down", L"d", L"left", L"l", L"right", L"r" };
 											actionStr = possibleActions.at( spellChecker.indexOfClosestString( actionStr, possibleActions) );
 											controls.back().setPlayer( playerNum );
@@ -3737,6 +3790,15 @@ void MainGame::setControls() {
 	
 	if( debug ) {
 		std::wcout << L"end of setControls()" << std::endl;
+	}
+	
+	//Eliminate duplicate controls
+	for( decltype( controls.size() ) a = 0; a < controls.size(); ++a ) {
+		for( decltype( controls.size() ) b = a + 1; b < controls.size(); ++b ) {
+			if( controls.at( a ) == controls.at( b ) ) {
+				controls.erase( controls.begin() + b );
+			}
+		}
 	}
 }
 
@@ -4110,6 +4172,37 @@ void MainGame::setLoadingPercentage( float newPercent ) {
  		loadingProgress = 0;
  	}
  }
+
+/**
+ * Sets which player this client controls
+ * Arguments: Yes please.
+ **/
+void MainGame::setMyPlayer( uint_fast8_t newPlayer ) {
+	try {
+		std::wcout << L"MainGame::setMyPlayer() called with argument " << newPlayer << std::endl;
+		for( uint_fast8_t c = 0; c < controls.size(); ++c ) {
+			if( controls.at( c ).getPlayer() == newPlayer ) { //Eliminate duplicate controls
+				controls.erase( controls.begin() + c );
+				--c;
+			}
+		}
+		
+		for( uint_fast8_t c = 0; c < controls.size(); ++c ) {
+			if( controls.at( c ).getPlayer() == myPlayer ) {
+				std::wcout << L"Setting control " << c << L" from player " << controls.at( c ).getPlayer() << " to " << newPlayer << std::endl;
+				controls.at( c ).setPlayer( newPlayer );
+			}
+		}
+		
+		myPlayer = newPlayer;
+		
+		if( playerAssigned.size() > 0 ) { //There's one point in the MainGame constructor where setMyPlayer() gets called before playerAssigned has been given a nonzero size.
+			playerAssigned.at( myPlayer ) = true;
+		}
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in MainGame::setMyPlayer(): " << e.what() << std::endl;
+	}
+}
 
 /**
  * Sets the random number generator's seed.

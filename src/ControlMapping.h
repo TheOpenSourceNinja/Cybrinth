@@ -56,6 +56,8 @@ class ControlMapping {
 		int_fast16_t getJoystickDeadZone();
 		void setJoystickDeadZonePercent( uint_fast8_t percent );
 		
+		bool operator==( ControlMapping other );
+		
 		bool activated; //To be set, unset, and accessed by MainGame. Indicates whether the relevant button has been pressed, or joystick moved, etc. Ensures smooth player movements.
 	protected:
 	private:

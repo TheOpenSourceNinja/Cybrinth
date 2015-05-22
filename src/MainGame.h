@@ -74,8 +74,8 @@ class MainGame : public irr::IEventReceiver {
 		std::minstd_rand::result_type getRandomSeed();
 		PlayerStart* getStart( uint_fast8_t ps );
 		
-		void movePlayerOnX( uint_fast8_t p, int_fast8_t direction );
-		void movePlayerOnY( uint_fast8_t p, int_fast8_t direction );
+		void movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromServer );
+		void movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromServer );
 		
 		void networkHasNewConnection(); //Called by NetworkManager
 		void newMaze();
@@ -93,6 +93,7 @@ class MainGame : public irr::IEventReceiver {
 		void setExitConfirmation( irr::gui::IGUIWindow* newWindow );
 		void setFileChooser( irr::gui::IGUIFileOpenDialog* newChooser );
 		void setLoadingPercentage( float newPercent );
+		void setMyPlayer( uint_fast8_t newPlayer );
 		void setRandomSeed( std::minstd_rand::result_type newSeed );
 		void showLoadMazeDialog();
 		void showSaveMazeDialog();
@@ -189,6 +190,7 @@ class MainGame : public irr::IEventReceiver {
 		uint_fast8_t joystickDeadZoneDefaultPercent;
 		
 		uint_fast8_t myPlayer; //If in client mode, control only one player
+		std::vector< bool > playerAssigned; //If in server mode, keep track of which player numbers have been assigned to players
 		
 		uint_fast8_t numKeysFound;
 		

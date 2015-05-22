@@ -674,13 +674,13 @@ void AI::move() {
 			
 			if( not solution.empty() ) {
 				if( solution.back().X > currentPosition.X ) {
-					mg->movePlayerOnX( controlsPlayer, 1 );
+					mg->movePlayerOnX( controlsPlayer, 1, false );
 				} else if( solution.back().X < currentPosition.X ) {
-					mg->movePlayerOnX( controlsPlayer, -1 );
+					mg->movePlayerOnX( controlsPlayer, -1, false );
 				} else if( solution.back().Y > currentPosition.Y ) {
-					mg->movePlayerOnY( controlsPlayer, 1 );
+					mg->movePlayerOnY( controlsPlayer, 1, false );
 				} else if( solution.back().Y < currentPosition.Y ) {
-					mg->movePlayerOnY( controlsPlayer, -1 );
+					mg->movePlayerOnY( controlsPlayer, -1, false );
 				}
 				solution.pop_back();
 			} else {
@@ -755,13 +755,13 @@ void AI::move() {
 							}
 						}
 						if( oldPosition.X < currentPosition.X ) {
-							mg->movePlayerOnX( controlsPlayer, -1 );
+							mg->movePlayerOnX( controlsPlayer, -1, false );
 						} else if( oldPosition.X > currentPosition.X ) {
-							mg->movePlayerOnX( controlsPlayer, 1 );
+							mg->movePlayerOnX( controlsPlayer, 1, false );
 						} else if( oldPosition.Y < currentPosition.Y ) {
-							mg->movePlayerOnY( controlsPlayer, -1 );
+							mg->movePlayerOnY( controlsPlayer, -1, false );
 						} else { //if( oldPosition.Y > currentPosition.Y ) {
-							mg->movePlayerOnY( controlsPlayer, 1 );
+							mg->movePlayerOnY( controlsPlayer, 1, false );
 						}
 					} else if ( not ( currentPosition.X == mg->getGoal()->getX() and currentPosition.Y == mg->getGoal()->getY() ) ) { //Go to next position
 						
@@ -777,7 +777,7 @@ void AI::move() {
 										pathsToLockedCells.at( o ).pop_back();
 									}
 								}
-								mg->movePlayerOnY( controlsPlayer, -1 );
+								mg->movePlayerOnY( controlsPlayer, -1, false );
 							} break;
 							case DOWN: {
 								irr::core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y + 1 );
@@ -789,7 +789,7 @@ void AI::move() {
 										pathsToLockedCells.at( o ).pop_back();
 									}
 								}
-								mg->movePlayerOnY( controlsPlayer, 1 );
+								mg->movePlayerOnY( controlsPlayer, 1, false );
 							} break;
 							case LEFT: {
 								irr::core::position2d< uint_fast8_t > position( currentPosition.X - 1, currentPosition.Y );
@@ -801,7 +801,7 @@ void AI::move() {
 										pathsToLockedCells.at( o ).pop_back();
 									}
 								}
-								mg->movePlayerOnX( controlsPlayer, -1 );
+								mg->movePlayerOnX( controlsPlayer, -1, false );
 							} break;
 							case RIGHT: {
 								irr::core::position2d< uint_fast8_t > position( currentPosition.X + 1, currentPosition.Y );
@@ -813,7 +813,7 @@ void AI::move() {
 										pathsToLockedCells.at( o ).pop_back();
 									}
 								}
-								mg->movePlayerOnX( controlsPlayer, 1 );
+								mg->movePlayerOnX( controlsPlayer, 1, false );
 							} break;
 						}
 					}
@@ -868,13 +868,13 @@ void AI::move() {
 						irr::core::position2d< uint_fast8_t > oldPosition = pathTaken.back();
 
 						if( oldPosition.X < currentPosition.X ) {
-							mg->movePlayerOnX( controlsPlayer, -1 );
+							mg->movePlayerOnX( controlsPlayer, -1, false );
 						} else if( oldPosition.X > currentPosition.X ) {
-							mg->movePlayerOnX( controlsPlayer, 1 );
+							mg->movePlayerOnX( controlsPlayer, 1, false );
 						} else if( oldPosition.Y < currentPosition.Y ) {
-							mg->movePlayerOnY( controlsPlayer, -1 );
+							mg->movePlayerOnY( controlsPlayer, -1, false );
 						} else { //if( oldPosition.Y > currentPosition.Y ) {
-							mg->movePlayerOnY( controlsPlayer, 1 );
+							mg->movePlayerOnY( controlsPlayer, 1, false );
 						}
 					} else if ( not possibleDirections.empty() and not ( currentPosition.X == mg->getGoal()->getX() and currentPosition.Y == mg->getGoal()->getY() ) ) { //Go to next position
 						uint_fast8_t choiceNum = 0;//rand() % possibleDirections.size();
@@ -883,22 +883,22 @@ void AI::move() {
 							case UP: {
 								irr::core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y - 1 );
 								pathTaken.push_back( position );
-								mg->movePlayerOnY( controlsPlayer, -1 );
+								mg->movePlayerOnY( controlsPlayer, -1, false );
 							} break;
 							case DOWN: {
 								irr::core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y + 1 );
 								pathTaken.push_back( position );
-								mg->movePlayerOnY( controlsPlayer, 1 );
+								mg->movePlayerOnY( controlsPlayer, 1, false );
 							} break;
 							case LEFT: {
 								irr::core::position2d< uint_fast8_t > position( currentPosition.X - 1, currentPosition.Y );
 								pathTaken.push_back( position );
-								mg->movePlayerOnX( controlsPlayer, -1 );
+								mg->movePlayerOnX( controlsPlayer, -1, false );
 							} break;
 							case RIGHT: {
 								irr::core::position2d< uint_fast8_t > position( currentPosition.X + 1, currentPosition.Y );
 								pathTaken.push_back( position );
-								mg->movePlayerOnX( controlsPlayer, 1 );
+								mg->movePlayerOnX( controlsPlayer, 1, false );
 							} break;
 						}
 					}
@@ -913,7 +913,7 @@ void AI::move() {
 					switch( hand ) {
 						case RIGHT: {
 							if( currentPosition.Y > 0 and noOriginalTopWall( currentPosition.X, currentPosition.Y ) ) {
-								mg->movePlayerOnY( controlsPlayer, -1 );
+								mg->movePlayerOnY( controlsPlayer, -1, false );
 								hand = DOWN;
 							} else {
 								hand = UP;
@@ -923,7 +923,7 @@ void AI::move() {
 						}
 						case UP: {
 							if( currentPosition.X > 0 and noOriginalLeftWall( currentPosition.X, currentPosition.Y ) ) {
-								mg->movePlayerOnX( controlsPlayer, -1 );
+								mg->movePlayerOnX( controlsPlayer, -1, false );
 								hand = RIGHT;
 							} else {
 								hand = LEFT;
@@ -933,7 +933,7 @@ void AI::move() {
 						}
 						case LEFT: {
 							if( currentPosition.Y < ( mg->getMazeManager()->rows - 1 ) and noOriginalTopWall( currentPosition.X, currentPosition.Y + 1 ) ) {
-								mg->movePlayerOnY( controlsPlayer, 1 );
+								mg->movePlayerOnY( controlsPlayer, 1, false );
 								hand = UP;
 							} else {
 								hand = DOWN;
@@ -943,7 +943,7 @@ void AI::move() {
 						}
 						case DOWN: {
 							if( currentPosition.X < ( mg->getMazeManager()->cols - 1 ) and noOriginalLeftWall( currentPosition.X + 1, currentPosition.Y ) ) {
-								mg->movePlayerOnX( controlsPlayer, 1 );
+								mg->movePlayerOnX( controlsPlayer, 1, false );
 								hand = LEFT;
 							} else {
 								hand = RIGHT;
@@ -963,7 +963,7 @@ void AI::move() {
 					switch( hand ) {
 						case RIGHT: {
 							if( currentPosition.Y > 0 and noOriginalTopWall( currentPosition.X, currentPosition.Y ) ) {
-								mg->movePlayerOnY( controlsPlayer, -1 );
+								mg->movePlayerOnY( controlsPlayer, -1, false );
 								hand = UP;
 							} else {
 								hand = DOWN;
@@ -973,7 +973,7 @@ void AI::move() {
 						}
 						case UP: {
 							if( currentPosition.X > 0 and noOriginalLeftWall( currentPosition.X, currentPosition.Y ) ) {
-								mg->movePlayerOnX( controlsPlayer, -1 );
+								mg->movePlayerOnX( controlsPlayer, -1, false );
 								hand = LEFT;
 							} else {
 								hand = RIGHT;
@@ -983,7 +983,7 @@ void AI::move() {
 						}
 						case LEFT: {
 							if( currentPosition.Y < (mg->getMazeManager()->rows - 1) and noOriginalTopWall( currentPosition.X, currentPosition.Y + 1 ) ) {
-								mg->movePlayerOnY( controlsPlayer, 1 );
+								mg->movePlayerOnY( controlsPlayer, 1, false );
 								hand = DOWN;
 							} else {
 								hand = UP;
@@ -993,7 +993,7 @@ void AI::move() {
 						}
 						case DOWN: {
 							if( currentPosition.X < (mg->getMazeManager()->cols - 1) and noOriginalLeftWall( currentPosition.X + 1, currentPosition.Y ) ) {
-								mg->movePlayerOnX( controlsPlayer, 1 );
+								mg->movePlayerOnX( controlsPlayer, 1, false );
 								hand = RIGHT;
 							} else {
 								hand = LEFT;

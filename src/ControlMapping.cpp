@@ -174,6 +174,10 @@ int_fast16_t ControlMapping::getJoystickDeadZone() {
 	return joystickDeadZone;
 }
 
+bool ControlMapping::operator==( ControlMapping other ) {
+	return ( key == other.getKey() and mouseEvent == other.mouseEvent and controllerButton == other.controllerButton and controllerNumber == other.controllerNumber and mouseWheelUp == other.mouseWheelUp and action == other.action and player == other.player and joystickDirection == other.joystickDirection and joystickAxis == other.joystickAxis and mouseDirection == other.mouseDirection and joystickDeadZone == other.joystickDeadZone );
+}
+
 ControlMapping::ControlMapping() {
 	try {
 		mouseWheelUp = false;

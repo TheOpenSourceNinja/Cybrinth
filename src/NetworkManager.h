@@ -41,13 +41,20 @@ class NetworkManager {
 		bool getConnectionStatus();
 		void processPackets();
 		void sendMaze( std::minstd_rand::result_type randomSeed );
+		void sendPlayerPos( uint_fast8_t playerNum );
+		void sendPlayerPosXMove( uint_fast8_t playerNum, int_fast8_t direction );
+		void sendPlayerPosYMove( uint_fast8_t playerNum, int_fast8_t direction );
 		void setup( MainGame* newGM, bool newIsServer );
+		
+		void tellNewClientItsPlayer( uint_fast8_t playerNum );
 	protected:
 	private:
 		
 		RakNet::SystemAddress clientID; //This is in both the client and server examples
 		std::string clientPort; //Clients need to know this
 		
+		uint8_t deSerializeU8( std::string input );
+		int8_t deSerializeS8( std::string input );
 		uint16_t deSerializeU16( std::string input );
 		int16_t deSerializeS16( std::string input );
 		uint32_t deSerializeU32( std::string input );
@@ -60,6 +67,8 @@ class NetworkManager {
 		RakNet::RakPeerInterface* me; //A representation of the local peer
 		std::string password; //No real security provided by passwords, especially since we're using an unencrypted connection. It just helps prevent other programs from accidentally connecting.
 		
+		std::string serializeU8( uint8_t input );
+		std::string serializeS8( int8_t input );
 		std::string serializeU16( uint16_t input );
 		std::string serializeS16( int16_t input );
 		std::string serializeU32( uint32_t input );
@@ -67,6 +76,8 @@ class NetworkManager {
 		
 		std::string serverIP; //Clients need to know this
 		std::string serverPort;
+		
+		enum command_t : uint8_t { NEWMAZE, TELEPORTPLAYER, MOVEPLAYERONX, MOVEPLAYERONY, TELLPLAYERNUMBER };
 };
 
 #endif // NETWORKMANAGER_H

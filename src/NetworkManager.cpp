@@ -59,143 +59,220 @@ bool NetworkManager::getConnectionStatus() {
 }
 
 void NetworkManager::processPackets() {
-	for( RakNet::Packet* p = me->Receive(); p != 0; me->DeallocatePacket( p ), p = me->Receive() ) {
-		if( p == 0 ) {
-			return;
-		}
-		
-		unsigned char messageID = p->data[ 0 ];
-		if( messageID == ID_TIMESTAMP ) {
-			auto skipLength = sizeof( RakNet::MessageID ) + sizeof( RakNet::Time );
-			if( p->length <= skipLength ) {
-				std::wcerr << L"Received packet of invalid length " << p->length << L" > " << skipLength << std::endl;
+	try {
+		for( RakNet::Packet* p = me->Receive(); p != 0; me->DeallocatePacket( p ), p = me->Receive() ) {
+			if( p == 0 ) {
+				return;
 			}
-			messageID = p->data[ skipLength ]; //The timestamp, which we ignore, is followed by another message ID.
-		}
-		
-		StringConverter sc;
-		
-		switch( messageID ) {
-			case ID_DISCONNECTION_NOTIFICATION: {
-				if( isServer ) {
-					if( mg != nullptr and mg->getDebugStatus() ) {
-						std::wcout << L"Client disconnected: " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
+			
+			unsigned char messageID = p->data[ 0 ];
+			if( messageID == ID_TIMESTAMP ) {
+				auto skipLength = sizeof( RakNet::MessageID ) + sizeof( RakNet::Time );
+				if( p->length <= skipLength ) {
+					std::wcerr << L"Received packet of invalid length " << p->length << L" > " << skipLength << std::endl;
+				}
+				messageID = p->data[ skipLength ]; //The timestamp, which we ignore, is followed by another message ID.
+			}
+			
+			StringConverter sc;
+			
+			switch( messageID ) {
+				case ID_DISCONNECTION_NOTIFICATION: {
+					if( isServer ) {
+						if( mg != nullptr and mg->getDebugStatus() ) {
+							std::wcout << L"Client disconnected: " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
+						}
+						isConnected = false;
+					} else {
+						isConnected = false;
 					}
-					isConnected = false;
-				} else {
-					isConnected = false;
+					break;
 				}
-				break;
-			}
-			case ID_ALREADY_CONNECTED: {
-				if( mg != nullptr and mg->getDebugStatus() ) {
-					std::wcout << L"Already connected." << std::endl;
+				case ID_ALREADY_CONNECTED: {
+					if( mg != nullptr and mg->getDebugStatus() ) {
+						std::wcout << L"Already connected." << std::endl;
+					}
+					break;
 				}
-				break;
-			}
-			case ID_NEW_INCOMING_CONNECTION: { //Only the server should receive incoming connections
-				if( mg not_eq nullptr ) {
-					if( mg->getDebugStatus() ) {
-						std::wcout << L"New incoming connection from " << sc.toStdWString( p->systemAddress.ToString() ) << L" with GUID " << sc.toStdWString( p->guid.ToString() ) << L". ";
-						clientID=p->systemAddress;
-						
-						std::wcout << L"Remote IDs: " << std::endl;
-						for ( decltype( MAXIMUM_NUMBER_OF_INTERNAL_IDS ) i = 0; i < MAXIMUM_NUMBER_OF_INTERNAL_IDS; ++i ) {
-							RakNet::SystemAddress internalID = me->GetInternalID( p->systemAddress, i );
-							if ( internalID not_eq RakNet::UNASSIGNED_SYSTEM_ADDRESS ) {
-								std::wcout << i << L". " << sc.toStdWString( internalID.ToString() ) << std::endl;
+				case ID_NEW_INCOMING_CONNECTION: { //Only the server should receive incoming connections
+					if( mg not_eq nullptr ) {
+						if( mg->getDebugStatus() ) {
+							std::wcout << L"New incoming connection from " << sc.toStdWString( p->systemAddress.ToString() ) << L" with GUID " << sc.toStdWString( p->guid.ToString() ) << L". ";
+							clientID=p->systemAddress;
+							
+							std::wcout << L"Remote IDs: " << std::endl;
+							for ( decltype( MAXIMUM_NUMBER_OF_INTERNAL_IDS ) i = 0; i < MAXIMUM_NUMBER_OF_INTERNAL_IDS; ++i ) {
+								RakNet::SystemAddress internalID = me->GetInternalID( p->systemAddress, i );
+								if ( internalID not_eq RakNet::UNASSIGNED_SYSTEM_ADDRESS ) {
+									std::wcout << i << L". " << sc.toStdWString( internalID.ToString() ) << std::endl;
+								}
 							}
 						}
+						
+						latestClientAddress = p->systemAddress;
+						isConnected = true;
+						mg->networkHasNewConnection();
 					}
-					
-					latestClientAddress = p->systemAddress;
+					break;
+				}
+				case ID_INCOMPATIBLE_PROTOCOL_VERSION: {
+					std::wcerr << L"Error: Incompatible RakNet protocol versions. Ensure that the server and client are using the same version of the software." << std::endl;
+					break;
+				}
+				case ID_REMOTE_DISCONNECTION_NOTIFICATION: { //Should only be received by clients
+					if( mg not_eq nullptr and mg->getDebugStatus() ) {
+						std::wcout << L"Another client has disconnected." << std::endl;
+					}
+					break;
+				}
+				case ID_REMOTE_CONNECTION_LOST: { //Should only be received by clients
+					if( mg not_eq nullptr and mg->getDebugStatus() ) {
+						std::wcout << L"Another client has lost its connection to the server." << std::endl;
+					}
+					break;
+				}
+				case ID_REMOTE_NEW_INCOMING_CONNECTION: { //Should only be received by clients
+					if( mg not_eq nullptr and mg->getDebugStatus() ) {
+						std::wcout << L"Another client has connected to the server." << std::endl;
+					}
+					break;
+				}
+				case ID_CONNECTION_BANNED: { //Should only be received by clients
+					std::wcerr << L"The server has banned this client. Cannot connect." << std::endl;
+					break;
+				}
+				case ID_CONNECTION_ATTEMPT_FAILED: { //Should only be received by clients
+					std::wcerr << L"Connection attempt failed." << std::endl;
+					break;
+				}
+				case ID_NO_FREE_INCOMING_CONNECTIONS: { //Should only be received by clients
+					std::wcerr << L"The server is full." << std::endl;
+					break;
+				}
+				case ID_INVALID_PASSWORD: { //Should only be received by clients
+					std::wcerr << L"Cannot connect to server: Invalid  program name and/or version." << std::endl;
+					break;
+				}
+				case ID_CONNECTED_PING: //Should only be received by the server
+				case ID_UNCONNECTED_PING: { //Should only be received by the server
+					if( mg not_eq nullptr and mg->getDebugStatus() ) {
+						std::wcout << L"Ping received from " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
+					}
+					break;
+				}
+				case ID_CONNECTION_LOST: {
+					std::wcerr << L"Connection to " << sc.toStdWString( p->systemAddress.ToString() ) << L" lost." << std::endl;
+					isConnected = false;
+					break;
+				}
+				case ID_CONNECTION_REQUEST_ACCEPTED: { //Should only be received by clients
+					if( mg not_eq nullptr and mg->getDebugStatus() ) {
+						std::wcout << L"Connection request accepted by " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
+					}
 					isConnected = true;
-					mg->networkHasNewConnection();
+					break;
 				}
-				break;
-			}
-			case ID_INCOMPATIBLE_PROTOCOL_VERSION: {
-				std::wcerr << L"Error: Incompatible RakNet protocol versions. Ensure that the server and client are using the same version of the software." << std::endl;
-				break;
-			}
-			case ID_REMOTE_DISCONNECTION_NOTIFICATION: { //Should only be received by clients
-				if( mg not_eq nullptr and mg->getDebugStatus() ) {
-					std::wcout << L"Another client has disconnected." << std::endl;
+				case ID_IP_RECENTLY_CONNECTED: {
+					std::wcerr << L"Connected too recently; can't connect again so soon." << std::endl;
+					break;
 				}
-				break;
-			}
-			case ID_REMOTE_CONNECTION_LOST: { //Should only be received by clients
-				if( mg not_eq nullptr and mg->getDebugStatus() ) {
-					std::wcout << L"Another client has lost its connection to the server." << std::endl;
-				}
-				break;
-			}
-			case ID_REMOTE_NEW_INCOMING_CONNECTION: { //Should only be received by clients
-				if( mg not_eq nullptr and mg->getDebugStatus() ) {
-					std::wcout << L"Another client has connected to the server." << std::endl;
-				}
-				break;
-			}
-			case ID_CONNECTION_BANNED: { //Should only be received by clients
-				std::wcerr << L"The server has banned this client. Cannot connect." << std::endl;
-				break;
-			}
-			case ID_CONNECTION_ATTEMPT_FAILED: { //Should only be received by clients
-				std::wcerr << L"Connection attempt failed." << std::endl;
-				break;
-			}
-			case ID_NO_FREE_INCOMING_CONNECTIONS: { //Should only be received by clients
-				std::wcerr << L"The server is full." << std::endl;
-				break;
-			}
-			case ID_INVALID_PASSWORD: { //Should only be received by clients
-				std::wcerr << L"Cannot connect to server: Invalid  program name and/or version." << std::endl;
-				break;
-			}
-			case ID_CONNECTED_PING: //Should only be received by the server
-			case ID_UNCONNECTED_PING: { //Should only be received by the server
-				if( mg not_eq nullptr and mg->getDebugStatus() ) {
-					std::wcout << L"Ping received from " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
-				}
-				break;
-			}
-			case ID_CONNECTION_LOST: {
-				std::wcerr << L"Connection to " << sc.toStdWString( p->systemAddress.ToString() ) << L" lost." << std::endl;
-				isConnected = false;
-				break;
-			}
-			case ID_CONNECTION_REQUEST_ACCEPTED: { //Should only be received by clients
-				if( mg not_eq nullptr and mg->getDebugStatus() ) {
-					std::wcout << L"Connection request accepted by " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
-				}
-				isConnected = true;
-				break;
-			}
-			case ID_IP_RECENTLY_CONNECTED: {
-				std::wcerr << L"Connected too recently; can't connect again so soon." << std::endl;
-				break;
-			}
-			default: { //Message received, the server should forward it to the clients. Clients should react accordingly.
-				std::wcout << L"Message received, the server should forward it to the clients. Clients should react accordingly." << std::endl;
-				if( isServer ) {
-					me->Send( ( const char * ) p->data, p->length, HIGH_PRIORITY, RELIABLE_ORDERED, SERVER_SEND_CHANNEL, p->systemAddress, true ); //p->systemAddress tells it who (not) to send to (the address we just received from), and the bool means broadcast to all other connected systems.
-				} else {
-					//std::wcout << sc.toStdWString( p->data ) << std::endl;
-					uint32_t newRandomSeed = deSerializeU32( std::string( ( char * ) p->data ) );
-					std::wcout << sc.toStdWString( newRandomSeed ) << std::endl;
-					mg->newMaze( newRandomSeed );
+				default: { //Message received, the server should forward it to the clients. Clients should react accordingly.
+					std::wcout << L"Message received, the server should forward it to the clients. Clients should react accordingly." << std::endl;
+					if( isServer ) {
+						me->Send( ( const char * ) p->data, p->length, HIGH_PRIORITY, RELIABLE_ORDERED, SERVER_SEND_CHANNEL, p->systemAddress, true ); //p->systemAddress tells it who not to send to (the address we just received from), and the bool means broadcast to all other connected systems.
+					}// else {
+						std::string data = std::string( ( char * ) p->data );
+						auto split = data.find( "|" );
+						command_t command;
+						{
+							std::string commandString = data.substr( 0, split );
+							data = data.substr( split + 1 );
+							command = (command_t) deSerializeU8( commandString );
+							
+							std::wcout << L"command: " << sc.toStdWString( command ) << L" (" << sc.toStdWString( command ) << L") " << L" data: " << sc.toStdWString( data ) << std::endl;
+						}
+						
+						switch( command ) {
+							case NEWMAZE: {
+								uint32_t newRandomSeed = deSerializeU32( data );
+								std::wcout << sc.toStdWString( newRandomSeed ) << std::endl;
+								mg->newMaze( newRandomSeed );
+								break;
+							} case TELEPORTPLAYER: {
+								auto split = data.find( "|" );
+								std::string playerString = data.substr( 0, split );
+								data = data.substr( split + 1 );
+								split = data.find( "|" );
+								std::string xString = data.substr( 0, split );
+								data = data.substr( split + 1 );
+								std::string yString = data;
+								
+								uint_fast8_t playerNum = deSerializeU8( playerString );
+								uint_fast8_t playerX = deSerializeU8( xString );
+								uint_fast8_t playerY = deSerializeU8( yString );
+								
+								std::wcout << L"Received player info: playerNum: " << playerNum << L" X: " << playerX << L" Y: " << playerY << std::endl;
+								
+								auto player = mg->getPlayer( playerNum );
+								player->setX( playerX );
+								player->setY( playerY );
+								break;
+							} case TELLPLAYERNUMBER: {
+								std::string playerString = data.substr( 0, split );
+								
+								uint_fast8_t playerNum = deSerializeU8( playerString );
+								
+								std::wcout << L"Received my player number: " << playerNum << std::endl;
+								mg->setMyPlayer( playerNum );
+								break;
+							} case MOVEPLAYERONX: {
+								auto split = data.find( "|" );
+								std::string playerString = data.substr( 0, split );
+								data = data.substr( split + 1 );
+								std::string dirString = data;
+								
+								uint_fast8_t playerNum = deSerializeU8( playerString );
+								int_fast8_t dir = deSerializeS8( dirString );
+								
+								std::wcout << L"Moving player on X: playerNum: " << playerNum << L" dir: " << dir << std::endl;
+								
+								mg->movePlayerOnX( playerNum, dir, true );
+								break;
+							} case MOVEPLAYERONY: {
+								auto split = data.find( "|" );
+								std::string playerString = data.substr( 0, split );
+								data = data.substr( split + 1 );
+								std::string dirString = data;
+								
+								uint_fast8_t playerNum = deSerializeU8( playerString );
+								int_fast8_t dir = deSerializeS8( dirString );
+								
+								std::wcout << L"Moving player on Y: playerNum: " << playerNum << L" dir: " << dir << std::endl;
+								
+								mg->movePlayerOnY( playerNum, dir, true );
+								break;
+							} default: {
+								std::wcerr << L"Client cannot interpret this command" << std::endl;
+								break;
+							}
+						}
+					//}
 				}
 			}
 		}
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in NetworkManager::processPackets(): " << e.what() << std::endl;
 	}
 }
 
 void NetworkManager::sendMaze( std::minstd_rand::result_type randomSeed ) {
-	std::wcout << L"NetworkManager::sendMaze() called" << std::endl;
-	std::wcout << L"me: " << ( me not_eq nullptr ) << L" isConnected: " << isConnected << std::endl;
 	if( me not_eq nullptr and isConnected ) {
 		std::wcout << L"Sending random seed " << randomSeed << std::endl;
-		auto data = serializeU32( randomSeed );
+		//auto data = serializeU32( randomSeed );
+		std::string data = "";
+		data.append( serializeU8( NEWMAZE ) );
+		data.append( "|" );
+		data.append( serializeU32( randomSeed ) );
 		char channel;
 		if( isServer ) {
 			channel = SERVER_SEND_CHANNEL;
@@ -208,6 +285,109 @@ void NetworkManager::sendMaze( std::minstd_rand::result_type randomSeed ) {
 	}
 }
 
+void NetworkManager::sendPlayerPos( uint_fast8_t playerNum ) {
+	std::wcout << L"Sending position of player " << playerNum << std::endl;
+	std::string data = "";
+	data.append( serializeU8( TELEPORTPLAYER ) );
+	data.append( "|" );
+	data.append( serializeU8( playerNum ) );
+	data.append( "|" );
+	auto player = mg->getPlayer( playerNum );
+	data.append( serializeU8( player->getX() ) );
+	data.append( "|" );
+	data.append( serializeU8( player->getY() ) );
+	
+	char channel;
+	if( isServer ) {
+		channel = SERVER_SEND_CHANNEL;
+	} else {
+		channel = CLIENT_SEND_CHANNEL;
+	}
+	
+	auto messageNumber = me->Send( data.c_str(), data.length(), MEDIUM_PRIORITY, RELIABLE_ORDERED, channel, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
+	if( messageNumber == 0 ) {
+		std::wcerr << L"Error in NetworkManager::sendPlayerPos(): Error in Send()" << std::endl;
+	}
+	
+	if( mg->getDebugStatus() ) {
+		std::wcout << L"Sent message number " << messageNumber << std::endl;
+	}
+}
+
+void NetworkManager::sendPlayerPosXMove( uint_fast8_t playerNum, int_fast8_t direction ) {
+	std::wcout << L"Sending position of player " << playerNum << std::endl;
+	std::string data = "";
+	data.append( serializeU8( MOVEPLAYERONX ) );
+	data.append( "|" );
+	data.append( serializeU8( playerNum ) );
+	data.append( "|" );
+	data.append( serializeS8( direction ) );
+	
+	char channel;
+	if( isServer ) {
+		channel = SERVER_SEND_CHANNEL;
+	} else {
+		channel = CLIENT_SEND_CHANNEL;
+	}
+	
+	auto messageNumber = me->Send( data.c_str(), data.length(), MEDIUM_PRIORITY, RELIABLE_ORDERED, channel, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
+	if( messageNumber == 0 ) {
+		std::wcerr << L"Error in NetworkManager::sendPlayerPosXMove(): Error in Send()" << std::endl;
+	}
+	
+	if( mg->getDebugStatus() ) {
+		std::wcout << L"Sent message number " << messageNumber << std::endl;
+	}
+}
+
+void NetworkManager::sendPlayerPosYMove( uint_fast8_t playerNum, int_fast8_t direction ) {
+	std::wcout << L"Sending position of player " << playerNum << std::endl;
+	std::string data = "";
+	data.append( serializeU8( MOVEPLAYERONY ) );
+	data.append( "|" );
+	data.append( serializeU8( playerNum ) );
+	data.append( "|" );
+	data.append( serializeS8( direction ) );
+	
+	char channel;
+	if( isServer ) {
+		channel = SERVER_SEND_CHANNEL;
+	} else {
+		channel = CLIENT_SEND_CHANNEL;
+	}
+	
+	auto messageNumber = me->Send( data.c_str(), data.length(), MEDIUM_PRIORITY, RELIABLE_ORDERED, channel, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
+	if( messageNumber == 0 ) {
+		std::wcerr << L"Error in NetworkManager::sendPlayerPosYMove(): Error in Send()" << std::endl;
+	}
+	
+	if( mg->getDebugStatus() ) {
+		std::wcout << L"Sent message number " << messageNumber << std::endl;
+	}
+}
+
+std::string NetworkManager::serializeS8( int8_t input ) {
+	StringConverter sc;
+	std::string result = sc.toStdString( input );
+	return result;
+}
+
+int8_t NetworkManager::deSerializeS8( std::string input ) {
+	int8_t result = std::stol( input );
+	return result;
+}
+
+std::string NetworkManager::serializeU8( uint8_t input ) {
+	StringConverter sc;
+	std::string result = sc.toStdString( input );
+	return result;
+}
+
+uint8_t NetworkManager::deSerializeU8( std::string input ) {
+	uint8_t result = std::stoul( input );
+	return result;
+}
+
 std::string NetworkManager::serializeS16( int16_t input ) {
 	std::stringstream ss;
 	ss << htons( input );
@@ -216,6 +396,7 @@ std::string NetworkManager::serializeS16( int16_t input ) {
 
 int16_t deSerializeS16( std::string input ) {
 	int16_t result = ntohs( std::stoi( input ) );
+	return result;
 }
 
 std::string NetworkManager::serializeU16( uint16_t input ) {
@@ -370,5 +551,29 @@ void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
 				break;
 			}
 		}
+	}
+}
+
+void NetworkManager::tellNewClientItsPlayer( uint_fast8_t playerNum ) {
+	std::wcout << L"Sending player number " << playerNum << std::endl;
+	std::string data = "";
+	data.append( serializeU8( TELLPLAYERNUMBER ) );
+	data.append( "|" );
+	data.append( serializeS8( playerNum ) );
+	
+	char channel;
+	if( isServer ) {
+		channel = SERVER_SEND_CHANNEL;
+	} else {
+		channel = CLIENT_SEND_CHANNEL;
+	}
+	
+	auto messageNumber = me->Send( data.c_str(), data.length(), MEDIUM_PRIORITY, RELIABLE_ORDERED, channel, latestClientAddress, false );
+	if( messageNumber == 0 ) {
+		std::wcerr << L"Error in NetworkManager::tellNewClientItsPlayer(): Error in Send()" << std::endl;
+	}
+	
+	if( mg->getDebugStatus() ) {
+		std::wcout << L"Sent message number " << messageNumber << std::endl;
 	}
 }

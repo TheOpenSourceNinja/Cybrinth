@@ -352,6 +352,16 @@ const wchar_t* StringConverter::toWCharArray( const char* input ) {
 	return wCharArray;
 }
 
+std::string StringConverter::toStdString( uint8_t input ) {
+	try {
+		return std::to_string( input );
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in StringConverter::toStdString" << e.what() << std::endl;
+		std::string w;
+		return w;
+	}
+}
+
 StringConverter::~StringConverter() {
 	try {
 		if( wCharArray not_eq nullptr ) {
