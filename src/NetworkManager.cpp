@@ -33,7 +33,7 @@ NetworkManager::NetworkManager() {
 	try {
 		password = PACKAGE_STRING;
 		serverPort = "61187";
-		serverIP = "::1";
+		serverIP = "127.0.0.1";
 		me = nullptr;
 		isConnected = false;
 		mg = nullptr;
@@ -81,6 +81,7 @@ void NetworkManager::processPackets() {
 					if( mg != nullptr and mg->getDebugStatus() ) {
 						std::wcout << L"Client disconnected: " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
 					}
+					isConnected = false;
 				} else {
 					isConnected = false;
 				}
@@ -108,6 +109,7 @@ void NetworkManager::processPackets() {
 					}
 					
 					latestClientAddress = p->systemAddress;
+					isConnected = true;
 					mg->networkHasNewConnection();
 				}
 				break;
@@ -159,12 +161,14 @@ void NetworkManager::processPackets() {
 			}
 			case ID_CONNECTION_LOST: {
 				std::wcerr << L"Connection to " << sc.toStdWString( p->systemAddress.ToString() ) << L" lost." << std::endl;
+				isConnected = false;
 				break;
 			}
 			case ID_CONNECTION_REQUEST_ACCEPTED: { //Should only be received by clients
 				if( mg not_eq nullptr and mg->getDebugStatus() ) {
 					std::wcout << L"Connection request accepted by " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
 				}
+				isConnected = true;
 				break;
 			}
 			case ID_IP_RECENTLY_CONNECTED: {
@@ -176,7 +180,10 @@ void NetworkManager::processPackets() {
 				if( isServer ) {
 					me->Send( ( const char * ) p->data, p->length, HIGH_PRIORITY, RELIABLE_ORDERED, SERVER_SEND_CHANNEL, p->systemAddress, true ); //p->systemAddress tells it who (not) to send to (the address we just received from), and the bool means broadcast to all other connected systems.
 				} else {
-					std::wcout << sc.toStdWString( p->data ) << std::endl;
+					//std::wcout << sc.toStdWString( p->data ) << std::endl;
+					uint32_t newRandomSeed = deSerializeU32( std::string( ( char * ) p->data ) );
+					std::wcout << sc.toStdWString( newRandomSeed ) << std::endl;
+					mg->newMaze( newRandomSeed );
 				}
 			}
 		}
@@ -184,7 +191,10 @@ void NetworkManager::processPackets() {
 }
 
 void NetworkManager::sendMaze( std::minstd_rand::result_type randomSeed ) {
+	std::wcout << L"NetworkManager::sendMaze() called" << std::endl;
+	std::wcout << L"me: " << ( me not_eq nullptr ) << L" isConnected: " << isConnected << std::endl;
 	if( me not_eq nullptr and isConnected ) {
+		std::wcout << L"Sending random seed " << randomSeed << std::endl;
 		auto data = serializeU32( randomSeed );
 		char channel;
 		if( isServer ) {
@@ -204,10 +214,19 @@ std::string NetworkManager::serializeS16( int16_t input ) {
 	return ss.str();
 }
 
+int16_t deSerializeS16( std::string input ) {
+	int16_t result = ntohs( std::stoi( input ) );
+}
+
 std::string NetworkManager::serializeU16( uint16_t input ) {
 	std::stringstream ss;
 	ss << htons( input );
 	return ss.str();
+}
+
+uint16_t NetworkManager::deSerializeU16( std::string input ) {
+	uint16_t result = ntohs( std::stoul( input ) );
+	return result;
 }
 
 std::string NetworkManager::serializeS32( int32_t input ) {
@@ -216,13 +235,24 @@ std::string NetworkManager::serializeS32( int32_t input ) {
 	return ss.str();
 }
 
+int32_t NetworkManager::deSerializeS32( std::string input ) {
+	int32_t result = ntohl( std::stoll( input ) );
+	return result;
+}
+
 std::string NetworkManager::serializeU32( uint32_t input ) {
 	std::stringstream ss;
 	ss << htonl( input );
 	return ss.str();
 }
 
+uint32_t NetworkManager::deSerializeU32( std::string input ) {
+	uint32_t result = ntohl( std::stoull( input ) );
+	return result;
+}
+
 void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
+	std::wcout << L"NetworkManager::setup() called" << std::endl;
 	isServer = newIsServer;
 	mg = newGM;
 	me = RakNet::RakPeerInterface::GetInstance(); //In RakNet's examples, this is called "client" in the client program and "server" in the server program.
@@ -235,32 +265,24 @@ void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
 	
 	unsigned char packetIdentifier;
 	
-	std::vector< RakNet::SocketDescriptor > socketDescriptors;
-	
-	if( isServer ) {
-		socketDescriptors.resize( UINT_FAST8_MAX ); //A server can have many clients
-	} else {
-		socketDescriptors.resize( 1 ); //A client only connects to one server
-	}
-	
-	for( decltype( socketDescriptors.size() ) sd = 0; sd < socketDescriptors.size(); ++sd ) {
-		if( isServer ) {
-			socketDescriptors.at( sd ).port = atoi( serverPort.c_str() );
-		} else {
-			socketDescriptors.at( sd ).port = atoi( clientPort.c_str() );
-		}
-		socketDescriptors.at( sd ).socketFamily = AF_INET6;
-	}
-	
 	uint_fast8_t maxConnections;
 	if( isServer ) {
-		maxConnections = UINT_FAST8_MAX;
+		maxConnections = UINT_FAST8_MAX; //A server can have many clients
 	} else {
-		maxConnections = 1;
+		maxConnections = 1; //A client only connects to one server
 	}
 	
-	bool b = me->Startup( maxConnections, socketDescriptors.data(), socketDescriptors.size() ) == RakNet::RAKNET_STARTED;
-	if( b ) {
+	RakNet::SocketDescriptor socketDescriptor;
+	socketDescriptor.socketFamily = AF_INET;
+	if( isServer ) {
+		socketDescriptor.port = atoi( serverPort.c_str() );
+	} else {
+		socketDescriptor.port = atoi( clientPort.c_str() );
+	}
+	
+	auto startupState = me->Startup( maxConnections, &socketDescriptor, 1 );
+	
+	if( startupState == RakNet::RAKNET_STARTED ) {
 		if( isServer ) {
 			me->SetMaximumIncomingConnections( maxConnections ); //Ensures that all the allowed connections ( set with Startup() above ) are for incoming use only.
 		}
@@ -290,6 +312,63 @@ void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
 			}
 			
 			std::wcout << L"My GUID is " << sc.toStdWString( me->GetGuidFromSystemAddress( RakNet::UNASSIGNED_SYSTEM_ADDRESS ).ToString() ) << std::endl;
+		}
+	} else {
+		std::wcerr << L"NetworkManager: Startup() call failed. startupState is " << startupState << L": ";
+		
+		switch( startupState ) {
+			case RakNet::RAKNET_STARTED: {
+				std::wcerr << L"This should be impossible: RakNet started successfully but you're still seeing this message." << std::endl;
+				break;
+			}
+			case RakNet::RAKNET_ALREADY_STARTED: {
+				std::wcerr << L"RakNet already started." << std::endl;
+				break;
+			}
+			case RakNet::INVALID_SOCKET_DESCRIPTORS: {
+				std::wcerr << L"Invalid socket descriptors." << std::endl;
+				break;
+			}
+			case RakNet::INVALID_MAX_CONNECTIONS: {
+				std::wcerr << L"Invalid max connections." << std::endl;
+				break;
+			}
+			case RakNet::SOCKET_FAMILY_NOT_SUPPORTED: {
+				std::wcerr << L"Socket family not supported." << std::endl;
+				break;
+			}
+			case RakNet::SOCKET_PORT_ALREADY_IN_USE: {
+				std::wcerr << L"Socket port " << serverPort.c_str() << " already in use." << std::endl;
+				break;
+			}
+			case RakNet::SOCKET_FAILED_TO_BIND: {
+				std::wcerr << L"Socket failed to find." << std::endl;
+				break;
+			}
+			case RakNet::SOCKET_FAILED_TEST_SEND: {
+				std::wcerr << L"Socket failed test send." << std::endl;
+				break;
+			}
+			case RakNet::PORT_CANNOT_BE_ZERO: {
+				std::wcerr << L"Port cannot be zero." << std::endl;
+				break;
+			}
+			case RakNet::FAILED_TO_CREATE_NETWORK_THREAD: {
+				std::wcerr << L"Failed to create network thread." << std::endl;
+				break;
+			}
+			case RakNet::COULD_NOT_GENERATE_GUID: {
+				std::wcerr << L"Could not generate GUID." << std::endl;
+				break;
+			}
+			case RakNet::STARTUP_OTHER_FAILURE: {
+				std::wcerr << L"Other failure (error code in select statement)" << std::endl;
+				break;
+			}
+			default: {
+				std::wcerr << L"Other failure (error code not in select statement)" << std::endl;
+				break;
+			}
 		}
 	}
 }

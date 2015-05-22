@@ -215,6 +215,798 @@
 		<Unit filename="src/PreprocessorCommands.h">
 			<Option target="cybrinth" />
 		</Unit>
+		<Unit filename="src/RakNet/AutopatcherPatchContext.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/AutopatcherRepositoryInterface.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Base64Encoder.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Base64Encoder.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/BitStream.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/BitStream.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CCRakNetSlidingWindow.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CCRakNetSlidingWindow.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CCRakNetUDT.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CCRakNetUDT.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CheckSum.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CheckSum.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CloudClient.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CloudClient.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CloudCommon.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CloudCommon.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CloudServer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CloudServer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CommandParserInterface.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/CommandParserInterface.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ConnectionGraph2.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ConnectionGraph2.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ConsoleServer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ConsoleServer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DR_SHA1.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DR_SHA1.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_BPlusTree.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_BinarySearchTree.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_BytePool.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_BytePool.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_ByteQueue.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_ByteQueue.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Hash.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Heap.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_HuffmanEncodingTree.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_HuffmanEncodingTree.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_HuffmanEncodingTreeFactory.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_HuffmanEncodingTreeNode.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_LinkedList.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_List.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Map.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_MemoryPool.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Multilist.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_OrderedChannelHeap.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_OrderedList.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Queue.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_QueueLinkedList.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_RangeList.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Table.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Table.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_ThreadsafeAllocatingQueue.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Tree.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_WeightedGraph.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DataCompressor.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DataCompressor.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DirectoryDeltaTransfer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DirectoryDeltaTransfer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DynDNS.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/DynDNS.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/EmailSender.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/EmailSender.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/EmptyHeader.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/EpochTimeToString.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/EpochTimeToString.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Export.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/FileList.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/FileList.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/FileListNodeContext.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/FileListTransfer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/FileListTransfer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/FileListTransferCBInterface.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/FileOperations.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/FileOperations.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/FormatString.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/FormatString.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/FullyConnectedMesh2.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/FullyConnectedMesh2.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/GetTime.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/GetTime.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Getche.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Getche.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Gets.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Gets.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/GridSectorizer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/GridSectorizer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/HTTPConnection.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/HTTPConnection.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/HTTPConnection2.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/HTTPConnection2.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/IncrementalReadInterface.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/IncrementalReadInterface.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/InternalPacket.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Itoa.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Itoa.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Kbhit.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/LinuxStrings.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/LinuxStrings.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/LocklessTypes.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/LocklessTypes.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/LogCommandParser.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/LogCommandParser.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/MTUSize.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/MessageFilter.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/MessageFilter.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/MessageIdentifiers.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NatPunchthroughClient.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NatPunchthroughClient.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NatPunchthroughServer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NatPunchthroughServer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NatTypeDetectionClient.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NatTypeDetectionClient.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NatTypeDetectionCommon.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NatTypeDetectionCommon.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NatTypeDetectionServer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NatTypeDetectionServer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NativeFeatureIncludes.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NativeFeatureIncludesOverrides.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NativeTypes.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NetworkIDManager.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NetworkIDManager.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NetworkIDObject.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/NetworkIDObject.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PS3Includes.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PS4Includes.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PS4Includes.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketConsoleLogger.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketConsoleLogger.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketFileLogger.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketFileLogger.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketLogger.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketLogger.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketOutputWindowLogger.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketOutputWindowLogger.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketPool.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketPriority.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketizedTCP.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketizedTCP.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PluginInterface2.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/PluginInterface2.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RPC4Plugin.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RPC4Plugin.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Rackspace.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Rackspace.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakAlloca.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakAssert.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakMemoryOverride.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakMemoryOverride.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetCommandParser.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetCommandParser.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetDefines.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetDefinesOverrides.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSmartPtr.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_360_720.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_Berkley.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_Berkley_NativeClient.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_NativeClient.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_PS3_PS4.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_PS4.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_Vita.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_WindowsStore8.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_Windows_Linux.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_Windows_Linux_360.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetStatistics.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetStatistics.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetTime.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetTransport2.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetTransport2.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetTypes.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetTypes.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetVersion.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakPeer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakPeer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakPeerInterface.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakSleep.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakSleep.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakString.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakString.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakThread.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakThread.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakWString.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RakWString.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Rand.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Rand.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RandSync.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RandSync.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ReadyEvent.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ReadyEvent.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RefCountedObj.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RelayPlugin.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/RelayPlugin.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ReliabilityLayer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ReliabilityLayer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ReplicaEnums.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ReplicaManager3.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ReplicaManager3.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Router2.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/Router2.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SecureHandshake.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SecureHandshake.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SendToThread.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SendToThread.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SignaledEvent.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SignaledEvent.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SimpleMutex.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SimpleMutex.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SimpleTCPServer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SingleProducerConsumer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SocketDefines.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SocketIncludes.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SocketLayer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SocketLayer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/StatisticsHistory.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/StatisticsHistory.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/StringCompressor.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/StringCompressor.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/StringTable.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/StringTable.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SuperFastHash.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/SuperFastHash.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TCPInterface.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TCPInterface.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TableSerializer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TableSerializer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TeamBalancer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TeamBalancer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TeamManager.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TeamManager.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TelnetTransport.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TelnetTransport.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ThreadPool.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ThreadsafePacketLogger.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/ThreadsafePacketLogger.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TransportInterface.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TwoWayAuthentication.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/TwoWayAuthentication.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPForwarder.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPForwarder.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyClient.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyClient.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyCommon.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyCoordinator.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyCoordinator.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyServer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyServer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/VariableDeltaSerializer.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/VariableDeltaSerializer.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/VariableListDeltaTracker.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/VariableListDeltaTracker.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/VariadicSQLParser.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/VariadicSQLParser.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/VitaIncludes.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/VitaIncludes.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/WSAStartupSingleton.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/WSAStartupSingleton.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/WindowsIncludes.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/XBox360Includes.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/_FindFirst.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/_FindFirst.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/gettimeofday.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/RakNet/gettimeofday.h">
+			<Option target="cybrinth" />
+		</Unit>
 		<Unit filename="src/SpellChecker.cpp">
 			<Option target="cybrinth" />
 		</Unit>
