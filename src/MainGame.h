@@ -56,6 +56,8 @@ class MainGame : public irr::IEventReceiver {
 		MainGame();
 		virtual ~MainGame();
 		
+		void allPlayersReady( bool tf );
+		
 		void drawAll(); //Public because it's called by MazeManager. Otherwise the loading screen wouldn't get drawn during maze generation.
 		
 		void eraseCollectable( uint_fast8_t item );
@@ -182,6 +184,7 @@ class MainGame : public irr::IEventReceiver {
 		
 		bool vsync;
 		
+		bool waitingForOtherPlayers;
 		bool won;
 		
 		//unsigned 8-bit integers----------------------------------

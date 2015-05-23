@@ -22,6 +22,7 @@
 #include "RakNet/MessageIdentifiers.h"
 #include "RakNet/RakNetStatistics.h"
 #include "StringConverter.h"
+#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <vector>
 
@@ -32,7 +33,7 @@
 NetworkManager::NetworkManager() {
 	try {
 		password = PACKAGE_STRING;
-		serverPort = "61187";
+		setPort( "0" );
 		serverIP = "127.0.0.1";
 		me = nullptr;
 		isConnected = false;
@@ -82,8 +83,19 @@ void NetworkManager::processPackets() {
 						if( mg != nullptr and mg->getDebugStatus() ) {
 							std::wcout << L"Client disconnected: " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
 						}
-						isConnected = false;
+						
+						for( uint_fast8_t c = 0; c < clients.size(); ++c ) {
+							if( clients.at( c ).guid == p->guid ) {
+								clients.erase( clients.begin() + c );
+								break;
+							}
+						}
+						
+						isConnected = ( clients.empty() );
 					} else {
+						if( mg != nullptr and mg->getDebugStatus() ) {
+							std::wcout << L"Server disconnected: " << sc.toStdWString( p->systemAddress.ToString() ) << std::endl;
+						}
 						isConnected = false;
 					}
 					break;
@@ -110,6 +122,13 @@ void NetworkManager::processPackets() {
 						}
 						
 						latestClientAddress = p->systemAddress;
+						
+						{
+							ClientInfo newClient;
+							newClient.guid = p->guid;
+							clients.push_back( newClient );
+						}
+						
 						isConnected = true;
 						mg->networkHasNewConnection();
 					}
@@ -180,83 +199,108 @@ void NetworkManager::processPackets() {
 					std::wcout << L"Message received, the server should forward it to the clients. Clients should react accordingly." << std::endl;
 					if( isServer ) {
 						me->Send( ( const char * ) p->data, p->length, HIGH_PRIORITY, RELIABLE_ORDERED, SERVER_SEND_CHANNEL, p->systemAddress, true ); //p->systemAddress tells it who not to send to (the address we just received from), and the bool means broadcast to all other connected systems.
-					}// else {
-						std::string data = std::string( ( char * ) p->data );
-						auto split = data.find( "|" );
-						command_t command;
-						{
-							std::string commandString = data.substr( 0, split );
-							data = data.substr( split + 1 );
-							command = (command_t) deSerializeU8( commandString );
-							
-							std::wcout << L"command: " << sc.toStdWString( command ) << L" (" << sc.toStdWString( command ) << L") " << L" data: " << sc.toStdWString( data ) << std::endl;
-						}
+					}
+					
+					std::string data = std::string( ( char * ) p->data );
+					auto split = data.find( "|" );
+					command_t command;
+					{
+						std::string commandString = data.substr( 0, split );
+						data = data.substr( split + 1 );
+						command = (command_t) deSerializeU8( commandString );
 						
-						switch( command ) {
-							case NEWMAZE: {
-								uint32_t newRandomSeed = deSerializeU32( data );
-								std::wcout << sc.toStdWString( newRandomSeed ) << std::endl;
-								mg->newMaze( newRandomSeed );
-								break;
-							} case TELEPORTPLAYER: {
-								auto split = data.find( "|" );
-								std::string playerString = data.substr( 0, split );
-								data = data.substr( split + 1 );
-								split = data.find( "|" );
-								std::string xString = data.substr( 0, split );
-								data = data.substr( split + 1 );
-								std::string yString = data;
+						std::wcout << L"command: " << sc.toStdWString( command ) << L" (" << sc.toStdWString( command ) << L") " << L" data: " << sc.toStdWString( data ) << std::endl;
+					}
+					
+					switch( command ) {
+						case NEWMAZE: {
+							uint32_t newRandomSeed = deSerializeU32( data );
+							std::wcout << sc.toStdWString( newRandomSeed ) << std::endl;
+							mg->newMaze( newRandomSeed );
+							break;
+						} case TELEPORTPLAYER: {
+							auto split = data.find( "|" );
+							std::string playerString = data.substr( 0, split );
+							data = data.substr( split + 1 );
+							split = data.find( "|" );
+							std::string xString = data.substr( 0, split );
+							data = data.substr( split + 1 );
+							std::string yString = data;
+							
+							uint_fast8_t playerNum = deSerializeU8( playerString );
+							uint_fast8_t playerX = deSerializeU8( xString );
+							uint_fast8_t playerY = deSerializeU8( yString );
+							
+							std::wcout << L"Received player info: playerNum: " << playerNum << L" X: " << playerX << L" Y: " << playerY << std::endl;
+							
+							auto player = mg->getPlayer( playerNum );
+							player->setX( playerX );
+							player->setY( playerY );
+							break;
+						} case TELLPLAYERNUMBER: {
+							std::string playerString = data.substr( 0, split );
+							
+							uint_fast8_t playerNum = deSerializeU8( playerString );
+							
+							std::wcout << L"Received my player number: " << playerNum << std::endl;
+							mg->setMyPlayer( playerNum );
+							break;
+						} case MOVEPLAYERONX: {
+							auto split = data.find( "|" );
+							std::string playerString = data.substr( 0, split );
+							data = data.substr( split + 1 );
+							std::string dirString = data;
+							
+							uint_fast8_t playerNum = deSerializeU8( playerString );
+							int_fast8_t dir = deSerializeS8( dirString );
+							
+							std::wcout << L"Moving player on X: playerNum: " << playerNum << L" dir: " << dir << std::endl;
+							
+							mg->movePlayerOnX( playerNum, dir, true );
+							break;
+						} case MOVEPLAYERONY: {
+							auto split = data.find( "|" );
+							std::string playerString = data.substr( 0, split );
+							data = data.substr( split + 1 );
+							std::string dirString = data;
+							
+							uint_fast8_t playerNum = deSerializeU8( playerString );
+							int_fast8_t dir = deSerializeS8( dirString );
+							
+							std::wcout << L"Moving player on Y: playerNum: " << playerNum << L" dir: " << dir << std::endl;
+							
+							mg->movePlayerOnY( playerNum, dir, true );
+							break;
+						} case READYTOPLAY: {
+							if( isServer ) {
+								for( uint_fast8_t c = 0; c < clients.size(); ++c ) {
+									if( clients.at( c ).guid == p->guid ) {
+										clients.at( c ).isReadyToPlay = true;
+										break;
+									}
+								}
 								
-								uint_fast8_t playerNum = deSerializeU8( playerString );
-								uint_fast8_t playerX = deSerializeU8( xString );
-								uint_fast8_t playerY = deSerializeU8( yString );
+								bool ready = true;
+								for( uint_fast8_t c = 0; c < clients.size(); ++c ) {
+									if( not clients.at( c ).isReadyToPlay ) {
+										ready = false;
+										break;
+									}
+								}
 								
-								std::wcout << L"Received player info: playerNum: " << playerNum << L" X: " << playerX << L" Y: " << playerY << std::endl;
-								
-								auto player = mg->getPlayer( playerNum );
-								player->setX( playerX );
-								player->setY( playerY );
-								break;
-							} case TELLPLAYERNUMBER: {
-								std::string playerString = data.substr( 0, split );
-								
-								uint_fast8_t playerNum = deSerializeU8( playerString );
-								
-								std::wcout << L"Received my player number: " << playerNum << std::endl;
-								mg->setMyPlayer( playerNum );
-								break;
-							} case MOVEPLAYERONX: {
-								auto split = data.find( "|" );
-								std::string playerString = data.substr( 0, split );
-								data = data.substr( split + 1 );
-								std::string dirString = data;
-								
-								uint_fast8_t playerNum = deSerializeU8( playerString );
-								int_fast8_t dir = deSerializeS8( dirString );
-								
-								std::wcout << L"Moving player on X: playerNum: " << playerNum << L" dir: " << dir << std::endl;
-								
-								mg->movePlayerOnX( playerNum, dir, true );
-								break;
-							} case MOVEPLAYERONY: {
-								auto split = data.find( "|" );
-								std::string playerString = data.substr( 0, split );
-								data = data.substr( split + 1 );
-								std::string dirString = data;
-								
-								uint_fast8_t playerNum = deSerializeU8( playerString );
-								int_fast8_t dir = deSerializeS8( dirString );
-								
-								std::wcout << L"Moving player on Y: playerNum: " << playerNum << L" dir: " << dir << std::endl;
-								
-								mg->movePlayerOnY( playerNum, dir, true );
-								break;
-							} default: {
-								std::wcerr << L"Client cannot interpret this command" << std::endl;
-								break;
+								if( ready ) {
+									std::string notice = serializeU8( READYTOPLAY );
+									me->Send( notice.c_str(), notice.length(), HIGH_PRIORITY, RELIABLE_ORDERED, SERVER_SEND_CHANNEL, p->systemAddress, true );
+									mg->allPlayersReady( true );
+								}
+							} else {
+								mg->allPlayersReady( true );
 							}
+						} default: {
+							std::wcerr << L"Client cannot interpret this command" << std::endl;
+							break;
 						}
-					//}
+					}
 				}
 			}
 		}
@@ -432,6 +476,15 @@ uint32_t NetworkManager::deSerializeU32( std::string input ) {
 	return result;
 }
 
+void NetworkManager::setPort( std::string newPort ) {
+	try {
+		boost::lexical_cast< uint16_t >( newPort ); //This is just to test whether the string represents a valid port number
+		serverPort = newPort;
+	} catch( boost::bad_lexical_cast e ) {
+		std::wcerr << L"Error in NetworkManager::setPort(): not a valid port number." << std::endl;
+	}
+}
+
 void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
 	std::wcout << L"NetworkManager::setup() called" << std::endl;
 	isServer = newIsServer;
@@ -448,7 +501,7 @@ void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
 	
 	uint_fast8_t maxConnections;
 	if( isServer ) {
-		maxConnections = UINT_FAST8_MAX; //A server can have many clients
+		maxConnections = UINT8_MAX; //A server can have many clients
 	} else {
 		maxConnections = 1; //A client only connects to one server
 	}
@@ -457,8 +510,6 @@ void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
 	socketDescriptor.socketFamily = AF_INET;
 	if( isServer ) {
 		socketDescriptor.port = atoi( serverPort.c_str() );
-	} else {
-		socketDescriptor.port = atoi( clientPort.c_str() );
 	}
 	
 	auto startupState = me->Startup( maxConnections, &socketDescriptor, 1 );

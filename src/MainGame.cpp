@@ -88,6 +88,15 @@ bool MainGame::allHumansAtGoal() {
 }
 
 /**
+ * If not all players are ready, displays a modal dialog saying so.
+ * If all players are ready, removes the dialog.
+ * @param bool tf: indicates whether all players are ready.
+ */
+void MainGame::allPlayersReady( bool tf ) {
+	waitingForOtherPlayers = tf;
+}
+
+/**
  * Draws everything onto the screen. Calls other draw functions, including those of objects.
  */
 void MainGame::drawAll() {
@@ -140,8 +149,14 @@ void MainGame::drawAll() {
 			goal.draw( device, cellWidth, cellHeight );
 
 			mazeManager.draw( driver, cellWidth, cellHeight );
-
-			if( showingMenu ) {
+			
+			if( waitingForOtherPlayers ) {
+				//TODO: Display a notification that we're waiting for other players to finish loading
+				irr::core::stringw waitingNotice( L"Waiting for other players to finish loading" );
+				irr::core::dimension2d< irr::u32 > tempDimensions = textFont->getDimension( waitingNotice.c_str() );
+				irr::core::rect< irr::s32 > tempRectangle( 0, 0, tempDimensions.Width + 0, tempDimensions.Height + 0 );
+				textFont->draw( waitingNotice, tempRectangle, WHITE, true, true );
+			} else if( showingMenu ) {
 				menuManager.draw( driver );
 			}
 
@@ -752,6 +767,7 @@ MainGame::MainGame() {
 		currentDirectory = boost::filesystem::current_path();
 		haveShownLogo = false;
 		showingMenu = true;
+		waitingForOtherPlayers = false;
 		donePlaying = false;
 		lastTimeControlsProcessed = 0;
 		controlProcessDelay = 100;
@@ -976,6 +992,7 @@ MainGame::MainGame() {
 		
 		if( isServer ) {
 			setMyPlayer( 0 );
+		} else {
 			numBots = 0; //Only the server can control the bots. Clients should see them as other players.
 		}
 		
@@ -2067,6 +2084,12 @@ void MainGame::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 			std::wcout << L"newMaze() called with an argument" << std::endl;
 		}
 		
+		allPlayersReady( false );
+		
+		if( isServer ) {
+			network.sendMaze( newRandomSeed );
+		}
+		
 		resetThings();
 		setRandomSeed( newRandomSeed );
 		
@@ -2074,7 +2097,7 @@ void MainGame::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 		
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
-		for( decltype( numBots ) b = 0; not isServer and b < numBots; ++b ) {
+		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
 			bot.at( b ).setup( this, botsKnowSolution, botAlgorithm, botMovementDelay );
 		}
 		
@@ -2551,7 +2574,7 @@ void MainGame::processControls() {
 					default: { //Handle player controls
 						bool ignoreKey = false;
 						
-						if( showingMenu ) { //Don't move the players if the game is paused.
+						if( showingMenu or waitingForOtherPlayers ) { //Don't move the players if the game is paused.
 							ignoreKey = true;
 						}
 						
@@ -2867,8 +2890,8 @@ void MainGame::readPrefs() {
 										}
 										
 										try {
-											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice ); //If your compiler gives you a warning about this unused variable, that's because we don't have networking working yet. Do not remove this variable.
-											//network.setPort( choiceAsInt ); //NOTE: Network stuff here.
+											StringConverter sc;
+											network.setPort( sc.toStdString( choice ) ); //NOTE: Network stuff here.
 										} catch( boost::bad_lexical_cast &e ) {
 											std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 										}
@@ -3252,7 +3275,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 				
 				if( ( not showingLoadingScreen and device->isWindowActive() ) or debug ) {
 					//It's the bots' turn to move now.
-					if( not ( showingMenu or showingLoadingScreen ) and numBots > 0 ) {
+					if( not ( showingMenu or showingLoadingScreen or waitingForOtherPlayers ) and numBots > 0 ) {
 						for( decltype( numBots ) i = 0; i < numBots; ++i ) {
 							if( not bot.at( i ).atGoal() and ( allHumansAtGoal() or bot.at( i ).doneWaiting() ) ) {
 								bot.at( i ).move();
@@ -3812,12 +3835,10 @@ void MainGame::setupBackground() {
 		}
 		
 		uint_fast8_t availableBackgrounds = 4; //The number of different background animations to choose from
-		
+		backgroundChosen = getRandomNumber() % availableBackgrounds;
 		if( debug ) {
-			backgroundChosen = availableBackgrounds - 1; //If we're debugging, we may be testing the last background added.
+			//backgroundChosen = availableBackgrounds - 1; //If we're debugging, we may be testing the last background added.
 			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;
-		} else {
-			backgroundChosen = getRandomNumber() % availableBackgrounds;
 		}
 		
 		backgroundTexture = nullptr;
@@ -4137,7 +4158,8 @@ void MainGame::setupBackground() {
 			}
 
 			default: {
-				std::wstring error = L"Background chosen is not in switch statement.";
+				StringConverter sc;
+				std::wstring error = L"Background chosen (#" + sc.toStdWString( backgroundChosen ) + L") is not in switch statement.";
 				throw error;
 			}
 		}
