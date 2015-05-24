@@ -335,6 +335,9 @@ void MainGame::drawBackground() {
 			case 0:
 			case 1: {
 				backgroundSceneManager->drawAll();
+				irr::core::rect< irr::s32 > pos( viewportSize.Width, 0, windowSize.Width, windowSize.Height );
+				irr::core::rect< irr::s32 > clipRect = irr::core::rect< irr::s32 >( 0, 0, windowSize.Width, windowSize.Height );
+				driver->draw2DRectangle( BLACK, pos, &clipRect );
 				break;
 			}
 			case 2: {
@@ -351,6 +354,9 @@ void MainGame::drawBackground() {
 				backgroundSceneManager->drawAll();
 				driver->setRenderTarget( irr::video::ERT_FRAME_BUFFER, false, false, backgroundColor );
 				driver->draw2DImage( backgroundTexture, irr::core::position2d< irr::s32 >( 0, 0 ) );
+				irr::core::rect< irr::s32 > pos( viewportSize.Width, 0, windowSize.Width, windowSize.Height );
+				irr::core::rect< irr::s32 > clipRect = irr::core::rect< irr::s32 >( 0, 0, windowSize.Width, windowSize.Height );
+				driver->draw2DRectangle( BLACK, pos, &clipRect );
 				break;
 			}
 		}
@@ -736,7 +742,7 @@ MainGame::MainGame() {
 		if( debug ) {
 			std::wcout << L"MainGame constructor called" << std::endl;
 		}
-		//Just wanted to be totally sure that these point to nullptr before being set otherwise
+		//Just wanted to be totally sure that these point to nullptr before.
 		clockFont = nullptr;
 		loadingFont = nullptr;
 		musicTagFont = nullptr;
@@ -2626,6 +2632,11 @@ void MainGame::processControls() {
  */
 void MainGame::readPrefs() {
 	try {
+		#if defined DEBUG
+			debug = true;
+		#else
+			debug = false;
+		#endif
 		if( debug ) {
 			std::wcout << L"readPrefs() called" << std::endl;
 		}
@@ -2649,15 +2660,11 @@ void MainGame::readPrefs() {
 		botAlgorithm = AI::DEPTH_FIRST_SEARCH;
 		botMovementDelay = 300;
 		mazeManager.hideUnseen = false;
-		#if defined DEBUG
-			debug = true;
-		#else
-			debug = false;
-		#endif
+		backgroundAnimations = true;
 		
 		std::vector< std::wstring > possiblePrefs = { L"bots' solving algorithm", L"volume", L"number of bots", L"show backgrounds",
 									L"fullscreen", L"mark player trails", L"debug", L"bits per pixel", L"wait for vertical sync", L"driver type", L"number of players",
-									L"window size", L"play music", L"network port", L"always server", L"bots know the solution", L"bot movement delay", L"hide unseen maze areas" };
+									L"window size", L"play music", L"network port", L"always server", L"bots know the solution", L"bot movement delay", L"hide unseen maze areas", L"background animations" };
 		auto prefsNotFound = possiblePrefs;
 		
 		std::vector< boost::filesystem::path > configFolders = system.getConfigFolders(); // Flawfinder: ignore
@@ -2919,6 +2926,11 @@ void MainGame::readPrefs() {
 									
 									case 17: { //L"hide unseen maze areas"
 										mazeManager.hideUnseen = prefIsTrue( choice );
+										break;
+									}
+									
+									case 18: { //L"ackground animations"
+										backgroundAnimations = prefIsTrue( choice );
 										break;
 									}
 								}
@@ -3836,6 +3848,11 @@ void MainGame::setupBackground() {
 		
 		uint_fast8_t availableBackgrounds = 4; //The number of different background animations to choose from
 		backgroundChosen = getRandomNumber() % availableBackgrounds;
+		
+		if( not backgroundAnimations ) {
+			backgroundChosen = 2; //So far, the only background type that is not animated is #2, the image background.
+		}
+		
 		if( debug ) {
 			//backgroundChosen = availableBackgrounds - 1; //If we're debugging, we may be testing the last background added.
 			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;

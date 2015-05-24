@@ -101,15 +101,16 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_cybrinth_OBJECTS = src/AI.$(OBJEXT) src/Collectable.$(OBJEXT) \
-	src/FontManager.$(OBJEXT) src/MainGame.$(OBJEXT) \
-	src/Goal.$(OBJEXT) src/GUIFreetypeFont.$(OBJEXT) \
-	src/ControlMapping.$(OBJEXT) src/main.$(OBJEXT) \
-	src/MazeCell.$(OBJEXT) src/MazeManager.$(OBJEXT) \
-	src/MenuOption.$(OBJEXT) src/NetworkManager.$(OBJEXT) \
-	src/Object.$(OBJEXT) src/Player.$(OBJEXT) \
-	src/PlayerStart.$(OBJEXT) src/StringConverter.$(OBJEXT) \
-	src/SpellChecker.$(OBJEXT) src/ImageModifier.$(OBJEXT) \
+am_cybrinth_OBJECTS = src/XPMImageLoader.$(OBJEXT) src/AI.$(OBJEXT) \
+	src/Collectable.$(OBJEXT) src/FontManager.$(OBJEXT) \
+	src/MainGame.$(OBJEXT) src/Goal.$(OBJEXT) \
+	src/GUIFreetypeFont.$(OBJEXT) src/ControlMapping.$(OBJEXT) \
+	src/main.$(OBJEXT) src/MazeCell.$(OBJEXT) \
+	src/MazeManager.$(OBJEXT) src/MenuOption.$(OBJEXT) \
+	src/NetworkManager.$(OBJEXT) src/Object.$(OBJEXT) \
+	src/Player.$(OBJEXT) src/PlayerStart.$(OBJEXT) \
+	src/StringConverter.$(OBJEXT) src/SpellChecker.$(OBJEXT) \
+	src/ImageModifier.$(OBJEXT) \
 	src/SystemSpecificsManager.$(OBJEXT) src/MenuManager.$(OBJEXT) \
 	src/FileSelectorDialog.$(OBJEXT) \
 	src/RakNet/Base64Encoder.$(OBJEXT) \
@@ -210,9 +211,7 @@ am_cybrinth_OBJECTS = src/AI.$(OBJEXT) src/Collectable.$(OBJEXT) \
 	src/RakNet/VariableListDeltaTracker.$(OBJEXT) \
 	src/RakNet/VariadicSQLParser.$(OBJEXT) \
 	src/RakNet/VitaIncludes.$(OBJEXT) \
-	src/RakNet/WSAStartupSingleton.$(OBJEXT) \
-	compiled-images/key.$(OBJEXT) compiled-images/acid.$(OBJEXT) \
-	compiled-images/goal.$(OBJEXT) compiled-images/start.$(OBJEXT)
+	src/RakNet/WSAStartupSingleton.$(OBJEXT)
 cybrinth_OBJECTS = $(am_cybrinth_OBJECTS)
 am__DEPENDENCIES_1 =
 cybrinth_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -410,12 +409,11 @@ AM_LDFLAGS = -lstdc++ -lm -pthread
 
 #do-stuff : convert-images cybrinth
 #.PHONY : do-stuff
-
-# cybrinth_SOURCES = $(wildcard src/*.h src/*.cpp)
-cybrinth_SOURCES = src/AI.h src/AI.cpp src/Collectable.h \
-	src/Collectable.cpp src/colors.h src/FontManager.h \
-	src/FontManager.cpp src/MainGame.h src/MainGame.cpp src/Goal.h \
-	src/Goal.cpp src/GUIFreetypeFont.h src/GUIFreetypeFont.cpp \
+cybrinth_SOURCES = src/XPMImageLoader.h src/XPMImageLoader.cpp \
+	src/AI.h src/AI.cpp src/Collectable.h src/Collectable.cpp \
+	src/colors.h src/FontManager.h src/FontManager.cpp \
+	src/MainGame.h src/MainGame.cpp src/Goal.h src/Goal.cpp \
+	src/GUIFreetypeFont.h src/GUIFreetypeFont.cpp \
 	src/ControlMapping.h src/ControlMapping.cpp src/main.cpp \
 	src/MazeCell.h src/MazeCell.cpp src/MazeManager.h \
 	src/MazeManager.cpp src/MenuOption.h src/MenuOption.cpp \
@@ -588,9 +586,10 @@ cybrinth_SOURCES = src/AI.h src/AI.cpp src/Collectable.h \
 	src/RakNet/VariadicSQLParser.h src/RakNet/VitaIncludes.cpp \
 	src/RakNet/VitaIncludes.h src/RakNet/WindowsIncludes.h \
 	src/RakNet/WSAStartupSingleton.cpp \
-	src/RakNet/WSAStartupSingleton.h src/RakNet/XBox360Includes.h \
-	compiled-images/key.cpp compiled-images/acid.cpp \
-	compiled-images/goal.cpp compiled-images/start.cpp
+	src/RakNet/WSAStartupSingleton.h src/RakNet/XBox360Includes.h
+
+# cybrinth_SOURCES = $(wildcard src/*.h src/*.cpp)
+# cybrinth_SOURCES += compiled-images/key.xpm compiled-images/acid.xpm compiled-images/goal.xpm compiled-images/start.xpm
 # cybrinth_SOURCES += $(wildcard compiled-images/*.cpp)
 cybrinth_LDADD = $(IRRLICHT_LIBS) $(BOOSTFILESYSTEM_LIBS) $(BOOSTFILESYSTEM_LIBS_TWO) $(BOOSTSYSTEM_LIBS) $(BOOSTSYSTEM_LIBS_TWO) $(DEPS_LIBS) $(SDLDEPS_LIBS)
 all: all-am
@@ -681,6 +680,8 @@ src/$(am__dirstamp):
 src/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/$(DEPDIR)
 	@: > src/$(DEPDIR)/$(am__dirstamp)
+src/XPMImageLoader.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/AI.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/Collectable.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
@@ -968,20 +969,6 @@ src/RakNet/VitaIncludes.$(OBJEXT): src/RakNet/$(am__dirstamp) \
 	src/RakNet/$(DEPDIR)/$(am__dirstamp)
 src/RakNet/WSAStartupSingleton.$(OBJEXT): src/RakNet/$(am__dirstamp) \
 	src/RakNet/$(DEPDIR)/$(am__dirstamp)
-compiled-images/$(am__dirstamp):
-	@$(MKDIR_P) compiled-images
-	@: > compiled-images/$(am__dirstamp)
-compiled-images/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) compiled-images/$(DEPDIR)
-	@: > compiled-images/$(DEPDIR)/$(am__dirstamp)
-compiled-images/key.$(OBJEXT): compiled-images/$(am__dirstamp) \
-	compiled-images/$(DEPDIR)/$(am__dirstamp)
-compiled-images/acid.$(OBJEXT): compiled-images/$(am__dirstamp) \
-	compiled-images/$(DEPDIR)/$(am__dirstamp)
-compiled-images/goal.$(OBJEXT): compiled-images/$(am__dirstamp) \
-	compiled-images/$(DEPDIR)/$(am__dirstamp)
-compiled-images/start.$(OBJEXT): compiled-images/$(am__dirstamp) \
-	compiled-images/$(DEPDIR)/$(am__dirstamp)
 
 cybrinth$(EXEEXT): $(cybrinth_OBJECTS) $(cybrinth_DEPENDENCIES) $(EXTRA_cybrinth_DEPENDENCIES) 
 	@rm -f cybrinth$(EXEEXT)
@@ -989,17 +976,12 @@ cybrinth$(EXEEXT): $(cybrinth_OBJECTS) $(cybrinth_DEPENDENCIES) $(EXTRA_cybrinth
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
-	-rm -f compiled-images/*.$(OBJEXT)
 	-rm -f src/*.$(OBJEXT)
 	-rm -f src/RakNet/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@compiled-images/$(DEPDIR)/acid.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@compiled-images/$(DEPDIR)/goal.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@compiled-images/$(DEPDIR)/key.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@compiled-images/$(DEPDIR)/start.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/AI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/Collectable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ControlMapping.Po@am__quote@
@@ -1020,6 +1002,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/SpellChecker.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/StringConverter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/SystemSpecificsManager.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/XPMImageLoader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/Base64Encoder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/RakNet/$(DEPDIR)/BitStream.Po@am__quote@
@@ -1403,8 +1386,6 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f compiled-images/$(DEPDIR)/$(am__dirstamp)
-	-rm -f compiled-images/$(am__dirstamp)
 	-rm -f src/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/$(am__dirstamp)
 	-rm -f src/RakNet/$(DEPDIR)/$(am__dirstamp)
@@ -1419,7 +1400,7 @@ clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf compiled-images/$(DEPDIR) src/$(DEPDIR) src/RakNet/$(DEPDIR)
+	-rm -rf src/$(DEPDIR) src/RakNet/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1467,7 +1448,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf compiled-images/$(DEPDIR) src/$(DEPDIR) src/RakNet/$(DEPDIR)
+	-rm -rf src/$(DEPDIR) src/RakNet/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

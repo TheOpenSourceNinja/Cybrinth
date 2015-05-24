@@ -197,7 +197,8 @@ bool AI::effectivelyNoTopWall( uint_fast8_t x, uint_fast8_t y ) {
 
 bool AI::effectivelyNoTopWall( uint_fast8_t x, uint_fast8_t y, bool canDissolveWalls ) {
 	if( mg not_eq nullptr and mg->getMazeManager() not_eq nullptr and mg->getMazeManager()->maze not_eq nullptr ) {
-		return ( mg->getMazeManager()->maze[ x ][ y ].getTop() == MazeCell::NONE or ( mg->getMazeManager()->maze[ x ][ y ].getTop() not_eq MazeCell::ACIDPROOF and canDissolveWalls ) );
+		auto topWall = mg->getMazeManager()->maze[ x ][ y ].getTop();
+		return ( topWall == MazeCell::NONE or ( ( topWall not_eq MazeCell::LOCK and topWall not_eq MazeCell::ACIDPROOF )  and canDissolveWalls ) );
 	} else {
 		return false;
 	}
@@ -209,7 +210,8 @@ bool AI::effectivelyNoLeftWall( uint_fast8_t x, uint_fast8_t y ) {
 
 bool AI::effectivelyNoLeftWall( uint_fast8_t x, uint_fast8_t y, bool canDissolveWalls ) {
 	if( mg not_eq nullptr and mg->getMazeManager()->maze not_eq nullptr ) {
-		return( mg->getMazeManager()->maze[ x ][ y ].getLeft() == MazeCell::NONE or ( mg->getMazeManager()->maze[ x ][ y ].getLeft() not_eq MazeCell::ACIDPROOF and canDissolveWalls ) );
+		auto leftWall = mg->getMazeManager()->maze[ x ][ y ].getLeft();
+		return( leftWall == MazeCell::NONE or ( ( leftWall not_eq MazeCell::LOCK and leftWall not_eq MazeCell::ACIDPROOF ) and canDissolveWalls ) );
 	} else {
 		return false;
 	}

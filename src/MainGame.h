@@ -163,6 +163,7 @@ class MainGame : public irr::IEventReceiver {
 		bool allowSmallSize;
 		bool antiAliasFonts;
 		
+		bool backgroundAnimations;
 		bool botsKnowSolution;
 		
 		bool debug;
@@ -177,6 +178,7 @@ class MainGame : public irr::IEventReceiver {
 		bool markTrails;
 		bool musicPlaying;
 		
+		std::vector< bool > playerAssigned; //If in server mode, keep track of which player numbers have been assigned to players
 		bool playMusic;
 		
 		bool showBackgrounds;
@@ -193,7 +195,6 @@ class MainGame : public irr::IEventReceiver {
 		uint_fast8_t joystickDeadZoneDefaultPercent;
 		
 		uint_fast8_t myPlayer; //If in client mode, control only one player
-		std::vector< bool > playerAssigned; //If in server mode, keep track of which player numbers have been assigned to players
 		
 		uint_fast8_t numKeysFound;
 		

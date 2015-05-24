@@ -45,6 +45,7 @@ class Object {
 		irr::video::SColor getColorOne();
 		irr::video::SColor getColorTwo();
 		uint_fast16_t distanceFromExit;
+		void adjustImageColors( irr::video::IImage* image );
 	protected:
 		uint_fast8_t x;
 		float xInterp;

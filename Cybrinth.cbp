@@ -80,12 +80,6 @@
 		<Unit filename="coding style guidelines.txt">
 			<Option target="non-building files" />
 		</Unit>
-		<Unit filename="compiled-images/acid.cpp">
-			<Option target="cybrinth" />
-		</Unit>
-		<Unit filename="compiled-images/key.cpp">
-			<Option target="cybrinth" />
-		</Unit>
 		<Unit filename="configure.ac">
 			<Option target="non-building files" />
 		</Unit>
@@ -1023,6 +1017,12 @@
 			<Option target="cybrinth" />
 		</Unit>
 		<Unit filename="src/SystemSpecificsManager.h">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/XPMImageLoader.cpp">
+			<Option target="cybrinth" />
+		</Unit>
+		<Unit filename="src/XPMImageLoader.h">
 			<Option target="cybrinth" />
 		</Unit>
 		<Unit filename="src/acid.xcf">

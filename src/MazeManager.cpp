@@ -393,6 +393,9 @@ void MazeManager::makeRandomLevel() {
 					temp.setType( Collectable::KEY );
 					temp.loadTexture( mainGame->device );
 					mainGame->stuff.push_back( temp );
+					//if( mainGame->getDebugStatus() ) {
+						std::wcout << L"Placing key at " << deadEndsX.at( chosen ) << L"," << deadEndsY.at( chosen ) << std::endl;
+					//}
 				}
 
 				//Remove chosen from the list of dead ends so no other keys go there

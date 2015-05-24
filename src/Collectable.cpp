@@ -18,6 +18,7 @@
 
 #include "Collectable.h"
 #include "colors.h"
+#include "XPMImageLoader.h"
 #ifdef HAVE_IOSTREAM
 	#include <iostream>
 #endif //HAVE_IOSTREAM
@@ -42,104 +43,32 @@ Collectable::~Collectable() {
 
 void Collectable::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 	try {
+		std::wcout << L"createTexture() called" << std::endl;
 		irr::video::IVideoDriver* driver = device->getVideoDriver();
+		XPMImageLoader loader;
+		
+		irr::video::IImage* tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) );
+		loader.loadImage( driver, tempImage, type );
+		
+		irr::core::stringw textureName;
 		switch( type ) {
 			case KEY: {
-				//Key.c:
-				#include "compiled-images/key.cpp"
-				
-				irr::video::ECOLOR_FORMAT format = irr::video::ECF_UNKNOWN;
-				switch( gimp_image_key.bytes_per_pixel ) {
-					case 2: {
-						format = irr::video::ECF_R5G6B5;
-						break;
-					}
-					case 3: {
-						format = irr::video::ECF_R8G8B8;
-						break;
-					}
-					case 4: {
-						format = irr::video::ECF_A8R8G8B8;
-					}
-				}
-				
-				{ //The following line works but produces the wrong colors, since GIMP outputs in RGBA and Irrlicht apparently expects ARGB
-					//irr::video::IImage* temp = driver->createImageFromData( format, irr::core::dimension2d< irr::u32 >( gimp_image.width, gimp_image.height ), const_cast< unsigned char* >( gimp_image.pixel_data ), false, false );
-					
-					irr::video::IImage* temp = driver->createImage( format, irr::core::dimension2d< irr::u32 >( gimp_image_key.width, gimp_image_key.height ) );
-					
-					for( decltype( gimp_image_key.height ) y = 0; y < gimp_image_key.height; ++y ) {
-						for( decltype( gimp_image_key.width ) x = 0; x < gimp_image_key.width; ++x ) {
-							unsigned char pixel[ 4 ];
-							pixel[ 0 ] = gimp_image_key.pixel_data[ ( y * gimp_image_key.width * gimp_image_key.bytes_per_pixel ) + ( x * gimp_image_key.bytes_per_pixel ) + 0 ]; //Red
-							pixel[ 1 ] = gimp_image_key.pixel_data[ ( y * gimp_image_key.width * gimp_image_key.bytes_per_pixel ) + ( x * gimp_image_key.bytes_per_pixel ) + 1 ]; //Green
-							pixel[ 2 ] = gimp_image_key.pixel_data[ ( y * gimp_image_key.width * gimp_image_key.bytes_per_pixel ) + ( x * gimp_image_key.bytes_per_pixel ) + 2 ]; //Blue
-							
-							//Alpha
-							if( gimp_image_key.bytes_per_pixel == 4 ) {
-								pixel[ 3 ] = gimp_image_key.pixel_data[ ( y * gimp_image_key.width * gimp_image_key.bytes_per_pixel ) + ( x * gimp_image_key.bytes_per_pixel ) + 3 ];
-							} else {
-								pixel[ 3 ] = 255;
-							}
-							
-							temp->setPixel( x, y, irr::video::SColor( pixel[ 3 ], pixel[ 0 ], pixel[ 1 ], pixel[ 2 ] ) );
-						}
-					}
-					
-					texture = resizer.imageToTexture( driver, temp, "key" );
-				}
-				
+				textureName = L"key-xpm";
 				break;
 			}
 			case ACID: {
-				//acid.c:
-				#include "compiled-images/acid.cpp"
-				
-				irr::video::ECOLOR_FORMAT format = irr::video::ECF_UNKNOWN;
-				switch( gimp_image_acid.bytes_per_pixel ) {
-					case 2: {
-						format = irr::video::ECF_R5G6B5;
-						break;
-					}
-					case 3: {
-						format = irr::video::ECF_R8G8B8;
-						break;
-					}
-					case 4: {
-						format = irr::video::ECF_A8R8G8B8;
-					}
-				}
-				
-				{ //The following line works but produces the wrong colors, since GIMP outputs in RGBA and Irrlicht apparently expects ARGB
-					//irr::video::IImage* temp = driver->createImageFromData( format, irr::core::dimension2d< irr::u32 >( gimp_image.width, gimp_image.height ), const_cast< unsigned char* >( gimp_image.pixel_data ), false, false );
-					
-					irr::video::IImage* temp = driver->createImage( format, irr::core::dimension2d< irr::u32 >( gimp_image_acid.width, gimp_image_acid.height ) );
-					
-					for( decltype( gimp_image_acid.height ) y = 0; y < gimp_image_acid.height; ++y ) {
-						for( decltype( gimp_image_acid.width ) x = 0; x < gimp_image_acid.width; ++x ) {
-							unsigned char pixel[ 4 ];
-							pixel[ 0 ] = gimp_image_acid.pixel_data[ ( y * gimp_image_acid.width * gimp_image_acid.bytes_per_pixel ) + ( x * gimp_image_acid.bytes_per_pixel ) + 0 ]; //Red
-							pixel[ 1 ] = gimp_image_acid.pixel_data[ ( y * gimp_image_acid.width * gimp_image_acid.bytes_per_pixel ) + ( x * gimp_image_acid.bytes_per_pixel ) + 1 ]; //Green
-							pixel[ 2 ] = gimp_image_acid.pixel_data[ ( y * gimp_image_acid.width * gimp_image_acid.bytes_per_pixel ) + ( x * gimp_image_acid.bytes_per_pixel ) + 2 ]; //Blue
-							
-							//Alpha
-							if( gimp_image_acid.bytes_per_pixel == 4 ) {
-								pixel[ 3 ] = gimp_image_acid.pixel_data[ ( y * gimp_image_acid.width * gimp_image_acid.bytes_per_pixel ) + ( x * gimp_image_acid.bytes_per_pixel ) + 3 ];
-							} else {
-								pixel[ 3 ] = 255;
-							}
-							
-							temp->setPixel( x, y, irr::video::SColor( pixel[ 3 ], pixel[ 0 ], pixel[ 1 ], pixel[ 2 ] ) );
-						}
-					}
-					
-					texture = resizer.imageToTexture( driver, temp, "acid" );
-				}
-				
+				textureName = L"acid-xpm";
 				break;
 			}
-			default: break;
+			default: {
+				textureName = L"generic collectable";
+				break;
+			}
 		}
+		
+		adjustImageColors( tempImage );
+		
+		texture = resizer.imageToTexture( driver, tempImage, textureName );
 
 		if( texture == nullptr ) {
 			irr::video::IImage* temp = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( size, size ) );
@@ -183,6 +112,11 @@ void Collectable::loadTexture( irr::IrrlichtDevice* device ) {
 }
 
 void Collectable::loadTexture( irr::IrrlichtDevice* device, uint_fast8_t size ) {
+	std::wcout << L"Collectable::loadTexture() called" << std::endl;
+	if( texture not_eq nullptr and texture not_eq NULL and texture not_eq 0 ) {
+		device->getVideoDriver()->removeTexture( texture );
+		texture = nullptr;
+	}
 	switch( type ) {
 		case KEY: {
 			Object::loadTexture( device, size, L"key" );
@@ -194,8 +128,10 @@ void Collectable::loadTexture( irr::IrrlichtDevice* device, uint_fast8_t size ) 
 		}
 	}
 	// cppcheck-suppress duplicateExpression
-	if( texture == nullptr or texture == NULL ) {
+	if( texture == nullptr or texture == NULL or texture == 0 ) {
 		createTexture( device, size );
+	} else {
+		std::wcout << L"No need to call createTexture()" << std::endl;
 	}
 }
 
