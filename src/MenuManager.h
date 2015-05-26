@@ -29,39 +29,36 @@ class MainGame; //Avoids circular dependency
 
 class MenuManager {
 	public:
-		MenuManager();
-		virtual ~MenuManager();
-		
-		enum selection_t : uint_fast8_t { NEXT_MAZE, RESTART_MAZE, LOAD_MAZE, SAVE_MAZE, EXIT_GAME, BACK_TO_GAME, FREEDOM };
-		
-		void draw( irr::video::IVideoDriver* driver );
+		void draw( irr::IrrlichtDevice* device );
 		
 		void findHighlights( int_fast32_t x, int_fast32_t y );
+		
+		void loadIcons( irr::IrrlichtDevice* device );
+		
+		MenuManager();
+		virtual ~MenuManager();
 		
 		void processSelection( MainGame* mg );
 		
 		void scrollSelection( bool up );
-		
-		void setFont( irr::gui::IGUIFont* font );
-		
+		void setFontAndResizeIcons( irr::IrrlichtDevice* device, irr::gui::IGUIFont* font );
 		void setPositions( uint_fast32_t windowHeight );
-		
-		void setSelection( selection_t selection );
+		void setSelection( MenuOption::option_t selection );
 	protected:
 	private:
-		std::vector< MenuOption > options;
-		
 		uint_fast8_t backToGame;
 		
-		uint_fast8_t freedom;
-
 		uint_fast8_t exitGame;
+		
+		uint_fast8_t freedom;
 		
 		uint_fast8_t highlightedOption;
 		
 		uint_fast8_t loadMaze;
 		
 		uint_fast8_t nextMaze;
+		
+		std::vector< MenuOption > options;
 		
 		uint_fast8_t restartMaze;
 		

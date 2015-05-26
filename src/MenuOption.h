@@ -26,28 +26,47 @@
 
 class MenuOption {
 	public:
+		enum option_t : uint_fast8_t { NEW_MAZE, RESTART_MAZE, LOAD_MAZE, SAVE_MAZE, EXIT_GAME, BACK_TO_GAME, FREEDOM, DO_NOT_USE };
+		
 		MenuOption();
 		virtual ~MenuOption();
-		uint_fast16_t getX();
-		uint_fast16_t getMiddleX();
-		void setX( uint_fast16_t val );
-		uint_fast16_t getY();
-		uint_fast16_t getMiddleY();
-		void setY( uint_fast16_t val );
-		void setFont( irr::gui::IGUIFont* newFont );
-		void draw( irr::video::IVideoDriver* driver );
+		
 		bool contains( irr::core::position2d< uint_fast32_t > test );
 		bool contains( uint_fast32_t testX, uint_fast32_t testY );
-		void setText( irr::core::stringw newText );
+		void createTexture( irr::IrrlichtDevice* device );
+		
+		void draw( irr::IrrlichtDevice* device );
+		
+		uint_fast16_t getMiddleX();
+		uint_fast16_t getMiddleY();
+		uint_fast16_t getX();
+		uint_fast16_t getY();
+		
 		bool highlighted;
+		
+		void loadTexture( irr::IrrlichtDevice* device );
+		
+		void setFontAndResizeIcon( irr::IrrlichtDevice* device, irr::gui::IGUIFont* newFont );
+		void setType( irr::IrrlichtDevice* device, option_t newType );
+		void setX( uint_fast16_t val );
+		void setY( uint_fast16_t val );
 	protected:
 	private:
-		uint_fast16_t x;
-		uint_fast16_t y;
 		irr::core::dimension2d<uint_fast16_t> dimension;
+		
+		irr::core::stringw fileName;  //fileName gets set equal to text by the setText() function, but will be changed by loadTexture()
 		irr::gui::IGUIFont* font;
-		irr::core::stringw text;
+		
+		irr::video::ITexture* iconTexture;
+		
 		void setDimension();
+		
+		irr::core::stringw text;
+		option_t type;
+		
+		uint_fast16_t x;
+		
+		uint_fast16_t y;
 };
 
 #endif // MENUOPTION_H

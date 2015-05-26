@@ -101,7 +101,11 @@ void MainGame::allPlayersReady( bool tf ) {
  */
 void MainGame::drawAll() {
 	try {
-		driver->beginScene( true, true, backgroundColor );
+		if( showingLoadingScreen ) {
+			driver->beginScene( true, true, BLACK );
+		} else {
+			driver->beginScene( true, true, backgroundColor );
+		}
 		
 		if( not showingLoadingScreen ) {
 			if( showBackgrounds ) {
@@ -140,15 +144,15 @@ void MainGame::drawAll() {
 					player.at( p ).draw( device, cellWidth, cellHeight );
 				}
 			}
-
+			
 			//We used to draw Collectables before the players due to a texture resizing bug in Irrlicht's software renderer (the bug still exists AFAIK). Collectables generally use pre-created images whereas players generally use dynamically generated images. This made players potentially get covered by Collectables and thus invisible. Now that players can hold Collectables, we want them drawn on top of the players.
 			for( decltype( stuff.size() ) i = 0; i < stuff.size(); ++i ) {
 				stuff.at( i ).draw( device, cellWidth, cellHeight );
 			}
-
+			
 			goal.draw( device, cellWidth, cellHeight );
-
-			mazeManager.draw( driver, cellWidth, cellHeight );
+			
+			mazeManager.draw( device, cellWidth, cellHeight );
 			
 			if( waitingForOtherPlayers ) {
 				//TODO: Display a notification that we're waiting for other players to finish loading
@@ -157,14 +161,14 @@ void MainGame::drawAll() {
 				irr::core::rect< irr::s32 > tempRectangle( 0, 0, tempDimensions.Width + 0, tempDimensions.Height + 0 );
 				textFont->draw( waitingNotice, tempRectangle, WHITE, true, true );
 			} else if( showingMenu ) {
-				menuManager.draw( driver );
+				menuManager.draw( device );
 			}
-
-
+			
+			
 			uint_fast32_t spaceBetween = windowSize.Height / 30;
 			uint_fast32_t textY = spaceBetween;
 			irr::core::dimension2d< irr::u32 > tempDimensions;
-
+			
 			{
 				time_t currentTime = time( nullptr );
 				wchar_t clockTime[ 9 ];
@@ -332,15 +336,15 @@ void MainGame::drawAll() {
 void MainGame::drawBackground() {
 	try {
 		switch( backgroundChosen ) {
-			case 0:
-			case 1: {
+			case ORIGINAL_STARFIELD:
+			case ROTATING_STARFIELD: {
 				backgroundSceneManager->drawAll();
 				irr::core::rect< irr::s32 > pos( viewportSize.Width, 0, windowSize.Width, windowSize.Height );
 				irr::core::rect< irr::s32 > clipRect = irr::core::rect< irr::s32 >( 0, 0, windowSize.Width, windowSize.Height );
 				driver->draw2DRectangle( BLACK, pos, &clipRect );
 				break;
 			}
-			case 2: {
+			case IMAGES: {
 				if( backgroundTexture not_eq 0 ) {
 					if( backgroundTexture->getSize() not_eq windowSize ) {
 						backgroundTexture = resizer.resize( backgroundTexture, windowSize.Width, windowSize.Height, driver );
@@ -349,10 +353,11 @@ void MainGame::drawBackground() {
 				}
 				break;
 			}
-			case 3: {
-				driver->setRenderTarget( backgroundTexture, false, true, backgroundColor );
+			case STARTRAILS: {
+				driver->setRenderTarget( backgroundTexture, ( fillBackgroundTextureAfterLoading and not haveFilledBackgroundTextureAfterLoading ), true, backgroundColor );
+				haveFilledBackgroundTextureAfterLoading = true;
 				backgroundSceneManager->drawAll();
-				driver->setRenderTarget( irr::video::ERT_FRAME_BUFFER, false, false, backgroundColor );
+				driver->setRenderTarget( 0, false, false, backgroundColor ); //From Irrlicht's documentation: "If set to 0, it sets the previous render target which was set before the last setRenderTarget() call."
 				driver->draw2DImage( backgroundTexture, irr::core::position2d< irr::s32 >( 0, 0 ) );
 				irr::core::rect< irr::s32 > pos( viewportSize.Width, 0, windowSize.Width, windowSize.Height );
 				irr::core::rect< irr::s32 > clipRect = irr::core::rect< irr::s32 >( 0, 0, windowSize.Width, windowSize.Height );
@@ -447,19 +452,11 @@ void MainGame::drawLoadingScreen() {
  */
  void MainGame::drawLogo() {
 	try {
-		if( isNull( logoTexture ) ) {
-			std::wstring error = L"drawLogo() called but logoTexture is null.";
-			throw error;
-		}
-
-		if( logoTexture->getSize() not_eq windowSize ) {
+		if( not isNull( logoTexture ) and logoTexture->getSize() not_eq windowSize ) {
 			logoTexture = resizer.resize( logoTexture, windowSize.Width, windowSize.Height, driver );
 		}
-
-		if( isNull( logoTexture ) ) {
-			std::wstring error = L"Cannot resize logo texture.";
-			throw error;
-		} else {
+		
+		if( not isNull( logoTexture ) ) {
 			driver->draw2DImage( logoTexture, irr::core::position2d< irr::s32 >( 0, 0 ) );
 		}
 	} catch( std::wstring error ) {
@@ -677,396 +674,6 @@ void MainGame::eraseCollectable( uint_fast8_t item ) {
 		}
 	} catch ( std::exception &error ) {
 		std::wcerr << L"Error in eraseCollectable(): " << error.what() << std::endl;
-	}
-}
-
-/**
- * This object's destructor. Destroys stuff.
- * I... am... DESTRUCTOOOOOOORRRRR!!!!!!!!!
- */
-MainGame::~MainGame() {
-	try {
-		if( debug ) {
-			std::wcout << L"MainGame destructor called" << std::endl;
-		}
-		
-		if( not isNull( loadMazeDialog ) ) {
-			delete loadMazeDialog;
-		}
-		if( not isNull( saveMazeDialog ) ) {
-			delete saveMazeDialog;
-		}
-		
-		stuff.clear(); //Calling this before removeAllTextures() because object destructors will remove their own textures
-		player.clear();
-		playerStart.clear();
-		
-		driver->removeAllHardwareBuffers();
-		driver->removeAllTextures();
-
-		device->closeDevice();
-		device->run(); //Sometimes there are problems if we don't call run() after closeDevice(). Don't remember what they are at the moment.
-		device->drop();
-
-		if( playMusic ) {
-			Mix_HaltMusic();
-			Mix_FreeMusic( music );
-			Mix_CloseAudio();
-
-			while( Mix_Init( 0 ) ) {
-				Mix_Quit();
-			}
-
-			SDL_Quit();
-		}
-		
-		if( debug ) {
-			std::wcout << L"end of MainGame destructor" << std::endl;
-		}
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in MainGame::~MainGame(): " << e.what() << std::endl;
-	}
-}
-
-/**
- * This object's constructor. Does lots of very important stuff.
- * Since this constructor is so big, maybe some parts should be split off into separate functions for readability.
- */
-MainGame::MainGame() {
-	try {
-		#ifdef DEBUG //Not the last place debug is set to true or false; look at readPrefs()
-			debug = true;
-		#else
-			debug = false;
-		#endif
-		if( debug ) {
-			std::wcout << L"MainGame constructor called" << std::endl;
-		}
-		//Just wanted to be totally sure that these point to nullptr before.
-		clockFont = nullptr;
-		loadingFont = nullptr;
-		musicTagFont = nullptr;
-		statsFont = nullptr;
-		textFont = nullptr;
-		tipFont = nullptr;
-		backgroundTexture = nullptr;
-		loadMazeDialog = nullptr;
-		saveMazeDialog = nullptr;
-		exitConfirmation = nullptr;
-
-		loading = L"Loading...";
-		proTipPrefix = L"Pro tip: ";
-		winnersLabel = L"Winners: ";
-		steps = L"Steps: ";
-		times = L"Times: ";
-		keysFoundPerPlayer = L"Keys found: ";
-		scores = L"Scores: ";
-		scoresTotal = L"Total scores: ";
-		//network.setMainGame( this ); //NOTE: Network stuff here.
-		mazeManager.setMainGame( this );
-		isServer = false;
-		antiAliasFonts = true;
-		currentProTip = 0;
-		sideDisplaySizeDenominator = 6; //What fraction of the screen's width is set aside for displaying text, statistics, etc. during play.
-		minWidth = 640;
-		minHeight = 480;
-		currentDirectory = boost::filesystem::current_path();
-		haveShownLogo = false;
-		showingMenu = true;
-		waitingForOtherPlayers = false;
-		donePlaying = false;
-		lastTimeControlsProcessed = 0;
-		controlProcessDelay = 100;
-		backgroundColor = BLACK; //Every background should set this in setupBackground(); putting it here just in case.
-		backgroundFilePath = L"";
-		
-		device = irr::createDevice( irr::video::EDT_NULL ); //Must create a device before calling readPrefs();
-		
-		if( isNull( device ) ) {
-			throw( std::wstring( L"Cannot create null device. Something is definitely wrong here!" ) );
-		}
-		
-		readPrefs();
-		
-		if ( debug ) {
-			std::wcout << L"Read prefs, now setting controls" << std::endl;
-		}
-		
-		setMyPlayer( UINT8_MAX ); //Must call this before setControls() so that controls which affect player number "mine" will work. setMyPlayer() will be called again later to set the correct player number; the number used here doesn't matter.
-		setControls();
-		
-		if( fullscreen ) {
-			irr::video::IVideoModeList* vmList = device->getVideoModeList();
-			if( allowSmallSize ) {
-				windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), device->getVideoModeList()->getDesktopResolution() ); //Gets a video resolution between minimum (1,1) and maximum (desktop resolution)
-			} else {
-				windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( minWidth, minHeight ), device->getVideoModeList()->getDesktopResolution() );
-			}
-		}
-		
-		viewportSize.set( windowSize.Width - ( windowSize.Width / sideDisplaySizeDenominator ), windowSize.Height - 1 );
-		
-		device->closeDevice(); //Signals to the existing device that it needs to close itself on next run() so that we can create a new device
-		device->run(); //This is next run()
-		device->drop(); //Cleans up after the device
-		
-		bool sbuffershadows = false; //Would not be visible anyway since this game is 2D
-		IEventReceiver* receiver = this;
-		
-		device = createDevice( driverType, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver ); //Most of these parameters were read from the preferences file
-		
-		if( isNull( device ) ) {
-			std::wcerr << L"Error: Cannot create device. Trying other driver types." << std::endl;
-			
-			//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
-			for( auto i = ( uint_fast8_t ) irr::video::EDT_COUNT; isNull( device ) and i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
-				if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
-					driverType = ( irr::video::E_DRIVER_TYPE ) i;
-					device = createDevice( driverType, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
-				}
-			}
-			
-			if( isNull( device ) ) {
-				std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
-				device = createDevice( irr::video::EDT_NULL, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
-				debug = true;
-			}
-		} else if ( debug ) {
-			std::wcout << L"Got the new device" << std::endl;
-		}
-		
-		driver = device->getVideoDriver(); //Not sure if this would be possible with a null device, which is why we don't exit
-		if( isNull( driver ) ) {
-			throw( std::wstring( L"Cannot get video driver" ) );
-		} else if ( debug ) {
-			std::wcout << L"Got the video driver" << std::endl;
-		}
-		
-		driver->setTextureCreationFlag( irr::video::ETCF_NO_ALPHA_CHANNEL, false );
-		driver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, false );
-		if( driverType == irr::video::EDT_SOFTWARE or driverType == irr::video:: EDT_BURNINGSVIDEO ) {
-			driver->setTextureCreationFlag( irr::video::ETCF_OPTIMIZED_FOR_SPEED, true );
-		} else {
-			driver->setTextureCreationFlag( irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true );
-		}
-		if( driverType == irr::video::EDT_SOFTWARE ) {
-			driver->setTextureCreationFlag( irr::video::ETCF_ALLOW_NON_POWER_2, false );
-		}
-		
-		setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
-		pickLogo();
-		driver->beginScene( false, false ); //These falses specify whether the back buffer and z buffer should be cleared. Since this is the first time drawing anything, there's no need to clear anything beforehand.
-		drawLogo(); //Why the fuck isn't this working consistently? Sometimes it draws, sometimes it only thinks it draws. Had to hack the drawLoadingScreen() function (which gets called several times, therefore is likely to work at least once).
-		driver->endScene();
-
-		gui = device->getGUIEnvironment();
-		if( isNull( gui ) ) {
-			throw( std::wstring( L"Cannot get GUI environment" ) );
-		} else {
-			if ( debug ) {
-				std::wcout << L"Got the gui environment" << std::endl;
-			}
-			for( uint_fast8_t i = 0; i < ( decltype( i ) )irr::gui::EGDC_COUNT ; ++i ) {
-				irr::video::SColor guiSkinColor = gui->getSkin()->getColor( static_cast< irr::gui::EGUI_DEFAULT_COLOR >( i ) );
-				guiSkinColor.setAlpha( 255 );
-				gui->getSkin()->setColor( static_cast< irr::gui::EGUI_DEFAULT_COLOR >( i ), guiSkinColor );
-			}
-		}
-		
-		loadProTips();
-		
-		device->setWindowCaption( stringConverter.toStdWString( PACKAGE_STRING ).c_str() ); //stringConverter.toWCharArray( PACKAGE_STRING ) );
-		
-		if( debug ) {
-			device->getLogger()->setLogLevel( irr::ELL_INFORMATION );
-		} else {
-			device->getLogger()->setLogLevel( irr::ELL_ERROR );
-		}
-		
-		backgroundSceneManager = device->getSceneManager(); //Not sure if this would be possible with a null device, which is why we don't exit
-		if( isNull( backgroundSceneManager ) ) {
-			throw( std::wstring( L"Cannot get scene manager" ) );
-		} else if ( debug ) {
-			std::wcout << L"Got the scene manager" << std::endl;
-		}
-		
-		
-		if( playMusic ) {
-			
-			if( SDL_Init( SDL_INIT_AUDIO ) == -1 ) {
-				std::wcerr << L"Cannot initialize SDL audio." << std::endl;
-				playMusic = false;
-			}
-			
-			{//Set the audio properties we hope to get: sample rate, channels, etc.
-				int audioRate = MIX_DEFAULT_FREQUENCY; //MIX_DEFAULT_FREQUENCY is 22050 Hz, half the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
-				Uint16 audioFormat = MIX_DEFAULT_FORMAT; //AUDIO_S16SYS according to documentation. CDs use signed 16-bit audio. SYS means use the system's native endianness.
-				int audioChannels = MIX_DEFAULT_CHANNELS; //2 according to documentation. Almost everything uses stereo. I wish surround sound were more common.
-				int audioChunkSize = 4096; //Magic number! Change it if you dare, and see what happens. SDL_Mixer has no default, but its documentation says 4096 is good if all we're playing is music. Too small and sound may skip on a slow system, too large and sound effects may lag behind the action.
-
-				if( Mix_OpenAudio( audioRate, audioFormat, audioChannels, audioChunkSize ) not_eq 0 ) {
-					std::wcerr << L"Unable to initialize audio: " << Mix_GetError() << std::endl;
-					playMusic = false;
-				} else if( debug ) {
-					std::wcout << L"Initialized audio" << std::endl;
-				}
-
-				if( debug ) {
-					Mix_QuerySpec( &audioRate, &audioFormat, &audioChannels );//Don't assume we got everything we asked for above
-					std::wcout << L"Audio sample rate: " << audioRate << L" Hertz. Format: ";
-					// cppcheck-suppress duplicateIf
-					if( audioFormat == AUDIO_U16SYS ) {
-						std::wcout << L"AUDIO_U16SYS (equivalent to ";
-						//cppcheck-suppress duplicateIf
-						if( AUDIO_U16SYS == AUDIO_U16LSB ) {
-							std::wcout << L"AUDIO_U16LSB";
-						} else if( AUDIO_U16SYS == AUDIO_U16MSB ) {
-							std::wcout << L"AUDIO_U16MSB";
-						} else if( AUDIO_U16SYS == AUDIO_U16 ) {
-							std::wcout << L"AUDIO_U16";
-						} else {
-							std::wcout << L"unknown";
-						}
-					std::wcout << L")";
-					//cppcheck-suppress duplicateIf
-					} else if( audioFormat == AUDIO_S16SYS ) {
-						std::wcout << L"AUDIO_S16SYS (equivalent to ";
-						//cppcheck-suppress duplicateIf
-						if( AUDIO_S16SYS == AUDIO_S16LSB ) {
-							std::wcout << L"AUDIO_S16LSB";
-						} else if( AUDIO_S16SYS == AUDIO_S16MSB ) {
-							std::wcout << L"AUDIO_S16MSB";
-						} else if( AUDIO_S16SYS == AUDIO_S16 ) {
-							std::wcout << L"AUDIO_S16";
-						} else {
-							std::wcout << L"unknown";
-						}
-					std::wcout << L")";
-					} else if( audioFormat == AUDIO_U8 ) {
-						std::wcout << L"AUDIO_U8";
-					} else if( audioFormat == AUDIO_S8 ) {
-						std::wcout << L"AUDIO_S8";
-					} else if( audioFormat == AUDIO_U16LSB ) {
-						std::wcout << L"AUDIO_U16LSB";
-					} else if( audioFormat == AUDIO_S16LSB ) {
-						std::wcout << L"AUDIO_S16LSB";
-					} else if( audioFormat == AUDIO_U16MSB ) {
-						std::wcout << L"AUDIO_U16MSB";
-					} else if( audioFormat == AUDIO_S16MSB ) {
-						std::wcout << L"AUDIO_S16MSB";
-					} else if( audioFormat == AUDIO_U16 ) {
-						std::wcout << L"AUDIO_U16";
-					} else if( audioFormat == AUDIO_S16 ) {
-						std::wcout << L"AUDIO_S16";
-					} else {
-						std::wcout << L"unknown";
-					}
-
-					std::wcout << " channels: " << audioChannels  << L" chunk size: " << audioChunkSize << std::endl;
-				}
-			}
-
-			music = nullptr;
-
-			if( playMusic ) { //No sense in making the music list if we've been unable to initialize the audio.
-				makeMusicList();
-				if( playMusic ) {  //playMusic may be set to false if makeMusicList() can't find any songs to play
-					loadNextSong();
-				}
-			}
-		}
-
-		loadFonts();
-		
-		menuManager.setPositions( windowSize.Height );
-
-		if ( debug ) {
-			std::wcout << L"Resizing player and playerStart vectors to " << numPlayers << std::endl;
-		}
-
-		player.resize( numPlayers );
-		playerStart.resize( numPlayers );
-		playerAssigned.resize( numPlayers );
-		
-		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
-			player.at( p ).setPlayerNumber( p );
-			player.at( p ).setColorBasedOnNum();
-			player.at( p ).loadTexture( device );
-			player.at( p ).setGM( this );
-			playerAssigned.at( p ) = false;
-		}
-		
-		if( isServer ) {
-			setMyPlayer( 0 );
-		} else {
-			numBots = 0; //Only the server can control the bots. Clients should see them as other players.
-		}
-		
-		if( numBots > numPlayers ) {
-			numBots = numPlayers;
-		}
-		
-		if( numBots > 0 ) {
-			if ( debug ) {
-				std::wcout << L"Resizing numBots vector to " << numBots << std::endl;
-			}
-			
-			bot.resize( numBots );
-			
-			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
-				decltype( bot.at( i ).getPlayer() ) p = numPlayers - ( i + 1 );
-				bot.at( i ).setPlayer( p ) ;
-				playerAssigned.at( p ) = true;
-				player.at( bot.at( i ).getPlayer() ).isHuman = false;
-				//bot.at( i ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm, botMovementDelay );
-				bot.at( i ).setup( this, botsKnowSolution, botAlgorithm, botMovementDelay );
-			}
-		}
-		
-		goal.loadTexture( device );
-		
-		if( enableController and device->activateJoysticks( controllerInfo ) and debug ) { //activateJoysticks fills controllerInfo with info about each controller
-			std::wcout << L"controller support is enabled and " << controllerInfo.size() << L" controller(s) are present." << std::endl;
-
-			for( decltype( controllerInfo.size() ) controller = 0; controller < controllerInfo.size(); ++controller ) {
-				std::wcout << L"controller " << controller << L":" << std::endl;
-				std::wcout << L"\tName: '" << stringConverter.toStdWString( controllerInfo[ controller ].Name ).c_str() << L"'" << std::endl; //stringConverter.toWCharArray( controllerInfo[ controller ].Name ) << L"'" << std::endl;
-				std::wcout << L"\tAxes: " << controllerInfo[ controller ].Axes << std::endl;
-				std::wcout << L"\tButtons: " << controllerInfo[ controller ].Buttons << std::endl;
-
-				std::wcout << L"\tHat is: ";
-
-				switch( controllerInfo[controller ].PovHat ) {
-					case irr::SJoystickInfo::POV_HAT_PRESENT:
-						std::wcout << L"present" << std::endl;
-						break;
-
-					case irr::SJoystickInfo::POV_HAT_ABSENT:
-						std::wcout << L"absent" << std::endl;
-						break;
-
-					case irr::SJoystickInfo::POV_HAT_UNKNOWN:
-					default:
-						std::wcout << L"unknown" << std::endl;
-						break;
-				}
-			}
-		} else if( debug ) {
-			std::wcout << L"controller support is not enabled." << std::endl;
-		}
-		
-		//Set up networking
-		network.setup( this, isServer ); //NOTE: Network stuff here.
-		
-		timer = device->getTimer();
-
-		if( debug ) {
-			std::wcout << L"end of MainGame constructor" << std::endl;
-		}
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in MainGame::MainGame(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in MainGame::MainGame(): " << e << std::endl;
 	}
 }
 
@@ -1297,13 +904,16 @@ void MainGame::loadFonts() {
 			if( debug ) {
 				std::wcout << L"Looking for fonts in folder " << fontFolders.at( o ) << std::endl;
 			}
-			for( boost::filesystem::recursive_directory_iterator i( fontFolders.at( o ) ); i not_eq end; ++i ) {
-				if( fontManager.canLoadFont( i->path() ) ) {
-					if( debug ) {
-						std::wcout << L"SUCCESS: " << i->path() << L" is a loadable font." << std::endl;
+			
+			if( exists( fontFolders.at( o ) ) ) {
+				for( boost::filesystem::recursive_directory_iterator i( fontFolders.at( o ) ); i not_eq end; ++i ) {
+					if( fontManager.canLoadFont( i->path() ) ) {
+						if( debug ) {
+							std::wcout << L"SUCCESS: " << i->path() << L" is a loadable font." << std::endl;
+						}
+						fontFile = stringConverter.toIrrlichtStringW( i->path().wstring() );
+						break;
 					}
-					fontFile = stringConverter.toIrrlichtStringW( i->path().wstring() );
-					break;
 				}
 			}
 			if( fontFile not_eq "" ) { //We've found a loadable file
@@ -1499,7 +1109,7 @@ void MainGame::loadFonts() {
 			}
 		}
 		
-		menuManager.setFont( clockFont );
+		menuManager.setFontAndResizeIcons( device, clockFont ); //Why use clockFont? Because I'm too lazy to implement loading another font.
 
 		uint_fast32_t size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect readability on large or small screens, but it's better on large screens than the built-in font.
 		gui->getSkin()->setFont( fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts ) );
@@ -1820,6 +1430,402 @@ void MainGame::loadTipFont() {
 		std::wcerr << L"Error in MainGame::loadTipFont(): " << e.what() << std::endl;
 	}
 }
+
+
+/**
+ * This object's destructor. Destroys stuff.
+ * I... am... DESTRUCTOOOOOOORRRRR!!!!!!!!!
+ */
+MainGame::~MainGame() {
+	try {
+		if( debug ) {
+			std::wcout << L"MainGame destructor called" << std::endl;
+		}
+		
+		if( not isNull( loadMazeDialog ) ) {
+			delete loadMazeDialog;
+		}
+		if( not isNull( saveMazeDialog ) ) {
+			delete saveMazeDialog;
+		}
+		
+		stuff.clear(); //Calling this before removeAllTextures() because object destructors will remove their own textures
+		player.clear();
+		playerStart.clear();
+		
+		driver->removeAllHardwareBuffers();
+		driver->removeAllTextures();
+
+		device->closeDevice();
+		device->run(); //Sometimes there are problems if we don't call run() after closeDevice(). Don't remember what they are at the moment.
+		device->drop();
+
+		if( playMusic ) {
+			Mix_HaltMusic();
+			Mix_FreeMusic( music );
+			Mix_CloseAudio();
+
+			while( Mix_Init( 0 ) ) {
+				Mix_Quit();
+			}
+
+			SDL_Quit();
+		}
+		
+		if( debug ) {
+			std::wcout << L"end of MainGame destructor" << std::endl;
+		}
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in MainGame::~MainGame(): " << e.what() << std::endl;
+	}
+}
+
+/**
+ * This object's constructor. Does lots of very important stuff.
+ * Since this constructor is so big, maybe some parts should be split off into separate functions for readability.
+ */
+MainGame::MainGame() {
+	try {
+		#ifdef DEBUG //Not the last place debug is set to true or false; look at readPrefs()
+			debug = true;
+		#else
+			debug = false;
+		#endif
+		if( debug ) {
+			std::wcout << L"MainGame constructor called" << std::endl;
+		}
+		//Just wanted to be totally sure that these point to nullptr before.
+		clockFont = nullptr;
+		loadingFont = nullptr;
+		musicTagFont = nullptr;
+		statsFont = nullptr;
+		textFont = nullptr;
+		tipFont = nullptr;
+		backgroundTexture = nullptr;
+		loadMazeDialog = nullptr;
+		saveMazeDialog = nullptr;
+		exitConfirmation = nullptr;
+		logoTexture = nullptr;
+
+		loading = L"Loading...";
+		proTipPrefix = L"Pro tip: ";
+		winnersLabel = L"Winners: ";
+		steps = L"Steps: ";
+		times = L"Times: ";
+		keysFoundPerPlayer = L"Keys found: ";
+		scores = L"Scores: ";
+		scoresTotal = L"Total scores: ";
+		//network.setMainGame( this ); //NOTE: Network stuff here.
+		mazeManager.setMainGame( this );
+		isServer = false;
+		antiAliasFonts = true;
+		currentProTip = 0;
+		sideDisplaySizeDenominator = 6; //What fraction of the screen's width is set aside for displaying text, statistics, etc. during play.
+		minWidth = 640;
+		minHeight = 480;
+		currentDirectory = boost::filesystem::current_path();
+		haveShownLogo = false;
+		showingMenu = true;
+		waitingForOtherPlayers = false;
+		donePlaying = false;
+		fillBackgroundTextureAfterLoading = false;
+		haveFilledBackgroundTextureAfterLoading = false;
+		lastTimeControlsProcessed = 0;
+		controlProcessDelay = 100;
+		backgroundColor = BLACK; //Every background should set this in setupBackground(); putting it here just in case.
+		backgroundFilePath = L"";
+		
+		device = irr::createDevice( irr::video::EDT_NULL ); //Must create a device before calling readPrefs();
+		
+		if( isNull( device ) ) {
+			throw( std::wstring( L"Cannot create null device. Something is definitely wrong here!" ) );
+		}
+		
+		readPrefs();
+		
+		if ( debug ) {
+			std::wcout << L"Read prefs, now setting controls" << std::endl;
+		}
+		
+		setMyPlayer( UINT8_MAX ); //Must call this before setControls() so that controls which affect player number "mine" will work. setMyPlayer() will be called again later to set the correct player number; the number used here doesn't matter.
+		setControls();
+		
+		if( fullscreen ) {
+			irr::video::IVideoModeList* vmList = device->getVideoModeList();
+			if( allowSmallSize ) {
+				windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), device->getVideoModeList()->getDesktopResolution() ); //Gets a video resolution between minimum (1,1) and maximum (desktop resolution)
+			} else {
+				windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( minWidth, minHeight ), device->getVideoModeList()->getDesktopResolution() );
+			}
+		}
+		
+		viewportSize.set( windowSize.Width - ( windowSize.Width / sideDisplaySizeDenominator ), windowSize.Height - 1 );
+		
+		device->closeDevice(); //Signals to the existing device that it needs to close itself on next run() so that we can create a new device
+		device->run(); //This is next run()
+		device->drop(); //Cleans up after the device
+		
+		bool sbuffershadows = false; //Would not be visible anyway since this game is 2D
+		IEventReceiver* receiver = this;
+		
+		device = createDevice( driverType, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver ); //Most of these parameters were read from the preferences file
+		
+		if( isNull( device ) ) {
+			std::wcerr << L"Error: Cannot create device. Trying other driver types." << std::endl;
+			
+			//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
+			for( auto i = ( uint_fast8_t ) irr::video::EDT_COUNT; isNull( device ) and i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
+				if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
+					driverType = ( irr::video::E_DRIVER_TYPE ) i;
+					device = createDevice( driverType, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
+				}
+			}
+			
+			if( isNull( device ) ) {
+				std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
+				device = createDevice( irr::video::EDT_NULL, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
+				debug = true;
+			}
+		} else if ( debug ) {
+			std::wcout << L"Got the new device" << std::endl;
+		}
+		
+		driver = device->getVideoDriver(); //Not sure if this would be possible with a null device, which is why we don't exit
+		if( isNull( driver ) ) {
+			throw( std::wstring( L"Cannot get video driver" ) );
+		} else if ( debug ) {
+			std::wcout << L"Got the video driver" << std::endl;
+		}
+		
+		driver->setTextureCreationFlag( irr::video::ETCF_NO_ALPHA_CHANNEL, false );
+		driver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, false );
+		if( driverType == irr::video::EDT_SOFTWARE or driverType == irr::video:: EDT_BURNINGSVIDEO ) {
+			driver->setTextureCreationFlag( irr::video::ETCF_OPTIMIZED_FOR_SPEED, true );
+		} else {
+			driver->setTextureCreationFlag( irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true );
+		}
+		if( driverType == irr::video::EDT_SOFTWARE ) {
+			driver->setTextureCreationFlag( irr::video::ETCF_ALLOW_NON_POWER_2, false );
+		}
+		
+		setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
+		pickLogo();
+		driver->beginScene( false, false ); //These falses specify whether the back buffer and z buffer should be cleared. Since this is the first time drawing anything, there's no need to clear anything beforehand.
+		drawLogo(); //Why the fuck isn't this working consistently? Sometimes it draws, sometimes it only thinks it draws. Had to hack the drawLoadingScreen() function (which gets called several times, therefore is likely to work at least once).
+		driver->endScene();
+
+		gui = device->getGUIEnvironment();
+		if( isNull( gui ) ) {
+			throw( std::wstring( L"Cannot get GUI environment" ) );
+		} else {
+			if ( debug ) {
+				std::wcout << L"Got the gui environment" << std::endl;
+			}
+			for( uint_fast8_t i = 0; i < ( decltype( i ) )irr::gui::EGDC_COUNT ; ++i ) {
+				irr::video::SColor guiSkinColor = gui->getSkin()->getColor( static_cast< irr::gui::EGUI_DEFAULT_COLOR >( i ) );
+				guiSkinColor.setAlpha( 255 );
+				gui->getSkin()->setColor( static_cast< irr::gui::EGUI_DEFAULT_COLOR >( i ), guiSkinColor );
+			}
+		}
+		
+		loadProTips();
+		
+		device->setWindowCaption( stringConverter.toStdWString( PACKAGE_STRING ).c_str() ); //stringConverter.toWCharArray( PACKAGE_STRING ) );
+		
+		if( debug ) {
+			device->getLogger()->setLogLevel( irr::ELL_INFORMATION );
+		} else {
+			device->getLogger()->setLogLevel( irr::ELL_ERROR );
+		}
+		
+		backgroundSceneManager = device->getSceneManager(); //Not sure if this would be possible with a null device, which is why we don't exit
+		if( isNull( backgroundSceneManager ) ) {
+			throw( std::wstring( L"Cannot get scene manager" ) );
+		} else if ( debug ) {
+			std::wcout << L"Got the scene manager" << std::endl;
+		}
+		
+		
+		if( playMusic ) {
+			
+			if( SDL_Init( SDL_INIT_AUDIO ) == -1 ) {
+				std::wcerr << L"Cannot initialize SDL audio." << std::endl;
+				playMusic = false;
+			}
+			
+			{//Set the audio properties we hope to get: sample rate, channels, etc.
+				int audioRate = MIX_DEFAULT_FREQUENCY; //MIX_DEFAULT_FREQUENCY is 22050 Hz, half the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
+				Uint16 audioFormat = MIX_DEFAULT_FORMAT; //AUDIO_S16SYS according to documentation. CDs use signed 16-bit audio. SYS means use the system's native endianness.
+				int audioChannels = MIX_DEFAULT_CHANNELS; //2 according to documentation. Almost everything uses stereo. I wish surround sound were more common.
+				int audioChunkSize = 4096; //Magic number! Change it if you dare, and see what happens. SDL_Mixer has no default, but its documentation says 4096 is good if all we're playing is music. Too small and sound may skip on a slow system, too large and sound effects may lag behind the action.
+
+				if( Mix_OpenAudio( audioRate, audioFormat, audioChannels, audioChunkSize ) not_eq 0 ) {
+					std::wcerr << L"Unable to initialize audio: " << Mix_GetError() << std::endl;
+					playMusic = false;
+				} else if( debug ) {
+					std::wcout << L"Initialized audio" << std::endl;
+				}
+
+				if( debug ) {
+					Mix_QuerySpec( &audioRate, &audioFormat, &audioChannels );//Don't assume we got everything we asked for above
+					std::wcout << L"Audio sample rate: " << audioRate << L" Hertz. Format: ";
+					// cppcheck-suppress duplicateIf
+					if( audioFormat == AUDIO_U16SYS ) {
+						std::wcout << L"AUDIO_U16SYS (equivalent to ";
+						//cppcheck-suppress duplicateIf
+						if( AUDIO_U16SYS == AUDIO_U16LSB ) {
+							std::wcout << L"AUDIO_U16LSB";
+						} else if( AUDIO_U16SYS == AUDIO_U16MSB ) {
+							std::wcout << L"AUDIO_U16MSB";
+						} else if( AUDIO_U16SYS == AUDIO_U16 ) {
+							std::wcout << L"AUDIO_U16";
+						} else {
+							std::wcout << L"unknown";
+						}
+					std::wcout << L")";
+					//cppcheck-suppress duplicateIf
+					} else if( audioFormat == AUDIO_S16SYS ) {
+						std::wcout << L"AUDIO_S16SYS (equivalent to ";
+						//cppcheck-suppress duplicateIf
+						if( AUDIO_S16SYS == AUDIO_S16LSB ) {
+							std::wcout << L"AUDIO_S16LSB";
+						} else if( AUDIO_S16SYS == AUDIO_S16MSB ) {
+							std::wcout << L"AUDIO_S16MSB";
+						} else if( AUDIO_S16SYS == AUDIO_S16 ) {
+							std::wcout << L"AUDIO_S16";
+						} else {
+							std::wcout << L"unknown";
+						}
+					std::wcout << L")";
+					} else if( audioFormat == AUDIO_U8 ) {
+						std::wcout << L"AUDIO_U8";
+					} else if( audioFormat == AUDIO_S8 ) {
+						std::wcout << L"AUDIO_S8";
+					} else if( audioFormat == AUDIO_U16LSB ) {
+						std::wcout << L"AUDIO_U16LSB";
+					} else if( audioFormat == AUDIO_S16LSB ) {
+						std::wcout << L"AUDIO_S16LSB";
+					} else if( audioFormat == AUDIO_U16MSB ) {
+						std::wcout << L"AUDIO_U16MSB";
+					} else if( audioFormat == AUDIO_S16MSB ) {
+						std::wcout << L"AUDIO_S16MSB";
+					} else if( audioFormat == AUDIO_U16 ) {
+						std::wcout << L"AUDIO_U16";
+					} else if( audioFormat == AUDIO_S16 ) {
+						std::wcout << L"AUDIO_S16";
+					} else {
+						std::wcout << L"unknown";
+					}
+
+					std::wcout << " channels: " << audioChannels  << L" chunk size: " << audioChunkSize << std::endl;
+				}
+			}
+
+			music = nullptr;
+
+			if( playMusic ) { //No sense in making the music list if we've been unable to initialize the audio.
+				makeMusicList();
+				if( playMusic ) {  //playMusic may be set to false if makeMusicList() can't find any songs to play
+					loadNextSong();
+				}
+			}
+		}
+
+		loadFonts();
+		
+		menuManager.setPositions( windowSize.Height );
+		menuManager.loadIcons( device );
+
+		if ( debug ) {
+			std::wcout << L"Resizing player and playerStart vectors to " << numPlayers << std::endl;
+		}
+
+		player.resize( numPlayers );
+		playerStart.resize( numPlayers );
+		playerAssigned.resize( numPlayers );
+		
+		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
+			player.at( p ).setPlayerNumber( p );
+			player.at( p ).setColorBasedOnNum();
+			player.at( p ).loadTexture( device );
+			player.at( p ).setGM( this );
+			playerAssigned.at( p ) = false;
+		}
+		
+		if( isServer ) {
+			setMyPlayer( 0 );
+		} else {
+			numBots = 0; //Only the server can control the bots. Clients should see them as other players.
+		}
+		
+		if( numBots > numPlayers ) {
+			numBots = numPlayers;
+		}
+		
+		if( numBots > 0 ) {
+			if ( debug ) {
+				std::wcout << L"Resizing numBots vector to " << numBots << std::endl;
+			}
+			
+			bot.resize( numBots );
+			
+			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
+				decltype( bot.at( i ).getPlayer() ) p = numPlayers - ( i + 1 );
+				bot.at( i ).setPlayer( p ) ;
+				playerAssigned.at( p ) = true;
+				player.at( bot.at( i ).getPlayer() ).isHuman = false;
+				//bot.at( i ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm, botMovementDelay );
+				bot.at( i ).setup( this, botsKnowSolution, botAlgorithm, botMovementDelay );
+			}
+		}
+		
+		goal.loadTexture( device );
+		
+		if( enableController and device->activateJoysticks( controllerInfo ) and debug ) { //activateJoysticks fills controllerInfo with info about each controller
+			std::wcout << L"controller support is enabled and " << controllerInfo.size() << L" controller(s) are present." << std::endl;
+
+			for( decltype( controllerInfo.size() ) controller = 0; controller < controllerInfo.size(); ++controller ) {
+				std::wcout << L"controller " << controller << L":" << std::endl;
+				std::wcout << L"\tName: '" << stringConverter.toStdWString( controllerInfo[ controller ].Name ).c_str() << L"'" << std::endl; //stringConverter.toWCharArray( controllerInfo[ controller ].Name ) << L"'" << std::endl;
+				std::wcout << L"\tAxes: " << controllerInfo[ controller ].Axes << std::endl;
+				std::wcout << L"\tButtons: " << controllerInfo[ controller ].Buttons << std::endl;
+
+				std::wcout << L"\tHat is: ";
+
+				switch( controllerInfo[controller ].PovHat ) {
+					case irr::SJoystickInfo::POV_HAT_PRESENT:
+						std::wcout << L"present" << std::endl;
+						break;
+
+					case irr::SJoystickInfo::POV_HAT_ABSENT:
+						std::wcout << L"absent" << std::endl;
+						break;
+
+					case irr::SJoystickInfo::POV_HAT_UNKNOWN:
+					default:
+						std::wcout << L"unknown" << std::endl;
+						break;
+				}
+			}
+		} else if( debug ) {
+			std::wcout << L"controller support is not enabled." << std::endl;
+		}
+		
+		//Set up networking
+		network.setup( this, isServer ); //NOTE: Network stuff here.
+		
+		timer = device->getTimer();
+
+		if( debug ) {
+			std::wcout << L"end of MainGame constructor" << std::endl;
+		}
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in MainGame::MainGame(): " << e.what() << std::endl;
+	} catch( std::wstring &e ) {
+		std::wcerr << L"Error in MainGame::MainGame(): " << e << std::endl;
+	}
+}
+
 
 /**
  * Finds all playable music files in the ./music folder and compiles them into a list. If ./music does not exist or is not a folder, it uses the parent path instead.
@@ -2251,15 +2257,14 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 								camera->setAspectRatio( static_cast< decltype( camera->getAspectRatio() ) >( windowSize.Width ) / windowSize.Height );
 							}
 							
-							//See setupBackgrounds() to find out what each background number means
-							if( backgroundChosen == 2 and not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq windowSize ) {
+							if( backgroundChosen == IMAGES and not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq windowSize ) {
 								if( backgroundFilePath.size() > 0 ) {// not backgroundFilePath.empty() ) { Irrlicht 1.8+ has .empty() but Raspbian only has 1.7 in its repositories
 									backgroundTexture = driver->getTexture( backgroundFilePath );
 								}
 								if( not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq windowSize ) {
 									backgroundTexture = resizer.resize( backgroundTexture, windowSize.Width, windowSize.Height, driver );
 								}
-							} else if( backgroundChosen == 3 and backgroundTexture->getSize() not_eq windowSize ) {
+							} else if( backgroundChosen == STARTRAILS and backgroundTexture->getSize() not_eq windowSize ) {
 								driver->removeTexture( backgroundTexture );
 								backgroundTexture = driver->addRenderTargetTexture( windowSize );
 							}
@@ -2461,12 +2466,14 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 
 						//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
 							irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
-							if( loader->isALoadableFileFormat( file ) ) {
-								logoList.push_back( i->path() );
+							if( not isNull( file ) ) {
+								if( loader->isALoadableFileFormat( file ) ) {
+									logoList.push_back( i->path() );
+									file->drop();
+									break;
+								}
 								file->drop();
-								break;
 							}
-							file->drop();
 						/*} else {
 							if( debug ) {
 								bool isLoadableExtension = loader->isALoadableFileExtension( filePath );
@@ -3846,22 +3853,22 @@ void MainGame::setupBackground() {
 			std::wcout << L"setupBackground() called" << std::endl;
 		}
 		
-		uint_fast8_t availableBackgrounds = 4; //The number of different background animations to choose from
-		backgroundChosen = getRandomNumber() % availableBackgrounds;
+		backgroundChosen = getRandomNumber() % NUMBER_OF_BACKGROUNDS;
 		
 		if( not backgroundAnimations ) {
-			backgroundChosen = 2; //So far, the only background type that is not animated is #2, the image background.
+			backgroundChosen = IMAGES; //So far, the only background type that is not animated is #2, the image background.
 		}
 		
 		if( debug ) {
-			//backgroundChosen = availableBackgrounds - 1; //If we're debugging, we may be testing the last background added.
+			backgroundChosen = NUMBER_OF_BACKGROUNDS - 1; //If we're debugging, we may be testing the last background added.
 			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;
 		}
 		
 		backgroundTexture = nullptr;
+		fillBackgroundTextureAfterLoading = false; //Most backgrounds don't need this to be true
 		
 		switch( backgroundChosen ) {
-			case 0: { //Original starfield: just flies straight forward.
+			case ORIGINAL_STARFIELD: { //Original starfield: just flies straight forward.
 				backgroundColor = BLACK;
 				
 				// create a particle system
@@ -3942,10 +3949,11 @@ void MainGame::setupBackground() {
 				ps->setMaterialTexture( 0, pixelTexture );
 				break;
 			}
-			case 3: { //"Paint" background (deliberately falls through to starfield, do not add a break). This smearing background started out as a bug, but I liked the look so much I decided to replicate it as a feature.
+			case STARTRAILS: { //"STARTRAILS" background (deliberately falls through to starfield, do not add a break). This smearing background started out as a bug, but I liked the look so much I decided to replicate it as a feature.
 				if( driver->queryFeature( irr::video::EVDF_RENDER_TO_TARGET  ) ) {
+					fillBackgroundTextureAfterLoading = true;
+					haveFilledBackgroundTextureAfterLoading = false;
 					backgroundTexture = driver->addRenderTargetTexture( windowSize );
-					backgroundColor = BLACK;
 					
 					{ //Fill the texture with the background color;
 						driver->beginScene( false, false, backgroundColor );
@@ -3958,11 +3966,7 @@ void MainGame::setupBackground() {
 					backgroundChosen = 1;
 				}
 			}
-			case 1: { //New starfield: rotates the camera around.
-				if( backgroundChosen == 1 ) {
-					backgroundColor = BLACK;
-				}
-				
+			case ROTATING_STARFIELD: { //New starfield: rotates the camera around.
 				// create a particle system
 				irr::scene::ICameraSceneNode* camera = backgroundSceneManager->addCameraSceneNode();
 				
@@ -4072,6 +4076,12 @@ void MainGame::setupBackground() {
 					}
 				}
 				
+				if( backgroundChosen == 1 ) {
+					backgroundColor = BLACK;
+				} else { //backgroundChosen == 3;
+					backgroundColor = darkStarColor;
+				}
+				
 				irr::scene::IParticleEmitter* em = ps->createBoxEmitter(
 												  camera->getViewFrustum()->getBoundingBox(), //core::aabbox3d< float >(-7,-7,-7,7,7,7), // emitter size
 												  irr::core::vector3df( 0.0f, 0.0f, -0.1f ), // initial direction
@@ -4099,7 +4109,7 @@ void MainGame::setupBackground() {
 				ps->setMaterialTexture( 0, pixelTexture );
 				break;
 			}
-			case 2: { //Image files
+			case IMAGES: { //Image files
 				std::vector< boost::filesystem::path > backgroundList;
 
 				boost::filesystem::path backgroundPath( boost::filesystem::current_path()/L"images/backgrounds" );
@@ -4136,7 +4146,7 @@ void MainGame::setupBackground() {
 								irr::io::IFileSystem* fileSystem = device->getFileSystem();
 								irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
 
-								//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
+								if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
 									irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
 									if( loader->isALoadableFileFormat( file ) ) {
 										backgroundList.push_back( i->path() );
@@ -4144,13 +4154,7 @@ void MainGame::setupBackground() {
 										break;
 									}
 									file->drop();
-								/*} else {
-									if( debug ) {
-										bool isLoadableExtension = loader->isALoadableFileExtension( filePath );
-										bool isLoadableFormat = loader->isALoadableFileFormat( fileSystem->createAndOpenFile( filePath ) );
-										std::wcout << "is loadable extension? " << isLoadableExtension << " is loadable format? " << isLoadableFormat << std::endl;
-									}
-								}*/
+								}
 							}
 						}
 					}
@@ -4218,7 +4222,6 @@ void MainGame::setLoadingPercentage( float newPercent ) {
  **/
 void MainGame::setMyPlayer( uint_fast8_t newPlayer ) {
 	try {
-		std::wcout << L"MainGame::setMyPlayer() called with argument " << newPlayer << std::endl;
 		for( uint_fast8_t c = 0; c < controls.size(); ++c ) {
 			if( controls.at( c ).getPlayer() == newPlayer ) { //Eliminate duplicate controls
 				controls.erase( controls.begin() + c );
@@ -4228,7 +4231,6 @@ void MainGame::setMyPlayer( uint_fast8_t newPlayer ) {
 		
 		for( uint_fast8_t c = 0; c < controls.size(); ++c ) {
 			if( controls.at( c ).getPlayer() == myPlayer ) {
-				std::wcout << L"Setting control " << c << L" from player " << controls.at( c ).getPlayer() << " to " << newPlayer << std::endl;
 				controls.at( c ).setPlayer( newPlayer );
 			}
 		}

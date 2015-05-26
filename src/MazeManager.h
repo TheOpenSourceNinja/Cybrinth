@@ -41,7 +41,7 @@ class MazeManager {
 		bool canGetTo( uint_fast8_t startX, uint_fast8_t startY, uint_fast8_t goalX, uint_fast8_t goalY );
 		bool canGetToAllCollectables( uint_fast8_t startX, uint_fast8_t startY );
 
-		void draw( irr::video::IVideoDriver* driver, uint_fast16_t cellWidth, uint_fast16_t cellHeight );
+		void draw( irr::IrrlichtDevice* device, uint_fast16_t cellWidth, uint_fast16_t cellHeight );
 		
 		irr::core::stringw getFileTypeExtension();
 		irr::core::stringw getFileTypeName();

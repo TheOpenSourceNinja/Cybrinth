@@ -22,43 +22,43 @@
 MenuManager::MenuManager() {
 	{
 		MenuOption temp;
-		temp.setText( L"Next maze" );
+		temp.setType( nullptr, MenuOption::NEW_MAZE );
 		nextMaze = options.size();
 		options.push_back( temp );
 	}
 	{
 		MenuOption temp;
-		temp.setText( L"Restart maze" );
+		temp.setType( nullptr, MenuOption::RESTART_MAZE );
 		restartMaze = options.size();
 		options.push_back( temp );
 	}
 	{
 		MenuOption temp;
-		temp.setText( L"Load maze" );
+		temp.setType( nullptr, MenuOption::LOAD_MAZE );
 		loadMaze = options.size();
 		options.push_back( temp );
 	}
 	{
 		MenuOption temp;
-		temp.setText( L"Save maze" );
+		temp.setType( nullptr, MenuOption::SAVE_MAZE );
 		saveMaze = options.size();
 		options.push_back( temp );
 	}
 	{
 		MenuOption temp;
-		temp.setText( L"Exit game" );
+		temp.setType( nullptr, MenuOption::EXIT_GAME );
 		exitGame = options.size();
 		options.push_back( temp );
 	}
 	{
 		MenuOption temp;
-		temp.setText( L"Back to game" );
+		temp.setType( nullptr, MenuOption::BACK_TO_GAME );
 		backToGame = options.size();
 		options.push_back( temp );
 	}
 	{
 		MenuOption temp;
-		temp.setText( L"Freedom" );
+		temp.setType( nullptr, MenuOption::FREEDOM );
 		freedom = options.size();
 		options.push_back( temp );
 	}
@@ -69,9 +69,9 @@ MenuManager::~MenuManager() {
 	//dtor
 }
 
-void MenuManager::draw( irr::video::IVideoDriver* driver ) {
+void MenuManager::draw( irr::IrrlichtDevice* device ) {
 	for( decltype( options.size() ) o = 0; o < options.size(); ++o ) {
-		options.at( o ).draw( driver );
+		options.at( o ).draw( device );
 	}
 }
 
@@ -109,6 +109,17 @@ void MenuManager::findHighlights( int_fast32_t x, int_fast32_t y ) {
 	options.at( restartMaze ).highlighted = ( options.at( restartMaze ).contains( x, y ) );
 	options.at( backToGame ).highlighted = ( options.at( backToGame ).contains( x, y ) );
 	options.at( freedom ).highlighted = ( options.at( freedom ).contains( x, y ) );*/
+}
+
+/**
+ * Makes each menuOption load its texture.
+ * Arguments:
+ * device: A pointer to the Irrlicht device
+ **/
+void MenuManager::loadIcons( irr::IrrlichtDevice* device ) {
+	for( uint_fast8_t i = 0; i < options.size(); ++i ) {
+		options.at( i ).loadTexture( device );
+	}
 }
 
 /**
@@ -222,17 +233,10 @@ void MenuManager::scrollSelection( bool up ) {
 	options.at( nextHighlight ).highlighted = true;
 }
 
-void MenuManager::setFont( irr::gui::IGUIFont* font ) {
+void MenuManager::setFontAndResizeIcons( irr::IrrlichtDevice* device, irr::gui::IGUIFont* font ) {
 	for( decltype( options.size() ) o = 0; o < options.size(); ++o ) {
-		options.at( o ).setFont( font );
+		options.at( o ).setFontAndResizeIcon( device, font );
 	}
-	/*nextMaze.setFont( font );
-	restartMaze.setFont( font );
-	loadMaze.setFont( font );
-	saveMaze.setFont( font );
-	exitGame.setFont( font );
-	backToGame.setFont( font );
-	freedom.setFont( font );*/
 }
 
 /**
@@ -243,16 +247,6 @@ void MenuManager::setPositions( uint_fast32_t windowHeight ) {
 		for( decltype( options.size() ) o = 0; o < options.size(); ++o ) {
 			options.at( o ).setY( o * windowHeight / options.size() );
 		}
-		
-		/*uint_fast8_t numMenuOptions = 7;
-		nextMaze.setY( 0 );
-		restartMaze.setY( 1 * windowHeight / numMenuOptions );
-		loadMaze.setY( 2 * windowHeight / numMenuOptions );
-		saveMaze.setY( 3 * windowHeight / numMenuOptions );
-		exitGame.setY( 4 * windowHeight / numMenuOptions );
-		backToGame.setY( 5 * windowHeight / numMenuOptions );
-		freedom.setY( 6 * windowHeight / numMenuOptions );*/
-		
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::setPositions(): " << e.what() << std::endl;
 	}

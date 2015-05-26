@@ -325,12 +325,11 @@ void NetworkManager::sendMaze( std::minstd_rand::result_type randomSeed ) {
 		}
 		me->Send( data.c_str(), data.length(), MEDIUM_PRIORITY, RELIABLE_ORDERED, channel, latestClientAddress, false ); //The Boolean being false means we will send only to the specified address.
 	} else {
-		std::wcerr << L"Error: Cannot send data, not yet connected to anything." << std::endl;
+		//std::wcerr << L"Error: Cannot send data, not yet connected to anything." << std::endl;
 	}
 }
 
 void NetworkManager::sendPlayerPos( uint_fast8_t playerNum ) {
-	std::wcout << L"Sending position of player " << playerNum << std::endl;
 	std::string data = "";
 	data.append( serializeU8( TELEPORTPLAYER ) );
 	data.append( "|" );
@@ -359,7 +358,6 @@ void NetworkManager::sendPlayerPos( uint_fast8_t playerNum ) {
 }
 
 void NetworkManager::sendPlayerPosXMove( uint_fast8_t playerNum, int_fast8_t direction ) {
-	std::wcout << L"Sending position of player " << playerNum << std::endl;
 	std::string data = "";
 	data.append( serializeU8( MOVEPLAYERONX ) );
 	data.append( "|" );
@@ -385,7 +383,6 @@ void NetworkManager::sendPlayerPosXMove( uint_fast8_t playerNum, int_fast8_t dir
 }
 
 void NetworkManager::sendPlayerPosYMove( uint_fast8_t playerNum, int_fast8_t direction ) {
-	std::wcout << L"Sending position of player " << playerNum << std::endl;
 	std::string data = "";
 	data.append( serializeU8( MOVEPLAYERONY ) );
 	data.append( "|" );
@@ -486,7 +483,6 @@ void NetworkManager::setPort( std::string newPort ) {
 }
 
 void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
-	std::wcout << L"NetworkManager::setup() called" << std::endl;
 	isServer = newIsServer;
 	mg = newGM;
 	me = RakNet::RakPeerInterface::GetInstance(); //In RakNet's examples, this is called "client" in the client program and "server" in the server program.

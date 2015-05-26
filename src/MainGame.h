@@ -171,7 +171,10 @@ class MainGame : public irr::IEventReceiver {
 		
 		bool enableController;
 		
+		bool fillBackgroundTextureAfterLoading; //The "STARTRAILS" background animation requires this
 		bool fullscreen;
+		
+		bool haveFilledBackgroundTextureAfterLoading;
 		
 		bool isServer;
 		
@@ -318,6 +321,7 @@ class MainGame : public irr::IEventReceiver {
 		size_t currentProTip;
 		std::minstd_rand randomNumberGenerator;
 		std::minstd_rand::result_type randomSeed;
+		enum background_t : uint_fast8_t { ORIGINAL_STARFIELD, ROTATING_STARFIELD, IMAGES, STARTRAILS, NUMBER_OF_BACKGROUNDS };
 };
 
 #endif // GAMEMANAGER_H

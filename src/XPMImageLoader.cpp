@@ -15,26 +15,8 @@ XPMImageLoader::XPMImageLoader() {
 	//ctor
 }
 
-void XPMImageLoader::loadImage( irr::video::IVideoDriver* driver, irr::video::IImage* storage, Collectable::type_t type ) {
-	
-	char ** xpm = nullptr;
-	switch( type ) {
-		case Collectable::KEY: {
-			#include "compiled-images/key.xpm"
-			xpm = key_xpm;
-			break;
-		}
-		case Collectable::ACID: {
-			#include "compiled-images/acid.xpm"
-			xpm = acid_xpm;
-			break;
-		}
-		default: {
-			break;
-		}
-	}
-	
-	if( xpm != nullptr ) {
+void XPMImageLoader::loadImageCommon( irr::video::IVideoDriver* driver, irr::video::IImage* storage, char ** xpm ) {
+	if( xpm not_eq nullptr and driver not_eq nullptr and storage not_eq nullptr ) {
 		std::string temp = std::string( xpm[ 0 ] );
 		std::string widthString = temp.substr( 0, temp.find( ' ' ) );
 		temp = temp.substr( temp.find( ' ' ) + 1 );
@@ -68,7 +50,7 @@ void XPMImageLoader::loadImage( irr::video::IVideoDriver* driver, irr::video::II
 			std::string kxpm = xpm[ i ];
 			std::string id = kxpm.substr( 0, charPerPixel );
 			
-			colorType_t colorType;
+			colorType_t colorType; //I don't imagine the colorType variable will ever be used.
 			auto pos = kxpm.find( 'c' ); //c means the image is in color
 			if( pos == std::string::npos ) {
 				pos = kxpm.find( 'g' ); //g means grayscale
@@ -78,7 +60,7 @@ void XPMImageLoader::loadImage( irr::video::IVideoDriver* driver, irr::video::II
 						pos = kxpm.find( 's' ); //s means "symbolic", which I guess means the names of colors.
 						assert( pos != std::string::npos ); //Since I don't know for sure how to deal with symbolic colors, just produce an error for now. TODO: Deal with this properly
 					} else {
-						colorType = MONOCHROME;
+						colorType = MONOCHROME; //The monochrome color type will probably never be used in this program: GIMP, even when an image is monochrome, will save it as "color".
 					}
 				} else {
 					colorType = GRAYSCALE;
@@ -118,4 +100,96 @@ void XPMImageLoader::loadImage( irr::video::IVideoDriver* driver, irr::video::II
 		
 		newImage->copyToScaling( storage );
 	}
+}
+
+void XPMImageLoader::loadCollectableImage( irr::video::IVideoDriver* driver, irr::video::IImage* storage, Collectable::type_t type ) {
+	
+	char ** xpm = nullptr;
+	switch( type ) {
+		case Collectable::KEY: {
+			#include "compiled-images/items/key.xpm"
+			xpm = key_xpm;
+			break;
+		}
+		case Collectable::ACID: {
+			#include "compiled-images/items/acid.xpm"
+			xpm = acid_xpm;
+			break;
+		}
+		default: {
+			break;
+		}
+	}
+	
+	loadImageCommon( driver, storage, xpm );
+}
+
+void XPMImageLoader::loadMenuOptionImage( irr::video::IVideoDriver* driver, irr::video::IImage* storage, MenuOption::option_t type ) {
+	
+	char ** xpm = nullptr;
+	switch( type ) {
+		case MenuOption::NEW_MAZE: {
+			#include "compiled-images/menu icons/new_maze.xpm"
+			xpm = new_maze_xpm;
+			break;
+		}
+		case MenuOption::RESTART_MAZE: {
+			#include "compiled-images/menu icons/restart_maze.xpm"
+			xpm = restart_maze_xpm;
+			break;
+		}
+		case MenuOption::LOAD_MAZE: {
+			#include "compiled-images/menu icons/load_maze.xpm"
+			xpm = load_maze_xpm;
+			break;
+		}
+		case MenuOption::SAVE_MAZE: {
+			#include "compiled-images/menu icons/save_maze.xpm"
+			xpm = save_maze_xpm;
+			break;
+		}
+		case MenuOption::EXIT_GAME: {
+			#include "compiled-images/menu icons/exit_game.xpm"
+			xpm = exit_game_xpm;
+			break;
+		}
+		case MenuOption::BACK_TO_GAME: {
+			#include "compiled-images/menu icons/back_to_game.xpm"
+			xpm = back_to_game_xpm;
+			break;
+		}
+		case MenuOption::FREEDOM: {
+			#include "compiled-images/menu icons/freedom.xpm"
+			xpm = freedom_xpm;
+			break;
+		}
+		default: {
+			break;
+		}
+	}
+	
+	loadImageCommon( driver, storage, xpm );
+}
+
+void XPMImageLoader::loadOtherImage( irr::video::IVideoDriver* driver, irr::video::IImage* storage, other_t type ) {
+	char ** xpm = nullptr;
+	switch( type ) {
+		case PLAYER: {
+			#include "compiled-images/players/player.xpm"
+			xpm = player_xpm;
+			break;
+		}
+		case GOAL: {
+			#include "compiled-images/goal.xpm"
+			xpm = goal_xpm;
+			break;
+		}
+		case START: {
+			#include "compiled-images/start.xpm"
+			xpm = start_xpm;
+			break;
+		}
+	}
+	assert( xpm != nullptr );
+	loadImageCommon( driver, storage, xpm );
 }

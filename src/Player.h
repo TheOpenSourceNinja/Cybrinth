@@ -36,7 +36,6 @@ class Player : public Object {
 		void createTexture( irr::IrrlichtDevice* device, uint_fast16_t size );
 		
 		void draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height );
-		void draw( irr::video::IVideoDriver* driver, uint_fast16_t width, uint_fast16_t height );
 		
 		uint_fast8_t getItem();
 		Collectable::type_t getItemType();

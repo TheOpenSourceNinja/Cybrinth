@@ -88,8 +88,9 @@ bool MazeManager::canGetToAllCollectables( uint_fast8_t startX, uint_fast8_t sta
 	}
 }
 
-void MazeManager::draw( irr::video::IVideoDriver* driver, uint_fast16_t cellWidth, uint_fast16_t cellHeight ) {
+void MazeManager::draw( irr::IrrlichtDevice* device, uint_fast16_t cellWidth, uint_fast16_t cellHeight ) {
 	try {
+		auto* driver = device->getVideoDriver();
 		irr::video::SColor wallColor = WHITE;
 		irr::video::SColor lockColor = BROWN;
 		irr::video::SColor acidProofWallColor = LIGHTGREEN;
@@ -393,9 +394,9 @@ void MazeManager::makeRandomLevel() {
 					temp.setType( Collectable::KEY );
 					temp.loadTexture( mainGame->device );
 					mainGame->stuff.push_back( temp );
-					//if( mainGame->getDebugStatus() ) {
+					if( mainGame->getDebugStatus() ) {
 						std::wcout << L"Placing key at " << deadEndsX.at( chosen ) << L"," << deadEndsY.at( chosen ) << std::endl;
-					//}
+					}
 				}
 
 				//Remove chosen from the list of dead ends so no other keys go there

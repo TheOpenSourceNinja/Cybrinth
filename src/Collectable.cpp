@@ -43,12 +43,11 @@ Collectable::~Collectable() {
 
 void Collectable::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 	try {
-		std::wcout << L"createTexture() called" << std::endl;
-		irr::video::IVideoDriver* driver = device->getVideoDriver();
 		XPMImageLoader loader;
+		driver = device->getVideoDriver();
 		
 		irr::video::IImage* tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) );
-		loader.loadImage( driver, tempImage, type );
+		loader.loadCollectableImage( driver, tempImage, type );
 		
 		irr::core::stringw textureName;
 		switch( type ) {
@@ -112,9 +111,9 @@ void Collectable::loadTexture( irr::IrrlichtDevice* device ) {
 }
 
 void Collectable::loadTexture( irr::IrrlichtDevice* device, uint_fast8_t size ) {
-	std::wcout << L"Collectable::loadTexture() called" << std::endl;
+	auto* driver = device->getVideoDriver();
 	if( texture not_eq nullptr and texture not_eq NULL and texture not_eq 0 ) {
-		device->getVideoDriver()->removeTexture( texture );
+		driver->removeTexture( texture );
 		texture = nullptr;
 	}
 	switch( type ) {
@@ -131,7 +130,7 @@ void Collectable::loadTexture( irr::IrrlichtDevice* device, uint_fast8_t size ) 
 	if( texture == nullptr or texture == NULL or texture == 0 ) {
 		createTexture( device, size );
 	} else {
-		std::wcout << L"No need to call createTexture()" << std::endl;
+		//std::wcout << L"No need to call createTexture()" << std::endl;
 	}
 }
 

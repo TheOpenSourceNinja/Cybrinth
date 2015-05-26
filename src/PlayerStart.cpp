@@ -21,6 +21,7 @@
 #ifdef HAVE_IOSTREAM
 #include <iostream>
 #endif //HAVE_IOSTREAM
+#include "XPMImageLoader.h"
 
 PlayerStart::PlayerStart() {
 	try {
@@ -41,11 +42,28 @@ PlayerStart::~PlayerStart() {
 void PlayerStart::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 	try {
 		irr::video::IVideoDriver* driver = device->getVideoDriver();
-		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) );
-		tempImage->fill( WHITE );
+		XPMImageLoader loader;
 		
-		driver->removeTexture( texture );
-		texture = driver->addTexture( L"playerStart", tempImage );
+		irr::video::IImage* tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) );
+		loader.loadOtherImage( driver, tempImage, XPMImageLoader::START );
+		
+		irr::core::stringw textureName = "start-xpm";
+		
+		adjustImageColors( tempImage );
+		
+		texture = resizer.imageToTexture( driver, tempImage, textureName );
+
+		if( texture == nullptr ) {
+			irr::video::IImage* temp = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( size, size ) );
+			temp->fill( WHITE );
+			texture = resizer.imageToTexture( driver, temp, "generic start" );
+		}
+		
+		if( texture not_eq nullptr and texture->getSize() not_eq irr::core::dimension2d< irr::u32 >( size, size ) ) {
+			auto newTexture = resizer.resize( texture, size, size, driver );
+			driver->removeTexture( texture );
+			texture = newTexture;
+		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in PlayerStart::createTexture(): " << e.what() << std::endl;
 	}

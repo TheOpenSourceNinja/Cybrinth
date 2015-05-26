@@ -38,6 +38,7 @@ class Goal : public Object {
 		void reset();
 	protected:
 	private:
+		irr::core::stringw name; //gets passed to Object::loadTexture().
 };
 
 #endif // GOAL_H

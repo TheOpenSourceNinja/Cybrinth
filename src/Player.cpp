@@ -19,11 +19,12 @@
 #include "Player.h"
 #include <irrlicht/irrlicht.h>
 #ifdef HAVE_IOSTREAM
-#include <iostream>
+	#include <iostream>
 #endif //HAVE_IOSTREAM
 #include "colors.h"
 #include <boost/filesystem.hpp>
 #include "MainGame.h"
+#include "XPMImageLoader.h"
 
 // cppcheck-suppress uninitMemberVar
 Player::Player() {
@@ -58,45 +59,29 @@ Player::~Player() {
 //Draws a filled circle. Somebody please implement a faster algorithm.
 void Player::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 	try {
-		auto driver = device->getVideoDriver();
-		irr::video::IImage *tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) ); //Colorspace should be irr::video::A1R5G5B5 but that causes a bug on my current laptop.
-		tempImage->fill( irr::video::SColor( 0, 0, 0, 0 ) ); //Fills the image with invisibility!
-		tempImage->setPixel( size - 1, size - 1, irr::video::SColor( 0, 0, 0, 0 ) ); //Workaround for a bug in Irrlicht's software renderer
+		irr::video::IVideoDriver* driver = device->getVideoDriver();
+		XPMImageLoader loader;
 		
-		irr::core::position2d< decltype( size ) > origin( size / 2, size / 2 );
+		irr::video::IImage* tempImage = driver->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( size, size ) );
+		loader.loadOtherImage( driver, tempImage, XPMImageLoader::PLAYER );
 		
-		{
-			int_fast16_t radius = size / 2;
-			float rSquared = pow( static_cast< float >( radius ), 2.0f );
-			for( auto x = -radius; x <= 0; ++x ) {
-				auto height = static_cast< decltype( radius ) >( sqrt( rSquared - static_cast< float >( pow( static_cast< float >( x ), 2.0f ) ) ) );
-				for( auto y = -height; y <= 0; ++y ) {
-					tempImage->setPixel( x + origin.X, y + origin.Y, colorOne );
-					tempImage->setPixel( x + origin.X, -y + origin.Y, colorOne );
-					tempImage->setPixel( -x + origin.X, y + origin.Y, colorOne );
-					tempImage->setPixel( -x + origin.X, -y + origin.Y, colorOne );
-				}
-			}
+		irr::core::stringw textureName = "player-xpm";
+		
+		adjustImageColors( tempImage );
+		
+		texture = resizer.imageToTexture( driver, tempImage, textureName );
+
+		if( texture == nullptr ) {
+			irr::video::IImage* temp = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( size, size ) );
+			temp->fill( WHITE );
+			texture = resizer.imageToTexture( driver, temp, "generic player" );
 		}
 		
-		{
-			size /= 2;
-			int_fast16_t radius = size / 2;
-			float rSquared = pow( static_cast< float >( radius ), 2.0f );
-			for( auto x = -radius; x <= 0; ++x ) {
-				auto height = static_cast< decltype( radius ) >( sqrt( rSquared - static_cast< float >( pow( static_cast< float >( x ), 2.0f ) ) ) );
-				for( auto y = -height; y <= 0; ++y ) {
-					tempImage->setPixel( x + origin.X, y + origin.Y, colorTwo );
-					tempImage->setPixel( x + origin.X, -y + origin.Y, colorTwo );
-					tempImage->setPixel( -x + origin.X, y + origin.Y, colorTwo );
-					tempImage->setPixel( -x + origin.X, -y + origin.Y, colorTwo );
-				}
-			}
+		if( texture not_eq nullptr and texture->getSize() not_eq irr::core::dimension2d< irr::u32 >( size, size ) ) {
+			auto newTexture = resizer.resize( texture, size, size, driver );
+			driver->removeTexture( texture );
+			texture = newTexture;
 		}
-		
-		
-		driver->removeTexture( texture );
-		texture = driver->addTexture( L"playerCircle", tempImage );
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::createTexture(): " << e.what() << std::endl;
 	}

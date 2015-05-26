@@ -56,7 +56,8 @@ Object::~Object() {
 
 void Object::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height ) {
 	try {
-		irr::video::IVideoDriver* driver = device->getVideoDriver();
+		driver = device->getVideoDriver();
+		
 		if( moving ) {
 			float delta = 0.2; //Magic number! The value doesn't matter, except it should be between 0.0 and 1.0. Affects how quickly players appear to move between locations (how fast xInterp and yInterp approach the real x and y).
 
@@ -146,7 +147,6 @@ uint_fast8_t Object::getY() {
 void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::core::stringw fileName ) {
 	try {
 		driver = device->getVideoDriver();
-		
 		if( not ( texture == nullptr or texture == NULL ) ) {
 			driver->removeTexture( texture );
 			texture = nullptr;
@@ -177,23 +177,22 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 							for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount() and not fileFound; ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
 								irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
 							
-								//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
-								irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
-								if( loader->isALoadableFileFormat( file ) ) {
-									fileName = filePath;
-									fileFound = true;
+								if( loader->isALoadableFileExtension( filePath ) ) {
+									irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
+									if( loader->isALoadableFileFormat( file ) ) {
+										fileName = filePath;
+										fileFound = true;
+										file->drop();
+										break;
+									}
 									file->drop();
-									break;
 								}
-								file->drop();
 							}
 						}
 					}
 				}
 			}
 		}
-		
-		std::wcout << L"fileName: " << fileName.c_str() << std::endl;
 		
 		texture = driver->getTexture( fileName );
 		

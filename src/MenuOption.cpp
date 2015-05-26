@@ -18,10 +18,13 @@
  
 #include "MenuOption.h"
 #include "colors.h"
+#include "ImageModifier.h"
 #include "StringConverter.h"
+#include "XPMImageLoader.h"
 #ifdef HAVE_IOSTREAM
-#include <iostream>
+	#include <iostream>
 #endif //HAVE_IOSTREAM
+#include <boost/filesystem.hpp>
 
 #include <irrlicht/irrlicht.h>
 
@@ -30,8 +33,8 @@ MenuOption::MenuOption() {
 		x = 0;
 		y = 0;
 		font = nullptr;
-		setText( L"" );
-		setDimension();
+		iconTexture = nullptr;
+		setType( nullptr, DO_NOT_USE );
 		highlighted = false;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::MenuOption(): " << e.what() << std::endl;
@@ -45,19 +48,69 @@ MenuOption::~MenuOption() {
 	}
 }
 
-void MenuOption::setText( irr::core::stringw newText ) {
+void MenuOption::setType( irr::IrrlichtDevice* device, option_t newType ) {
 	try {
+		irr::core::stringw newText;
+		
+		type = newType;
+		switch( type ) {
+			case DO_NOT_USE: {
+				newText = L"";
+				break;
+			}
+			case NEW_MAZE: {
+				newText = L"Next maze";
+				break;
+			}
+			case RESTART_MAZE: {
+				newText = L"Restart maze";
+				break;
+			}
+			case LOAD_MAZE: {
+				newText = L"Load maze";
+				break;
+			}
+			case SAVE_MAZE: {
+				newText = L"Save maze";
+				break;
+			}
+			case EXIT_GAME: {
+				newText = L"Exit game";
+				break;
+			}
+			case BACK_TO_GAME: {
+				newText = L"Back to game";
+				break;
+			}
+			case FREEDOM: {
+				newText = L"Freedom";
+				break;
+			}
+		}
+		
 		text = newText;
+		fileName = text;
+		
+		if( iconTexture not_eq nullptr and device not_eq nullptr ) {
+			device->getVideoDriver()->removeTexture( iconTexture );
+			iconTexture = nullptr;
+		}
+		
+		loadTexture( device );
 		setDimension();
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::setText(): " << e.what() << std::endl;
 	}
 }
 
-void MenuOption::setFont( irr::gui::IGUIFont* newFont ) {
+void MenuOption::setFontAndResizeIcon( irr::IrrlichtDevice* device, irr::gui::IGUIFont* newFont ) {
 	try {
 		font = newFont;
 		setDimension();
+		
+		if( not ( iconTexture == nullptr or iconTexture == NULL ) ) {
+			loadTexture( device );
+		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::setFont(): " << e.what() << std::endl;
 	}
@@ -65,21 +118,37 @@ void MenuOption::setFont( irr::gui::IGUIFont* newFont ) {
 
 void MenuOption::setDimension() {
 	try {
+		dimension = irr::core::dimension2d<uint_fast16_t>( 0, 0 );
+		if( iconTexture not_eq nullptr ) {
+			dimension = iconTexture->getSize();
+		}
 		if( font not_eq nullptr ) {
 			StringConverter sc;
-			dimension = font->getDimension( sc.toStdWString( text ).c_str() ); //sc.toWCharArray( text ) );
-		} else {
-			dimension = irr::core::dimension2d<uint_fast16_t>( 0, 0 );
+			auto tempDimension = font->getDimension( sc.toStdWString( text ).c_str() ); //sc.toWCharArray( text ) );
+			dimension.Width += tempDimension.Width;
+			if( tempDimension.Height > dimension.Height ) {
+				dimension.Height = tempDimension.Height;
+			}
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::setDimension(): " << e.what() << std::endl;
 	}
 }
 
-void MenuOption::draw( irr::video::IVideoDriver* driver ) {
+void MenuOption::draw( irr::IrrlichtDevice* device ) {
 	try {
+		if( iconTexture == nullptr ) {
+			loadTexture( device );
+		}
+		
+		auto* driver = device->getVideoDriver();
+		decltype( x ) textX = x;
+		if( iconTexture not_eq nullptr ) {
+			driver->draw2DImage( iconTexture, irr::core::position2d< irr::s32 >( x, y ) );
+			textX += iconTexture->getSize().Width;
+		}
 		if( font not_eq nullptr ) {
-			irr::core::rect< irr::s32 > background( x, y, x + dimension.Width, y + dimension.Height );
+			irr::core::rect< irr::s32 > background( textX, y, dimension.Width, y + dimension.Height );
 			driver->draw2DRectangle( BLACK, background );
 			
 			irr::video::SColor textColor;
@@ -89,14 +158,14 @@ void MenuOption::draw( irr::video::IVideoDriver* driver ) {
 			} else {
 				textColor = CYAN;
 			}
-			font->draw( text, irr::core::rect< irr::s32 >( x, y, dimension.Width, dimension.Height ), textColor );
+			font->draw( text, irr::core::rect< irr::s32 >( textX, y, dimension.Width, dimension.Height ), textColor );
 		} else {
 			throw( L"Font is null" );
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::draw(): " << e.what() << std::endl;
 	}
-	 catch ( std::wstring &e ) {
+	catch ( std::wstring &e ) {
 		std::wcerr << L"Error in MenuOption::draw(): " << e << std::endl;
 	}
 }
@@ -148,5 +217,98 @@ bool MenuOption::contains( uint_fast32_t testX, uint_fast32_t testY ) {
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::contains(): " << e.what() << std::endl;
 		return false;
+	}
+}
+
+void MenuOption::loadTexture( irr::IrrlichtDevice* device ) {
+	try {
+		if( device not_eq nullptr ) {
+			irr::video::IVideoDriver* driver = device->getVideoDriver();
+			if( not ( iconTexture == nullptr or iconTexture == NULL ) ) {
+				driver->removeTexture( iconTexture );
+				iconTexture = nullptr;
+			}
+			
+			{
+				boost::filesystem::path path( boost::filesystem::current_path()/L"images" );
+				
+				//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
+				path = system_complete( path );
+				//path = absolute( path );
+				
+				while( ( not exists( path ) or not is_directory( path ) ) and path.has_parent_path() ) {
+					path = path.parent_path();
+				}
+				
+				if( exists( path ) ) {
+					boost::filesystem::recursive_directory_iterator end;
+					bool fileFound = false;
+					
+					for( boost::filesystem::recursive_directory_iterator i( path ); i not_eq end and not fileFound; ++i ) {
+						if( not is_directory( i->path() ) ) { //We've found a file
+							irr::io::IFileSystem* fileSystem = device->getFileSystem();
+							StringConverter stringConverter;
+							irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
+							if( fileSystem->getFileBasename( filePath, false ) == fileName ) {
+								//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
+								for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount() and not fileFound; ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
+									irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
+								
+									if( loader->isALoadableFileExtension( filePath ) ) {
+										irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
+										if( loader->isALoadableFileFormat( file ) ) {
+											fileName = filePath;
+											fileFound = true;
+											file->drop();
+											break;
+										}
+										file->drop();
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			iconTexture = driver->getTexture( fileName );
+			
+			if( iconTexture == nullptr or iconTexture == NULL ) {
+				createTexture( device );
+			}  else {
+				ImageModifier im;
+				
+				irr::video::IVideoDriver* driver = device->getVideoDriver();
+				irr::video::IImage* image = im.textureToImage( driver, iconTexture );
+				irr::core::stringw textureName = iconTexture->getName().getInternalName(); //Needed when converting the image back to a texture
+				driver->removeTexture( iconTexture );
+				iconTexture = nullptr;
+				
+				textureName += L"-recolored";
+				iconTexture = im.imageToTexture( driver, image, textureName );
+			}
+			
+			setDimension();
+		}
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in Object::loadTexture(): " << e.what() << std::endl;
+	}
+}
+
+void MenuOption::createTexture( irr::IrrlichtDevice* device ) {
+	if( device not_eq nullptr and iconTexture not_eq nullptr ) {
+		device->getVideoDriver()->removeTexture( iconTexture );
+		iconTexture = nullptr;
+	}
+	
+	if( device not_eq nullptr ) {
+		XPMImageLoader loader;
+		setDimension();
+		irr::video::IImage* tempImage = device->getVideoDriver()->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( dimension.Height, dimension.Height ) );
+		loader.loadMenuOptionImage( device->getVideoDriver(), tempImage, type );
+		ImageModifier im;
+		irr::core::stringw textureName = text;
+		textureName.append( L"-xpm" );
+		iconTexture = im.imageToTexture( device->getVideoDriver(), tempImage, textureName );
 	}
 }
