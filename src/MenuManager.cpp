@@ -46,6 +46,12 @@ MenuManager::MenuManager() {
 	}
 	{
 		MenuOption temp;
+		temp.setType( nullptr, MenuOption::SETTINGS );
+		settings = options.size();
+		options.push_back( temp );
+	}
+	{
+		MenuOption temp;
 		temp.setType( nullptr, MenuOption::EXIT_GAME );
 		exitGame = options.size();
 		options.push_back( temp );
@@ -144,7 +150,7 @@ void MenuManager::processSelection( MainGame* mg ) {
 	} else if( options.at( restartMaze ).highlighted ) {
 		mg->newMaze( mg->getRandomSeed() );
 	} else if( options.at( backToGame ).highlighted ) {
-		mg->showingMenu = false;
+		mg->currentScreen = MainGame::MAINSCREEN;
 	} else if( options.at( freedom ).highlighted ) {
 		std::wstring message = stringConverter.toStdWString( PACKAGE_NAME );
 		message += L" is copyright 2012-2015 by James Dearing. Licensed under the GNU Affero General Public License, version 3.0 or (at your option) any later version, as published by the Free Software Foundation. See the file \"COPYING\" or https://www.gnu.org/licenses/agpl.html.\n\nThis means you're free to do what you want with this game: mod it, give copies to friends, sell it if you want. Whatever. It's Free software, Free as in Freedom. You should have received the program's source code with this copy; if you don't have it, you can get it from ";
@@ -154,7 +160,9 @@ void MenuManager::processSelection( MainGame* mg ) {
 		message += L" is distributed 'as is' in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of TITLE, MERCHANTABILITY, COMPLETE DESTRUCTION OF IMPORTANT DATA, or FITNESS FOR A PARTICULAR PURPOSE.";
 		message += L"\n\n";
 		message += L"Cybrinth uses a copy of the RakNet networking library. RakNet is owned by Oculus VR, Inc. It is available under the terms of a modified 2-clause BSD license. See src/RakNet/LICENSE for the copyright license, and src/RakNet/PATENTS for patent information, and src/RakNet/ORIGIN for the URL from which this copy of RakNet was downloaded; copies of LICENSE and PATENTS can also be obtained from there. The creators of Cybrinth claim no connection to RakNet or Oculus VR, and no responsibility for any bugs or features in RakNet.";
-		mg->gui->addMessageBox( L"Freedom", stringConverter.toStdWString( message ).c_str() ); //stringConverter.toWCharArray( message ) );
+		mg->gui->addMessageBox( L"Freedom", message.c_str() );
+	} else if( options.at( settings ).highlighted ) {
+		mg->currentScreen = MainGame::SETTINGSSCREEN;
 	}
 }
 

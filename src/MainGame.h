@@ -118,7 +118,9 @@ class MainGame : public irr::IEventReceiver {
 		std::vector< Player > player;
 		std::vector< PlayerStart > playerStart;
 		
-		bool showingMenu;
+		enum screen_t : uint_fast8_t { MAINSCREEN, LOADINGSCREEN, MENUSCREEN, SETTINGSSCREEN, WAITINGFORPLAYERSSCREEN };
+		screen_t currentScreen;
+		
 		StringConverter stringConverter;
 		std::vector< Collectable > stuff;
 		
@@ -185,11 +187,9 @@ class MainGame : public irr::IEventReceiver {
 		bool playMusic;
 		
 		bool showBackgrounds;
-		bool showingLoadingScreen;
 		
 		bool vsync;
 		
-		bool waitingForOtherPlayers;
 		bool won;
 		
 		//unsigned 8-bit integers----------------------------------
@@ -322,6 +322,7 @@ class MainGame : public irr::IEventReceiver {
 		std::minstd_rand randomNumberGenerator;
 		std::minstd_rand::result_type randomSeed;
 		enum background_t : uint_fast8_t { ORIGINAL_STARFIELD, ROTATING_STARFIELD, IMAGES, STARTRAILS, NUMBER_OF_BACKGROUNDS };
+		enum user_event_t : uint_fast8_t { USER_EVENT_WINDOW_RESIZE };
 };
 
 #endif // GAMEMANAGER_H

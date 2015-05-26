@@ -148,6 +148,11 @@ void XPMImageLoader::loadMenuOptionImage( irr::video::IVideoDriver* driver, irr:
 			xpm = save_maze_xpm;
 			break;
 		}
+		case MenuOption::SETTINGS: {
+			#include "compiled-images/menu icons/settings.xpm"
+			xpm = settings_xpm;
+			break;
+		}
 		case MenuOption::EXIT_GAME: {
 			#include "compiled-images/menu icons/exit_game.xpm"
 			xpm = exit_game_xpm;

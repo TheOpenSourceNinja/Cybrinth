@@ -74,6 +74,10 @@ void MenuOption::setType( irr::IrrlichtDevice* device, option_t newType ) {
 				newText = L"Save maze";
 				break;
 			}
+			case SETTINGS: {
+				newText = L"Settings";
+				break;
+			}
 			case EXIT_GAME: {
 				newText = L"Exit game";
 				break;

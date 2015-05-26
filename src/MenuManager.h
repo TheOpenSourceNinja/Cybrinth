@@ -63,6 +63,7 @@ class MenuManager {
 		uint_fast8_t restartMaze;
 		
 		uint_fast8_t saveMaze;
+		uint_fast8_t settings;
 		StringConverter stringConverter;
 };
 

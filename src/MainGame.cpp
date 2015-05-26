@@ -32,9 +32,6 @@
 	//don't know what to include here if anything
 #endif //What about other operating systems? I don't know what to include for BSD etc.
 
-//Custom user events for Irrlicht
-enum user_event_t : uint_fast8_t { USER_EVENT_WINDOW_RESIZE };
-
 //TODO: Implement an options screen
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
 //TODO: Get multiplayer working online
@@ -88,12 +85,15 @@ bool MainGame::allHumansAtGoal() {
 }
 
 /**
- * If not all players are ready, displays a modal dialog saying so.
- * If all players are ready, removes the dialog.
+ * If not all players are ready, displays a screen saying so.
  * @param bool tf: indicates whether all players are ready.
  */
 void MainGame::allPlayersReady( bool tf ) {
-	waitingForOtherPlayers = tf;
+	if( tf ) {
+		currentScreen = MAINSCREEN;
+	} else {
+		currentScreen = WAITINGFORPLAYERSSCREEN;
+	}
 }
 
 /**
@@ -101,227 +101,239 @@ void MainGame::allPlayersReady( bool tf ) {
  */
 void MainGame::drawAll() {
 	try {
-		if( showingLoadingScreen ) {
+		if( currentScreen == LOADINGSCREEN ) {
 			driver->beginScene( true, true, BLACK );
 		} else {
 			driver->beginScene( true, true, backgroundColor );
 		}
 		
-		if( not showingLoadingScreen ) {
-			if( showBackgrounds ) {
-				drawBackground();
+		switch( currentScreen ) {
+			case SETTINGSSCREEN: {
+				irr::core::stringw waitingNotice( L"This is a temporary setting screen" );
+				irr::core::dimension2d< irr::u32 > tempDimensions = textFont->getDimension( waitingNotice.c_str() );
+				irr::core::rect< irr::s32 > tempRectangle( 0, 0, tempDimensions.Width + 0, tempDimensions.Height + 0 );
+				textFont->draw( waitingNotice, tempRectangle, WHITE, true, true );
+				break;
 			}
-			
-			//Draws player trails ("footprints")
-			if( markTrails ) {
-				for( decltype( mazeManager.cols ) x = 0; x < mazeManager.cols; ++x ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
-					for( decltype( mazeManager.rows ) y = 0; y < mazeManager.rows; ++y ) {
-						if( mazeManager.maze[ x ][ y ].visited ) {
-							auto dotSize = cellWidth / 5;
-							
-							if( dotSize < 1 ) { //No point drawing these if they're less than a pixel big!
-								dotSize = 1;
-							}
-							
-							driver->draw2DRectangle( mazeManager.maze[ x ][ y ].getVisitorColor() , irr::core::rect< irr::s32 >( irr::core::position2d< irr::s32 >(( x * cellWidth ) + ( 0.5 * cellWidth ) - ( 0.5 * dotSize ), ( y * cellHeight ) + ( 0.5 * cellHeight ) - ( 0.5 * dotSize ) ), irr::core::dimension2d< irr::s32 >( dotSize, dotSize ) ) );
-						}
-					}
-				}
-			}
-			
-			for( decltype( numPlayers ) ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts. Changed decltype( playerStart.size() ) to decltype( numPlayers ) because playerStart.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
-				playerStart.at( ps ).draw( device, cellWidth, cellHeight );
-			}
-			
-			//Drawing bots before human players makes it easier to play against large numbers of bots
-			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
-				player.at( bot.at( i ).getPlayer() ).draw( device, cellWidth, cellHeight );
-			}
-			
-			//Now we draw the players
-			for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
-				if( player.at( p ).isHuman ) {
-					player.at( p ).draw( device, cellWidth, cellHeight );
-				}
-			}
-			
-			//We used to draw Collectables before the players due to a texture resizing bug in Irrlicht's software renderer (the bug still exists AFAIK). Collectables generally use pre-created images whereas players generally use dynamically generated images. This made players potentially get covered by Collectables and thus invisible. Now that players can hold Collectables, we want them drawn on top of the players.
-			for( decltype( stuff.size() ) i = 0; i < stuff.size(); ++i ) {
-				stuff.at( i ).draw( device, cellWidth, cellHeight );
-			}
-			
-			goal.draw( device, cellWidth, cellHeight );
-			
-			mazeManager.draw( device, cellWidth, cellHeight );
-			
-			if( waitingForOtherPlayers ) {
-				//TODO: Display a notification that we're waiting for other players to finish loading
+			case WAITINGFORPLAYERSSCREEN: {
 				irr::core::stringw waitingNotice( L"Waiting for other players to finish loading" );
 				irr::core::dimension2d< irr::u32 > tempDimensions = textFont->getDimension( waitingNotice.c_str() );
 				irr::core::rect< irr::s32 > tempRectangle( 0, 0, tempDimensions.Width + 0, tempDimensions.Height + 0 );
 				textFont->draw( waitingNotice, tempRectangle, WHITE, true, true );
-			} else if( showingMenu ) {
+				break;
+			}
+			case MENUSCREEN: {
 				menuManager.draw( device );
+				gui->drawAll();
+				break;
 			}
-			
-			
-			uint_fast32_t spaceBetween = windowSize.Height / 30;
-			uint_fast32_t textY = spaceBetween;
-			irr::core::dimension2d< irr::u32 > tempDimensions;
-			
-			{
-				time_t currentTime = time( nullptr );
-				wchar_t clockTime[ 9 ];
-				wcsftime( clockTime, 9, L"%H:%M:%S", localtime( &currentTime ) );
-				clockTime[ 8 ] = '\0';
-				tempDimensions = clockFont->getDimension( clockTime );
-				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				clockFont->draw( clockTime, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
+			case LOADINGSCREEN: {
+				drawLoadingScreen();
+				break;
 			}
-
-			{
-				irr::core::stringw timeLabel( L"Time:" );
-				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( stringConverter.toStdWString( timeLabel ).c_str() ); //stringConverter.toWCharArray( timeLabel ) );
-				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( L"Time:", tempRectangle, YELLOW, true, true, &tempRectangle );
-			}
-
-			{
-				irr::core::stringw timerStr( "" );
-				timerStr += ( timer->getTime() / 1000 );
-				timerStr += L" seconds";
-				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( stringConverter.toStdWString( timerStr ).c_str() ); //stringConverter.toWCharArray( timerStr ) );
-				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( timerStr, tempRectangle, YELLOW, true, true, &tempRectangle );
-			}
-
-			{
-				irr::core::stringw keysFoundStr( L"Keys found:" );
-				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( stringConverter.toStdWString( keysFoundStr ).c_str() ); //stringConverter.toWCharArray( keysFoundStr ) );
-				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( keysFoundStr, tempRectangle, YELLOW, true, true, &tempRectangle );
-			}
-
-			{
-				irr::core::stringw keyStr;
-				keyStr += numKeysFound;
-				keyStr += L"/";
-				keyStr += numLocks;
-				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( stringConverter.toStdWString( keyStr ).c_str() ); //stringConverter.toWCharArray( keyStr ) );
-				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( keyStr, tempRectangle, YELLOW, true, true, &tempRectangle );
-			}
-
-			{
-				irr::core::stringw seedLabel( L"Random seed:" );
-				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( stringConverter.toStdWString( seedLabel ).c_str() );// stringConverter.toWCharArray( seedLabel ) );
-				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( seedLabel, tempRectangle, YELLOW, true, true, &tempRectangle );
-			}
-
-			{
-				irr::core::stringw seedStr( randomSeed );
-				textY += tempDimensions.Height;
-				tempDimensions = textFont->getDimension( stringConverter.toStdWString( seedStr ).c_str() ); //stringConverter.toWCharArray( seedStr ) );
-				irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-				textFont->draw( seedStr, tempRectangle, YELLOW, true, true, &tempRectangle );
-			}
-
-			{
-				irr::core::stringw headfor( L"Head for" );
-				tempDimensions = textFont->getDimension( stringConverter.toStdWString( headfor ).c_str() ); //stringConverter.toWCharArray( headfor ) );
-				textY += tempDimensions.Height;
-				if( textY < ( ( windowSize.Height / 2 ) - tempDimensions.Height ) ) {
-					textY = ( ( windowSize.Height / 2 ) - tempDimensions.Height );
+			case MAINSCREEN: {
+				if( showBackgrounds ) {
+					drawBackground();
 				}
-				if( numKeysFound >= numLocks ) {
-					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( headfor, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
+				
+				//Draws player trails ("footprints")
+				if( markTrails ) {
+					for( decltype( mazeManager.cols ) x = 0; x < mazeManager.cols; ++x ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
+						for( decltype( mazeManager.rows ) y = 0; y < mazeManager.rows; ++y ) {
+							if( mazeManager.maze[ x ][ y ].visited ) {
+								auto dotSize = cellWidth / 5;
+								
+								if( dotSize < 1 ) { //No point drawing these if they're less than a pixel big!
+									dotSize = 1;
+								}
+								
+								driver->draw2DRectangle( mazeManager.maze[ x ][ y ].getVisitorColor() , irr::core::rect< irr::s32 >( irr::core::position2d< irr::s32 >(( x * cellWidth ) + ( 0.5 * cellWidth ) - ( 0.5 * dotSize ), ( y * cellHeight ) + ( 0.5 * cellHeight ) - ( 0.5 * dotSize ) ), irr::core::dimension2d< irr::s32 >( dotSize, dotSize ) ) );
+							}
+						}
+					}
 				}
-			}
-
-			{
-				irr::core::stringw theexit( L"the exit!" );
-				tempDimensions = textFont->getDimension( stringConverter.toStdWString( theexit ).c_str() ); //stringConverter.toWCharArray( theexit ) );
-				textY += tempDimensions.Height;
-				if( numKeysFound >= numLocks ) {
-					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( theexit, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
+				
+				for( decltype( numPlayers ) ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts. Changed decltype( playerStart.size() ) to decltype( numPlayers ) because playerStart.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+					playerStart.at( ps ).draw( device, cellWidth, cellHeight );
 				}
-			}
-
-			if( playMusic ) {
+				
+				//Drawing bots before human players makes it easier to play against large numbers of bots
+				for( decltype( numBots ) i = 0; i < numBots; ++i ) {
+					player.at( bot.at( i ).getPlayer() ).draw( device, cellWidth, cellHeight );
+				}
+				
+				//Now we draw the players
+				for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
+					if( player.at( p ).isHuman ) {
+						player.at( p ).draw( device, cellWidth, cellHeight );
+					}
+				}
+				
+				//We used to draw Collectables before the players due to a texture resizing bug in Irrlicht's software renderer (the bug still exists AFAIK). Collectables generally use pre-created images whereas players generally use dynamically generated images. This made players potentially get covered by Collectables and thus invisible. Now that players can hold Collectables, we want them drawn on top of the players.
+				for( decltype( stuff.size() ) i = 0; i < stuff.size(); ++i ) {
+					stuff.at( i ).draw( device, cellWidth, cellHeight );
+				}
+				
+				goal.draw( device, cellWidth, cellHeight );
+				
+				mazeManager.draw( device, cellWidth, cellHeight );
+				
+				uint_fast32_t spaceBetween = windowSize.Height / 30;
+				uint_fast32_t textY = spaceBetween;
+				irr::core::dimension2d< irr::u32 > tempDimensions;
+				
 				{
-					irr::core::stringw nowplaying( L"Now playing:" );
-					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( nowplaying ).c_str() ); //stringConverter.toWCharArray( nowplaying ) );
+					time_t currentTime = time( nullptr );
+					wchar_t clockTime[ 9 ];
+					wcsftime( clockTime, 9, L"%H:%M:%S", localtime( &currentTime ) );
+					clockTime[ 8 ] = '\0';
+					tempDimensions = clockFont->getDimension( clockTime );
 					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( nowplaying, tempRectangle, YELLOW, true, true, &tempRectangle );
+					clockFont->draw( clockTime, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
 				}
 
 				{
+					irr::core::stringw timeLabel( L"Time:" );
 					textY += tempDimensions.Height;
-					tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicTitle ).c_str() ); //stringConverter.toWCharArray( musicTitle ) );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( timeLabel ).c_str() ); //stringConverter.toWCharArray( timeLabel ) );
 					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					musicTagFont->draw( musicTitle, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
+					textFont->draw( L"Time:", tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
-					irr::core::stringw by( L"by" );
+					irr::core::stringw timerStr( "" );
+					timerStr += ( timer->getTime() / 1000 );
+					timerStr += L" seconds";
 					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( by ).c_str() ); //stringConverter.toWCharArray( by ) );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( timerStr ).c_str() ); //stringConverter.toWCharArray( timerStr ) );
 					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( by, tempRectangle, YELLOW, true, true, &tempRectangle );
+					textFont->draw( timerStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
+					irr::core::stringw keysFoundStr( L"Keys found:" );
 					textY += tempDimensions.Height;
-					tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicArtist ).c_str() ); //stringConverter.toWCharArray( musicArtist ) );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( keysFoundStr ).c_str() ); //stringConverter.toWCharArray( keysFoundStr ) );
 					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					musicTagFont->draw( musicArtist, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
+					textFont->draw( keysFoundStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
-					irr::core::stringw fromalbum( L"from album" );
+					irr::core::stringw keyStr;
+					keyStr += numKeysFound;
+					keyStr += L"/";
+					keyStr += numLocks;
 					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( fromalbum ).c_str() ); //stringConverter.toWCharArray( fromalbum ) );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( keyStr ).c_str() ); //stringConverter.toWCharArray( keyStr ) );
 					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( fromalbum, tempRectangle, YELLOW, true, true, &tempRectangle );
+					textFont->draw( keyStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
+					irr::core::stringw seedLabel( L"Random seed:" );
 					textY += tempDimensions.Height;
-					tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicAlbum ).c_str() ); //stringConverter.toWCharArray( musicAlbum ) );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( seedLabel ).c_str() );// stringConverter.toWCharArray( seedLabel ) );
 					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					musicTagFont->draw( musicAlbum, tempRectangle, LIGHTGRAY, true, true, &tempRectangle );
+					textFont->draw( seedLabel, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
-					irr::core::stringw volume( L"Volume:" );
+					irr::core::stringw seedStr( randomSeed );
 					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( volume ).c_str() ); //stringConverter.toWCharArray( volume ) );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( seedStr ).c_str() ); //stringConverter.toWCharArray( seedStr ) );
 					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( volume, tempRectangle, YELLOW, true, true, &tempRectangle );
+					textFont->draw( seedStr, tempRectangle, YELLOW, true, true, &tempRectangle );
 				}
 
 				{
-					irr::core::stringw volumeNumber( musicVolume );
-					volumeNumber.append( L"%" );
+					irr::core::stringw headfor( L"Head for" );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( headfor ).c_str() ); //stringConverter.toWCharArray( headfor ) );
 					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( volumeNumber ).c_str() ); //stringConverter.toWCharArray( volumeNumber ) );
-					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( volumeNumber, tempRectangle, LIGHTRED, true, true, &tempRectangle );
+					if( textY < ( ( windowSize.Height / 2 ) - tempDimensions.Height ) ) {
+						textY = ( ( windowSize.Height / 2 ) - tempDimensions.Height );
+					}
+					if( numKeysFound >= numLocks ) {
+						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+						textFont->draw( headfor, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
+					}
 				}
+
+				{
+					irr::core::stringw theexit( L"the exit!" );
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( theexit ).c_str() ); //stringConverter.toWCharArray( theexit ) );
+					textY += tempDimensions.Height;
+					if( numKeysFound >= numLocks ) {
+						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+						textFont->draw( theexit, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
+					}
+				}
+
+				if( playMusic ) {
+					{
+						irr::core::stringw nowplaying( L"Now playing:" );
+						textY += tempDimensions.Height;
+						tempDimensions = textFont->getDimension( stringConverter.toStdWString( nowplaying ).c_str() ); //stringConverter.toWCharArray( nowplaying ) );
+						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+						textFont->draw( nowplaying, tempRectangle, YELLOW, true, true, &tempRectangle );
+					}
+
+					{
+						textY += tempDimensions.Height;
+						tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicTitle ).c_str() ); //stringConverter.toWCharArray( musicTitle ) );
+						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+						musicTagFont->draw( musicTitle, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
+					}
+
+					{
+						irr::core::stringw by( L"by" );
+						textY += tempDimensions.Height;
+						tempDimensions = textFont->getDimension( stringConverter.toStdWString( by ).c_str() ); //stringConverter.toWCharArray( by ) );
+						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+						textFont->draw( by, tempRectangle, YELLOW, true, true, &tempRectangle );
+					}
+
+					{
+						textY += tempDimensions.Height;
+						tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicArtist ).c_str() ); //stringConverter.toWCharArray( musicArtist ) );
+						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+						musicTagFont->draw( musicArtist, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
+					}
+
+					{
+						irr::core::stringw fromalbum( L"from album" );
+						textY += tempDimensions.Height;
+						tempDimensions = textFont->getDimension( stringConverter.toStdWString( fromalbum ).c_str() ); //stringConverter.toWCharArray( fromalbum ) );
+						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+						textFont->draw( fromalbum, tempRectangle, YELLOW, true, true, &tempRectangle );
+					}
+
+					{
+						textY += tempDimensions.Height;
+						tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicAlbum ).c_str() ); //stringConverter.toWCharArray( musicAlbum ) );
+						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+						musicTagFont->draw( musicAlbum, tempRectangle, LIGHTGRAY, true, true, &tempRectangle );
+					}
+
+					{
+						irr::core::stringw volume( L"Volume:" );
+						textY += tempDimensions.Height;
+						tempDimensions = textFont->getDimension( stringConverter.toStdWString( volume ).c_str() ); //stringConverter.toWCharArray( volume ) );
+						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+						textFont->draw( volume, tempRectangle, YELLOW, true, true, &tempRectangle );
+					}
+
+					{
+						irr::core::stringw volumeNumber( musicVolume );
+						volumeNumber.append( L"%" );
+						textY += tempDimensions.Height;
+						tempDimensions = textFont->getDimension( stringConverter.toStdWString( volumeNumber ).c_str() ); //stringConverter.toWCharArray( volumeNumber ) );
+						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+						textFont->draw( volumeNumber, tempRectangle, LIGHTRED, true, true, &tempRectangle );
+					}
+				}
+
+				gui->drawAll();
 			}
-
-			gui->drawAll();
-		} else {
-			drawLoadingScreen();
 		}
 		
 		driver->endScene();
@@ -1506,7 +1518,7 @@ MainGame::MainGame() {
 		saveMazeDialog = nullptr;
 		exitConfirmation = nullptr;
 		logoTexture = nullptr;
-
+		currentScreen = LOADINGSCREEN;
 		loading = L"Loading...";
 		proTipPrefix = L"Pro tip: ";
 		winnersLabel = L"Winners: ";
@@ -1525,8 +1537,6 @@ MainGame::MainGame() {
 		minHeight = 480;
 		currentDirectory = boost::filesystem::current_path();
 		haveShownLogo = false;
-		showingMenu = true;
-		waitingForOtherPlayers = false;
 		donePlaying = false;
 		fillBackgroundTextureAfterLoading = false;
 		haveFilledBackgroundTextureAfterLoading = false;
@@ -2149,7 +2159,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 			break;
 
 			case irr::EET_MOUSE_INPUT_EVENT: {
-				if( showingMenu ) {
+				if( currentScreen == MENUSCREEN ) {
 					switch( event.MouseInput.Event ) {
 						case irr::EMIE_MOUSE_MOVED: {
 							menuManager.findHighlights( event.MouseInput.X, event.MouseInput.Y );
@@ -2545,19 +2555,49 @@ void MainGame::processControls() {
 				
 				switch( controls.at( k ).getAction() ) {
 					case ControlMapping::ACTION_MENU_ACTIVATE: {
-						if( not showingMenu ) {
-							showingMenu = true;
-						} else {
-							menuManager.processSelection( this );
+						switch( currentScreen ) {
+							case MENUSCREEN: {
+								menuManager.processSelection( this );
+								break;
+							}
+							case SETTINGSSCREEN: {
+								//TODO:Settings stuff
+								std::wcout << L"ACTION_MENU_ACTIVATE control used on settings screen." << std::endl;
+								break;
+							}
+							case MAINSCREEN: {
+								currentScreen = MENUSCREEN;
+								break;
+							}
+							default: {
+								throw L"ACTION_MENU_ACTIVATE control used on a screen which is not in the switch statement.";
+								break;
+							}
 						}
 						break;
 					}
 					case ControlMapping::ACTION_MENU_UP: {
-						menuManager.scrollSelection( true );
+						switch( currentScreen ) {
+							case MENUSCREEN: {
+								menuManager.scrollSelection( true );
+								break;
+							}
+							default: {
+								throw L"ACTION_MENU_UP control used on a screen which is not in the switch statement.";
+							}
+						}
 						break;
 					}
 					case ControlMapping::ACTION_MENU_DOWN: {
-						menuManager.scrollSelection( false );
+						switch( currentScreen ) {
+							case MENUSCREEN: {
+								menuManager.scrollSelection( false );
+								break;
+							}
+							default: {
+								throw L"ACTION_MENU_UP control used on a screen which is not in the switch statement.";
+							}
+						}
 						break;
 					}
 					case ControlMapping::ACTION_SCREENSHOT: {
@@ -2565,12 +2605,7 @@ void MainGame::processControls() {
 						break;
 					}
 					case ControlMapping::ACTION_VOLUME_UP: {
-						musicVolume += 5;
-						
-						if( musicVolume > 100 ) {
-							musicVolume = 100;
-						}
-						
+						musicVolume = std::max( ( musicVolume + 5 ), ( decltype( musicVolume ) ) 100 );
 						Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
 						break;
 					}
@@ -2587,7 +2622,7 @@ void MainGame::processControls() {
 					default: { //Handle player controls
 						bool ignoreKey = false;
 						
-						if( showingMenu or waitingForOtherPlayers ) { //Don't move the players if the game is paused.
+						if( currentScreen not_eq MAINSCREEN ) { //Don't move the players if the game is paused.
 							ignoreKey = true;
 						}
 						
@@ -3256,13 +3291,13 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 			}
 			
 			haveShownLogo = true; //This should only ever be false at the start of the program.
-
+			
 			while( device->run() and not won and not donePlaying ) {
-
-				if( showingLoadingScreen and ( timer->getRealTime() > timeStartedLoading + loadingDelay ) ) {
-					showingLoadingScreen = false;
+				
+				if( currentScreen == LOADINGSCREEN and ( timer->getRealTime() > timeStartedLoading + loadingDelay ) ) {
+					currentScreen = MAINSCREEN;
 				}
-
+				
 				if( driver->getFPS() > 60 ) {
 					/*These next 3 lines are for limiting processor usage. I really
 					 *doubt they're all needed, so comment one or another if you
@@ -3271,7 +3306,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 					//device->sleep( 17 ); //17 = 1/60 of a second, rounded up, in milliseconds. My monitor refreshes at 60 Hz.
 					//SDL_Delay( 17 );
 				}
-
+				
 				if( driver->getScreenSize() not_eq windowSize ) { //If the window has been resized. Only here until Irrlicht implements proper window resize events.
 					irr::SEvent temp;
 					temp.EventType = irr::EET_USER_EVENT;
@@ -3292,9 +3327,9 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 				}
 				
 				
-				if( ( not showingLoadingScreen and device->isWindowActive() ) or debug ) {
+				if( ( currentScreen != LOADINGSCREEN and device->isWindowActive() ) or debug ) {
 					//It's the bots' turn to move now.
-					if( not ( showingMenu or showingLoadingScreen or waitingForOtherPlayers ) and numBots > 0 ) {
+					if( currentScreen == MAINSCREEN and numBots > 0 ) {
 						for( decltype( numBots ) i = 0; i < numBots; ++i ) {
 							if( not bot.at( i ).atGoal() and ( allHumansAtGoal() or bot.at( i ).doneWaiting() ) ) {
 								bot.at( i ).move();
@@ -3302,7 +3337,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 						}
 					}
 					
-					device->getCursorControl()->setVisible( showingMenu or showingLoadingScreen or debug );
+					device->getCursorControl()->setVisible( currentScreen not_eq MAINSCREEN or debug );
 					drawAll();
 					
 					//Check if any of the players have landed on a collectable item
@@ -3371,13 +3406,13 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 					won = ( winners.size() >= numPlayers ); //If all the players are on the winners list, we've won.
 
 				} else if( not device->isWindowActive() ) { //if(( not showingLoadingScreen and device->isWindowActive() ) or debug )
-					showingMenu = true;
+					currentScreen = MENUSCREEN;
 					device->yield();
 				}
 
-				if( showingMenu and not timer->isStopped() ) {
+				if( currentScreen == MENUSCREEN and not timer->isStopped() ) {
 					timer->stop();
-				} else if( not showingMenu and timer->isStopped() ) {
+				} else if( currentScreen not_eq MENUSCREEN and timer->isStopped() ) {
 					timer->start();
 				}
 
@@ -4289,7 +4324,7 @@ void MainGame::startLoadingScreen() {
 	if( debug ) {
 		std::wcout << L"startLoadingScreen() called" << std::endl;
 	}
-	showingLoadingScreen = true;
+	currentScreen = LOADINGSCREEN;
 	timeStartedLoading = timer->getRealTime();
 	//drawLoadingScreen();
 	

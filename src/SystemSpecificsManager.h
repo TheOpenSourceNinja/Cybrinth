@@ -34,6 +34,7 @@ class SystemSpecificsManager {
 		virtual ~SystemSpecificsManager();
 		std::vector< boost::filesystem::path > getFontFolders();
 		std::vector< boost::filesystem::path > getConfigFolders();
+		bool canBeUsedAsFolder( boost::filesystem::path folder );
 	protected:
 		std::wstring getEnvironmentVariable( std::string name );
 		std::wstring getEnvironmentVariable( std::wstring name );

@@ -26,7 +26,7 @@
 
 class MenuOption {
 	public:
-		enum option_t : uint_fast8_t { NEW_MAZE, RESTART_MAZE, LOAD_MAZE, SAVE_MAZE, EXIT_GAME, BACK_TO_GAME, FREEDOM, DO_NOT_USE };
+		enum option_t : uint_fast8_t { NEW_MAZE, RESTART_MAZE, LOAD_MAZE, SAVE_MAZE, SETTINGS, EXIT_GAME, BACK_TO_GAME, FREEDOM, DO_NOT_USE };
 		
 		MenuOption();
 		virtual ~MenuOption();

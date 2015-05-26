@@ -56,8 +56,13 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 	#if defined WINDOWS
 		try {
 			fontFolders.push_back( getEnvironmentVariable( "%SYSTEMROOT%" ) + L"\Fonts" );
+		} catch( std::wstring error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		try {
 			fontFolders.push_back( getEnvironmentVariable( "%WINDIR%" ) + L"\Fonts" );
 		} catch( std::wstring error ) {
+			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#elif defined LINUX
 		fontFolders.push_back( L"/usr/share/X11/fonts/" );
@@ -80,16 +85,14 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#else
-		fontFolders.push_back( L"/usr/X11R6/lib/X11/fonts/" ); //OpenBSD documentation suggests fonts may be stored in these two locations
+		fontFolders.push_back( L"/usr/X11R6/lib/X11/fonts/" ); //FreeBSD documentation says that X11 fonts are located here. OpenBSD documentation suggests fonts may be stored in this and the following location.
 		fontFolders.push_back( L"/usr/local/lib/X11/fonts/" );
 	#endif //What about other operating systems? I don't know where BSD etc. put their font files.
 	
-	//for( std::vector< boost::filesystem::path >::iterator i = fontFolders.begin(); i not_eq fontFolders.end(); i++ ) {
 	for( decltype( fontFolders.size() ) i = 0; i < fontFolders.size(); i++ ) {
-		//if( not exists( &i ) ) {
-		if( not exists( fontFolders.at( i ) ) or ( not is_directory( fontFolders.at( i ) ) and ( is_symlink( fontFolders.at( i ) ) and not is_directory( read_symlink( fontFolders.at( i ) ) ) ) ) ) {
-			//fontFolders.erase( i );
+		if( not canBeUsedAsFolder( fontFolders.at( i ) ) ) {
 			fontFolders.erase( fontFolders.begin() + i );
+			i -= 1;
 		}
 	}
 	
@@ -151,20 +154,37 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 	#endif //What about other operating systems? I don't know where BSD etc. put their config files.
 	
 	for( decltype( configFolders.size() ) i = 0; i < configFolders.size(); i++ ) {
-		if( not exists( configFolders.at( i ) ) ) {
+		if( not canBeUsedAsFolder( configFolders.at( i ) ) ) {
 			configFolders.erase( configFolders.begin() + i );
+			i -= 1;
 		}
 	}
 	
 	return configFolders;
 }
 
-SystemSpecificsManager::SystemSpecificsManager()
-{
+bool SystemSpecificsManager::canBeUsedAsFolder( boost::filesystem::path folder ) {
+	bool goodSoFar = exists( folder );
+	
+	if( goodSoFar ) {
+		if( not is_directory( folder ) ) {
+			if( is_symlink( folder ) ) {
+				if( not is_directory( read_symlink( folder ) ) ) {
+					goodSoFar = false;
+				}
+			} else {
+				goodSoFar = false;
+			}
+		}
+	}
+	
+	return goodSoFar;
+}
+
+SystemSpecificsManager::SystemSpecificsManager() {
 	//ctor
 }
 
-SystemSpecificsManager::~SystemSpecificsManager()
-{
+SystemSpecificsManager::~SystemSpecificsManager() {
 	//dtor
 }
