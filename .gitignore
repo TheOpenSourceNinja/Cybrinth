@@ -1,9 +1,5 @@
-/compiled-images/.deps/%.Po
-/compiled-images/.deps/goal.Po
-/compiled-images/.deps/start.Po
+/compiled-images/
 *.cmaze
-/compiled-images/.deps/acid.Po
-/compiled-images/.deps/key.Po
 *.[oa]
 *~
 *.exe
