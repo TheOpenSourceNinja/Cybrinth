@@ -15,6 +15,9 @@ AC_CONFIG_FILES([Makefile])
 
 # Checks for programs.
 AC_PROG_CXX
+AC_CHECK_PROG( [gimp], [gimp], [yes], [no] )
+AM_CONDITIONAL([FOUND_GIMP], [test "x$gimp" = xyes])
+AM_COND_IF([FOUND_GIMP], , [AC_MSG_ERROR([required program 'gimp' not found.])])
 
 # Checks for libraries.
 PKG_CHECK_MODULES([DEPS], [freetype2 >= 14.1.8 taglib >= 1.7.2]) # Some libraries provide files for pkg-config

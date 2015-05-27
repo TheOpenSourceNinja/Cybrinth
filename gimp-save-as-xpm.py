@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#This is script is intended not to be run manually but by make as part of Cybrinth's build process.
+#This script is intended not to be run manually but by make as part of Cybrinth's build process.
 import os
 imageDir = "images"
 compiledImageDir = "compiled-images"

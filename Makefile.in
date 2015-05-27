@@ -379,6 +379,7 @@ datarootdir = @datarootdir@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
+gimp = @gimp@
 host_alias = @host_alias@
 htmldir = @htmldir@
 includedir = @includedir@
