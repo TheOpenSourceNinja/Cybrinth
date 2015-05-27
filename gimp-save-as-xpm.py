@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#This is script is intended not to be run manually but by make as part of Cybrinth's build process.
 import os
 imageDir = "images"
 compiledImageDir = "compiled-images"
@@ -16,8 +17,11 @@ for roots, dirs, files in os.walk( imageDir ):
 			if( not os.path.exists( newDirPath ) ):
 				os.makedirs( newDirPath )
 			
-			pdb.gimp_image_flatten( image )
-			pdb.gimp_file_save( image, image.active_drawable, newFilePath, newFilePath, run_mode=RUN_NONINTERACTIVE )
+			#pdb.gimp_image_flatten( image )
+			pdb.gimp_image_merge_visible_layers( image, CLIP_TO_IMAGE )
+			#pdb.gimp_file_save( image, image.active_drawable, newFilePath, newFilePath, run_mode=RUN_INTERACTIVE )
+			alphaThreshold = 127 #XPM format doesn't do alpha transparency; it does "invisible is a color that pixels can be"
+			pdb.file_xpm_save( image, image.active_drawable, newFilePath, newFilePath, alphaThreshold, run_mode=RUN_NONINTERACTIVE )
 			pdb.gimp_image_delete( image )
 
 pdb.gimp_quit( TRUE )

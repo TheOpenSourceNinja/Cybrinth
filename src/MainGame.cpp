@@ -2583,7 +2583,7 @@ void MainGame::processControls() {
 								break;
 							}
 							default: {
-								throw L"ACTION_MENU_UP control used on a screen which is not in the switch statement.";
+								//ignore
 							}
 						}
 						break;
@@ -2595,7 +2595,7 @@ void MainGame::processControls() {
 								break;
 							}
 							default: {
-								throw L"ACTION_MENU_UP control used on a screen which is not in the switch statement.";
+								//ignore
 							}
 						}
 						break;
