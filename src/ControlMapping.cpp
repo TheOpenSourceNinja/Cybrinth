@@ -138,6 +138,7 @@ void ControlMapping::setMouseWheelUp( bool val ) {
 
 void ControlMapping::setPlayer( uint_fast8_t val ) {
 	try {
+		controlsAPlayer = true;
 		player = val;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in ControlMapping::setPlayer(): " << e.what() << std::endl;
@@ -191,6 +192,8 @@ ControlMapping::ControlMapping() {
 		activated = false;
 		joystickAxis = UINT_FAST8_MAX;
 		joystickDeadZone = ( INT_FAST16_MAX / 2 );
+		player = UINT8_MAX;
+		controlsAPlayer = false;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in ControlMapping::ControlMapping(): " << e.what() << std::endl;
 	}

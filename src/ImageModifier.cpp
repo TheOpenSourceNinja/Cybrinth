@@ -50,9 +50,9 @@ irr::video::ITexture* ImageModifier::resize( irr::video::ITexture* image, uint_f
 		auto name = image->getName().getInternalName() + L"-resized";
 		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< irr::u32 >( width, height ) );
 		tempImage->copyToScaling( tempImage2 );
-		//tempImage->drop();
+		tempImage->drop();
 		image = imageToTexture( driver, tempImage2, name );
-		//tempImage2->drop();
+		tempImage2->drop();
 		return image;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in ImageModifier::resize(): " << e.what() << std::endl;
@@ -67,7 +67,7 @@ irr::video::IImage* ImageModifier::resize( irr::video::IImage* image, uint_fast3
 		//image->drop();
 		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< irr::u32 >( width, height ) );
 		tempImage->copyToScaling( tempImage2 );
-		//tempImage->drop();
+		tempImage->drop();
 		image = tempImage2;//imageToTexture( driver, tempImage2, L"resized" );
 		//tempImage2->drop();
 		return image;

@@ -119,6 +119,12 @@
 		<Unit filename="src/ControlMapping.h">
 			<Option target="all" />
 		</Unit>
+		<Unit filename="src/CustomException.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/CustomException.h">
+			<Option target="all" />
+		</Unit>
 		<Unit filename="src/FileSelectorDialog.cpp">
 			<Option target="all" />
 		</Unit>

@@ -39,7 +39,10 @@ class NetworkManager {
 		virtual ~NetworkManager();
 		
 		bool getConnectionStatus();
+		std::string getPort();
+		
 		void processPackets();
+		
 		void sendMaze( std::minstd_rand::result_type randomSeed );
 		void sendPlayerPos( uint_fast8_t playerNum );
 		void sendPlayerPosXMove( uint_fast8_t playerNum, int_fast8_t direction );

@@ -29,14 +29,14 @@ Collectable::Collectable() {
 		y = 0;
 		setType( KEY );
 		reset();
-	} catch ( std::exception &e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Collectable::Collectable(): " << e.what() << std::endl;
 	}
 }
 
 Collectable::~Collectable() {
 	try {
-	} catch ( std::exception &e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Collectable::~Collectable(): " << e.what() << std::endl;
 	}
 }
@@ -80,7 +80,7 @@ void Collectable::createTexture( irr::IrrlichtDevice* device, uint_fast16_t size
 			driver->removeTexture( texture );
 			texture = newTexture;
 		}
-	} catch ( std::exception &e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Collectable::loadTexture(): " << e.what() << std::endl;
 	}
 }

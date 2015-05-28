@@ -22,6 +22,7 @@
 
 #include <wchar.h>
 
+#include "CustomException.h"
 #include "SystemSpecificsManager.h"
 
 std::wstring SystemSpecificsManager::getEnvironmentVariable( std::string name ) {
@@ -33,7 +34,7 @@ std::wstring SystemSpecificsManager::getEnvironmentVariable( std::string name ) 
 		std::wstring error = L"Environment variable ";
 		error.append( sc.toStdWString( name ) );
 		error.append( L" not found." );
-		throw( error );
+		throw( CustomException( error ) );
 	}
 }
 
@@ -56,12 +57,12 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 	#if defined WINDOWS
 		try {
 			fontFolders.push_back( getEnvironmentVariable( "%SYSTEMROOT%" ) + L"\Fonts" );
-		} catch( std::wstring error ) {
+		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 		try {
 			fontFolders.push_back( getEnvironmentVariable( "%WINDIR%" ) + L"\Fonts" );
-		} catch( std::wstring error ) {
+		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#elif defined LINUX
@@ -71,7 +72,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 		fontFolders.push_back( L"/usr/share/fonts/" );
 		try {
 			fontFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/.fonts/" );
-		} catch( std::wstring error ) {
+		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#elif defined MACOSX
@@ -81,7 +82,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 		fontFolders.push_back( L"/System Folder/Fonts/" );
 		try {
 			fontFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Library/Fonts/");
-		} catch( std::wstring error ) {
+		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#else
@@ -107,35 +108,35 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 	#if defined WINDOWS
 		try {
 			configFolders.push_back( getEnvironmentVariable( "%APPDATA%" ) + L"/" + packageName );
-		} catch( std::wstring error ) {
+		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 		try {
 			configFolders.push_back( getEnvironmentVariable( "%LOCALAPPDATA%" ) + L"/" + packageName );
-		} catch( std::wstring error ) {
+		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 		try {
 			configFolders.push_back( getEnvironmentVariable( "%PROGRAMDATA%" ) + L"/" + packageName );
-		} catch( std::wstring error ) {
+		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#elif defined LINUX
 		configFolders.push_back( L"/etc/" + sc.toStdWString( PACKAGE_NAME ) );
 		try {
 			configFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/." + packageName );
-		} catch( std::wstring error ) {
+		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 		try {
 			configFolders.push_back( getEnvironmentVariable( "XDG_CONFIG_HOME" ) + L"/" + packageName );
-		} catch( std::wstring error ) {
+		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#elif defined MACOSX
 		try {
 			configFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/Library/Application Support/" + packageName );
-		} catch( std::wstring error ) {
+		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#else
@@ -143,12 +144,12 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 		configFolders.push_back( L"/etc/" + packageName );
 		try {
 			configFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/." + packageName );
-		} catch( std::wstring error ) {
+		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 		try {
 			configFolders.push_back( getEnvironmentVariable( "XDG_CONFIG_HOME" ) + L"/" + packageName );
-		} catch( std::wstring error ) {
+		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#endif //What about other operating systems? I don't know where BSD etc. put their config files.

@@ -15,7 +15,8 @@
  * @section DESCRIPTION
  * The MenuOption class represents an item in the in-game pause menu.
  */
- 
+
+#include "CustomException.h"
 #include "MenuOption.h"
 #include "colors.h"
 #include "ImageModifier.h"
@@ -164,13 +165,10 @@ void MenuOption::draw( irr::IrrlichtDevice* device ) {
 			}
 			font->draw( text, irr::core::rect< irr::s32 >( textX, y, dimension.Width, dimension.Height ), textColor );
 		} else {
-			throw( L"Font is null" );
+			throw( CustomException( L"Font is null" ) );
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::draw(): " << e.what() << std::endl;
-	}
-	catch ( std::wstring &e ) {
-		std::wcerr << L"Error in MenuOption::draw(): " << e << std::endl;
 	}
 }
 

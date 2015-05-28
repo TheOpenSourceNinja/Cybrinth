@@ -16,6 +16,7 @@
  * The MainGame class is the overseer of all other classes. It's also where the game's main loop is.
  */
 
+#include "CustomException.h"
 #include "MainGame.h"
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
@@ -25,12 +26,6 @@
 #include <SDL.h>
 #include <fileref.h>
 #include <tag.h>
-
-#if defined WINDOWS //Networking stuff
-	#include <winsock>
-#elif defined LINUX
-	//don't know what to include here if anything
-#endif //What about other operating systems? I don't know what to include for BSD etc.
 
 //TODO: Implement an options screen
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
@@ -454,9 +449,6 @@ void MainGame::drawLoadingScreen() {
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::drawLoadingScreen(): " << e.what() << std::endl;
 	}
-	catch( std::wstring e ) {
-		std::wcerr << L"Error in MainGame::drawLoadingScreen(): " << e << std::endl;
-	}
 }
 
 /**
@@ -471,9 +463,7 @@ void MainGame::drawLoadingScreen() {
 		if( not isNull( logoTexture ) ) {
 			driver->draw2DImage( logoTexture, irr::core::position2d< irr::s32 >( 0, 0 ) );
 		}
-	} catch( std::wstring error ) {
-		std::wcerr << L"Error in drawLogo(): " << error << std::endl;
-	} catch ( std::exception &error ) {
+	} catch( std::exception &error ) {
 		std::wcerr << L"Error in drawLogo(): " << error.what() << std::endl;
 	}
  }
@@ -757,12 +747,10 @@ Collectable* MainGame::getKey( uint_fast8_t key ) {
 			std::wstring error = L"Collectable ";
 			error += static_cast< unsigned int >( key );
 			error += L" is not a key.";
-			throw error;
+			throw CustomException( error );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::getKey(): " << e.what() << std::endl;
-	} catch( std::wstring e ) {
-		std::wcerr << L"Error in MainGame::getKey(): " << e << std::endl;
 	}
 	
 	if( debug ) {
@@ -838,13 +826,10 @@ Player* MainGame::getPlayer( uint_fast8_t p ) {
 		if( p < numPlayers ) {
 			return &player.at( p );
 		} else {
-			throw( std::wstring( L"Request for player (" ) + stringConverter.toStdWString( p ) + L") >= numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")" );
+			throw( CustomException( std::wstring( L"Request for player (" ) + stringConverter.toStdWString( p ) + L") >= numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")" ) );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::getPlayer(): " << e.what() << std::endl;
-		return nullptr;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in MainGame::getPlayer(): " << e << std::endl;
 		return nullptr;
 	}
 }
@@ -890,7 +875,7 @@ PlayerStart* MainGame::getStart( uint_fast8_t ps ) {
  */
 bool MainGame::isNull( void* ptr ) {
 	// cppcheck-suppress duplicateExpression
-	return ( ptr == 0 and ptr == NULL and ptr == nullptr );
+	return ( ptr == 0 or ptr == NULL or ptr == nullptr );
 }
 
 /**
@@ -1143,10 +1128,10 @@ void MainGame::loadMusicFont() {
 			std::wcout << L"loadMusicFont() called" << std::endl;
 		}
 		
-		uint_fast32_t size = 0; //The height (I think) of the font to be loaded
-		
 		if( playMusic ) {
 			if( fontFile not_eq "" ) {
+				uint_fast32_t size = 0; //The height (I think) of the font to be loaded
+			
 				uint_fast32_t maxWidth = ( windowSize.Width / sideDisplaySizeDenominator );
 				
 				uint_fast32_t numerator = 2.5 * maxWidth; //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
@@ -1238,12 +1223,12 @@ void MainGame::loadNextSong() {
 		music = Mix_LoadMUS( currentMusic.c_str() );
 
 		if( isNull( music ) ) {
-			throw( std::wstring( L"Unable to load music file: " ) + stringConverter.toStdWString( Mix_GetError() ) );
+			throw( CustomException( std::wstring( L"Unable to load music file: " ) + stringConverter.toStdWString( Mix_GetError() ) ) );
 		} else {
 			auto musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to *repeat* the music. -1 means infinite, 0 means don't repeat.
 
 			if( musicStatus == -1 ) {
-				throw( std::wstring( L"Unable to play music file: " ) + stringConverter.toStdWString( Mix_GetError() ) );
+				throw( CustomException( std::wstring( L"Unable to play music file: " ) + stringConverter.toStdWString( Mix_GetError() ) ) );
 			} else {
 				if( debug ) {
 					switch( Mix_GetMusicType( nullptr ) ) {
@@ -1316,8 +1301,6 @@ void MainGame::loadNextSong() {
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::loadNextSong(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in MainGame::loadNextSong(): " << e << std::endl;
 	}
 }
 
@@ -1368,13 +1351,13 @@ void MainGame::loadProTips() {
 					setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows random_shuffle() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
 					random_shuffle( proTips.begin(), proTips.end() );
 				} else {
-					throw( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) );
+					throw( CustomException( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) ) );
 				}
 			} else {
-				throw( std::wstring( L"Pro tips file is a directory. Cannot load pro tips." ) );
+				throw( CustomException( std::wstring( L"Pro tips file is a directory. Cannot load pro tips." ) ) );
 			}
 		} else {
-			throw( std::wstring( L"Pro tips file does not exist. Cannot load pro tips." ) );
+			throw( CustomException( std::wstring( L"Pro tips file does not exist. Cannot load pro tips." ) ) );
 		}
 		
 		if( debug ) {
@@ -1382,8 +1365,6 @@ void MainGame::loadProTips() {
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::loadProTips(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in MainGame::loadProTips(): " << e << std::endl;
 	}
 }
 
@@ -1396,9 +1377,8 @@ void MainGame::loadTipFont() {
 			std::wcout << L"loadTipFont() called" << std::endl;
 		}
 		
-		uint_fast32_t size; //The height (I think) of the font to be loaded
-		
 		if( fontFile not_eq "" ) {
+			uint_fast32_t size; //The height (I think) of the font to be loaded
 			uint_fast32_t maxWidth = windowSize.Width;
 			
 			irr::core::stringw tipIncludingPrefix = proTipPrefix;
@@ -1527,7 +1507,6 @@ MainGame::MainGame() {
 		keysFoundPerPlayer = L"Keys found: ";
 		scores = L"Scores: ";
 		scoresTotal = L"Total scores: ";
-		//network.setMainGame( this ); //NOTE: Network stuff here.
 		mazeManager.setMainGame( this );
 		isServer = false;
 		antiAliasFonts = true;
@@ -1548,7 +1527,7 @@ MainGame::MainGame() {
 		device = irr::createDevice( irr::video::EDT_NULL ); //Must create a device before calling readPrefs();
 		
 		if( isNull( device ) ) {
-			throw( std::wstring( L"Cannot create null device. Something is definitely wrong here!" ) );
+			throw( CustomException( std::wstring( L"Cannot create null device. Something is definitely wrong here!" ) ) );
 		}
 		
 		readPrefs();
@@ -1602,7 +1581,7 @@ MainGame::MainGame() {
 		
 		driver = device->getVideoDriver(); //Not sure if this would be possible with a null device, which is why we don't exit
 		if( isNull( driver ) ) {
-			throw( std::wstring( L"Cannot get video driver" ) );
+			throw( CustomException( std::wstring( L"Cannot get video driver" ) ) );
 		} else if ( debug ) {
 			std::wcout << L"Got the video driver" << std::endl;
 		}
@@ -1626,7 +1605,7 @@ MainGame::MainGame() {
 
 		gui = device->getGUIEnvironment();
 		if( isNull( gui ) ) {
-			throw( std::wstring( L"Cannot get GUI environment" ) );
+			throw( CustomException( std::wstring( L"Cannot get GUI environment" ) ) );
 		} else {
 			if ( debug ) {
 				std::wcout << L"Got the gui environment" << std::endl;
@@ -1650,7 +1629,7 @@ MainGame::MainGame() {
 		
 		backgroundSceneManager = device->getSceneManager(); //Not sure if this would be possible with a null device, which is why we don't exit
 		if( isNull( backgroundSceneManager ) ) {
-			throw( std::wstring( L"Cannot get scene manager" ) );
+			throw( CustomException( std::wstring( L"Cannot get scene manager" ) ) );
 		} else if ( debug ) {
 			std::wcout << L"Got the scene manager" << std::endl;
 		}
@@ -1822,7 +1801,7 @@ MainGame::MainGame() {
 		}
 		
 		//Set up networking
-		network.setup( this, isServer ); //NOTE: Network stuff here.
+		network.setup( this, isServer );
 		
 		timer = device->getTimer();
 
@@ -1831,8 +1810,6 @@ MainGame::MainGame() {
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::MainGame(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in MainGame::MainGame(): " << e << std::endl;
 	}
 }
 
@@ -1919,7 +1896,6 @@ void MainGame::makeMusicList() {
  * --- p: The player to move
  */
  void MainGame::movePlayerCommon( uint_fast8_t p ) {
-	//network.sendPlayerPos( p, player.at( p ).getX(), player.at( p ).getY() ); //NOTE: Network stuff here.
 	mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].visited = true;
 	if( player.at( p ).stepsTakenThisMaze % 2 == 0 ) {
 		mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].setVisitorColor( player.at( p ).getColorTwo() );
@@ -1966,18 +1942,16 @@ void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromSe
 
 			movePlayerCommon( p );
 			if( player.at( p ).getX() >= mazeManager.cols ) {
-				throw L"Player "+ stringConverter.toStdWString( p ) + L"'s X (" + stringConverter.toStdWString( player.at( p ).getX() ) + L") is outside mazeManager's cols (" + stringConverter.toStdWString( mazeManager.cols ) + L").";
+				throw CustomException( L"Player "+ stringConverter.toStdWString( p ) + L"'s X (" + stringConverter.toStdWString( player.at( p ).getX() ) + L") is outside mazeManager's cols (" + stringConverter.toStdWString( mazeManager.cols ) + L")." );
 			} else if( player.at( p ).getY() >= mazeManager.rows ) {
-				throw L"Player "+ stringConverter.toStdWString( p ) + L"'s Y (" + stringConverter.toStdWString( player.at( p ).getY() ) + L") is outside mazeManager's rows (" + stringConverter.toStdWString( mazeManager.rows ) + L").";
+				throw CustomException( L"Player "+ stringConverter.toStdWString( p ) + L"'s Y (" + stringConverter.toStdWString( player.at( p ).getY() ) + L") is outside mazeManager's rows (" + stringConverter.toStdWString( mazeManager.rows ) + L")." );
 			}
 		} else {
 			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
-			throw e;
+			throw CustomException( e );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::movePlayerOnX(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in MainGame::movePlayerOnX(): " << e << std::endl;
 	}
 }
 
@@ -2017,20 +1991,18 @@ void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromSe
 			}
 
 			if( player.at( p ).getX() >= mazeManager.cols ) {
-				throw L"Player "+ stringConverter.toStdWString( p ) + L"'s X (" + stringConverter.toStdWString( player.at( p ).getX() ) + L") is outside mazeManager's cols (" + stringConverter.toStdWString( mazeManager.cols ) + L").";
+				throw CustomException( L"Player "+ stringConverter.toStdWString( p ) + L"'s X (" + stringConverter.toStdWString( player.at( p ).getX() ) + L") is outside mazeManager's cols (" + stringConverter.toStdWString( mazeManager.cols ) + L")." );
 			} else if( player.at( p ).getY() >= mazeManager.rows ) {
-				throw L"Player "+ stringConverter.toStdWString( p ) + L"'s Y (" + stringConverter.toStdWString( player.at( p ).getY() ) + L") is outside mazeManager's rows (" + stringConverter.toStdWString( mazeManager.rows ) + L").";
+				throw CustomException( L"Player "+ stringConverter.toStdWString( p ) + L"'s Y (" + stringConverter.toStdWString( player.at( p ).getY() ) + L") is outside mazeManager's rows (" + stringConverter.toStdWString( mazeManager.rows ) + L")." );
 			}
 
 			movePlayerCommon( p );
 		} else {
 			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
-			throw e;
+			throw CustomException( e );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::movePlayerOnY(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in MainGame::movePlayerOnY(): " << e << std::endl;
 	}
 }
 
@@ -2510,7 +2482,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 			logoTexture = driver->getTexture( logoFilePath );
 			if( isNull( logoTexture ) ) {
 				std::wstring error = L"Cannot load logo texture, even though Irrlicht said it was loadable?!?";
-				throw error;
+				throw CustomException( error );
 			}
 
 			drawLogo();
@@ -2521,8 +2493,6 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 		if( debug ) {
 			std::wcout << L"end of pickLogo()" << std::endl;
 		}
-	} catch( std::wstring error ) {
-		std::wcerr << L"Error in drawLogo(): " << error << std::endl;
 	} catch ( std::exception &error ) {
 		std::wcerr << L"Error in drawLogo(): " << error.what() << std::endl;
 	}
@@ -2570,8 +2540,7 @@ void MainGame::processControls() {
 								break;
 							}
 							default: {
-								throw L"ACTION_MENU_ACTIVATE control used on a screen which is not in the switch statement.";
-								break;
+								throw CustomException( L"ACTION_MENU_ACTIVATE control used on a screen which is not in the switch statement." );
 							}
 						}
 						break;
@@ -2696,7 +2665,7 @@ void MainGame::readPrefs() {
 		numPlayers = 1;
 		markTrails = false;
 		musicVolume = 50;
-		//network.setPort( 61187 ); //NOTE: Network stuff here.
+		network.setPort( "61187" );
 		isServer = true;
 		botsKnowSolution = false;
 		botAlgorithm = AI::DEPTH_FIRST_SEARCH;
@@ -2940,7 +2909,7 @@ void MainGame::readPrefs() {
 										
 										try {
 											StringConverter sc;
-											network.setPort( sc.toStdString( choice ) ); //NOTE: Network stuff here.
+											network.setPort( sc.toStdString( choice ) );
 										} catch( boost::bad_lexical_cast &e ) {
 											std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 										}
@@ -3107,7 +3076,7 @@ void MainGame::readPrefs() {
 								break;
 							}
 							case 13: { //L"network port"
-								//prefsFile << network.getPort(); //NOTE: Network stuff here.
+								prefsFile << network.getPort();
 								break;
 							}
 							case 14: { //L"always server"
@@ -3144,12 +3113,10 @@ void MainGame::readPrefs() {
 		}
 		
 		if( not prefsFileFound ) {
-			throw( L"prefs.cfg does not exist or is not readable in any of the folders that were searched." );
+			throw( CustomException( L"prefs.cfg does not exist or is not readable in any of the folders that were searched." ) );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::readPrefs(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in MainGame::readPrefs(): " << e << std::endl;
 	}
 	
 	if( debug ) {
@@ -3845,8 +3812,6 @@ void MainGame::setControls() {
 								
 							} catch( std::exception &e ) {
 								std::wcerr << L"Error in MainGame::setControls(): " << e.what() << std::endl;
-							} catch( std::wstring &e ) {
-							std::wcerr << L"Error in MainGame::setControls(): " << e << std::endl;
 							}
 						}
 					}
@@ -3857,12 +3822,10 @@ void MainGame::setControls() {
 		}
 		
 		if( not controlsFileFound ) {
-			throw( std::wstring( L"controls.cfg does not exist or is not readable in any of the folders that were searched." ) );
+			throw( CustomException( std::wstring( L"controls.cfg does not exist or is not readable in any of the folders that were searched." ) ) );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::setControls(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in MainGame::setControls(): " << e << std::endl;
 	}
 	
 	if( debug ) {
@@ -4204,7 +4167,7 @@ void MainGame::setupBackground() {
 					backgroundTexture = driver->getTexture( backgroundFilePath );
 					if( backgroundTexture == 0 ) {
 						std::wstring error = L"Cannot load background texture, even though Irrlicht said it was loadable?!?";
-						throw error;
+						throw CustomException( error );
 					}
 				} else {
 					std::wcerr << L"Could not find any background images." << std::endl;
@@ -4216,13 +4179,11 @@ void MainGame::setupBackground() {
 			default: {
 				StringConverter sc;
 				std::wstring error = L"Background chosen (#" + sc.toStdWString( backgroundChosen ) + L") is not in switch statement.";
-				throw error;
+				throw CustomException( error );
 			}
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::setupBackground(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in MainGame::setupBackground(): " << e << std::endl;
 	}
 	
 	if( debug ) {
@@ -4258,7 +4219,7 @@ void MainGame::setLoadingPercentage( float newPercent ) {
 void MainGame::setMyPlayer( uint_fast8_t newPlayer ) {
 	try {
 		for( uint_fast8_t c = 0; c < controls.size(); ++c ) {
-			if( controls.at( c ).getPlayer() == newPlayer ) { //Eliminate duplicate controls
+			if( controls.at( c ).controlsAPlayer and controls.at( c ).getPlayer() == newPlayer ) { //Eliminate duplicate controls
 				controls.erase( controls.begin() + c );
 				--c;
 			}
@@ -4354,14 +4315,14 @@ void MainGame::takeScreenShot() {
 			time_t currentTime = time( nullptr );
 			wchar_t clockTime[ 20 ];
 			if( wcsftime( clockTime, 20, L"%FT%T", localtime( &currentTime ) ) == 0 ) {
-				throw( std::wstring( L"Could not convert the time to ISO 8601 format.") );
+				throw( CustomException( std::wstring( L"Could not convert the time to ISO 8601 format.") ) );
 			}
 			clockTime[ 19 ] = L'\0';
 			filename.append( clockTime );
 			filename.append( L".png" );
 			
 			if( not driver->writeImageToFile( image, filename ) ) {
-				throw( std::wstring( L"Failed to save screen shot to file " + stringConverter.toStdWString( filename ) ) );
+				throw( CustomException( std::wstring( L"Failed to save screen shot to file " + stringConverter.toStdWString( filename ) ) ) );
 			} else {
 				irr::core::stringw success = L"Screen shot saved as \"";
 				success.append( filename );
@@ -4376,12 +4337,10 @@ void MainGame::takeScreenShot() {
 			
 			image->drop();
 		} else {
-			throw( std::wstring( L"takeScreenShot(): Failed to take screen shot" ) );
+			throw( CustomException( std::wstring( L"takeScreenShot(): Failed to take screen shot" ) ) );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::takeScreenShot(): " << e.what() << std::endl;
-	} catch( std::wstring e ) {
-		std::wcerr << L"Error in MainGame::takeScreenShot(): " << e << std::endl;
 	}
 	
 	if( debug ) {

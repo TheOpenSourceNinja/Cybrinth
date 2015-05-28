@@ -59,6 +59,7 @@ class ControlMapping {
 		bool operator==( ControlMapping other );
 		
 		bool activated; //To be set, unset, and accessed by MainGame. Indicates whether the relevant button has been pressed, or joystick moved, etc. Ensures smooth player movements.
+		bool controlsAPlayer;
 	protected:
 	private:
 		irr::EKEY_CODE key;

@@ -101,7 +101,8 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_cybrinth_OBJECTS = src/XPMImageLoader.$(OBJEXT) src/AI.$(OBJEXT) \
+am_cybrinth_OBJECTS = src/CustomException.$(OBJEXT) \
+	src/XPMImageLoader.$(OBJEXT) src/AI.$(OBJEXT) \
 	src/Collectable.$(OBJEXT) src/FontManager.$(OBJEXT) \
 	src/MainGame.$(OBJEXT) src/Goal.$(OBJEXT) \
 	src/GUIFreetypeFont.$(OBJEXT) src/ControlMapping.$(OBJEXT) \
@@ -408,11 +409,12 @@ DEB_BUILD_HARDENING = 1 #If you have hardening wrapper scripts installed (Ubuntu
 AM_CPPFLAGS = -std=c++11 -Wpedantic -Wall -Wextra -Wno-write-strings $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS) $(SDLDEPS_CFLAGS)
 AM_LDFLAGS = -lstdc++ -lm -pthread
 BUILT_SOURCES = compiled-images
-cybrinth_SOURCES = src/Integers.h src/XPMImageLoader.h \
-	src/XPMImageLoader.cpp src/AI.h src/AI.cpp src/Collectable.h \
-	src/Collectable.cpp src/colors.h src/FontManager.h \
-	src/FontManager.cpp src/MainGame.h src/MainGame.cpp src/Goal.h \
-	src/Goal.cpp src/GUIFreetypeFont.h src/GUIFreetypeFont.cpp \
+cybrinth_SOURCES = src/CustomException.h src/CustomException.cpp \
+	src/Integers.h src/XPMImageLoader.h src/XPMImageLoader.cpp \
+	src/AI.h src/AI.cpp src/Collectable.h src/Collectable.cpp \
+	src/colors.h src/FontManager.h src/FontManager.cpp \
+	src/MainGame.h src/MainGame.cpp src/Goal.h src/Goal.cpp \
+	src/GUIFreetypeFont.h src/GUIFreetypeFont.cpp \
 	src/ControlMapping.h src/ControlMapping.cpp src/main.cpp \
 	src/MazeCell.h src/MazeCell.cpp src/MazeManager.h \
 	src/MazeManager.cpp src/MenuOption.h src/MenuOption.cpp \
@@ -680,6 +682,8 @@ src/$(am__dirstamp):
 src/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/$(DEPDIR)
 	@: > src/$(DEPDIR)/$(am__dirstamp)
+src/CustomException.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/XPMImageLoader.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/AI.$(OBJEXT): src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
@@ -985,6 +989,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/AI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/Collectable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ControlMapping.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/CustomException.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/FileSelectorDialog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/FontManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/GUIFreetypeFont.Po@am__quote@

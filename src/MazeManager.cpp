@@ -17,6 +17,7 @@
  */
 
 #include "colors.h"
+#include "CustomException.h"
 #include "MazeManager.h"
 #include "MainGame.h"
 
@@ -168,16 +169,16 @@ bool MazeManager::loadFromFile( boost::filesystem::path src ) {
 	try {
 		//cppcheck-suppress duplicateIf
 		if( mainGame == 0 or mainGame == NULL or mainGame == nullptr ) {
-			throw( L"setMainGame() has not been called yet." );
+			throw( CustomException( L"setMainGame() has not been called yet." ) );
 		}
 		if( mainGame->getDebugStatus() ) {
 			std::wcout << L"Trying to load from file " << src.wstring() << std::endl;
 		}
 		
 		if( not exists( src ) ) {
-			throw( std::wstring( L"File not found: " ) + src.wstring() );
+			throw( CustomException( std::wstring( L"File not found: " ) + src.wstring() ) );
 		} else if( is_directory( src ) ) {
-			throw( std::wstring( L"Directory specified, file needed: " ) + src.wstring() );
+			throw( CustomException( std::wstring( L"Directory specified, file needed: " ) + src.wstring() ) );
 		}
 		
 		boost::filesystem::wifstream file; //Identical to a standard C++ fstream, except it takes Boost paths
@@ -190,14 +191,12 @@ bool MazeManager::loadFromFile( boost::filesystem::path src ) {
 			mainGame->newMaze( newRandomSeed );
 			return true;
 		} else {
-			throw( std::wstring( L"Cannot open file: \"" ) + src.wstring() + L"\"" );
+			throw( CustomException( std::wstring( L"Cannot open file: \"" ) + src.wstring() + L"\"" ) );
 		}
 	} catch( const boost::filesystem::filesystem_error &e ) {
 		std::wcerr << L"Boost Filesystem error in MazeManager::loadFromFile(): " << e.what() << std::endl;
 	} catch( std::exception &e ) {
 		std::wcerr << L"non-Boost-Filesystem error in MazeManager::loadFromFile(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"non-Boost-Filesystem error in MazeManager::loadFromFile(): " << e << std::endl;
 	}
 	return false;
 }
@@ -690,7 +689,7 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 		}
 		
 		if( is_directory( dest ) ) {
-			throw( std::wstring( L"Directory specified, file needed: " ) + dest.wstring() );
+			throw( CustomException( std::wstring( L"Directory specified, file needed: " ) + dest.wstring() ) );
 		}
 		
 		boost::filesystem::wofstream file; //Identical to a standard C++ wofstream, except it takes Boost paths
@@ -719,9 +718,6 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 		return false;
 	} catch( std::exception &e ) {
 		std::wcerr << L"non-Boost-Filesystem error in MazeManager::saveToFile(): " << e.what() << std::endl;
-		return false;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"non-Boost-Filesystem error in MazeManager::saveToFile(): " << e << std::endl;
 		return false;
 	}
 }

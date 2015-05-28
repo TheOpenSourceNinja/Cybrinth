@@ -473,11 +473,15 @@ uint32_t NetworkManager::deSerializeU32( std::string input ) {
 	return result;
 }
 
+std::string NetworkManager::getPort() {
+	return serverPort;
+}
+
 void NetworkManager::setPort( std::string newPort ) {
 	try {
 		boost::lexical_cast< uint16_t >( newPort ); //This is just to test whether the string represents a valid port number
 		serverPort = newPort;
-	} catch( boost::bad_lexical_cast e ) {
+	} catch( boost::bad_lexical_cast &e ) {
 		std::wcerr << L"Error in NetworkManager::setPort(): not a valid port number." << std::endl;
 	}
 }

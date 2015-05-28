@@ -17,6 +17,7 @@
  */
 
 #include "AI.h"
+#include "CustomException.h"
 #include "MainGame.h"
 #include "MazeManager.h"
 #include "Player.h"
@@ -252,7 +253,8 @@ void AI::findSolution() {
 				}
 				default: {
 					StringConverter sc;
-					throw( std::wstring( L"Algorithm " ) + sc.toStdWString( algorithm ) + L" not yet added to findSolution()." );
+					CustomException ce( std::wstring( L"Algorithm " ) + sc.toStdWString( algorithm ) + L" not yet added to findSolution()." );
+					throw( ce );
 				}
 			}
 
@@ -270,8 +272,6 @@ void AI::findSolution() {
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::findSolution(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in AI::findSolution(): " << e << std::endl;
 	}
 }
 
@@ -407,9 +407,9 @@ void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPositi
 						possibleNeighbors.push_back( irr::core::position2d< uint_fast8_t >( u.X, u.Y + 1 ) );
 					}
 					
-					uint_fast16_t alt = 0;
-					
 					if( possibleNeighbors.size() > 0 ) {
+						uint_fast16_t alt = 0;
+					
 						for( decltype( possibleNeighbors.size() ) i = 0; i < possibleNeighbors.size(); ++i ) {
 							bool stillUnvisited = false;
 							irr::core::position2d< uint_fast8_t > v = undefined; //for each neighbor v of u: // where v has not yet been removed from Q.
@@ -452,8 +452,6 @@ void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPositi
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::findSolutionDijkstra(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in AI::findSolutionDijkstra(): " << e << std::endl;
 	}
 }
 
@@ -1012,7 +1010,7 @@ void AI::move() {
 				}
 			}
 		}
-	} catch ( std::exception &e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::move(): " << e.what() << std::endl;
 	}
 }

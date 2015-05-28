@@ -17,6 +17,7 @@
  * The GUIFreetypeFont class is used to represent fonts.
  */
 
+#include "CustomException.h"
 #include "GUIFreetypeFont.h"
 
 #if COMPILE_WITH_FREETYPE
@@ -75,7 +76,7 @@ void CGUITTGlyph::cache( irr::u32 idx_, const CGUIFreetypeFont * freetypeFont ) 
 		auto face = freetypeFont->TrueTypeFace->face;
 
 		if( FT_Set_Pixel_Sizes( face, 0, size ) ) {
-			throw( std::wstring( L"Cannot set pixel size to " + std::to_wstring( size ) ) );
+			throw( CustomException( std::wstring( L"Cannot set pixel size to " + std::to_wstring( size ) ) ) );
 		}
 
 		if( size > freetypeFont->LargestGlyph.Height ) {
@@ -233,8 +234,6 @@ void CGUITTGlyph::cache( irr::u32 idx_, const CGUIFreetypeFont * freetypeFont ) 
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in CGUITTGlyph::cache(): " << e.what() << std::endl;
-	} catch( std::wstring &e ) {
-		std::wcerr << L"Error in CGUITTGlyph::cache(): " << e << std::endl;
 	}
 }
 
