@@ -33,8 +33,7 @@ ImageModifier::~ImageModifier() {
 
 irr::video::ITexture* ImageModifier::imageToTexture( irr::video::IVideoDriver* driver, irr::video::IImage* oldImage, irr::core::stringw name ) {
 	try {
-		StringConverter sc;
-		irr::video::ITexture* texture = driver->addTexture( name.c_str(), oldImage ); //sc.toWCharArray( name ), oldImage );
+		irr::video::ITexture* texture = driver->addTexture( name.c_str(), oldImage );
 		texture->grab();
 		return texture;
 	} catch ( std::exception &e ) {
@@ -46,8 +45,8 @@ irr::video::ITexture* ImageModifier::imageToTexture( irr::video::IVideoDriver* d
 irr::video::ITexture* ImageModifier::resize( irr::video::ITexture* image, uint_fast32_t width, uint_fast32_t height, irr::video::IVideoDriver* driver ) {
 	try {
 		irr::video::IImage* tempImage = textureToImage( driver, image );
-		//driver->removeTexture( image ); //Why does this make the program crash?
 		auto name = image->getName().getInternalName() + L"-resized";
+		driver->removeTexture( image ); //NOTE: This line used to make the program crash. No idea why it crashed or why it no longer crashes.
 		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< irr::u32 >( width, height ) );
 		tempImage->copyToScaling( tempImage2 );
 		tempImage->drop();
@@ -62,14 +61,10 @@ irr::video::ITexture* ImageModifier::resize( irr::video::ITexture* image, uint_f
 
 irr::video::IImage* ImageModifier::resize( irr::video::IImage* image, uint_fast32_t width, uint_fast32_t height, irr::video::IVideoDriver* driver ) {
 	try {
-		irr::video::IImage* tempImage = image;//textureToImage( driver, image );
-		//driver->removeTexture( image );
-		//image->drop();
-		irr::video::IImage* tempImage2 = driver->createImage( tempImage->getColorFormat(), irr::core::dimension2d< irr::u32 >( width, height ) );
-		tempImage->copyToScaling( tempImage2 );
-		tempImage->drop();
-		image = tempImage2;//imageToTexture( driver, tempImage2, L"resized" );
-		//tempImage2->drop();
+		irr::video::IImage* tempImage2 = driver->createImage( image->getColorFormat(), irr::core::dimension2d< irr::u32 >( width, height ) );
+		image->copyToScaling( tempImage2 );
+		image->drop();
+		image = tempImage2;
 		return image;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in ImageModifier::resize(): " << e.what() << std::endl;
