@@ -1,0 +1,14 @@
+Source: obs-build-1431942947.c68ac29.tar.xz
+Maintainer: James Dearing <dearingj@lifetime.oregonstate.edu>
+Section: contrib/games
+Priority: optional
+Build-Depends: gimp, g++ (>= 4.8) | g++-4.8 | clang (>= 3.6) | clang-3.6, libirrlicht-dev, libfreetype6-dev, libsdl2-mixer-dev, libboost-dev (>= 1.55) | libboost1.55-dev
+Homepage: https://github.com/dearingj/Cybrinth
+Vcs-Browser: https://github.com/dearingj/Cybrinth
+Vcs-Git: https://github.com/dearingj/Cybrinth
+
+Package: cybrinth
+Architecture: any
+depends: libirrlicht (>= 1.8) | libirrlicht1.8, libsdl2-mixer-2.0-0, libfreetype6, libboost-filesystem (>= 1.55) | libboost-filesystem1.55.0
+Description: A retro-inspired 2D maze exploration game
+Cybrinth is a two-dimensional maze exploration game loosely inspired by the likes of Pac-Man.
