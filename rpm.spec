@@ -28,7 +28,7 @@ URL:	https://github.com/dearingj/Cybrinth
 
 #Dependencies
 BuildArch:	noarch
-BuildRequires:	python gimp irrlicht-devel boost-devel libSDL2_mixer-devel libtag-devel freetype2-devel
+BuildRequires:	python python-xml gimp irrlicht-devel boost-devel libSDL2_mixer-devel libtag-devel freetype2-devel
 
 %description
 A retro-themed two-dimensional maze exploration game inspired by Pac-Man and similar games.
@@ -43,6 +43,6 @@ A retro-themed two-dimensional maze exploration game inspired by Pac-Man and sim
 %make_install
 
 %changelog
-2015-05-29: dearingj@lifetime.oregonstate.edu
-- Initial version of this spec file.
+* Sat May 30 2015 James Dearing <dearingj@lifetime.oregonstate.edu> 0.1
+- Just putting this here because I'm apparently required to enter a changelog or it won't build. For the real changelog, see the Git commit history.
 
