@@ -1,5 +1,9 @@
 #!/usr/bin/python
 #This script is intended not to be run manually but by make as part of Cybrinth's build process.
+
+import sys
+print( "Python version ", sys.version )
+
 import os
 imageDir = "images"
 compiledImageDir = "compiled-images"
