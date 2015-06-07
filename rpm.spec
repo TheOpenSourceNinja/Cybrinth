@@ -28,18 +28,28 @@ URL:	https://github.com/dearingj/Cybrinth
 
 #Dependencies
 BuildArch:	noarch
-BuildRequires:	xvfb-run python python-xml gimp irrlicht-devel boost-devel libSDL2_mixer-devel libtag-devel freetype2-devel
+BuildRequires:	xorg-x11-server python python-xml gimp irrlicht-devel boost-devel libSDL2_mixer-devel libtag-devel freetype2-devel
 
 %description
 A retro-themed two-dimensional maze exploration game inspired by Pac-Man and similar games.
+
+%define         X_display         ":98"
 
 %prep 
 %setup
 
 %build 
+export DISPLAY=%{X_display}
+Xvfb %{X_display} >& Xvfb.log &
+trap "kill $! || true" EXIT
+sleep 10
 %make_build
 
 %install 
+export DISPLAY=%{X_display}
+Xvfb %{X_display} >& Xvfb.log &
+trap "kill $! || true" EXIT
+sleep 10
 %make_install
 
 %changelog
