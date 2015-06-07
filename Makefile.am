@@ -22,7 +22,7 @@ clean-local: remove-compiled-images
 distclean-local: remove-compiled-images
 
 compiled-images:
-	cat gimp-save-as-xpm.py | gimp --no-interface --no-data --batch-interpreter=python-fu-eval --batch -
+	cat gimp-save-as-xpm.py | gimp --no-splash --no-interface --no-data --console-messages --batch-interpreter=python-fu-eval --batch -
 
 remove-compiled-images:
 	rm -rf compiled-images
