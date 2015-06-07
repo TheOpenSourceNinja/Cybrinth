@@ -22,7 +22,7 @@ Group:			Amusements/Games/Other
 Summary:		Retro-themed 2D maze exploration game
 Version:		0.1
 Release:		0 
-Source0:		%name-%version.tar.bz2 
+Source0:		%name-%version.tar.xz
 BuildRoot:		%{_tmppath}/%{name}-%{version}-build
 URL:	https://github.com/dearingj/Cybrinth
 
