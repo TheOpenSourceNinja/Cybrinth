@@ -642,6 +642,7 @@ DEPS_CFLAGS
 PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
+XVFB_RUN_CMD
 FOUND_GIMP_FALSE
 FOUND_GIMP_TRUE
 gimp
@@ -3680,8 +3681,44 @@ if test -z "$FOUND_GIMP_TRUE"; then :
   else
   as_fn_error $? "required program 'gimp' not found." "$LINENO" 5
 fi
-#AC_CHECK_PROG(XVFB_RUN_CMD, xvfb-run, [xvfb-run -a], [])
-#AC_SUBST(XVFB_RUN_CMD)
+# Extract the first word of "xvfb-run", so it can be a program name with args.
+set dummy xvfb-run; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_XVFB_RUN_CMD+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$XVFB_RUN_CMD"; then
+  ac_cv_prog_XVFB_RUN_CMD="$XVFB_RUN_CMD" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_XVFB_RUN_CMD="xvfb-run -a"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+XVFB_RUN_CMD=$ac_cv_prog_XVFB_RUN_CMD
+if test -n "$XVFB_RUN_CMD"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $XVFB_RUN_CMD" >&5
+$as_echo "$XVFB_RUN_CMD" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+
 
 # Checks for libraries.
 
