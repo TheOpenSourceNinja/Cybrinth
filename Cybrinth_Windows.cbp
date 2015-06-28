@@ -1,0 +1,1061 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Cybrinth" />
+		<Option makefile_is_custom="1" />
+		<Option pch_mode="2" />
+		<Option default_target="cybrinth" />
+		<Option compiler="gcc" />
+		<Option show_notes="0">
+			<notes>
+				<![CDATA[Cybrinth created by James Dearing, copyright 2012-2014 and licensed under the GNU AGPL (see the file COPYING)]]>
+			</notes>
+		</Option>
+		<MakeCommands>
+			<Build command="$make -f $makefile $target" />
+			<CompileFile command="$make -f $makefile $file" />
+			<Clean command="$make -f $makefile clean" />
+			<DistClean command="$make -f $makefile distclean$target" />
+			<AskRebuildNeeded command="$make -q -f $makefile $target" />
+			<SilentBuild command="$make -f $makefile $target &gt; $(CMD_NULL)" />
+		</MakeCommands>
+		<Build>
+			<Target title="non-building files">
+				<Option platforms="" />
+				<Option type="4" />
+				<Option compiler="gcc" />
+			</Target>
+			<Target title="all">
+				<Option output="cybrinth" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add directory="src" />
+				</Compiler>
+				<MakeCommands>
+					<Build command="$make -f $makefile $target" />
+					<CompileFile command="$make -f $makefile $file" />
+					<Clean command="$make -f $makefile clean" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make -f $makefile $target &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Winit-self" />
+			<Add option="-Wredundant-decls" />
+			<Add option="-Wcast-align" />
+			<Add option="-Wunreachable-code" />
+			<Add option="-Wmissing-declarations" />
+			<Add option="-Wmissing-include-dirs" />
+			<Add option="-Wmain" />
+			<Add option="-Wall" />
+			<Add option="-ansi" />
+			<Add option="-fexceptions" />
+			<Add option="-Wno-unused-parameter" />
+			<Add directory="include" />
+			<Add directory="$(include)/freetype2" />
+			<Add directory="$(include)/irrlicht" />
+			<Add directory="$(include)/SDL" />
+			<Add directory="$(include)/boost" />
+		</Compiler>
+		<Linker>
+			<Add directory="$(Boost)/lib" />
+		</Linker>
+		<Unit filename="AUTHORS">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="COPYING">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="Makefile.am">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="README">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="coding style guidelines.txt">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="configure.ac">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="controls.cfg">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="credits.txt">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="philosophy and design goals.txt">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="prefs-slowcomputers.cfg">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="prefs.cfg">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="protips.txt">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="src/AI.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/AI.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/Collectable.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/Collectable.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/ControlMapping.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/ControlMapping.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/CustomException.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/CustomException.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/FileSelectorDialog.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/FileSelectorDialog.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/FontManager.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/FontManager.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/GUIFreetypeFont.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/GUIFreetypeFont.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/Goal.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/Goal.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/ImageModifier.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/ImageModifier.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/Integers.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/MainGame.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/MainGame.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/MazeCell.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/MazeCell.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/MazeManager.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/MazeManager.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/MenuManager.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/MenuManager.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/MenuOption.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/MenuOption.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/NetworkManager.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/NetworkManager.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/Object.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/Object.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/Player.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/Player.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/PlayerStart.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/PlayerStart.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/PreprocessorCommands.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/AutopatcherPatchContext.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/AutopatcherRepositoryInterface.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Base64Encoder.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Base64Encoder.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/BitStream.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/BitStream.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CCRakNetSlidingWindow.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CCRakNetSlidingWindow.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CCRakNetUDT.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CCRakNetUDT.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CheckSum.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CheckSum.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CloudClient.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CloudClient.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CloudCommon.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CloudCommon.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CloudServer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CloudServer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CommandParserInterface.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/CommandParserInterface.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ConnectionGraph2.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ConnectionGraph2.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ConsoleServer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ConsoleServer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DR_SHA1.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DR_SHA1.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_BPlusTree.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_BinarySearchTree.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_BytePool.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_BytePool.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_ByteQueue.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_ByteQueue.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Hash.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Heap.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_HuffmanEncodingTree.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_HuffmanEncodingTree.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_HuffmanEncodingTreeFactory.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_HuffmanEncodingTreeNode.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_LinkedList.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_List.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Map.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_MemoryPool.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Multilist.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_OrderedChannelHeap.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_OrderedList.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Queue.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_QueueLinkedList.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_RangeList.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Table.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Table.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_ThreadsafeAllocatingQueue.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_Tree.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DS_WeightedGraph.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DataCompressor.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DataCompressor.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DirectoryDeltaTransfer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DirectoryDeltaTransfer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DynDNS.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/DynDNS.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/EmailSender.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/EmailSender.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/EmptyHeader.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/EpochTimeToString.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/EpochTimeToString.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Export.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/FileList.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/FileList.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/FileListNodeContext.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/FileListTransfer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/FileListTransfer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/FileListTransferCBInterface.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/FileOperations.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/FileOperations.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/FormatString.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/FormatString.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/FullyConnectedMesh2.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/FullyConnectedMesh2.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/GetTime.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/GetTime.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Getche.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Getche.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Gets.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Gets.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/GridSectorizer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/GridSectorizer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/HTTPConnection.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/HTTPConnection.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/HTTPConnection2.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/HTTPConnection2.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/IncrementalReadInterface.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/IncrementalReadInterface.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/InternalPacket.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Itoa.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Itoa.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Kbhit.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/LinuxStrings.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/LinuxStrings.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/LocklessTypes.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/LocklessTypes.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/LogCommandParser.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/LogCommandParser.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/MTUSize.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/MessageFilter.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/MessageFilter.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/MessageIdentifiers.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NatPunchthroughClient.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NatPunchthroughClient.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NatPunchthroughServer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NatPunchthroughServer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NatTypeDetectionClient.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NatTypeDetectionClient.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NatTypeDetectionCommon.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NatTypeDetectionCommon.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NatTypeDetectionServer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NatTypeDetectionServer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NativeFeatureIncludes.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NativeFeatureIncludesOverrides.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NativeTypes.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NetworkIDManager.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NetworkIDManager.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NetworkIDObject.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/NetworkIDObject.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PS3Includes.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PS4Includes.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PS4Includes.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketConsoleLogger.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketConsoleLogger.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketFileLogger.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketFileLogger.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketLogger.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketLogger.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketOutputWindowLogger.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketOutputWindowLogger.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketPool.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketPriority.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketizedTCP.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PacketizedTCP.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PluginInterface2.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/PluginInterface2.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RPC4Plugin.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RPC4Plugin.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Rackspace.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Rackspace.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakAlloca.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakAssert.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakMemoryOverride.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakMemoryOverride.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetCommandParser.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetCommandParser.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetDefines.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetDefinesOverrides.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSmartPtr.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_360_720.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_Berkley.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_Berkley_NativeClient.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_NativeClient.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_PS3_PS4.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_PS4.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_Vita.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_WindowsStore8.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_Windows_Linux.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetSocket2_Windows_Linux_360.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetStatistics.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetStatistics.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetTime.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetTransport2.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetTransport2.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetTypes.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetTypes.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakNetVersion.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakPeer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakPeer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakPeerInterface.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakSleep.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakSleep.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakString.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakString.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakThread.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakThread.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakWString.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RakWString.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Rand.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Rand.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RandSync.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RandSync.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ReadyEvent.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ReadyEvent.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RefCountedObj.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RelayPlugin.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/RelayPlugin.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ReliabilityLayer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ReliabilityLayer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ReplicaEnums.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ReplicaManager3.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ReplicaManager3.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Router2.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/Router2.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SecureHandshake.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SecureHandshake.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SendToThread.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SendToThread.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SignaledEvent.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SignaledEvent.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SimpleMutex.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SimpleMutex.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SimpleTCPServer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SingleProducerConsumer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SocketDefines.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SocketIncludes.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SocketLayer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SocketLayer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/StatisticsHistory.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/StatisticsHistory.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/StringCompressor.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/StringCompressor.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/StringTable.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/StringTable.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SuperFastHash.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/SuperFastHash.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TCPInterface.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TCPInterface.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TableSerializer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TableSerializer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TeamBalancer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TeamBalancer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TeamManager.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TeamManager.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TelnetTransport.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TelnetTransport.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ThreadPool.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ThreadsafePacketLogger.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/ThreadsafePacketLogger.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TransportInterface.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TwoWayAuthentication.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/TwoWayAuthentication.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPForwarder.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPForwarder.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyClient.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyClient.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyCommon.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyCoordinator.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyCoordinator.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyServer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/UDPProxyServer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/VariableDeltaSerializer.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/VariableDeltaSerializer.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/VariableListDeltaTracker.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/VariableListDeltaTracker.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/VariadicSQLParser.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/VariadicSQLParser.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/VitaIncludes.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/VitaIncludes.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/WSAStartupSingleton.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/WSAStartupSingleton.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/WindowsIncludes.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/XBox360Includes.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/_FindFirst.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/_FindFirst.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/gettimeofday.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/RakNet/gettimeofday.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/SpellChecker.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/SpellChecker.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/StringConverter.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/StringConverter.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/SystemSpecificsManager.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/SystemSpecificsManager.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/XPMImageLoader.cpp">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/XPMImageLoader.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/acid.xcf">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="src/colors.h">
+			<Option target="all" />
+		</Unit>
+		<Unit filename="src/key.xcf">
+			<Option target="non-building files" />
+		</Unit>
+		<Unit filename="src/main.cpp">
+			<Option target="all" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<debugger />
+			<DoxyBlocks>
+				<comment_style block="4" line="2" />
+				<doxyfile_project />
+				<doxyfile_build />
+				<doxyfile_warnings warn_if_undocumented="1" />
+				<doxyfile_output html="0" />
+				<doxyfile_dot />
+				<general />
+			</DoxyBlocks>
+			<envvars />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
