@@ -1,7 +1,7 @@
 /**
  * @file
  * @author James Dearing <dearingj@lifetime.oregonstate.edu>
- * 
+ *
  * @section LICENSE
  * Copyright © 2012-2015.
  * This file is part of Cybrinth.
@@ -11,7 +11,7 @@
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @section DESCRIPTION
  * The MazeManager class is responsible for creating, loading, and saving mazes.
  */
@@ -25,7 +25,11 @@
 
 #include <boost/filesystem.hpp>
 
-#include <irrlicht/irrlicht.h>
+#ifdef WINDOWS
+    #include <irrlicht.h>
+#else
+    #include <irrlicht/irrlicht.h>
+#endif
 
 class MainGame;
 
@@ -42,17 +46,17 @@ class MazeManager {
 		bool canGetToAllCollectables( uint_fast8_t startX, uint_fast8_t startY );
 
 		void draw( irr::IrrlichtDevice* device, uint_fast16_t cellWidth, uint_fast16_t cellHeight );
-		
+
 		irr::core::stringw getFileTypeExtension();
 		irr::core::stringw getFileTypeName();
 		bool hideUnseen;
-		
+
 		bool loadFromFile();
 		bool loadFromFile( boost::filesystem::path src );
-		
+
 		void makeCellsVisible( uint_fast8_t x, uint_fast8_t y );
 		void makeRandomLevel();
-		
+
 		void newMaze( uint_fast8_t newCols, uint_fast8_t newRows );
 
 		void recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t depth, uint_fast16_t numSoFar );

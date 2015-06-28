@@ -1,7 +1,7 @@
 /**
  * @file
  * @author James Dearing <dearingj@lifetime.oregonstate.edu>
- * 
+ *
  * @section LICENSE
  * Copyright © 2012-2015.
  * This file is part of Cybrinth.
@@ -11,7 +11,7 @@
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @section DESCRIPTION
  * The Collectable class is a generic class for in-game items, such as keys and acid.
  */
@@ -23,28 +23,32 @@
 #include "ImageModifier.h"
 #include "PreprocessorCommands.h"
 
-#include <irrlicht/irrlicht.h>
+#ifdef WINDOWS
+    #include <irrlicht.h>
+#else
+    #include <irrlicht/irrlicht.h>
+#endif
 
 class Collectable : public Object {
 	public:
 		enum type_t : uint_fast8_t { KEY, ACID };
-		
+
 		void createTexture( irr::IrrlichtDevice* device, uint_fast16_t size = 1 );
-		
+
 		Collectable();
 		virtual ~Collectable();
 
 		void draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height );
-		
+
 		type_t getType();
-		
+
 		void loadTexture( irr::IrrlichtDevice* device );
 		void loadTexture( irr::IrrlichtDevice* device, uint_fast8_t size );
-		
+
 		bool owned;
-		
+
 		void reset();
-		
+
 		void setType( type_t newType );
 	protected:
 	private:

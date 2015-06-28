@@ -1,7 +1,7 @@
 /**
  * @file
  * @author James Dearing <dearingj@lifetime.oregonstate.edu>
- * 
+ *
  * @section LICENSE
  * Copyright © 2012-2015.
  * This file is part of Cybrinth.
@@ -11,7 +11,7 @@
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @section DESCRIPTION
  * This class exists just to convert between various types of strings. I have no idea whether I'm doing it right. I just want to make sure this program can work with non-English characters. If anyone can suggest a way to improve my code, fix any bugs, or whatever, PLEASE send in a patch!
  */
@@ -20,10 +20,20 @@
 #define STRINGCONVERTER_H
 
 #include "PreprocessorCommands.h"
-#include <irrlicht/irrlicht.h>
-#include <irrlicht/irrString.h>
+#ifdef WINDOWS
+    #include <irrlicht.h>
+    #include <irrString.h>
+#else
+    #include <irrlicht/irrlicht.h>
+    #include <irrlicht/irrString.h>
+#endif
+
 #include <boost/filesystem/path.hpp>
-#include <taglib/taglib.h>
+#ifdef WINDOWS
+    #include <taglib/toolkit/taglib.h>
+#else
+    #include <taglib/taglib.h>
+#endif
 #include <cwchar>
 #ifdef HAVE_STRING
 #include <string>

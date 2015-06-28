@@ -1,7 +1,7 @@
 /**
  * @file
  * @author James Dearing <dearingj@lifetime.oregonstate.edu>
- * 
+ *
  * @section LICENSE
  * Copyright © 2012-2015.
  * This file is part of Cybrinth.
@@ -11,7 +11,7 @@
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @section DESCRIPTION
  * The ControlMapping class is responsible for a 1:1:1 mapping of control (keyboard, mouse, controller, etc.) to event (e.g. player moves up one unit) to player number.
  */
@@ -19,7 +19,11 @@
 #ifndef CONTROLMAPPING_H
 #define CONTROLMAPPING_H
 
-#include <irrlicht/irrlicht.h>
+#ifdef WINDOWS
+    #include <irrlicht.h>
+#else
+    #include <irrlicht/irrlicht.h>
+#endif
 #ifdef HAVE_STRING
 	#include <string>
 #endif //HAVE_STRING
@@ -55,9 +59,9 @@ class ControlMapping {
 		mouseDirection_t getMouseDirection();
 		int_fast16_t getJoystickDeadZone();
 		void setJoystickDeadZonePercent( uint_fast8_t percent );
-		
+
 		bool operator==( ControlMapping other );
-		
+
 		bool activated; //To be set, unset, and accessed by MainGame. Indicates whether the relevant button has been pressed, or joystick moved, etc. Ensures smooth player movements.
 		bool controlsAPlayer;
 	protected:

@@ -1,7 +1,7 @@
 /**
  * @file
  * @author James Dearing <dearingj@lifetime.oregonstate.edu>
- * 
+ *
  * @section LICENSE
  * Copyright © 2012-2015.
  * This file is part of Cybrinth.
@@ -11,7 +11,7 @@
  * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @section DESCRIPTION
  * The AI class is responsible for controlling computer players. It contains the maze-solving algorithms.
  */
@@ -19,7 +19,11 @@
 #ifndef AI_H
 #define AI_H
 
-#include <irrlicht/irrlicht.h>
+#ifdef WINDOWS
+    #include <irrlicht.h>
+#else
+    #include <irrlicht/irrlicht.h>
+#endif
 #ifdef HAVE_STRING
 	#include <string>
 #endif //HAVE_STRING
@@ -45,7 +49,7 @@ class AI {
 		virtual ~AI();
 
 		enum algorithm_t : uint_fast8_t { DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH, RIGHT_HAND_RULE, LEFT_HAND_RULE, DIJKSTRA, ALGORITHM_DO_NOT_USE };
-		
+
 		/**
 		 * Returns the algorithm most closely matching a given string
 		 */
@@ -58,35 +62,35 @@ class AI {
 		 * @return A Boolean indicating whether this bot is currently at the goal.
 		 */
 		bool atGoal();
-		
+
 		/**
 		 * Used by MainGame to see if it's time to call this bot's move() function.
 		 * @return a Boolean indicating whether enough time has passed to move again.
 		 */
 		bool doneWaiting();
-		
+
 		/**
 		 * Used by MainGame to see which player this bot controls.
 		 * @return the number of the player controlled by this AI.
 		 */
 		uint_fast8_t getPlayer();
-		
+
 		/**
 		 * Called by MainGame to tell this bot that a key has been found.
 		 * @param key: the number of the key which has been found.
 		 */
 		void keyFound( uint_fast8_t s );
-		
+
 		/**
 		 * Called by MainGame. Moves the player. If the maze is pre-solved, we just follow the solution. If the maze is not pre-solved, this is where the non-pre-solved versions of each algorithm are implemented.
 		 */
 		void move(); //Needs to call MainGame's movePlayerOnX and movePlayerOnY functions.
-		
+
 		/**
 		 * Cleans up between mazes. Called by MainGame and by setup().
 		 */
 		void reset();
-		
+
 		/**
 		 * Sets which player this bot controls.
 		 * @param newPlayer: which player to control.
@@ -123,14 +127,14 @@ class AI {
 		 * @return a Boolean indicating whether this bot has already 'visited' the given position.
 		 */
 		bool alreadyVisitedPretend( irr::core::position2d< uint_fast8_t > position );
-		
+
 		std::vector< irr::core::position2d< uint_fast8_t > > cellsVisited; ///< A vector listing all the cells that have been visited so far.
 		uint_fast8_t controlsPlayer; ///< The number of the player controlled by this bot.
-		
+
 		enum direction_t : uint_fast8_t { UP, DOWN, LEFT, RIGHT }; ///< Directions, duh.
-		
-		std::vector< std::vector< uint_fast16_t > > DijkstraDistance; 
-		
+
+		std::vector< std::vector< uint_fast16_t > > DijkstraDistance;
+
 		/**
 		 * A wrapper for the other version of this function.
 		 * @param x: the X coordinate of the cell in question.
@@ -161,7 +165,7 @@ class AI {
 		 * @return A Boolean indicating whether the player can move left/right through this maze cell's left.
 		 */
 		bool effectivelyNoLeftWall( uint_fast8_t x, uint_fast8_t y, bool canDissolveWalls );
-		
+
 		/**
 		 * Calls other solution-finding functions depending on the algorithm.
 		 */
@@ -171,13 +175,13 @@ class AI {
 		 * @param startPosition: the position from which to start searching.
 		 */
 		void findSolutionDFS( irr::core::position2d< uint_fast8_t > startPosition );
-		
+
 		/**
 		 * Finds a solution using Dijkstra's algorithm
 		 * @param startPosition: the position from which to start searching.
 		 */
 		void findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPosition );
-		
+
 		/**
 		 * Finds a solution using the Iterative Deepening Depth-First Search algorithm. Does so by calling the other version of findSolutionIDDFS() over and over again with increasing depth limits.
 		 */
@@ -186,21 +190,21 @@ class AI {
 		 * Finds a solution using the Iterative Deepening Depth-First Search algorithm. Does so by calling the other version of findSolutionIDDFS() over and over again with increasing depth limits.
 		 */
 		void findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > startPosition, uint_fast16_t depthLimit, bool canDissolveWalls );
-		
+
 		MainGame * mg; ///< A pointer to the MainGame.
-		
+
 		direction_t hand; ///< Used in Right Hand Rule and Left Hand Rule
-		
+
 		std::vector< irr::core::position2d< uint_fast8_t > > IDDFSDeadEnds;
 		uint_fast16_t IDDFSDepthLimit; ///< For use only when the bots don't know the solution.
 		bool IDDFSIsDeadEnd( irr::core::position2d< uint_fast8_t > position );
-		
+
 		uint_fast8_t keyImSeeking; ///< When a key is found, see if it's this one. If so, look for a new key. Not used if we don't pre-solve the maze.
-		
+
 		uint_fast32_t lastTimeMoved; ///< The last time this bot moved.
 
 		uint_fast16_t movementDelay; ///< How long to delay between movements
-		
+
 		bool noKeysLeft; ///< the IDDFS algorithm uses this to determine whether it should really deepen or just start with the max depth like DFS.
 		/**
 		 * Used by those algorithms which do not yet account for the fact that maze walls can be destroyed. Consider this function deprecated, as it will be removed if all algorithms are updated such that they no longer need it.
@@ -214,12 +218,12 @@ class AI {
 		 * @param y: the Y coordinate of the maze cell in question.
 		 */
 		bool noOriginalTopWall( uint_fast8_t x, uint_fast8_t y );
-		
+
 		std::vector< std::vector< irr::core::position2d< uint_fast8_t > > > pathsToLockedCells; ///< The paths from the current position to each locked cell found so far.
 		std::vector< irr::core::position2d< uint_fast8_t > > pathTaken; ///< The path taken so far. Some algorithms use this to backtrack.
 		std::vector< irr::core::position2d< uint_fast8_t > > pretendCellsVisited; ///< Cells 'visited' while pre-solving the maze.
 		std::vector< irr::core::position2d< uint_fast8_t > > pretendCellsUnvisited; ///< Cells 'unvisited' while pre-solving the maze. Used by Dijkstra's algorithm (more convenient than pretendCellsVisited)
-		
+
 		std::vector< irr::core::position2d< uint_fast8_t > > solution; ///< A list of cells to visit in order to get from start to finish.
 		bool solved; ///< Indicates whether the maze has been pre-solved.
 		bool startSolved; ///< Indicates whether the maze should be pre-solved.
