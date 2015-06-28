@@ -1,0 +1,10 @@
+# Auto detect text files and perform LF normalization
+* text=crlf
+
+*.cpp text
+*.h text
+*.xpm text
+
+*.png binary
+*.jpg binary
+*.xcf binary
