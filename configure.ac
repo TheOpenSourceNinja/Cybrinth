@@ -15,6 +15,7 @@ AC_CONFIG_FILES([Makefile])
 
 # Checks for programs.
 AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX_11()
 AC_CHECK_PROG( [gimp], [gimp], [yes], [no] )
 AM_CONDITIONAL([FOUND_GIMP], [test "x$gimp" = xyes])
 AM_COND_IF([FOUND_GIMP], , [AC_MSG_ERROR([required program 'gimp' not found.])])
