@@ -25,22 +25,34 @@ Release:		0
 Source0:		%name-%version.tar.xz
 BuildRoot:		%{_tmppath}/%{name}-%{version}-build
 URL:	https://github.com/dearingj/Cybrinth
+Icon: images/icon.png
 
 #Dependencies
 BuildArch:	noarch
-BuildRequires:	python python-xml gimp irrlicht-devel boost-devel libSDL2_mixer-devel libtag-devel freetype2-devel
+BuildRequires:	c++_compiler python gimp gimp-plugins-python irrlicht-devel boost-devel libSDL2_mixer-devel libtag-devel freetype2-devel xvfb-run automake python-xml 
+Provides: cybrinth
+AutoReqProv: yes
 
 %description
 A retro-themed two-dimensional maze exploration game inspired by Pac-Man and similar games.
 
 %prep 
 %setup
+./configure
 
-%build 
+%build
 %make_build
 
 %install 
 %make_install
+
+%files
+%defattr(-,root,root,-)
+%{_bindir}/cybrinth
+%{_sysconfdir}/%{name}/
+%{_datadir}/%{name}/
+%config(noreplace) %{_sysconfdir}/%{name}/prefs.cfg %{_sysconfdir}/%{name}/controls.cfg
+%doc AUTHORS COPYING INSTALL NEWS README credits.txt
 
 %changelog
 * Sat May 30 2015 James Dearing <dearingj@lifetime.oregonstate.edu> 0.1

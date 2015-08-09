@@ -21,6 +21,7 @@
 #endif //HAVE_STDLIB_H. I don't know what we'll do if we don't have this header.
 
 #include <wchar.h>
+#include <boost/algorithm/string/split.hpp>
 
 #include "CustomException.h"
 #include "SystemSpecificsManager.h"
@@ -52,6 +53,100 @@ std::wstring SystemSpecificsManager::getEnvironmentVariable( std::wstring name )
 }
 
 std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() {
+	std::vector< boost::filesystem::path > fontFolders;
+	fontFolders.push_back( boost::filesystem::current_path() );
+	#if defined WINDOWS
+		try {
+			fontFolders.push_back( getEnvironmentVariable( "%SYSTEMROOT%" ) + L"\Fonts" );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		try {
+			fontFolders.push_back( getEnvironmentVariable( "%WINDIR%" ) + L"\Fonts" );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#elif defined LINUX
+		fontFolders.push_back( L"/usr/share/X11/fonts/" );
+		fontFolders.push_back( L"/usr/share/fonts/opentype" ); //This and the next line are a workaround: the first font my system finds in /usr/share/fonts is invisible
+		fontFolders.push_back( L"/usr/share/fonts/truetype" );
+		fontFolders.push_back( L"/usr/share/fonts/" );
+		try {
+			fontFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/.fonts/" );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#elif defined MACOSX
+		fontFolders.push_back( L"/Library/Fonts/" );
+		fontFolders.push_back( L"/Network/Library/Fonts/" );
+		fontFolders.push_back( L"/System/Library/Fonts/" );
+		fontFolders.push_back( L"/System Folder/Fonts/" );
+		try {
+			fontFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Library/Fonts/");
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#else
+		fontFolders.push_back( L"/usr/X11R6/lib/X11/fonts/" ); //FreeBSD documentation says that X11 fonts are located here. OpenBSD documentation suggests fonts may be stored in this and the following location.
+		fontFolders.push_back( L"/usr/local/lib/X11/fonts/" );
+	#endif //What about other operating systems? I don't know where BSD etc. put their font files.
+	
+	for( decltype( fontFolders.size() ) i = 0; i < fontFolders.size(); i++ ) {
+		if( not canBeUsedAsFolder( fontFolders.at( i ) ) ) {
+			fontFolders.erase( fontFolders.begin() + i );
+			i -= 1;
+		}
+	}
+	
+	return fontFolders;
+}
+
+//TODO: Add getConfigFolders()
+
+std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders() {
+	std::vector< boost::filesystem::path > imageFolders;
+	imageFolders.push_back( boost::filesystem::current_path() / boost::filesystem::path( L"images" ) );
+	
+	std::wstring common = L"Cybrinth\images";
+	
+	#if defined WINDOWS
+		imageFolders.push_back( getEnvironmentVariable( "%ProgramFiles%" ) + common );
+		imageFolders.push_back( getEnvironmentVariable( "%AppData%" ) + common );
+		imageFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + common );
+		imageFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + common );
+	#elif defined LINUX
+		imageFolders.push_back( L"/usr/local/share/Cybrinth/images" );
+		imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/images/" );
+		
+		std::wstring dataDirsString = getEnvironmentVariable( L"XDG_DATA_DIRS" );
+		//NOTE: This is where I left off 2015-07-10: Split dataDirsString into separate strings.
+		
+	#elif defined MACOSX
+		imageFolders.push_back( L"/Library/Fonts/" );
+		imageFolders.push_back( L"/Network/Library/Fonts/" );
+		imageFolders.push_back( L"/System/Library/Fonts/" );
+		imageFolders.push_back( L"/System Folder/Fonts/" );
+		try {
+			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Library/Fonts/");
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#else
+		imageFolders.push_back( L"/usr/X11R6/lib/X11/fonts/" ); //FreeBSD documentation says that X11 fonts are located here. OpenBSD documentation suggests fonts may be stored in this and the following location.
+		imageFolders.push_back( L"/usr/local/lib/X11/fonts/" );
+	#endif //What about other operating systems? I don't know where BSD etc. put their font files.
+	
+	for( decltype( imageFolders.size() ) i = 0; i < imageFolders.size(); i++ ) {
+		if( not canBeUsedAsFolder( imageFolders.at( i ) ) ) {
+			imageFolders.erase( imageFolders.begin() + i );
+			i -= 1;
+		}
+	}
+	
+	return imageFolders;
+}
+
+std::vector< boost::filesystem::path > SystemSpecificsManager::getMusicFolders() {
 	std::vector< boost::filesystem::path > fontFolders;
 	fontFolders.push_back( boost::filesystem::current_path() );
 	#if defined WINDOWS

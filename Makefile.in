@@ -1427,7 +1427,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-data-local
 
 install-dvi: install-dvi-am
 
@@ -1486,11 +1486,11 @@ uninstall-am: uninstall-binPROGRAMS
 	distclean-local distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am html html-am info info-am \
 	install install-am install-binPROGRAMS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-data-am install-data-local install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
 	uninstall-am uninstall-binPROGRAMS
@@ -1505,6 +1505,12 @@ compiled-images:
 
 remove-compiled-images:
 	rm -rf compiled-images
+
+install-data-local:
+	mkdir --parents --mode=655 @datadir@/Cybrinth
+	cp --recursive ./music @datadir@/Cybrinth/music
+	cp --recursive ./images @datadir@/Cybrinth/images
+	chmod --recursive 555 @datadir@/Cybrinth/
 
 .PHONY: compiled-images remove-compiled-images
 

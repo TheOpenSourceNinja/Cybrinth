@@ -33,6 +33,8 @@ class SystemSpecificsManager {
 		SystemSpecificsManager();
 		virtual ~SystemSpecificsManager();
 		std::vector< boost::filesystem::path > getFontFolders();
+		std::vector< boost::filesystem::path > getImageFolders();
+		std::vector< boost::filesystem::path > getMusicFolders();
 		std::vector< boost::filesystem::path > getConfigFolders();
 		bool canBeUsedAsFolder( boost::filesystem::path folder );
 	protected:
