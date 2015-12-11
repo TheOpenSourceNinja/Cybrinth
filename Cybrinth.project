@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="Cybrinth" InternalType="">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00010001N0005Debug000000000000]]>
+    </Plugin>
+    <Plugin Name="CMakePlugin">
+      <![CDATA[[{
+  "name": "Debug",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }]]]>
+    </Plugin>
+  </Plugins>
+  <VirtualDirectory Name="src">
+    <VirtualDirectory Name="RakNet">
+      <File Name="src/RakNet/PacketPool.h"/>
+      <File Name="src/RakNet/DS_Tree.h"/>
+      <File Name="src/RakNet/StringCompressor.cpp"/>
+      <File Name="src/RakNet/CloudServer.h"/>
+      <File Name="src/RakNet/MessageIdentifiers.h"/>
+      <File Name="src/RakNet/RakPeer.cpp"/>
+      <File Name="src/RakNet/IncrementalReadInterface.cpp"/>
+      <File Name="src/RakNet/EpochTimeToString.cpp"/>
+      <File Name="src/RakNet/SendToThread.cpp"/>
+      <File Name="src/RakNet/DS_LinkedList.h"/>
+      <File Name="src/RakNet/ConnectionGraph2.cpp"/>
+      <File Name="src/RakNet/ReliabilityLayer.h"/>
+      <File Name="src/RakNet/LinuxStrings.h"/>
+      <File Name="src/RakNet/CloudCommon.h"/>
+      <File Name="src/RakNet/ThreadPool.h"/>
+      <File Name="src/RakNet/InternalPacket.h"/>
+      <File Name="src/RakNet/NatTypeDetectionClient.cpp"/>
+      <File Name="src/RakNet/RefCountedObj.h"/>
+      <File Name="src/RakNet/UDPProxyClient.h"/>
+      <File Name="src/RakNet/DynDNS.h"/>
+      <File Name="src/RakNet/FileListNodeContext.h"/>
+      <File Name="src/RakNet/NatTypeDetectionCommon.h"/>
+      <File Name="src/RakNet/TeamManager.h"/>
+      <File Name="src/RakNet/WSAStartupSingleton.cpp"/>
+      <File Name="src/RakNet/RelayPlugin.cpp"/>
+      <File Name="src/RakNet/TransportInterface.h"/>
+      <File Name="src/RakNet/RakNetSocket2_Windows_Linux.cpp"/>
+      <File Name="src/RakNet/PS4Includes.h"/>
+      <File Name="src/RakNet/ReplicaManager3.cpp"/>
+      <File Name="src/RakNet/SendToThread.h"/>
+      <File Name="src/RakNet/DS_HuffmanEncodingTreeFactory.h"/>
+      <File Name="src/RakNet/NatTypeDetectionServer.cpp"/>
+      <File Name="src/RakNet/Rand.cpp"/>
+      <File Name="src/RakNet/PS4Includes.cpp"/>
+      <File Name="src/RakNet/RakNetSocket2_WindowsStore8.cpp"/>
+      <File Name="src/RakNet/RakNetSocket2_PS4.cpp"/>
+      <File Name="src/RakNet/RakNetTypes.h"/>
+      <File Name="src/RakNet/UDPProxyCoordinator.h"/>
+      <File Name="src/RakNet/HTTPConnection2.cpp"/>
+      <File Name="src/RakNet/Rackspace.cpp"/>
+      <File Name="src/RakNet/DS_BinarySearchTree.h"/>
+      <File Name="src/RakNet/_FindFirst.h"/>
+      <File Name="src/RakNet/TelnetTransport.cpp"/>
+      <File Name="src/RakNet/SuperFastHash.cpp"/>
+      <File Name="src/RakNet/DS_OrderedList.h"/>
+      <File Name="src/RakNet/SocketIncludes.h"/>
+      <File Name="src/RakNet/UDPProxyServer.h"/>
+      <File Name="src/RakNet/PacketizedTCP.cpp"/>
+      <File Name="src/RakNet/XBox360Includes.h"/>
+      <File Name="src/RakNet/PacketPriority.h"/>
+      <File Name="src/RakNet/DirectoryDeltaTransfer.cpp"/>
+      <File Name="src/RakNet/CloudClient.cpp"/>
+      <File Name="src/RakNet/DS_HuffmanEncodingTree.cpp"/>
+      <File Name="src/RakNet/NativeFeatureIncludes.h"/>
+      <File Name="src/RakNet/CloudCommon.cpp"/>
+      <File Name="src/RakNet/FileList.h"/>
+      <File Name="src/RakNet/DS_ByteQueue.h"/>
+      <File Name="src/RakNet/PacketOutputWindowLogger.cpp"/>
+      <File Name="src/RakNet/SuperFastHash.h"/>
+      <File Name="src/RakNet/DS_RangeList.h"/>
+      <File Name="src/RakNet/DS_Hash.h"/>
+      <File Name="src/RakNet/TeamBalancer.cpp"/>
+      <File Name="src/RakNet/PluginInterface2.h"/>
+      <File Name="src/RakNet/PacketConsoleLogger.cpp"/>
+      <File Name="src/RakNet/PacketLogger.cpp"/>
+      <File Name="src/RakNet/FileOperations.cpp"/>
+      <File Name="src/RakNet/Base64Encoder.h"/>
+      <File Name="src/RakNet/SingleProducerConsumer.h"/>
+      <File Name="src/RakNet/LogCommandParser.h"/>
+      <File Name="src/RakNet/Base64Encoder.cpp"/>
+      <File Name="src/RakNet/MessageFilter.cpp"/>
+      <File Name="src/RakNet/Getche.h"/>
+      <File Name="src/RakNet/TableSerializer.cpp"/>
+      <File Name="src/RakNet/RPC4Plugin.h"/>
+      <File Name="src/RakNet/ReplicaManager3.h"/>
+      <File Name="src/RakNet/HTTPConnection2.h"/>
+      <File Name="src/RakNet/TwoWayAuthentication.h"/>
+      <File Name="src/RakNet/FileOperations.h"/>
+      <File Name="src/RakNet/ReadyEvent.h"/>
+      <File Name="src/RakNet/RakMemoryOverride.h"/>
+      <File Name="src/RakNet/BitStream.h"/>
+      <File Name="src/RakNet/Gets.h"/>
+      <File Name="src/RakNet/RakNetTime.h"/>
+      <File Name="src/RakNet/UDPProxyClient.cpp"/>
+      <File Name="src/RakNet/LocklessTypes.cpp"/>
+      <File Name="src/RakNet/ReadyEvent.cpp"/>
+      <File Name="src/RakNet/DS_HuffmanEncodingTreeNode.h"/>
+      <File Name="src/RakNet/UDPForwarder.cpp"/>
+      <File Name="src/RakNet/GridSectorizer.h"/>
+      <File Name="src/RakNet/DirectoryDeltaTransfer.h"/>
+      <File Name="src/RakNet/RakNetSocket2.h"/>
+      <File Name="src/RakNet/TeamManager.cpp"/>
+      <File Name="src/RakNet/Rand.h"/>
+      <File Name="src/RakNet/HTTPConnection.cpp"/>
+      <File Name="src/RakNet/TableSerializer.h"/>
+      <File Name="src/RakNet/SimpleMutex.cpp"/>
+      <File Name="src/RakNet/RakNetTransport2.h"/>
+      <File Name="src/RakNet/RakNetCommandParser.cpp"/>
+      <File Name="src/RakNet/EpochTimeToString.h"/>
+      <File Name="src/RakNet/TCPInterface.cpp"/>
+      <File Name="src/RakNet/NatPunchthroughServer.h"/>
+      <File Name="src/RakNet/RakNetDefines.h"/>
+      <File Name="src/RakNet/RelayPlugin.h"/>
+      <File Name="src/RakNet/RakNetStatistics.cpp"/>
+      <File Name="src/RakNet/PacketOutputWindowLogger.h"/>
+      <File Name="src/RakNet/DR_SHA1.h"/>
+      <File Name="src/RakNet/DynDNS.cpp"/>
+      <File Name="src/RakNet/DS_Heap.h"/>
+      <File Name="src/RakNet/RandSync.cpp"/>
+      <File Name="src/RakNet/VitaIncludes.cpp"/>
+      <File Name="src/RakNet/RakNetCommandParser.h"/>
+      <File Name="src/RakNet/RakSleep.h"/>
+      <File Name="src/RakNet/StringTable.h"/>
+      <File Name="src/RakNet/RakNetSocket2_360_720.cpp"/>
+      <File Name="src/RakNet/RakNetDefinesOverrides.h"/>
+      <File Name="src/RakNet/UDPProxyCommon.h"/>
+      <File Name="src/RakNet/CCRakNetSlidingWindow.cpp"/>
+      <File Name="src/RakNet/CCRakNetUDT.h"/>
+      <File Name="src/RakNet/FileListTransferCBInterface.h"/>
+      <File Name="src/RakNet/PS3Includes.h"/>
+      <File Name="src/RakNet/SimpleMutex.h"/>
+      <File Name="src/RakNet/FormatString.cpp"/>
+      <File Name="src/RakNet/StatisticsHistory.h"/>
+      <File Name="src/RakNet/GetTime.cpp"/>
+      <File Name="src/RakNet/TeamBalancer.h"/>
+      <File Name="src/RakNet/DS_List.h"/>
+      <File Name="src/RakNet/SignaledEvent.cpp"/>
+      <File Name="src/RakNet/RandSync.h"/>
+      <File Name="src/RakNet/RakString.cpp"/>
+      <File Name="src/RakNet/AutopatcherPatchContext.h"/>
+      <File Name="src/RakNet/Router2.cpp"/>
+      <File Name="src/RakNet/BitStream.cpp"/>
+      <File Name="src/RakNet/Itoa.cpp"/>
+      <File Name="src/RakNet/RakNetSocket2_Berkley_NativeClient.cpp"/>
+      <File Name="src/RakNet/DS_Multilist.h"/>
+      <File Name="src/RakNet/DS_QueueLinkedList.h"/>
+      <File Name="src/RakNet/RakNetStatistics.h"/>
+      <File Name="src/RakNet/NatPunchthroughServer.cpp"/>
+      <File Name="src/RakNet/UDPProxyServer.cpp"/>
+      <File Name="src/RakNet/LocklessTypes.h"/>
+      <File Name="src/RakNet/DS_MemoryPool.h"/>
+      <File Name="src/RakNet/WSAStartupSingleton.h"/>
+      <File Name="src/RakNet/NatPunchthroughClient.h"/>
+      <File Name="src/RakNet/SecureHandshake.h"/>
+      <File Name="src/RakNet/FileList.cpp"/>
+      <File Name="src/RakNet/RPC4Plugin.cpp"/>
+      <File Name="src/RakNet/ConsoleServer.h"/>
+      <File Name="src/RakNet/DS_Table.h"/>
+      <File Name="src/RakNet/RakPeerInterface.h"/>
+      <File Name="src/RakNet/RakString.h"/>
+      <File Name="src/RakNet/DataCompressor.cpp"/>
+      <File Name="src/RakNet/RakNetSocket2_PS3_PS4.cpp"/>
+      <File Name="src/RakNet/ReplicaEnums.h"/>
+      <File Name="src/RakNet/PacketFileLogger.h"/>
+      <File Name="src/RakNet/CommandParserInterface.h"/>
+      <File Name="src/RakNet/CheckSum.h"/>
+      <File Name="src/RakNet/RakNetSocket2_Windows_Linux_360.cpp"/>
+      <File Name="src/RakNet/EmptyHeader.h"/>
+      <File Name="src/RakNet/FormatString.h"/>
+      <File Name="src/RakNet/DS_OrderedChannelHeap.h"/>
+      <File Name="src/RakNet/DS_BPlusTree.h"/>
+      <File Name="src/RakNet/DS_ByteQueue.cpp"/>
+      <File Name="src/RakNet/UDPProxyCoordinator.cpp"/>
+      <File Name="src/RakNet/RakThread.h"/>
+      <File Name="src/RakNet/Rackspace.h"/>
+      <File Name="src/RakNet/HTTPConnection.h"/>
+      <File Name="src/RakNet/TwoWayAuthentication.cpp"/>
+      <File Name="src/RakNet/DS_Map.h"/>
+      <File Name="src/RakNet/gettimeofday.cpp"/>
+      <File Name="src/RakNet/SocketLayer.cpp"/>
+      <File Name="src/RakNet/ConsoleServer.cpp"/>
+      <File Name="src/RakNet/RakNetTransport2.cpp"/>
+      <File Name="src/RakNet/VariadicSQLParser.cpp"/>
+      <File Name="src/RakNet/LinuxStrings.cpp"/>
+      <File Name="src/RakNet/StringCompressor.h"/>
+      <File Name="src/RakNet/DS_HuffmanEncodingTree.h"/>
+      <File Name="src/RakNet/EmailSender.h"/>
+      <File Name="src/RakNet/VariableDeltaSerializer.h"/>
+      <File Name="src/RakNet/CloudServer.cpp"/>
+      <File Name="src/RakNet/StringTable.cpp"/>
+      <File Name="src/RakNet/PacketLogger.h"/>
+      <File Name="src/RakNet/FileListTransfer.cpp"/>
+      <File Name="src/RakNet/RakPeer.h"/>
+      <File Name="src/RakNet/RakNetSocket2_Vita.cpp"/>
+      <File Name="src/RakNet/Kbhit.h"/>
+      <File Name="src/RakNet/RakSleep.cpp"/>
+      <File Name="src/RakNet/DS_BytePool.cpp"/>
+      <File Name="src/RakNet/gettimeofday.h"/>
+      <File Name="src/RakNet/VariadicSQLParser.h"/>
+      <File Name="src/RakNet/Itoa.h"/>
+      <File Name="src/RakNet/RakNetSocket.cpp"/>
+      <File Name="src/RakNet/NetworkIDObject.h"/>
+      <File Name="src/RakNet/RakWString.cpp"/>
+      <File Name="src/RakNet/FullyConnectedMesh2.cpp"/>
+      <File Name="src/RakNet/RakAlloca.h"/>
+      <File Name="src/RakNet/Router2.h"/>
+      <File Name="src/RakNet/VariableListDeltaTracker.h"/>
+      <File Name="src/RakNet/DS_Queue.h"/>
+      <File Name="src/RakNet/RakWString.h"/>
+      <File Name="src/RakNet/RakNetSmartPtr.h"/>
+      <File Name="src/RakNet/NativeFeatureIncludesOverrides.h"/>
+      <File Name="src/RakNet/PacketizedTCP.h"/>
+      <File Name="src/RakNet/NatTypeDetectionCommon.cpp"/>
+      <File Name="src/RakNet/AutopatcherRepositoryInterface.h"/>
+      <File Name="src/RakNet/StatisticsHistory.cpp"/>
+      <File Name="src/RakNet/SignaledEvent.h"/>
+      <File Name="src/RakNet/PluginInterface2.cpp"/>
+      <File Name="src/RakNet/TelnetTransport.h"/>
+      <File Name="src/RakNet/TCPInterface.h"/>
+      <File Name="src/RakNet/FullyConnectedMesh2.h"/>
+      <File Name="src/RakNet/CCRakNetSlidingWindow.h"/>
+      <File Name="src/RakNet/CCRakNetUDT.cpp"/>
+      <File Name="src/RakNet/GridSectorizer.cpp"/>
+      <File Name="src/RakNet/EmailSender.cpp"/>
+      <File Name="src/RakNet/NetworkIDObject.cpp"/>
+      <File Name="src/RakNet/NativeTypes.h"/>
+      <File Name="src/RakNet/RakNetTypes.cpp"/>
+      <File Name="src/RakNet/GetTime.h"/>
+      <File Name="src/RakNet/IncrementalReadInterface.h"/>
+      <File Name="src/RakNet/LogCommandParser.cpp"/>
+      <File Name="src/RakNet/Gets.cpp"/>
+      <File Name="src/RakNet/CheckSum.cpp"/>
+      <File Name="src/RakNet/DR_SHA1.cpp"/>
+      <File Name="src/RakNet/PacketFileLogger.cpp"/>
+      <File Name="src/RakNet/SimpleTCPServer.h"/>
+      <File Name="src/RakNet/DS_Table.cpp"/>
+      <File Name="src/RakNet/FileListTransfer.h"/>
+      <File Name="src/RakNet/NatPunchthroughClient.cpp"/>
+      <File Name="src/RakNet/RakNetSocket.h"/>
+      <File Name="src/RakNet/Export.h"/>
+      <File Name="src/RakNet/WindowsIncludes.h"/>
+      <File Name="src/RakNet/Getche.cpp"/>
+      <File Name="src/RakNet/VariableListDeltaTracker.cpp"/>
+      <File Name="src/RakNet/ThreadsafePacketLogger.cpp"/>
+      <File Name="src/RakNet/RakNetSocket2_NativeClient.cpp"/>
+      <File Name="src/RakNet/DS_BytePool.h"/>
+      <File Name="src/RakNet/VariableDeltaSerializer.cpp"/>
+      <File Name="src/RakNet/DS_ThreadsafeAllocatingQueue.h"/>
+      <File Name="src/RakNet/DataCompressor.h"/>
+      <File Name="src/RakNet/RakMemoryOverride.cpp"/>
+      <File Name="src/RakNet/ThreadsafePacketLogger.h"/>
+      <File Name="src/RakNet/SocketDefines.h"/>
+      <File Name="src/RakNet/RakNetSocket2.cpp"/>
+      <File Name="src/RakNet/RakAssert.h"/>
+      <File Name="src/RakNet/SecureHandshake.cpp"/>
+      <File Name="src/RakNet/ReliabilityLayer.cpp"/>
+      <File Name="src/RakNet/DS_WeightedGraph.h"/>
+      <File Name="src/RakNet/NatTypeDetectionServer.h"/>
+      <File Name="src/RakNet/UDPForwarder.h"/>
+      <File Name="src/RakNet/ConnectionGraph2.h"/>
+      <File Name="src/RakNet/RakNetSocket2_Berkley.cpp"/>
+      <File Name="src/RakNet/RakNetVersion.h"/>
+      <File Name="src/RakNet/NetworkIDManager.h"/>
+      <File Name="src/RakNet/PacketConsoleLogger.h"/>
+      <File Name="src/RakNet/RakThread.cpp"/>
+      <File Name="src/RakNet/NatTypeDetectionClient.h"/>
+      <File Name="src/RakNet/VitaIncludes.h"/>
+      <File Name="src/RakNet/NetworkIDManager.cpp"/>
+      <File Name="src/RakNet/_FindFirst.cpp"/>
+      <File Name="src/RakNet/SocketLayer.h"/>
+      <File Name="src/RakNet/CommandParserInterface.cpp"/>
+      <File Name="src/RakNet/MessageFilter.h"/>
+      <File Name="src/RakNet/CloudClient.h"/>
+      <File Name="src/RakNet/MTUSize.h"/>
+    </VirtualDirectory>
+    <File Name="src/Player.h"/>
+    <File Name="src/ControlMapping.h"/>
+    <File Name="src/Object.cpp"/>
+    <File Name="src/PlayerStart.h"/>
+    <File Name="src/CustomException.cpp"/>
+    <File Name="src/MenuOption.h"/>
+    <File Name="src/MazeCell.cpp"/>
+    <File Name="src/GUIFreetypeFont.cpp"/>
+    <File Name="src/MenuManager.h"/>
+    <File Name="src/FontManager.cpp"/>
+    <File Name="src/Goal.h"/>
+    <File Name="src/SpellChecker.cpp"/>
+    <File Name="src/XPMImageLoader.cpp"/>
+    <File Name="src/Player.cpp"/>
+    <File Name="src/ImageModifier.h"/>
+    <File Name="src/MazeManager.cpp"/>
+    <File Name="src/Integers.h"/>
+    <File Name="src/FontManager.h"/>
+    <File Name="src/Collectable.h"/>
+    <File Name="src/StringConverter.cpp"/>
+    <File Name="src/SettingsScreen.cpp"/>
+    <File Name="src/XPMImageLoader.h"/>
+    <File Name="src/MainGame.h"/>
+    <File Name="src/GUIFreetypeFont.h"/>
+    <File Name="src/SystemSpecificsManager.cpp"/>
+    <File Name="src/NetworkManager.h"/>
+    <File Name="src/SpellChecker.h"/>
+    <File Name="src/MenuOption.cpp"/>
+    <File Name="src/PlayerStart.cpp"/>
+    <File Name="src/MazeCell.h"/>
+    <File Name="src/ControlMapping.cpp"/>
+    <File Name="src/NetworkManager.cpp"/>
+    <File Name="src/Object.h"/>
+    <File Name="src/Collectable.cpp"/>
+    <File Name="src/StringConverter.h"/>
+    <File Name="src/main.cpp"/>
+    <File Name="src/FileSelectorDialog.h"/>
+    <File Name="src/AI.h"/>
+    <File Name="src/FileSelectorDialog.cpp"/>
+    <File Name="src/SystemSpecificsManager.h"/>
+    <File Name="src/ImageModifier.cpp"/>
+    <File Name="src/Goal.cpp"/>
+    <File Name="src/colors.h"/>
+    <File Name="src/MazeManager.h"/>
+    <File Name="src/CustomException.h"/>
+    <File Name="src/AI.cpp"/>
+    <File Name="src/MenuManager.cpp"/>
+    <File Name="src/SettingsScreen.h"/>
+    <File Name="src/PreprocessorCommands.h"/>
+    <File Name="src/MainGame.cpp"/>
+    <File Name="src/SettingsManager.h"/>
+    <File Name="src/SettingsManager.cpp"/>
+  </VirtualDirectory>
+  <Description/>
+  <Dependencies/>
+  <Settings Type="Executable">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g" C_Options="-g" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="" IntermediateDirectory="./Debug" Command="/media/SecondDrive/Programming/Cybrinth/cybrinth" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="yes">
+        <RebuildCommand/>
+        <CleanCommand>make clean</CleanCommand>
+        <BuildCommand>make</BuildCommand>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory>$(WorkspacePath)</WorkingDirectory>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="yes" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="-O2" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="" IntermediateDirectory="./Release" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="yes">
+        <RebuildCommand/>
+        <CleanCommand>make clean</CleanCommand>
+        <BuildCommand>make</BuildCommand>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory>$(WorkspacePath)</WorkingDirectory>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>
