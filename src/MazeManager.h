@@ -22,6 +22,7 @@
 //#include "MainGame.h"
 #include "MazeCell.h"
 #include "PreprocessorCommands.h"
+#include "SettingsManager.h"
 
 #include <boost/filesystem.hpp>
 
@@ -32,6 +33,7 @@
 #endif
 
 class MainGame;
+class SettingsManager;
 
 class MazeManager {
 	public:
@@ -63,13 +65,15 @@ class MazeManager {
 
 		bool saveToFile( boost::filesystem::path dest );
 
-		void setMainGame( MainGame* newGM );
+		void setPointers( MainGame* newMainGame, SettingsManager* newSettingsManager );
 
 		uint_fast8_t cols;
 
 		MainGame* mainGame;
 
 		uint_fast8_t rows;
+		
+		SettingsManager* settingsManager;
 	protected:
 	private:
 		irr::core::stringw fileTypeExtension;

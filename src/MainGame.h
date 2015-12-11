@@ -34,6 +34,8 @@
 #include "Player.h"
 #include "PlayerStart.h"
 #include "PreprocessorCommands.h"
+#include "SettingsManager.h"
+#include "SettingsScreen.h"
 #include "SpellChecker.h"
 #include "StringConverter.h"
 #include "SystemSpecificsManager.h"
@@ -111,9 +113,7 @@ class MainGame : public irr::IEventReceiver {
 		
 		uint_fast16_t loadingDelay;
 		
-		uint_fast8_t numBots;
 		uint_fast8_t numLocks;
-		uint_fast8_t numPlayers;
 		
 		std::vector< Player > player;
 		std::vector< PlayerStart > playerStart;
@@ -151,10 +151,7 @@ class MainGame : public irr::IEventReceiver {
 		void makeMusicList();
 		void movePlayerCommon( uint_fast8_t p );
 		
-		bool prefIsTrue( std::wstring choice );
 		void processControls();
-		
-		void readPrefs();
 		
 		void setupBackground();
 		void startLoadingScreen();
@@ -162,33 +159,19 @@ class MainGame : public irr::IEventReceiver {
 		void takeScreenShot();
 		
 		//Booleans----------------------------------
-		bool allowSmallSize;
 		bool antiAliasFonts;
 		
-		bool backgroundAnimations;
-		bool botsKnowSolution;
-		
-		bool debug;
 		bool donePlaying;
 		
 		bool enableController;
 		
 		bool fillBackgroundTextureAfterLoading; //The "STARTRAILS" background animation requires this
-		bool fullscreen;
 		
 		bool haveFilledBackgroundTextureAfterLoading;
 		
-		bool isServer;
-		
-		bool markTrails;
 		bool musicPlaying;
 		
 		std::vector< bool > playerAssigned; //If in server mode, keep track of which player numbers have been assigned to players
-		bool playMusic;
-		
-		bool showBackgrounds;
-		
-		bool vsync;
 		
 		bool won;
 		
@@ -207,19 +190,12 @@ class MainGame : public irr::IEventReceiver {
 		std::vector< uint_fast8_t > winnersLoadingScreen; //An ugly hack: Copy winners to winnersLoadingScreen so that we can show it on the loading screen after winners is cleared
 		
 		//unsigned 16-bit integers----------------------------------
-		uint_fast16_t bitsPerPixel;
-		uint_fast16_t botMovementDelay;
-		
 		uint_fast16_t cellWidth;
 		uint_fast16_t cellHeight;
-		
-		uint_fast16_t musicVolume;
 		
 		//unsigned 32-bit integers----------------------------------
 		uint_fast32_t lastTimeControlsProcessed;
 		uint_fast32_t controlProcessDelay;
-		uint_fast32_t minWidth;
-		uint_fast32_t minHeight;
 		
 		//signed 32-bit integers----------------------------------
 		irr::s32 mouseX;
@@ -253,8 +229,6 @@ class MainGame : public irr::IEventReceiver {
 		irr::core::stringw times;
 		
 		//Our own types----------------------------------
-		AI::algorithm_t botAlgorithm;
-		
 		MenuManager menuManager;
 		
 		FontManager fontManager;
@@ -267,13 +241,14 @@ class MainGame : public irr::IEventReceiver {
 		
 		ImageModifier resizer;
 		
+		SettingsManager settingsManager;
+		SettingsScreen settingsScreen;
 		SpellChecker spellChecker;
 		
 		SystemSpecificsManager system; // Flawfinder: ignore
 		
 		//2D dimensions----------------------------------
 		irr::core::dimension2d< uint_fast16_t > viewportSize;
-		irr::core::dimension2d< irr::u32 > windowSize;
 		
 		//Fonts----------------------------------
 		irr::gui::IGUIFont* clockFont;
@@ -294,8 +269,6 @@ class MainGame : public irr::IEventReceiver {
 		irr::video::ITexture* backgroundTexture;
 		
 		irr::core::array< irr::SJoystickInfo > controllerInfo;
-		
-		irr::video::E_DRIVER_TYPE driverType;
 		
 		irr::gui::IGUIWindow* exitConfirmation;
 		

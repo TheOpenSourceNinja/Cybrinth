@@ -20,6 +20,7 @@
 #include "CustomException.h"
 #include "MazeManager.h"
 #include "MainGame.h"
+#include "SettingsManager.h"
 
 #include <boost/filesystem/fstream.hpp>
 #ifdef HAVE_IOSTREAM
@@ -266,7 +267,7 @@ void MazeManager::makeRandomLevel() {
 		mainGame->setLoadingPercentage( mainGame->getLoadingPercentage() + 1 );
 		mainGame->drawAll();
 
-		for( decltype( mainGame->numPlayers ) p = 0; p < mainGame->numPlayers; ++p ) {
+		for( decltype( settingsManager->numPlayers ) p = 0; p < settingsManager->numPlayers; ++p ) {
 			mainGame->playerStart[ p ].reset();
 		}
 		
@@ -341,7 +342,7 @@ void MazeManager::makeRandomLevel() {
 		mainGame->drawAll();
 
 		//Remove player starts from list of dead ends
-		for( decltype( mainGame->numPlayers ) p = 0; p < mainGame->numPlayers; ++p ) {
+		for( decltype( settingsManager->numPlayers ) p = 0; p < settingsManager->numPlayers; ++p ) {
 			for( decltype( deadEndsX.size() ) i = 0; i < deadEndsX.size(); ++i ) {
 				if( mainGame->playerStart.at( p ).getX() == deadEndsX.at( i ) and mainGame->playerStart.at( p ).getY() == deadEndsY.at( i ) ) {
 					deadEndsX.erase( deadEndsX.begin() + i );
@@ -446,7 +447,7 @@ void MazeManager::makeRandomLevel() {
 			}
 		}
 
-		for( decltype( mainGame->numPlayers ) p = 0; p < mainGame->numPlayers; ++p ) {
+		for( decltype( settingsManager->numPlayers ) p = 0; p < settingsManager->numPlayers; ++p ) {
 			mainGame->player[ p ].setPos( mainGame->playerStart[ p ].getX(), mainGame->playerStart[ p ].getY() );
 		}
 
@@ -528,7 +529,7 @@ void MazeManager::makeRandomLevel() {
 			}
 		}
 
-		for( decltype( mainGame->numPlayers ) p = 0; p < mainGame->numPlayers; ++p ) {
+		for( decltype( settingsManager->numPlayers ) p = 0; p < settingsManager->numPlayers; ++p ) {
 			maze[ mainGame->playerStart[ p ].getX() ][ mainGame->playerStart[ p ].getY() ].visited = true;
 			maze[ mainGame->playerStart[ p ].getX() ][ mainGame->playerStart[ p ].getY() ].setVisitorColor( mainGame->player[ p ].getColorTwo() );
 			makeCellsVisible( mainGame->playerStart[ p ].getX(), mainGame->playerStart[ p ].getY() );
@@ -607,7 +608,7 @@ void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t d
 		maze[ x ][ y ].visited = true;
 		maze[ x ][ y ].id = numSoFar;
 		
-		for( decltype( mainGame->numPlayers ) p = 0; p < mainGame->numPlayers; ++p ) {
+		for( decltype( settingsManager->numPlayers ) p = 0; p < settingsManager->numPlayers; ++p ) {
 			if( depth >= mainGame->playerStart[ p ].distanceFromExit ) {
 				mainGame->playerStart[ p ].setPos( x, y );
 				mainGame->playerStart[ p ].distanceFromExit = depth;
@@ -722,9 +723,10 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 	}
 }
 
-void MazeManager::setMainGame( MainGame* newGM ) {
+void MazeManager::setPointers( MainGame* newMainGame, SettingsManager* newSettingsManager ){
 	try {
-		mainGame = newGM;
+		mainGame = newMainGame;
+		settingsManager = newSettingsManager;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::setMainGame(): " << e.what() << std::endl;
 	}

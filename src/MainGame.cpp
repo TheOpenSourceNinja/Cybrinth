@@ -18,6 +18,7 @@
 
 #include "CustomException.h"
 #include "MainGame.h"
+#include "MazeManager.h"
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -46,16 +47,16 @@ bool MainGame::allHumansAtGoal() {
 	try {
 		std::vector< uint_fast8_t > humanPlayers; //Get a list of players
 
-		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
+		for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
 			humanPlayers.push_back( p );
 		}
 
 		bool result = false;
 
-		for( decltype( numBots ) b = 0; b < numBots; ++b ) { //Remove bots from the list
-			decltype( numPlayers ) botPlayer = bot.at( b ).getPlayer(); //changed decltype( bot.at( b ).getPlayer() ) to decltype( numPlayers ) because getPlayer can never exceed numPlayers, and this avoids needless function calls.
+		for( decltype( settingsManager.numBots ) b = 0; b < settingsManager.numBots; ++b ) { //Remove bots from the list
+			decltype( settingsManager.numPlayers ) botPlayer = bot.at( b ).getPlayer(); //changed decltype( bot.at( b ).getPlayer() ) to decltype( numPlayers ) because getPlayer can never exceed numPlayers, and this avoids needless function calls.
 
-			for( decltype( numPlayers ) p = 0; p < humanPlayers.size(); ++p ) { //changed decltype( humanPlayers.size() ) to decltype( numPlayers ) because humanPlayers.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+			for( decltype( settingsManager.numPlayers ) p = 0; p < humanPlayers.size(); ++p ) { //changed decltype( humanPlayers.size() ) to decltype( numPlayers ) because humanPlayers.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 				if( humanPlayers.at( p ) == botPlayer ) {
 					humanPlayers.erase( humanPlayers.begin() + p );
 				}
@@ -65,7 +66,7 @@ bool MainGame::allHumansAtGoal() {
 		if( humanPlayers.size() > 0 ) {
 			result = true;
 
-			for( decltype( numPlayers ) p = 0; ( p < humanPlayers.size() and result == true ); ++p ) { //changed decltype( humanPlayers.size() ) to decltype( numPlayers ) because humanPlayers.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+			for( decltype( settingsManager.numPlayers ) p = 0; ( p < humanPlayers.size() and result == true ); ++p ) { //changed decltype( humanPlayers.size() ) to decltype( numPlayers ) because humanPlayers.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 				if( not ( player.at( humanPlayers.at( p ) ).getX() == goal.getX() and player.at( humanPlayers.at( p ) ).getY() == goal.getY() ) ) {
 					result = false;
 				}
@@ -104,10 +105,7 @@ void MainGame::drawAll() {
 		
 		switch( currentScreen ) {
 			case SETTINGSSCREEN: {
-				irr::core::stringw waitingNotice( L"This is a temporary setting screen" );
-				irr::core::dimension2d< irr::u32 > tempDimensions = textFont->getDimension( waitingNotice.c_str() );
-				irr::core::rect< irr::s32 > tempRectangle( 0, 0, tempDimensions.Width + 0, tempDimensions.Height + 0 );
-				textFont->draw( waitingNotice, tempRectangle, WHITE, true, true );
+				settingsScreen.draw( device );
 				break;
 			}
 			case WAITINGFORPLAYERSSCREEN: {
@@ -127,12 +125,12 @@ void MainGame::drawAll() {
 				break;
 			}
 			case MAINSCREEN: {
-				if( showBackgrounds ) {
+				if( settingsManager.showBackgrounds ) {
 					drawBackground();
 				}
 				
 				//Draws player trails ("footprints")
-				if( markTrails ) {
+				if( settingsManager.markTrails ) {
 					for( decltype( mazeManager.cols ) x = 0; x < mazeManager.cols; ++x ) { //It's inefficient to do this here and have similar nested loops below drawing the walls, but I want these drawn before the players, and the players drawn before the walls.
 						for( decltype( mazeManager.rows ) y = 0; y < mazeManager.rows; ++y ) {
 							if( mazeManager.maze[ x ][ y ].visited ) {
@@ -148,17 +146,17 @@ void MainGame::drawAll() {
 					}
 				}
 				
-				for( decltype( numPlayers ) ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts. Changed decltype( playerStart.size() ) to decltype( numPlayers ) because playerStart.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+				for( decltype( settingsManager.numPlayers ) ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts. Changed decltype( playerStart.size() ) to decltype( numPlayers ) because playerStart.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 					playerStart.at( ps ).draw( device, cellWidth, cellHeight );
 				}
 				
 				//Drawing bots before human players makes it easier to play against large numbers of bots
-				for( decltype( numBots ) i = 0; i < numBots; ++i ) {
+				for( decltype( settingsManager.numBots ) i = 0; i < settingsManager.numBots; ++i ) {
 					player.at( bot.at( i ).getPlayer() ).draw( device, cellWidth, cellHeight );
 				}
 				
 				//Now we draw the players
-				for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
+				for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
 					if( player.at( p ).isHuman ) {
 						player.at( p ).draw( device, cellWidth, cellHeight );
 					}
@@ -173,7 +171,7 @@ void MainGame::drawAll() {
 				
 				mazeManager.draw( device, cellWidth, cellHeight );
 				
-				uint_fast32_t spaceBetween = windowSize.Height / 30;
+				uint_fast32_t spaceBetween = settingsManager.windowSize.Height / 30;
 				uint_fast32_t textY = spaceBetween;
 				irr::core::dimension2d< irr::u32 > tempDimensions;
 				
@@ -244,8 +242,8 @@ void MainGame::drawAll() {
 					irr::core::stringw headfor( L"Head for" );
 					tempDimensions = textFont->getDimension( stringConverter.toStdWString( headfor ).c_str() ); //stringConverter.toWCharArray( headfor ) );
 					textY += tempDimensions.Height;
-					if( textY < ( ( windowSize.Height / 2 ) - tempDimensions.Height ) ) {
-						textY = ( ( windowSize.Height / 2 ) - tempDimensions.Height );
+					if( textY < ( ( settingsManager.windowSize.Height / 2 ) - tempDimensions.Height ) ) {
+						textY = ( ( settingsManager.windowSize.Height / 2 ) - tempDimensions.Height );
 					}
 					if( numKeysFound >= numLocks ) {
 						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
@@ -263,7 +261,7 @@ void MainGame::drawAll() {
 					}
 				}
 
-				if( playMusic ) {
+				if( settingsManager.playMusic ) {
 					{
 						irr::core::stringw nowplaying( L"Now playing:" );
 						textY += tempDimensions.Height;
@@ -318,7 +316,7 @@ void MainGame::drawAll() {
 					}
 
 					{
-						irr::core::stringw volumeNumber( musicVolume );
+						irr::core::stringw volumeNumber( settingsManager.musicVolume );
 						volumeNumber.append( L"%" );
 						textY += tempDimensions.Height;
 						tempDimensions = textFont->getDimension( stringConverter.toStdWString( volumeNumber ).c_str() ); //stringConverter.toWCharArray( volumeNumber ) );
@@ -346,15 +344,15 @@ void MainGame::drawBackground() {
 			case ORIGINAL_STARFIELD:
 			case ROTATING_STARFIELD: {
 				backgroundSceneManager->drawAll();
-				irr::core::rect< irr::s32 > pos( viewportSize.Width, 0, windowSize.Width, windowSize.Height );
-				irr::core::rect< irr::s32 > clipRect = irr::core::rect< irr::s32 >( 0, 0, windowSize.Width, windowSize.Height );
+				irr::core::rect< irr::s32 > pos( viewportSize.Width, 0, settingsManager.windowSize.Width, settingsManager.windowSize.Height );
+				irr::core::rect< irr::s32 > clipRect = irr::core::rect< irr::s32 >( 0, 0, settingsManager.windowSize.Width, settingsManager.windowSize.Height );
 				driver->draw2DRectangle( BLACK, pos, &clipRect );
 				break;
 			}
 			case IMAGES: {
 				if( backgroundTexture not_eq 0 ) {
-					if( backgroundTexture->getSize() not_eq windowSize ) {
-						backgroundTexture = resizer.resize( backgroundTexture, windowSize.Width, windowSize.Height, driver );
+					if( backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
+						backgroundTexture = resizer.resize( backgroundTexture, settingsManager.windowSize.Width, settingsManager.windowSize.Height, driver );
 					}
 					driver->draw2DImage( backgroundTexture, irr::core::position2d< irr::s32 >( 0, 0 ) );
 				}
@@ -366,8 +364,8 @@ void MainGame::drawBackground() {
 				backgroundSceneManager->drawAll();
 				driver->setRenderTarget( 0, false, false, backgroundColor ); //From Irrlicht's documentation: "If set to 0, it sets the previous render target which was set before the last setRenderTarget() call."
 				driver->draw2DImage( backgroundTexture, irr::core::position2d< irr::s32 >( 0, 0 ) );
-				irr::core::rect< irr::s32 > pos( viewportSize.Width, 0, windowSize.Width, windowSize.Height );
-				irr::core::rect< irr::s32 > clipRect = irr::core::rect< irr::s32 >( 0, 0, windowSize.Width, windowSize.Height );
+				irr::core::rect< irr::s32 > pos( viewportSize.Width, 0, settingsManager.windowSize.Width, settingsManager.windowSize.Height );
+				irr::core::rect< irr::s32 > clipRect = irr::core::rect< irr::s32 >( 0, 0, settingsManager.windowSize.Width, settingsManager.windowSize.Height );
 				driver->draw2DRectangle( BLACK, pos, &clipRect );
 				break;
 			}
@@ -398,8 +396,8 @@ void MainGame::drawLoadingScreen() {
 			int_fast32_t Y = 0;
 			{
 				auto loadingDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
-				int_fast32_t textX = ( windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
-				irr::core::rect< irr::s32 > tempRectangle( textX, Y, ( windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + Y );
+				int_fast32_t textX = ( settingsManager.windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
+				irr::core::rect< irr::s32 > tempRectangle( textX, Y, ( settingsManager.windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + Y );
 				loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
 				Y += loadingDimensions.Height + 1;
 			}
@@ -407,12 +405,12 @@ void MainGame::drawLoadingScreen() {
 			{
 				std::wstring percentString = stringConverter.toStdWString( loadingProgress, L"%05.1f%%", 7 ); //7 is the length that L"%05.1f%%" expands to plus one extra to terminate the resulting string with a null
 				auto percentDimensions = loadingFont->getDimension( percentString.c_str() );
-				irr::core::recti progressBarOutline( 0, Y, windowSize.Width, Y + percentDimensions.Height );
+				irr::core::recti progressBarOutline( 0, Y, settingsManager.windowSize.Width, Y + percentDimensions.Height );
 				driver->draw2DRectangleOutline( progressBarOutline, GRAY );
-				irr::core::recti progressBarFilled( 0, Y, windowSize.Width * loadingProgress / 100, Y + percentDimensions.Height );
+				irr::core::recti progressBarFilled( 0, Y, settingsManager.windowSize.Width * loadingProgress / 100, Y + percentDimensions.Height );
 				driver->draw2DRectangle( LIGHTGRAY, progressBarFilled );
-				int_fast32_t textX = ( windowSize.Width / 2 ) - ( percentDimensions.Width / 2 );
-				irr::core::recti percentRectangle( textX, Y, ( windowSize.Width / 2 ) + ( percentDimensions.Width / 2 ), percentDimensions.Height + Y );
+				int_fast32_t textX = ( settingsManager.windowSize.Width / 2 ) - ( percentDimensions.Width / 2 );
+				irr::core::recti percentRectangle( textX, Y, ( settingsManager.windowSize.Width / 2 ) + ( percentDimensions.Width / 2 ), percentDimensions.Height + Y );
 				loadingFont->draw( stringConverter.toIrrlichtStringW( percentString ), percentRectangle, YELLOW, true, true, &percentRectangle );
 				Y += percentDimensions.Height + 1;
 			}
@@ -456,8 +454,8 @@ void MainGame::drawLoadingScreen() {
  */
  void MainGame::drawLogo() {
 	try {
-		if( not isNull( logoTexture ) and logoTexture->getSize() not_eq windowSize ) {
-			logoTexture = resizer.resize( logoTexture, windowSize.Width, windowSize.Height, driver );
+		if( not isNull( logoTexture ) and logoTexture->getSize() not_eq settingsManager.windowSize ) {
+			logoTexture = resizer.resize( logoTexture, settingsManager.windowSize.Width, settingsManager.windowSize.Height, driver );
 		}
 		
 		if( not isNull( logoTexture ) ) {
@@ -555,7 +553,7 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 
 		textY = textYOriginal;
 		//Now we go through and draw the actual player stats
-		for( decltype( numPlayers ) p = 0; p < winnersLoadingScreen.size(); ++p ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+		for( decltype( settingsManager.numPlayers ) p = 0; p < winnersLoadingScreen.size(); ++p ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 			auto textXOld = textX;
 			
 			auto backgroundColor = player.at( winnersLoadingScreen.at( p ) ).getColorOne();
@@ -568,11 +566,11 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 				dummy.append( irr::core::stringw( winnersLoadingScreen.size() ) );
 				dummy.append( L" " );
 				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( dummy ).c_str() );
-				if( textX >= windowSize.Width - tempDimensions.Width ) {
+				if( textX >= settingsManager.windowSize.Width - tempDimensions.Width ) {
 					textX = 0;
 					textXOld = 0;
 					decltype( textY ) separatorY = textYScoresTotal + tempDimensions.Height + 1;
-					driver->draw2DLine( irr::core::position2d< irr::s32  >( 0, separatorY ), irr::core::position2d< irr::s32 >( windowSize.Width, separatorY ) );
+					driver->draw2DLine( irr::core::position2d< irr::s32  >( 0, separatorY ), irr::core::position2d< irr::s32 >( settingsManager.windowSize.Width, separatorY ) );
 					textY = separatorY + 1;
 					textYSteps += ( textY - textYOriginal );
 					textYTimes += ( textY - textYOriginal );
@@ -659,19 +657,19 @@ void MainGame::drawStats( uint_fast32_t textY ) {
  */
 void MainGame::eraseCollectable( uint_fast8_t item ) {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"eraseCollectable() called" << std::endl;
 		}
 		
 		if( item < stuff.size() ) {
 			stuff.erase( stuff.begin() + item );
-			for( decltype( numPlayers ) p = 0; p < player.size(); ++p ) {
+			for( decltype( settingsManager.numPlayers ) p = 0; p < player.size(); ++p ) {
 				if( player.at( p ).hasItem() and player.at( p ).getItem() > item ) {
 					player.at( p ).giveItem( player.at( p ).getItem() - 1, player.at( p ).getItemType() );
 				}
 			}
 		}
-		if( debug ) {
+		if( settingsManager.debug ) {
 				std::wcout << L"end of eraseCollectable()" << std::endl;
 		}
 	} catch ( std::exception &error ) {
@@ -699,7 +697,7 @@ Collectable* MainGame::getCollectable( uint_fast8_t collectable ) {
  */
 bool MainGame::getDebugStatus() {
 	try {
-		return debug;
+		return settingsManager.debug;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::getDebugStatus(): " << e.what() << std::endl;
 		return true;
@@ -721,7 +719,7 @@ Goal* MainGame::getGoal() {
  */
 Collectable* MainGame::getKey( uint_fast8_t key ) {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"getKey() called" << std::endl;
 		}
 		
@@ -738,7 +736,7 @@ Collectable* MainGame::getKey( uint_fast8_t key ) {
 				}
 			}
 			
-			if( debug ) {
+			if( settingsManager.debug ) {
 				std::wcout << L"end of getKey() (key is valid)" << std::endl;
 			}
 			
@@ -753,7 +751,7 @@ Collectable* MainGame::getKey( uint_fast8_t key ) {
 		std::wcerr << L"Error in MainGame::getKey(): " << e.what() << std::endl;
 	}
 	
-	if( debug ) {
+	if( settingsManager.debug ) {
 		std::wcout << L"end of getKey() (key is not valid)" << std::endl;
 	}
 	return nullptr;
@@ -823,10 +821,10 @@ uint_fast8_t MainGame::getNumKeys() {
  **/
 Player* MainGame::getPlayer( uint_fast8_t p ) {
 	try {
-		if( p < numPlayers ) {
+		if( p < settingsManager.numPlayers ) {
 			return &player.at( p );
 		} else {
-			throw( CustomException( std::wstring( L"Request for player (" ) + stringConverter.toStdWString( p ) + L") >= numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")" ) );
+			throw( CustomException( std::wstring( L"Request for player (" ) + stringConverter.toStdWString( p ) + L") >= numPlayers (" + stringConverter.toStdWString( settingsManager.numPlayers ) + L")" ) );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::getPlayer(): " << e.what() << std::endl;
@@ -856,7 +854,7 @@ std::minstd_rand::result_type MainGame::getRandomSeed() {
  */
 PlayerStart* MainGame::getStart( uint_fast8_t ps ) {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"getStart() called" << std::endl;
 		}
 		
@@ -883,7 +881,7 @@ bool MainGame::isNull( void* ptr ) {
  */
 void MainGame::loadFonts() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"loadFonts() called" << std::endl;
 		}
 		//TODO: When a font is loaded, use its size ratio to estimate what the next size to try should be
@@ -891,21 +889,21 @@ void MainGame::loadFonts() {
 		boost::filesystem::recursive_directory_iterator end;
 		std::vector< boost::filesystem::path > fontFolders = system.getFontFolders(); // Flawfinder: ignore
 
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"fontFolders.size(): " << fontFolders.size() << std::endl;
 		}
 
 		//for( std::vector< boost::filesystem::path >::iterator o = fontFolders.begin(); o not_eq fontFolders.end(); o++ ) {
 		for( decltype( fontFolders.size() ) o = 0; o < fontFolders.size(); ++o ) {
 			//for( boost::filesystem::recursive_directory_iterator i( *o ); i not_eq end; ++i ) {
-			if( debug ) {
+			if( settingsManager.debug ) {
 				std::wcout << L"Looking for fonts in folder " << fontFolders.at( o ) << std::endl;
 			}
 			
 			if( exists( fontFolders.at( o ) ) ) {
 				for( boost::filesystem::recursive_directory_iterator i( fontFolders.at( o ) ); i not_eq end; ++i ) {
 					if( fontManager.canLoadFont( i->path() ) ) {
-						if( debug ) {
+						if( settingsManager.debug ) {
 							std::wcout << L"SUCCESS: " << i->path() << L" is a loadable font." << std::endl;
 						}
 						fontFile = stringConverter.toIrrlichtStringW( i->path().wstring() );
@@ -926,7 +924,7 @@ void MainGame::loadFonts() {
 
 		{ //Load loadingFont
 			irr::core::dimension2d< uint_fast32_t > fontDimensions;
-			uint_fast32_t size = windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
+			uint_fast32_t size = settingsManager.windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
 
 			if( fontFile not_eq "" ) {
 				do { //TODO: Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
@@ -935,7 +933,7 @@ void MainGame::loadFonts() {
 						fontDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
 						size -= 2;
 					}
-				} while( not isNull( loadingFont ) and ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) or fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+				} while( not isNull( loadingFont ) and ( fontDimensions.Width > ( settingsManager.windowSize.Width / sideDisplaySizeDenominator ) or fontDimensions.Height > ( settingsManager.windowSize.Height / 5 ) ) );
 
 				size += 3;
 
@@ -945,14 +943,14 @@ void MainGame::loadFonts() {
 						fontDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
 						size -= 1;
 					}
-				} while( not isNull( loadingFont ) and ( fontDimensions.Width > ( windowSize.Width / sideDisplaySizeDenominator ) or fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+				} while( not isNull( loadingFont ) and ( fontDimensions.Width > ( settingsManager.windowSize.Width / sideDisplaySizeDenominator ) or fontDimensions.Height > ( settingsManager.windowSize.Height / 5 ) ) );
 			}
 
 			if( fontFile == "" or isNull( loadingFont ) or size <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
 				loadingFont = gui->getBuiltInFont();
 			}
 
-			if( debug ) {
+			if( settingsManager.debug ) {
 				std::wcout << L"loadingFont is loaded" << std::endl;
 			}
 		}
@@ -961,22 +959,22 @@ void MainGame::loadFonts() {
 		{ //load textFont
 			irr::core::dimension2d< uint_fast32_t > fontDimensions;
 			if( fontFile not_eq "" ) {
-				uint_fast32_t size = ( windowSize.Width / sideDisplaySizeDenominator ) / 6; //found through experimentation, adjust it however you like and see how many times the font gets loaded
+				uint_fast32_t size = ( settingsManager.windowSize.Width / sideDisplaySizeDenominator ) / 6; //found through experimentation, adjust it however you like and see how many times the font gets loaded
 
 				do {
 					textFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 
 					if( not isNull( textFont ) ) {
-						if( debug ) {
+						if( settingsManager.debug ) {
 							std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
 						}
 						fontDimensions = textFont->getDimension( L"Random seed: " );
-						if( debug ) {
+						if( settingsManager.debug ) {
 							std::wcout << L"fontDimensions set to " << fontDimensions.Width << L"x" << fontDimensions.Height << std::endl;
 						}
 						size -= 2;
 					}
-				} while( not isNull( textFont ) and ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
+				} while( not isNull( textFont ) and ( fontDimensions.Width + viewportSize.Width > settingsManager.windowSize.Width ) );
 
 				size += 3;
 
@@ -984,23 +982,23 @@ void MainGame::loadFonts() {
 					textFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
 
 					if( not isNull( textFont ) ) {
-						if( debug ) {
+						if( settingsManager.debug ) {
 							std::wcout << L"Loaded textFont in loop (size " << size << L")" << std::endl;
 						}
 						fontDimensions = textFont->getDimension( L"Random seed: " );
-						if( debug ) {
+						if( settingsManager.debug ) {
 							std::wcout << L"fontDimensions set to " << fontDimensions.Width << L"x" << fontDimensions.Height << std::endl;
 						}
 						size -= 1;
 					}
-				} while( not isNull( textFont ) and ( fontDimensions.Width + viewportSize.Width > windowSize.Width ) );
+				} while( not isNull( textFont ) and ( fontDimensions.Width + viewportSize.Width > settingsManager.windowSize.Width ) );
 			}
 
 			if( fontFile == "" or isNull( textFont ) or textFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
 				textFont = gui->getBuiltInFont();
 			}
 
-			if( debug ) {
+			if( settingsManager.debug ) {
 				std::wcout << L"textFont is loaded" << std::endl;
 			}
 		}
@@ -1009,7 +1007,7 @@ void MainGame::loadFonts() {
 		{ //Load clockFont
 			irr::core::dimension2d< uint_fast32_t > fontDimensions;
 			if( fontFile not_eq "" ) {
-				uint_fast32_t size = ( windowSize.Width / sideDisplaySizeDenominator );
+				uint_fast32_t size = ( settingsManager.windowSize.Width / sideDisplaySizeDenominator );
 
 				do {
 					clockFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
@@ -1017,7 +1015,7 @@ void MainGame::loadFonts() {
 						fontDimensions = clockFont->getDimension( L"00:00:00" );
 						size -= 2;
 					}
-				} while( not isNull( clockFont ) and ( fontDimensions.Width + viewportSize.Width > windowSize.Width  or fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+				} while( not isNull( clockFont ) and ( fontDimensions.Width + viewportSize.Width > settingsManager.windowSize.Width  or fontDimensions.Height > ( settingsManager.windowSize.Height / 5 ) ) );
 
 				size += 3;
 
@@ -1027,14 +1025,14 @@ void MainGame::loadFonts() {
 						fontDimensions = clockFont->getDimension( L"00:00:00" );
 						size -= 1;
 					}
-				} while( not isNull( clockFont ) and ( fontDimensions.Width + viewportSize.Width > windowSize.Width  or fontDimensions.Height > ( windowSize.Height / 5 ) ) );
+				} while( not isNull( clockFont ) and ( fontDimensions.Width + viewportSize.Width > settingsManager.windowSize.Width  or fontDimensions.Height > ( settingsManager.windowSize.Height / 5 ) ) );
 			}
 
 			if( fontFile == "" or isNull( clockFont ) or clockFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
 				clockFont = gui->getBuiltInFont();
 			}
 
-			if( debug ) {
+			if( settingsManager.debug ) {
 				std::wcout << L"clockFont is loaded" << std::endl;
 			}
 		}
@@ -1046,7 +1044,7 @@ void MainGame::loadFonts() {
 			if( fontFile not_eq "" ) {
 				auto aboveStats = loadingFont->getDimension( loading.c_str() ).Height * 2 + std::max( tipFont->getDimension( proTipPrefix.c_str() ).Height, tipFont->getDimension( proTips.at( currentProTip ).c_str() ).Height );
 			
-				uint_fast32_t size = windowSize.Width / numPlayers / 3; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
+				uint_fast32_t size = settingsManager.windowSize.Width / settingsManager.numPlayers / 3; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
 				uint_fast8_t builtInFontHeight = gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height;
 				if( size > builtInFontHeight ) { //If the text needs to be that small, go with the built-in font because it's readable at that size.
 					do {
@@ -1055,21 +1053,21 @@ void MainGame::loadFonts() {
 						if( not isNull( statsFont ) ) {
 							irr::core::dimension2d< uint_fast32_t > tempDimensions;
 							std::wstring tempString;
-							if( numPlayers <= 10 ) {
+							if( settingsManager.numPlayers <= 10 ) {
 								tempString = L"0.P";
-							} else if( numPlayers <= 100 ) {
+							} else if( settingsManager.numPlayers <= 100 ) {
 								tempString = L"00.P";
 							} else {
 								tempString = L"000.P";
 							}
-							tempString += stringConverter.toStdWString( numPlayers );
+							tempString += stringConverter.toStdWString( settingsManager.numPlayers );
 							
 							tempDimensions = statsFont->getDimension( tempString.c_str() );
-							fontDimensions = irr::core::dimension2d< uint_fast32_t >( tempDimensions.Width * numPlayers, tempDimensions.Height );
+							fontDimensions = irr::core::dimension2d< uint_fast32_t >( tempDimensions.Width * settingsManager.numPlayers, tempDimensions.Height );
 							tempDimensions = statsFont->getDimension( keysFoundPerPlayer.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
 							fontDimensions = irr::core::dimension2d< uint_fast32_t >( fontDimensions.Width + tempDimensions.Width, std::max( fontDimensions.Height, tempDimensions.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
 						}
-					} while( size > builtInFontHeight and not isNull( statsFont ) and ( fontDimensions.Width >= windowSize.Width  or fontDimensions.Height + aboveStats >= windowSize.Height ) );
+					} while( size > builtInFontHeight and not isNull( statsFont ) and ( fontDimensions.Width >= settingsManager.windowSize.Width  or fontDimensions.Height + aboveStats >= settingsManager.windowSize.Height ) );
 
 					size += 3;
 
@@ -1079,21 +1077,21 @@ void MainGame::loadFonts() {
 						if( not isNull( statsFont ) ) {
 							irr::core::dimension2d< uint_fast32_t > tempDimensions;
 							std::wstring tempString;
-							if( numPlayers <= 10 ) {
+							if( settingsManager.numPlayers <= 10 ) {
 								tempString = L"0.P";
-							} else if( numPlayers <= 100 ) {
+							} else if( settingsManager.numPlayers <= 100 ) {
 								tempString = L"00.P";
 							} else {
 								tempString = L"000.P";
 							}
-							tempString += stringConverter.toStdWString( numPlayers );
+							tempString += stringConverter.toStdWString( settingsManager.numPlayers );
 							
 							tempDimensions = statsFont->getDimension( tempString.c_str() );
-							fontDimensions = irr::core::dimension2d< uint_fast32_t >( tempDimensions.Width * numPlayers, tempDimensions.Height );
+							fontDimensions = irr::core::dimension2d< uint_fast32_t >( tempDimensions.Width * settingsManager.numPlayers, tempDimensions.Height );
 							tempDimensions = statsFont->getDimension( keysFoundPerPlayer.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
 							fontDimensions = irr::core::dimension2d< uint_fast32_t >( fontDimensions.Width + tempDimensions.Width, std::max( fontDimensions.Height, tempDimensions.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
 						}
-					} while( size > builtInFontHeight and not isNull( statsFont ) and ( fontDimensions.Width >= windowSize.Width  or fontDimensions.Height + aboveStats >= windowSize.Height ) );
+					} while( size > builtInFontHeight and not isNull( statsFont ) and ( fontDimensions.Width >= settingsManager.windowSize.Width  or fontDimensions.Height + aboveStats >= settingsManager.windowSize.Height ) );
 				}
 			}
 
@@ -1101,7 +1099,7 @@ void MainGame::loadFonts() {
 				statsFont = gui->getBuiltInFont();
 			}
 
-			if( debug ) {
+			if( settingsManager.debug ) {
 				std::wcout << L"statsFont is loaded" << std::endl;
 			}
 		}
@@ -1111,7 +1109,7 @@ void MainGame::loadFonts() {
 		uint_fast32_t size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect readability on large or small screens, but it's better on large screens than the built-in font.
 		gui->getSkin()->setFont( fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts ) );
 		
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"end of loadFonts()" << std::endl;
 		}
 	} catch( std::exception &e ) {
@@ -1124,15 +1122,15 @@ void MainGame::loadFonts() {
  */
 void MainGame::loadMusicFont() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"loadMusicFont() called" << std::endl;
 		}
 		
-		if( playMusic ) {
+		if( settingsManager.playMusic ) {
 			if( fontFile not_eq "" ) {
 				uint_fast32_t size = 0; //The height (I think) of the font to be loaded
 			
-				uint_fast32_t maxWidth = ( windowSize.Width / sideDisplaySizeDenominator );
+				uint_fast32_t maxWidth = ( settingsManager.windowSize.Width / sideDisplaySizeDenominator );
 				
 				uint_fast32_t numerator = 2.5 * maxWidth; //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
 
@@ -1187,7 +1185,7 @@ void MainGame::loadMusicFont() {
 			}
 		}
 		
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"end of loadMusicFont()" << std::endl;
 		}
 	} catch( std::exception &e ) {
@@ -1200,7 +1198,7 @@ void MainGame::loadMusicFont() {
  */
 void MainGame::loadNextSong() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"loadNextSong() called" << std::endl;
 		}
 
@@ -1230,7 +1228,7 @@ void MainGame::loadNextSong() {
 			if( musicStatus == -1 ) {
 				throw( CustomException( std::wstring( L"Unable to play music file: " ) + stringConverter.toStdWString( Mix_GetError() ) ) );
 			} else {
-				if( debug ) {
+				if( settingsManager.debug ) {
 					switch( Mix_GetMusicType( nullptr ) ) {
 						case MUS_CMD:
 							std::wcout << L"Command based";
@@ -1285,7 +1283,7 @@ void MainGame::loadNextSong() {
 						musicAlbum = L"Unknown Album";
 					}
 
-					if( debug ) {
+					if( settingsManager.debug ) {
 						std::wcout << L"Now playing: " << stringConverter.toStdWString( musicTitle ) << L" by " << stringConverter.toStdWString( musicArtist ) << L" from album " << stringConverter.toStdWString( musicAlbum ) << std::endl;
 					}
 				}
@@ -1293,10 +1291,10 @@ void MainGame::loadNextSong() {
 				loadMusicFont();
 			}
 
-			Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+			Mix_VolumeMusic( settingsManager.musicVolume * MIX_MAX_VOLUME / 100 );
 		}
 		
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"end of loadNextSong()" << std::endl;
 		}
 	} catch( std::exception &e ) {
@@ -1309,7 +1307,7 @@ void MainGame::loadNextSong() {
  */
 void MainGame::loadProTips() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"loadProTips() called" << std::endl;
 		}
 		
@@ -1318,7 +1316,7 @@ void MainGame::loadProTips() {
 		
 		if( exists( proTipsPath ) ) {
 			if( not is_directory( proTipsPath ) ) {
-				if( debug ) {
+				if( settingsManager.debug ) {
 					std::wcout << L"Loading pro tips from file " << proTipsPath.wstring() << std::endl;
 				}
 				boost::filesystem::wifstream proTipsFile;
@@ -1339,7 +1337,7 @@ void MainGame::loadProTips() {
 							if( not line.empty() ) {
 								proTips.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
 								
-								if( debug ) {
+								if( settingsManager.debug ) {
 									std::wcout << line << std::endl;
 								}
 							}
@@ -1360,7 +1358,7 @@ void MainGame::loadProTips() {
 			throw( CustomException( std::wstring( L"Pro tips file does not exist. Cannot load pro tips." ) ) );
 		}
 		
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"end of loadProTips()" << std::endl;
 		}
 	} catch( std::exception &e ) {
@@ -1373,13 +1371,13 @@ void MainGame::loadProTips() {
  */
 void MainGame::loadTipFont() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"loadTipFont() called" << std::endl;
 		}
 		
 		if( fontFile not_eq "" ) {
 			uint_fast32_t size; //The height (I think) of the font to be loaded
-			uint_fast32_t maxWidth = windowSize.Width;
+			uint_fast32_t maxWidth = settingsManager.windowSize.Width;
 			
 			irr::core::stringw tipIncludingPrefix = proTipPrefix;
 
@@ -1415,7 +1413,7 @@ void MainGame::loadTipFont() {
 			tipFont = gui->getBuiltInFont();
 		}
 		
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"end of loadTipFont()" << std::endl;
 		}
 	} catch( std::exception &e ) {
@@ -1430,7 +1428,7 @@ void MainGame::loadTipFont() {
  */
 MainGame::~MainGame() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"MainGame destructor called" << std::endl;
 		}
 		
@@ -1452,7 +1450,7 @@ MainGame::~MainGame() {
 		device->run(); //Sometimes there are problems if we don't call run() after closeDevice(). Don't remember what they are at the moment.
 		device->drop();
 
-		if( playMusic ) {
+		if( settingsManager.playMusic ) {
 			Mix_HaltMusic();
 			Mix_FreeMusic( music );
 			Mix_CloseAudio();
@@ -1464,7 +1462,7 @@ MainGame::~MainGame() {
 			SDL_Quit();
 		}
 		
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"end of MainGame destructor" << std::endl;
 		}
 	} catch( std::exception &e ) {
@@ -1481,9 +1479,9 @@ MainGame::MainGame() {
 		#ifdef DEBUG //Not the last place debug is set to true or false; look at readPrefs()
 			debug = true;
 		#else
-			debug = false;
+			settingsManager.debug = false;
 		#endif
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"MainGame constructor called" << std::endl;
 		}
 		//Just wanted to be totally sure that these point to nullptr before.
@@ -1507,13 +1505,13 @@ MainGame::MainGame() {
 		keysFoundPerPlayer = L"Keys found: ";
 		scores = L"Scores: ";
 		scoresTotal = L"Total scores: ";
-		mazeManager.setMainGame( this );
-		isServer = false;
+		mazeManager.setPointers( this, &settingsManager );
+		settingsManager.isServer = false;
 		antiAliasFonts = true;
 		currentProTip = 0;
 		sideDisplaySizeDenominator = 6; //What fraction of the screen's width is set aside for displaying text, statistics, etc. during play.
-		minWidth = 640;
-		minHeight = 480;
+		settingsManager.minWidth = 640;
+		settingsManager.minHeight = 480;
 		currentDirectory = boost::filesystem::current_path();
 		haveShownLogo = false;
 		donePlaying = false;
@@ -1530,25 +1528,26 @@ MainGame::MainGame() {
 			throw( CustomException( std::wstring( L"Cannot create null device. Something is definitely wrong here!" ) ) );
 		}
 		
-		readPrefs();
+		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system );
+		settingsManager.readPrefs();
 		
-		if ( debug ) {
+		if ( settingsManager.debug ) {
 			std::wcout << L"Read prefs, now setting controls" << std::endl;
 		}
 		
 		setMyPlayer( UINT8_MAX ); //Must call this before setControls() so that controls which affect player number "mine" will work. setMyPlayer() will be called again later to set the correct player number; the number used here doesn't matter.
 		setControls();
 		
-		if( fullscreen ) {
+		if( settingsManager.fullscreen ) {
 			irr::video::IVideoModeList* vmList = device->getVideoModeList();
-			if( allowSmallSize ) {
-				windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), device->getVideoModeList()->getDesktopResolution() ); //Gets a video resolution between minimum (1,1) and maximum (desktop resolution)
+			if( settingsManager.allowSmallSize ) {
+				settingsManager.windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), device->getVideoModeList()->getDesktopResolution() ); //Gets a video resolution between minimum (1,1) and maximum (desktop resolution)
 			} else {
-				windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( minWidth, minHeight ), device->getVideoModeList()->getDesktopResolution() );
+				settingsManager.windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( settingsManager.minWidth, settingsManager.minHeight ), device->getVideoModeList()->getDesktopResolution() );
 			}
 		}
 		
-		viewportSize.set( windowSize.Width - ( windowSize.Width / sideDisplaySizeDenominator ), windowSize.Height - 1 );
+		viewportSize.set( settingsManager.windowSize.Width - ( settingsManager.windowSize.Width / sideDisplaySizeDenominator ), settingsManager.windowSize.Height - 1 );
 		
 		device->closeDevice(); //Signals to the existing device that it needs to close itself on next run() so that we can create a new device
 		device->run(); //This is next run()
@@ -1557,7 +1556,7 @@ MainGame::MainGame() {
 		bool sbuffershadows = false; //Would not be visible anyway since this game is 2D
 		IEventReceiver* receiver = this;
 		
-		device = createDevice( driverType, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver ); //Most of these parameters were read from the preferences file
+		device = createDevice( settingsManager.driverType, settingsManager.windowSize, settingsManager.bitsPerPixel, settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver ); //Most of these parameters were read from the preferences file
 		
 		if( isNull( device ) ) {
 			std::wcerr << L"Error: Cannot create device. Trying other driver types." << std::endl;
@@ -1565,35 +1564,35 @@ MainGame::MainGame() {
 			//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
 			for( auto i = ( uint_fast8_t ) irr::video::EDT_COUNT; isNull( device ) and i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
 				if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
-					driverType = ( irr::video::E_DRIVER_TYPE ) i;
-					device = createDevice( driverType, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
+					settingsManager.driverType = ( irr::video::E_DRIVER_TYPE ) i;
+					device = createDevice( settingsManager.driverType, settingsManager.windowSize, settingsManager.bitsPerPixel, settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver );
 				}
 			}
 			
 			if( isNull( device ) ) {
 				std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
-				device = createDevice( irr::video::EDT_NULL, windowSize, bitsPerPixel, fullscreen, sbuffershadows, vsync, receiver );
-				debug = true;
+				device = createDevice( irr::video::EDT_NULL, settingsManager.windowSize, settingsManager.bitsPerPixel, settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver );
+				settingsManager.debug = true;
 			}
-		} else if ( debug ) {
+		} else if ( settingsManager.debug ) {
 			std::wcout << L"Got the new device" << std::endl;
 		}
 		
 		driver = device->getVideoDriver(); //Not sure if this would be possible with a null device, which is why we don't exit
 		if( isNull( driver ) ) {
 			throw( CustomException( std::wstring( L"Cannot get video driver" ) ) );
-		} else if ( debug ) {
+		} else if ( settingsManager.debug ) {
 			std::wcout << L"Got the video driver" << std::endl;
 		}
 		
 		driver->setTextureCreationFlag( irr::video::ETCF_NO_ALPHA_CHANNEL, false );
 		driver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, false );
-		if( driverType == irr::video::EDT_SOFTWARE or driverType == irr::video:: EDT_BURNINGSVIDEO ) {
+		if( settingsManager.driverType == irr::video::EDT_SOFTWARE or settingsManager.driverType == irr::video:: EDT_BURNINGSVIDEO ) {
 			driver->setTextureCreationFlag( irr::video::ETCF_OPTIMIZED_FOR_SPEED, true );
 		} else {
 			driver->setTextureCreationFlag( irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true );
 		}
-		if( driverType == irr::video::EDT_SOFTWARE ) {
+		if( settingsManager.driverType == irr::video::EDT_SOFTWARE ) {
 			driver->setTextureCreationFlag( irr::video::ETCF_ALLOW_NON_POWER_2, false );
 		}
 		
@@ -1607,7 +1606,7 @@ MainGame::MainGame() {
 		if( isNull( gui ) ) {
 			throw( CustomException( std::wstring( L"Cannot get GUI environment" ) ) );
 		} else {
-			if ( debug ) {
+			if ( settingsManager.debug ) {
 				std::wcout << L"Got the gui environment" << std::endl;
 			}
 			for( uint_fast8_t i = 0; i < ( decltype( i ) )irr::gui::EGDC_COUNT ; ++i ) {
@@ -1621,7 +1620,7 @@ MainGame::MainGame() {
 		
 		device->setWindowCaption( stringConverter.toStdWString( PACKAGE_STRING ).c_str() ); //stringConverter.toWCharArray( PACKAGE_STRING ) );
 		
-		if( debug ) {
+		if( settingsManager.debug ) {
 			device->getLogger()->setLogLevel( irr::ELL_INFORMATION );
 		} else {
 			device->getLogger()->setLogLevel( irr::ELL_ERROR );
@@ -1630,16 +1629,16 @@ MainGame::MainGame() {
 		backgroundSceneManager = device->getSceneManager(); //Not sure if this would be possible with a null device, which is why we don't exit
 		if( isNull( backgroundSceneManager ) ) {
 			throw( CustomException( std::wstring( L"Cannot get scene manager" ) ) );
-		} else if ( debug ) {
+		} else if ( settingsManager.debug ) {
 			std::wcout << L"Got the scene manager" << std::endl;
 		}
 		
 		
-		if( playMusic ) {
+		if( settingsManager.playMusic ) {
 			
 			if( SDL_Init( SDL_INIT_AUDIO ) == -1 ) {
 				std::wcerr << L"Cannot initialize SDL audio." << std::endl;
-				playMusic = false;
+				settingsManager.playMusic = false;
 			}
 			
 			{//Set the audio properties we hope to get: sample rate, channels, etc.
@@ -1650,12 +1649,12 @@ MainGame::MainGame() {
 
 				if( Mix_OpenAudio( audioRate, audioFormat, audioChannels, audioChunkSize ) not_eq 0 ) {
 					std::wcerr << L"Unable to initialize audio: " << Mix_GetError() << std::endl;
-					playMusic = false;
-				} else if( debug ) {
+					settingsManager.playMusic = false;
+				} else if( settingsManager.debug ) {
 					std::wcout << L"Initialized audio" << std::endl;
 				}
 
-				if( debug ) {
+				if( settingsManager.debug ) {
 					Mix_QuerySpec( &audioRate, &audioFormat, &audioChannels );//Don't assume we got everything we asked for above
 					std::wcout << L"Audio sample rate: " << audioRate << L" Hertz. Format: ";
 					// cppcheck-suppress duplicateIf
@@ -1712,28 +1711,29 @@ MainGame::MainGame() {
 
 			music = nullptr;
 
-			if( playMusic ) { //No sense in making the music list if we've been unable to initialize the audio.
+			if( settingsManager.playMusic ) { //No sense in making the music list if we've been unable to initialize the audio.
 				makeMusicList();
-				if( playMusic ) {  //playMusic may be set to false if makeMusicList() can't find any songs to play
+				if( settingsManager.playMusic ) {  //playMusic may be set to false if makeMusicList() can't find any songs to play
 					loadNextSong();
 				}
 			}
 		}
 
 		loadFonts();
+		settingsScreen.setTextFont( textFont );
 		
-		menuManager.setPositions( windowSize.Height );
+		menuManager.setPositions( settingsManager.windowSize.Height );
 		menuManager.loadIcons( device );
 
-		if ( debug ) {
-			std::wcout << L"Resizing player and playerStart vectors to " << numPlayers << std::endl;
+		if ( settingsManager.debug ) {
+			std::wcout << L"Resizing player and playerStart vectors to " << settingsManager.numPlayers << std::endl;
 		}
 
-		player.resize( numPlayers );
-		playerStart.resize( numPlayers );
-		playerAssigned.resize( numPlayers );
+		player.resize( settingsManager.numPlayers );
+		playerStart.resize( settingsManager.numPlayers );
+		playerAssigned.resize( settingsManager.numPlayers );
 		
-		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
+		for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
 			player.at( p ).setPlayerNumber( p );
 			player.at( p ).setColorBasedOnNum();
 			player.at( p ).loadTexture( device );
@@ -1741,36 +1741,36 @@ MainGame::MainGame() {
 			playerAssigned.at( p ) = false;
 		}
 		
-		if( isServer ) {
+		if( settingsManager.isServer ) {
 			setMyPlayer( 0 );
 		} else {
-			numBots = 0; //Only the server can control the bots. Clients should see them as other players.
+			settingsManager.numBots = 0; //Only the server can control the bots. Clients should see them as other players.
 		}
 		
-		if( numBots > numPlayers ) {
-			numBots = numPlayers;
+		if( settingsManager.numBots > settingsManager.numPlayers ) {
+			settingsManager.numBots = settingsManager.numPlayers;
 		}
 		
-		if( numBots > 0 ) {
-			if ( debug ) {
-				std::wcout << L"Resizing numBots vector to " << numBots << std::endl;
+		if( settingsManager.numBots > 0 ) {
+			if ( settingsManager.debug ) {
+				std::wcout << L"Resizing numBots vector to " << settingsManager.numBots << std::endl;
 			}
 			
-			bot.resize( numBots );
+			bot.resize( settingsManager.numBots );
 			
-			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
-				decltype( bot.at( i ).getPlayer() ) p = numPlayers - ( i + 1 );
+			for( decltype( settingsManager.numBots ) i = 0; i < settingsManager.numBots; ++i ) {
+				decltype( bot.at( i ).getPlayer() ) p = settingsManager.numPlayers - ( i + 1 );
 				bot.at( i ).setPlayer( p ) ;
 				playerAssigned.at( p ) = true;
 				player.at( bot.at( i ).getPlayer() ).isHuman = false;
 				//bot.at( i ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm, botMovementDelay );
-				bot.at( i ).setup( this, botsKnowSolution, botAlgorithm, botMovementDelay );
+				bot.at( i ).setup( this, settingsManager.botsKnowSolution, settingsManager.botAlgorithm, settingsManager.botMovementDelay );
 			}
 		}
 		
 		goal.loadTexture( device );
 		
-		if( enableController and device->activateJoysticks( controllerInfo ) and debug ) { //activateJoysticks fills controllerInfo with info about each controller
+		if( enableController and device->activateJoysticks( controllerInfo ) and settingsManager.debug ) { //activateJoysticks fills controllerInfo with info about each controller
 			std::wcout << L"controller support is enabled and " << controllerInfo.size() << L" controller(s) are present." << std::endl;
 
 			for( decltype( controllerInfo.size() ) controller = 0; controller < controllerInfo.size(); ++controller ) {
@@ -1796,16 +1796,16 @@ MainGame::MainGame() {
 						break;
 				}
 			}
-		} else if( debug ) {
+		} else if( settingsManager.debug ) {
 			std::wcout << L"controller support is not enabled." << std::endl;
 		}
 		
 		//Set up networking
-		network.setup( this, isServer );
+		network.setup( this, settingsManager.isServer );
 		
 		timer = device->getTimer();
 
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"end of MainGame constructor" << std::endl;
 		}
 	} catch( std::exception &e ) {
@@ -1819,13 +1819,13 @@ MainGame::MainGame() {
  */
 void MainGame::makeMusicList() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"makeMusicList() called" << std::endl;
 		}
 		
 		musicList.clear(); //The music list should be empty anyway, since makeMusicList() only gets called once, but just in case...
 
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"makeMusicList() called" << std::endl;
 			decltype( Mix_GetNumMusicDecoders() ) numMusicDecoders = Mix_GetNumMusicDecoders();
 			std::wcout << L"There are " << numMusicDecoders << L" music decoders available. They are:" << std::endl;
@@ -1841,12 +1841,12 @@ void MainGame::makeMusicList() {
 		musicPath = system_complete( musicPath );
 		//musicPath = absolute( musicPath );
 
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"music path is absolute? " << musicPath.is_absolute() << std::endl;
 		}
 
 		while( ( not exists( musicPath ) or not is_directory( musicPath ) ) and musicPath.has_parent_path() ) {
-			if( debug ) {
+			if( settingsManager.debug ) {
 				std::wcout << L"Path " << musicPath.wstring() << L" does not exist or is not a directory. Checking parent path " << musicPath.parent_path().wstring() << std::endl;
 			}
 
@@ -1879,10 +1879,10 @@ void MainGame::makeMusicList() {
 			currentMusic = musicList.back();
 		} else {
 			std::wcerr << L"Could not find any music to play. Turning off playback." << std::endl;
-			playMusic = false;
+			settingsManager.playMusic = false;
 		}
 		
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"end of makeMusicList()" << std::endl;
 		}
 	} catch( std::exception &e ) {
@@ -1915,11 +1915,11 @@ void MainGame::makeMusicList() {
 void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromServer ) {
 	try {
 		
-		if( not fromServer and( isServer or ( not isServer and p == myPlayer ) ) ) {
+		if( not fromServer and( settingsManager.isServer or ( not settingsManager.isServer and p == myPlayer ) ) ) {
 			network.sendPlayerPosXMove( p, direction );
 		}
 		
-		if( numPlayers > p and mazeManager.cols > 0 ) {
+		if( settingsManager.numPlayers > p and mazeManager.cols > 0 ) {
 			if( direction < 0 ) {
 				if( player.at( p ).hasItem() and player.at( p ).getItemType() == Collectable::ACID and player.at( p ).getX() > 0 and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() not_eq MazeCell::ACIDPROOF and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() not_eq MazeCell::LOCK  and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() not_eq MazeCell::NONE ) {
 					player.at( p ).removeItem();
@@ -1947,7 +1947,7 @@ void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromSe
 				throw CustomException( L"Player "+ stringConverter.toStdWString( p ) + L"'s Y (" + stringConverter.toStdWString( player.at( p ).getY() ) + L") is outside mazeManager's rows (" + stringConverter.toStdWString( mazeManager.rows ) + L")." );
 			}
 		} else {
-			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
+			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( settingsManager.numPlayers ) + L")";
 			throw CustomException( e );
 		}
 	} catch( std::exception &e ) {
@@ -1965,11 +1965,11 @@ void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromSe
 void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromServer ) {
 	try {
 		
-		if( not fromServer and ( isServer or ( not isServer and p == myPlayer ) ) ) {
+		if( not fromServer and ( settingsManager.isServer or ( not settingsManager.isServer and p == myPlayer ) ) ) {
 			network.sendPlayerPosYMove( p, direction );
 		}
 		
-		if( numPlayers > p and mazeManager.rows > 0 ) {
+		if( settingsManager.numPlayers > p and mazeManager.rows > 0 ) {
 			if( direction < 0 ) {
 				if( player.at( p ).hasItem() and player.at( p ).getItemType() == Collectable::ACID and player.at( p ).getY() > 0 and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() not_eq MazeCell::ACIDPROOF and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() not_eq MazeCell::LOCK and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() not_eq MazeCell::NONE ) {
 					player.at( p ).removeItem();
@@ -1998,7 +1998,7 @@ void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromSe
 
 			movePlayerCommon( p );
 		} else {
-			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
+			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( settingsManager.numPlayers ) + L")";
 			throw CustomException( e );
 		}
 	} catch( std::exception &e ) {
@@ -2012,7 +2012,7 @@ void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromSe
 void MainGame::networkHasNewConnection() {
 	network.sendMaze( randomSeed );
 	
-	for( decltype( myPlayer ) p = 0; p < numPlayers; ++p ) {
+	for( decltype( myPlayer ) p = 0; p < settingsManager.numPlayers; ++p ) {
 		std::wcout << p << " ";
 		if( !playerAssigned.at( p ) ) {
 			std::wcout << "false";
@@ -2022,7 +2022,7 @@ void MainGame::networkHasNewConnection() {
 		std::wcout << std::endl;
 	}
 	
-	for( decltype( myPlayer ) p = 0; p < numPlayers; ++p ) {
+	for( decltype( myPlayer ) p = 0; p < settingsManager.numPlayers; ++p ) {
 		if( !playerAssigned.at( p ) ) {
 			network.tellNewClientItsPlayer( p );
 			playerAssigned.at( p ) = true;
@@ -2030,7 +2030,7 @@ void MainGame::networkHasNewConnection() {
 		}
 	}
 	
-	for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
+	for( uint_fast8_t p = 0; p < settingsManager.numPlayers; ++p ) {
 		network.sendPlayerPos( p );
 	}
 }
@@ -2040,13 +2040,13 @@ void MainGame::networkHasNewConnection() {
  */
 void MainGame::newMaze() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"newMaze() called with no arguments" << std::endl;
 		}
 		
 		newMaze( getRandomNumber() );
 		
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"end of newMaze() with no arguments" << std::endl;
 		}
 	} catch( std::exception &e ) {
@@ -2074,13 +2074,13 @@ void MainGame::newMaze( boost::filesystem::path src ) {
  */
 void MainGame::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"newMaze() called with an argument" << std::endl;
 		}
 		
 		allPlayersReady( false );
 		
-		if( isServer ) {
+		if( settingsManager.isServer ) {
 			network.sendMaze( newRandomSeed );
 		}
 		
@@ -2091,19 +2091,19 @@ void MainGame::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 		
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
-		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
-			bot.at( b ).setup( this, botsKnowSolution, botAlgorithm, botMovementDelay );
+		for( decltype( settingsManager.numBots ) b = 0; b < settingsManager.numBots; ++b ) {
+			bot.at( b ).setup( this, settingsManager.botsKnowSolution, settingsManager.botAlgorithm, settingsManager.botMovementDelay );
 		}
 		
 		if( numLocks == 0 ) {
-			for( decltype( numBots ) b = 0; b < numBots; ++b ) {
+			for( decltype( settingsManager.numBots ) b = 0; b < settingsManager.numBots; ++b ) {
 				bot.at( b ).allKeysFound(); //Lets all the bots know they don't need to search for keys
 			}
 		}
 		
 		setLoadingPercentage( 100 );
 		
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"end of newMaze() with an argument" << std::endl;
 		}
 	} catch( std::exception &e ) {
@@ -2204,7 +2204,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 			case irr::EET_USER_EVENT: {
 				switch( event.UserEvent.UserData1 ) {
 					case USER_EVENT_WINDOW_RESIZE: {
-						windowSize.set( driver->getScreenSize().Width, driver->getScreenSize().Height );
+						settingsManager.windowSize.set( driver->getScreenSize().Width, driver->getScreenSize().Height );
 
 						//TODO: Find a way to resize the window or set a minimum size
 						/*if (!allowSmallSize) {
@@ -2225,30 +2225,30 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 							}
 						}*/
 
-						viewportSize.set( windowSize.Width - ( windowSize.Width / sideDisplaySizeDenominator ), windowSize.Height - 1 );
+						viewportSize.set( settingsManager.windowSize.Width - ( settingsManager.windowSize.Width / sideDisplaySizeDenominator ), settingsManager.windowSize.Height - 1 );
 						cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 						cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 						loadFonts();
 						
-						menuManager.setPositions( windowSize.Height );
+						menuManager.setPositions( settingsManager.windowSize.Height );
 						
-						if( showBackgrounds ) {
+						if( settingsManager.showBackgrounds ) {
 							
 							irr::scene::ICameraSceneNode* camera = backgroundSceneManager->getActiveCamera();
 							if( not isNull( camera ) ) {
-								camera->setAspectRatio( static_cast< decltype( camera->getAspectRatio() ) >( windowSize.Width ) / windowSize.Height );
+								camera->setAspectRatio( static_cast< decltype( camera->getAspectRatio() ) >( settingsManager.windowSize.Width ) / settingsManager.windowSize.Height );
 							}
 							
-							if( backgroundChosen == IMAGES and not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq windowSize ) {
+							if( backgroundChosen == IMAGES and not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
 								if( backgroundFilePath.size() > 0 ) {// not backgroundFilePath.empty() ) { Irrlicht 1.8+ has .empty() but Raspbian only has 1.7 in its repositories
 									backgroundTexture = driver->getTexture( backgroundFilePath );
 								}
-								if( not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq windowSize ) {
-									backgroundTexture = resizer.resize( backgroundTexture, windowSize.Width, windowSize.Height, driver );
+								if( not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
+									backgroundTexture = resizer.resize( backgroundTexture, settingsManager.windowSize.Width, settingsManager.windowSize.Height, driver );
 								}
-							} else if( backgroundChosen == STARTRAILS and backgroundTexture->getSize() not_eq windowSize ) {
+							} else if( backgroundChosen == STARTRAILS and backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
 								driver->removeTexture( backgroundTexture );
-								backgroundTexture = driver->addRenderTargetTexture( windowSize );
+								backgroundTexture = driver->addRenderTargetTexture( settingsManager.windowSize );
 							}
 						}
 						return true;
@@ -2324,7 +2324,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 				switch( event.GUIEvent.EventType ) {
 					case irr::gui::EGET_FILE_SELECTED: {
 						if( not isNull( loadMazeDialog ) and event.GUIEvent.Caller->getID() == loadMazeDialog->getID() ) {
-							if( debug ) {
+							if( settingsManager.debug ) {
 								std::wcout << L"File selected for loading. Folder: " << stringConverter.toStdWString( loadMazeDialog->getDirectoryName() ) << L"\tFile: " << loadMazeDialog->getFileName() << std::endl;
 							}
 							boost::filesystem::current_path( currentDirectory ); //Resets the actual current directory to currentDirectory, since the file chooser can change the current directory.
@@ -2333,7 +2333,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 							loadMazeDialog = nullptr;
 							return true;
 						} else if( not isNull( saveMazeDialog ) and event.GUIEvent.Caller->getID() == saveMazeDialog->getID() ) {
-							if( debug ) {
+							if( settingsManager.debug ) {
 								std::wcout << L"File selected for saving. Folder: " << stringConverter.toStdWString( loadMazeDialog->getDirectoryName() ) << L"\tFile: " << loadMazeDialog->getFileName() << std::endl;
 							}
 							boost::filesystem::current_path( currentDirectory ); //Resets the actual current directory to currentDirectory, since the file chooser can change the current directory.
@@ -2346,12 +2346,12 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 					}
 					case irr::gui::EGET_DIRECTORY_SELECTED: {
 						if( not isNull( loadMazeDialog ) and event.GUIEvent.Caller->getID() == loadMazeDialog->getID() ) {
-							if( debug ) {
+							if( settingsManager.debug ) {
 								std::wcout << L"Folder selected." << std::endl;
 							}
 							return true;
 						} else if( not isNull( saveMazeDialog ) and event.GUIEvent.Caller->getID() == saveMazeDialog->getID() ) {
-							if( debug ) {
+							if( settingsManager.debug ) {
 								std::wcout << L"Folder selected." << std::endl;
 							}
 							return true;
@@ -2410,7 +2410,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
  */
  void MainGame::pickLogo() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"pickLogo() called" << std::endl;
 		}
 		
@@ -2423,7 +2423,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 		//logoPath = absolute( logoPath );
 
 		while( ( not exists( logoPath ) or not is_directory( logoPath ) ) and logoPath.has_parent_path() ) {
-			if( debug ) {
+			if( settingsManager.debug ) {
 				std::wcout << L"Path " << logoPath.wstring() << L" does not exist or is not a directory. Checking parent path " << logoPath.parent_path().wstring() << std::endl;
 			}
 
@@ -2435,7 +2435,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 
 			for( boost::filesystem::recursive_directory_iterator i( logoPath ); i not_eq end; ++i ) {
 				if( not is_directory( i->path() ) ) { //We've found a file
-					if( debug ) {
+					if( settingsManager.debug ) {
 						std::wcout << i->path().wstring() << std::endl;
 					}
 
@@ -2474,7 +2474,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 
 			//Pick a random logo and load it
 			auto logoChosen = getRandomNumber() % logoList.size();
-			if( debug ) {
+			if( settingsManager.debug ) {
 				std::wcout << L"Logo chosen: #" << logoChosen << L"/" << logoList.size();
 				std::wcout << L" " << logoList.at( logoChosen ).wstring() << std::endl;
 			}
@@ -2490,25 +2490,13 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 			std::wcerr << L"Could not find any logo images." << std::endl;
 		}
 		
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"end of pickLogo()" << std::endl;
 		}
 	} catch ( std::exception &error ) {
 		std::wcerr << L"Error in drawLogo(): " << error.what() << std::endl;
 	}
  }
-
-/**
- * Created because so many preferences are booleans
- * Arguments:
- * --- std::wstring choice: a string which should be either "true" or "false"
- * Returns: A Boolean indicating whether choice is closer to "true" or to "false"
- */
-bool MainGame::prefIsTrue( std::wstring choice ) {
-	std::vector< std::wstring > possibleChoices = { L"true", L"false" };
-	auto choiceNum = spellChecker.indexOfClosestString( choice, possibleChoices );
-	return( choiceNum == 0 );
-}
 
 /**
 * Should be called only by run().
@@ -2574,18 +2562,18 @@ void MainGame::processControls() {
 						break;
 					}
 					case ControlMapping::ACTION_VOLUME_UP: {
-						musicVolume = std::max( ( musicVolume + 5 ), ( decltype( musicVolume ) ) 100 );
-						Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+						settingsManager.musicVolume = std::max( ( settingsManager.musicVolume + 5 ), ( decltype( settingsManager.musicVolume ) ) 100 );
+						Mix_VolumeMusic( settingsManager.musicVolume * MIX_MAX_VOLUME / 100 );
 						break;
 					}
 					case ControlMapping::ACTION_VOLUME_DOWN: {
-						if( musicVolume >= 5 ) {
-							musicVolume -= 5;
+						if( settingsManager.musicVolume >= 5 ) {
+							settingsManager.musicVolume -= 5;
 						} else {
-							musicVolume = 0;
+							settingsManager.musicVolume = 0;
 						}
 						
-						Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+						Mix_VolumeMusic( settingsManager.musicVolume * MIX_MAX_VOLUME / 100 );
 						break;
 					}
 					default: { //Handle player controls
@@ -2595,13 +2583,13 @@ void MainGame::processControls() {
 							ignoreKey = true;
 						}
 						
-						for( decltype( numBots ) b = 0; not isServer and not ignoreKey and b < numBots; ++b ) { //Ignore controls that affect bots
+						for( decltype( settingsManager.numBots ) b = 0; not settingsManager.isServer and not ignoreKey and b < settingsManager.numBots; ++b ) { //Ignore controls that affect bots
 							if( controls.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
 								ignoreKey = true;
 							}
 						}
 						
-						if( not isServer and controls.at( k ).getPlayer() not_eq myPlayer ) {
+						if( not settingsManager.isServer and controls.at( k ).getPlayer() not_eq myPlayer ) {
 							ignoreKey = true;
 						}
 						
@@ -2639,497 +2627,11 @@ void MainGame::processControls() {
 }
 
 /**
- * Reads preferences from prefs.cfg. Sets defaults for any preference not found in the file. If the file does not exist, creates it.
- */
-void MainGame::readPrefs() {
-	try {
-		#if defined DEBUG
-			debug = true;
-		#else
-			debug = false;
-		#endif
-		if( debug ) {
-			std::wcout << L"readPrefs() called" << std::endl;
-		}
-
-		//Set default prefs, in case we can't get them from the file
-		showBackgrounds = true;
-		fullscreen = false;
-		bitsPerPixel = 8;
-		vsync = true;
-		driverType = irr::video::EDT_OPENGL;
-		windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( minWidth, minHeight );
-		allowSmallSize = false;
-		playMusic = true;
-		numBots = 0;
-		numPlayers = 1;
-		markTrails = false;
-		musicVolume = 50;
-		network.setPort( "61187" );
-		isServer = true;
-		botsKnowSolution = false;
-		botAlgorithm = AI::DEPTH_FIRST_SEARCH;
-		botMovementDelay = 300;
-		mazeManager.hideUnseen = false;
-		backgroundAnimations = true;
-		
-		std::vector< std::wstring > possiblePrefs = { L"bots' solving algorithm", L"volume", L"number of bots", L"show backgrounds",
-									L"fullscreen", L"mark player trails", L"debug", L"bits per pixel", L"wait for vertical sync", L"driver type", L"number of players",
-									L"window size", L"play music", L"network port", L"always server", L"bots know the solution", L"bot movement delay", L"hide unseen maze areas", L"background animations" };
-		auto prefsNotFound = possiblePrefs;
-		
-		std::vector< boost::filesystem::path > configFolders = system.getConfigFolders(); // Flawfinder: ignore
-		bool prefsFileFound = false;
-		
-		for( auto it = configFolders.begin(); it not_eq configFolders.end(); ++it ) {
-			boost::filesystem::path prefsPath( *it/L"prefs.cfg" );
-			
-			if( ( exists( prefsPath ) and not is_directory( prefsPath ) ) or not exists( prefsPath ) ) {
-				if( debug ) {
-					std::wcout << L"Loading preferences from file " << prefsPath.wstring() << std::endl;
-				}
-				prefsFileFound = true;
-				boost::filesystem::wfstream prefsFile;
-				prefsFile.open( prefsPath, boost::filesystem::wfstream::in );
-				
-				if( prefsFile.is_open() ) {
-					std::wstring line;
-					uintmax_t lineNum = 0; //This used to be a uint_fast8_t, which should be good enough. However, when dealing with user input (such as a file), we don't want to make assumptions.
-					
-					while( prefsFile.good() ) {
-						++lineNum;
-						getline( prefsFile, line );
-						line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
-						boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
-						boost::algorithm::to_lower( line );
-						if( debug ) {
-							std::wcout << L"Line " << lineNum << L": \"" << line << "\"" << std::endl;
-						}
-						
-						
-						if( not line.empty() ) {
-							try {
-								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
-								std::wstring choice = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
-								
-								if( debug ) {
-									std::wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< std::endl;
-								}
-								
-								//preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
-								auto preferenceNum = spellChecker.indexOfClosestString( preference, possiblePrefs );
-								
-								if( debug ) {
-									std::wcout << L"Preference after spellchecking \"" << preference << std::endl;
-								}
-								
-								{
-									auto toRemove = std::find( prefsNotFound.begin(), prefsNotFound.end(), possiblePrefs.at( preferenceNum ) );
-									if( toRemove not_eq prefsNotFound.end() ) {
-										prefsNotFound.erase( toRemove );
-									}
-								}
-								
-								switch( preferenceNum ) {
-									case 0: { //L"bots' solving algorithm"
-										AI temp;
-										temp.setup( this, false, AI::ALGORITHM_DO_NOT_USE, 0 );
-										botAlgorithm = temp.algorithmFromString( choice );
-										break;
-									}
-									
-									case 1: { //L"volume"
-										try {
-											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-											
-											if( choiceAsInt <= 100 ) {
-												musicVolume = choiceAsInt;
-												Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
-												if( debug ) {
-													std::wcout << L"Volume should be " << choiceAsInt << "%" << std::endl;
-													std::wcout << L"Volume is really " << 100 * Mix_VolumeMusic( -1 ) / MIX_MAX_VOLUME << "%" << std::endl;
-												}
-											} else {
-												std::wcerr << L"Warning: Volume greater than 100%: " << choiceAsInt << std::endl;
-												Mix_VolumeMusic( MIX_MAX_VOLUME );
-												musicVolume = 100;
-											}
-										} catch( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading volume preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-										}
-										break;
-									}
-									
-									case 2: { //L"number of bots"
-										try {
-											decltype( numBots ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
-											
-											if( choiceAsInt <= numPlayers ) {
-												numBots = choiceAsInt;
-												if( debug ) {
-													std::wcout << L"Number of bots is " << choiceAsInt << std::endl;
-												}
-											} else {
-												std::wcerr << L"Warning: Number of bots not less than or equal to number of players (number of players may not have been read yet): " << choiceAsInt << std::endl;
-												numBots = choiceAsInt;
-											}
-										} catch( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-										}
-										break;
-									}
-									
-									case 3: { //L"show backgrounds"
-										showBackgrounds = prefIsTrue( choice );
-										break;
-									}
-									
-									case 4: { //L"fullscreen"
-										fullscreen = prefIsTrue( choice );
-										break;
-									}
-									
-									case 5: { //L"mark player trails"
-										markTrails = prefIsTrue( choice );
-										break;
-									}
-									
-									case 6: { //L"debug"
-										#ifndef DEBUG
-											debug = prefIsTrue( choice );
-										#endif
-										
-										if( debug ) {
-											std::wcout << L"Debug is ON" << std::endl;
-										}
-										break;
-									}
-									
-									case 7: { //L"bits per pixel"
-										try {
-											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-											
-											if( choiceAsInt <= 16 ) {
-												bitsPerPixel = choiceAsInt;
-												if( debug ) {
-													std::wcout << L"Bits per pixel is " << choiceAsInt << std::endl;
-												}
-											} else {
-												std::wcerr << L"Warning: Bits per pixel not less than or equal to 16: " << choiceAsInt << std::endl;
-												bitsPerPixel = choiceAsInt;
-											}
-										} catch( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-										}
-										break;
-									}
-									
-									case 8: { //L"wait for vertical sync"
-										vsync = prefIsTrue( choice );
-										break;
-									}
-									
-									case 9: { //L"driver type"
-										std::vector< std::wstring > possibleChoices = { L"opengl", L"direct3d9", L"direct3d8", L"burning's video", L"software", L"null" };
-										choice = possibleChoices.at( spellChecker.indexOfClosestString( choice, possibleChoices ) );
-										
-										if( choice == possibleChoices.at( 0 ) ) { //L"opengl"
-											driverType = irr::video::EDT_OPENGL;
-										} else if( choice == possibleChoices.at( 1 ) ) { //L"direct3d9"
-											driverType = irr::video::EDT_DIRECT3D9;
-										} else if( choice == possibleChoices.at( 2 ) ) { //L"direct3d8"
-											driverType = irr::video::EDT_DIRECT3D8;
-										} else if( choice == possibleChoices.at( 3 ) ) { //L"burning's video"
-											driverType = irr::video::EDT_BURNINGSVIDEO;
-										} else if( choice == possibleChoices.at( 4 ) ) { //L"software"
-											driverType = irr::video::EDT_SOFTWARE;
-										} else if( choice == possibleChoices.at( 5 ) ) { //L"null"
-											driverType = irr::video::EDT_NULL;
-										}
-										
-										if( debug ) {
-											std::wcout << L"Selected driver type is " << choice << std::endl;
-										}
-										
-										break;
-									}
-									
-									case 10: { //L"number of players"
-										try {
-											decltype( numPlayers ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
-											
-											if( choiceAsInt <= 4 and choiceAsInt > 0 ) {
-												numPlayers = choiceAsInt;
-												if( debug ) {
-													std::wcout << L"Number of players is " << choiceAsInt << std::endl;
-												}
-											} else if( choiceAsInt > 4 ) {
-												std::wcerr << L"Warning: Number of players not less than or equal to 4: " << choiceAsInt << std::endl;
-												numPlayers = choiceAsInt;
-											} else {
-												std::wcerr << L"Warning: Number of players is zero or not a number: " << choiceAsInt << L". Setting number of players to default." << std::endl;
-											}
-										} catch( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-										}
-										break;
-									}
-									
-									case 11: { //L"window size"
-										size_t locationOfX = choice.find( L"x" );
-										std::wstring width = choice.substr( 0, locationOfX );
-										std::wstring height = choice.substr( locationOfX + 1 );
-										if( debug ) {
-											std::wcout << L"Window size: " << width << L"x" << height << std::endl;
-										}
-										
-										decltype( windowSize.Width ) widthAsInt = boost::lexical_cast< decltype( windowSize.Width ) >( width );
-										decltype( windowSize.Height ) heightAsInt = boost::lexical_cast< decltype( windowSize.Height ) >( height );
-										
-										if( widthAsInt < 160 or heightAsInt < 240 ) {
-											std::wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << std::endl;
-										} else if( widthAsInt == 160 and heightAsInt == 240 ) {
-											std::wcout << L"Rock on, CGA graphics. Rock on." << std::endl;
-											windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
-										} else {
-											windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
-										}
-										break;
-									}
-									
-									case 12: { //L"play music"
-										playMusic = prefIsTrue( choice );
-										break;
-									}
-									
-									case 13: { //L"network port"
-										if( debug ) {
-											std::wcout << L"Network port: " << choice << std::endl;
-										}
-										
-										try {
-											StringConverter sc;
-											network.setPort( sc.toStdString( choice ) );
-										} catch( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-										}
-										break;
-									}
-									
-									case 14: { //L"always server"
-										isServer = prefIsTrue( choice );
-										break;
-									}
-									
-									case 15: { //L"bots know the solution"
-										botsKnowSolution = prefIsTrue( choice );
-										break;
-									}
-									
-									case 16: { //L"bot movement delay"
-										try {
-											botMovementDelay = boost::lexical_cast< uint_fast16_t >( choice );
-										} catch( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading botMovementDelay preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-										}
-										break;
-									}
-									
-									case 17: { //L"hide unseen maze areas"
-										mazeManager.hideUnseen = prefIsTrue( choice );
-										break;
-									}
-									
-									case 18: { //L"ackground animations"
-										backgroundAnimations = prefIsTrue( choice );
-										break;
-									}
-								}
-								
-							} catch ( std::exception &e ) {
-								std::wcerr << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << std::endl;
-							}
-						}
-					}
-					
-					prefsFile.close();
-					
-					if( debug ) {
-						botMovementDelay = 0;
-					}
-				}
-				
-				if( not device->isDriverSupported( driverType ) ) {
-					std::wcerr << L"Warning: Chosen driver type is not supported on this system. Auto-picking a new type.";
-					
-					driverType = irr::video::EDT_NULL;
-					//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
-					for( auto i = ( uint_fast8_t ) irr::video::EDT_COUNT; i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
-						if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
-							driverType = ( irr::video::E_DRIVER_TYPE ) i;
-							break;
-						}
-					}
-					
-					//Note: Just because the library supports a driver type doesn't mean we can actually use it. A loop similar to the above is used in the MainGame constructor where we call createDevice(). Therefore, the final driverType may not be what is set here.
-					if( driverType == irr::video::EDT_NULL ) {
-						std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
-						debug = true;
-					}
-				}
-				
-				prefsFile.open( prefsPath, boost::filesystem::wfstream::out bitor boost::filesystem::wfstream::app );
-				
-				if( prefsFile.is_open() ) {
-					prefsFile << std::boolalpha;
-					uintmax_t lineNum = 0;
-					
-					while( prefsFile.good() and not prefsNotFound.empty() ) {
-						prefsFile << std::endl;
-						
-						auto preferenceNum = spellChecker.indexOfClosestString( prefsNotFound.at( 0 ), possiblePrefs );
-						
-						prefsFile << prefsNotFound.at( 0 ) << L"\t";
-						prefsNotFound.erase( prefsNotFound.begin() );
-						
-						switch( preferenceNum ) {
-							case 0: { //L"bots' solving algorithm"
-								AI temp;
-								temp.setup( this, false, AI::ALGORITHM_DO_NOT_USE, 0 );
-								prefsFile << temp.stringFromAlgorithm( botAlgorithm );
-								break;
-							}
-							case 1: { //L"volume"
-								prefsFile << musicVolume;
-								break;
-							}
-							case 2: { //L"number of bots"
-								prefsFile << numBots;
-								break;
-							}
-							case 3: { //L"show backgrounds"
-								prefsFile << showBackgrounds;
-								break;
-							}
-							case 4: { //L"fullscreen"
-								prefsFile << fullscreen;
-								break;
-							}
-							case 5: { //L"mark player trails"
-								prefsFile << markTrails;
-								break;
-							}
-							case 6: { //L"debug"
-								prefsFile << debug;
-								break;
-							}
-							case 7: { //L"bits per pixel"
-								prefsFile << bitsPerPixel;
-								break;
-							}
-							case 8: { //L"wait for vertical sync"
-								prefsFile << vsync;
-								break;
-							}
-							case 9: { //L"driver type"
-								switch( driverType ) { //{ L"opengl", L"direct3d9", L"direct3d8", L"burning's video", L"software", L"null" };
-									case irr::video::EDT_OPENGL: {
-										prefsFile << L"opengl";
-										break;
-									}
-									case irr::video::EDT_DIRECT3D9: {
-										prefsFile << L"direct3d9";
-										break;
-									}
-									case irr::video::EDT_DIRECT3D8: {
-										prefsFile << L"direct3d8";
-										break;
-									}
-									case irr::video::EDT_BURNINGSVIDEO: {
-										prefsFile << L"burning's video";
-										break;
-									}
-									case irr::video::EDT_SOFTWARE: {
-										prefsFile << L"software";
-										break;
-									}
-									case irr::video::EDT_NULL: {
-										prefsFile << L"null";
-										break;
-									}
-									case irr::video::EDT_COUNT: {
-										break;
-									}
-								}
-								break;
-							}
-							case 10: { //L"number of players"
-								prefsFile << numPlayers;
-								break;
-							}
-							case 11: { //L"window size"
-								prefsFile << windowSize.Width << L"x" << windowSize.Height;
-								break;
-							}
-							case 12: { //L"play music"
-								prefsFile << playMusic;
-								break;
-							}
-							case 13: { //L"network port"
-								prefsFile << network.getPort();
-								break;
-							}
-							case 14: { //L"always server"
-								prefsFile << isServer;
-								break;
-							}
-							case 15: { //L"bots know the solution"
-								prefsFile << botsKnowSolution;
-								break;
-							}
-							case 16: { //L"bot movement delay"
-								prefsFile << botMovementDelay;
-								break;
-							}
-							case 17: { //L"hide unseen maze areas"
-								prefsFile << mazeManager.hideUnseen;
-								break;
-							}
-						}
-						
-						++lineNum;
-					}
-					
-					prefsFile.close();
-				}
-			}
-		}
-
-		if( not isServer ) {
-			std::wcout << L"(S)erver or (c)lient? " << std::endl;
-			wchar_t a;
-			std::wcin >> a;
-			isServer = ( a == L's' or a == L'S' );
-		}
-		
-		if( not prefsFileFound ) {
-			throw( CustomException( L"prefs.cfg does not exist or is not readable in any of the folders that were searched." ) );
-		}
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in MainGame::readPrefs(): " << e.what() << std::endl;
-	}
-	
-	if( debug ) {
-		std::wcout << L"end of readPrefs()" << std::endl;
-	}
-}
-
-/**
  * Resets miscellaneous stuff between mazes.
  */
 void MainGame::resetThings() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"resetThings() called" << std::endl;
 		}
 		
@@ -3151,45 +2653,45 @@ void MainGame::resetThings() {
 		numLocks = 0;
 		donePlaying = false;
 
-		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
+		for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
 			playerStart.at( p ).reset();
 			player.at( p ).reset();
 		}
 
 		//Calculate players' total scores
-		for( decltype( numPlayers ) w = 0; w < winnersLoadingScreen.size(); ++w ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+		for( decltype( settingsManager.numPlayers ) w = 0; w < winnersLoadingScreen.size(); ++w ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) score = 0;
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) additiveMultiplier = 10; //So the scores don't get too negative, numbers that add to the score get multiplied by a magic number.
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) subtractiveDivisor = 10; //Likewise, numbers that subtract from the score get divided by a magic number.
 			
-			if( debug ) {
+			if( settingsManager.debug ) {
 				std::wcout << L"Setting player " << winnersLoadingScreen.at( w ) << L"'s score to ";
 			}
 			{
 				decltype( score ) temp = ( winnersLoadingScreen.size() - w ) * additiveMultiplier;
 				score += temp;
-				if( debug ) {
+				if( settingsManager.debug ) {
 					std::wcout << temp;
 				}
 			}
 			{
 				decltype( score ) temp = ( player.at( winnersLoadingScreen.at( w ) ).stepsTakenLastMaze ) / subtractiveDivisor;
 				score -= temp;
-				if( debug ) {
+				if( settingsManager.debug ) {
 					std::wcout << L" - " << temp;
 				}
 			}
 			{
 				decltype( score ) temp = player.at( winnersLoadingScreen.at( w ) ).timeTakenLastMaze / 1000 / subtractiveDivisor; //The 1000 is for converting the time to seconds
 				score -= temp;
-				if( debug ) {
+				if( settingsManager.debug ) {
 					std::wcout << L" - " << temp;
 				}
 			}
 			{
 				decltype( score ) temp = player.at( winnersLoadingScreen.at( w ) ).keysCollectedLastMaze * additiveMultiplier;
 				score += temp;
-				if( debug ) {
+				if( settingsManager.debug ) {
 					std::wcout << L" + " << temp << L" for a total of " << score << std::endl;
 				}
 			}
@@ -3197,7 +2699,7 @@ void MainGame::resetThings() {
 			player.at( winnersLoadingScreen.at( w ) ).setScore( score );
 		}
 
-		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
+		for( decltype( settingsManager.numBots ) b = 0; b < settingsManager.numBots; ++b ) {
 			bot.at( b ).reset();
 		}
 
@@ -3214,7 +2716,7 @@ void MainGame::resetThings() {
 		won = false;
 		backgroundSceneManager->clear();
 
-		if( showBackgrounds ) {
+		if( settingsManager.showBackgrounds ) {
 			setupBackground();
 		}
 		timer->setTime( 0 );
@@ -3227,7 +2729,7 @@ void MainGame::resetThings() {
 		std::wcerr << L"Error in MainGame::resetThings(): " << e.what() << std::endl;
 	}
 	
-	if( debug ) {
+	if( settingsManager.debug ) {
 		std::wcout << L"end of resetThings()" << std::endl;
 	}
 }
@@ -3238,7 +2740,7 @@ void MainGame::resetThings() {
  */
 uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"run() called" << std::endl;
 		}
 		
@@ -3274,14 +2776,14 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 					//SDL_Delay( 17 );
 				}
 				
-				if( driver->getScreenSize() not_eq windowSize ) { //If the window has been resized. Only here until Irrlicht implements proper window resize events.
+				if( driver->getScreenSize() not_eq settingsManager.windowSize ) { //If the window has been resized. Only here until Irrlicht implements proper window resize events.
 					irr::SEvent temp;
 					temp.EventType = irr::EET_USER_EVENT;
 					temp.UserEvent.UserData1 = USER_EVENT_WINDOW_RESIZE;
 					device->postEventFromUser( temp );
 				}
 
-				if( playMusic and not Mix_PlayingMusic() ) { //If we've finished playing a song.
+				if( settingsManager.playMusic and not Mix_PlayingMusic() ) { //If we've finished playing a song.
 					loadNextSong();
 				}
 				
@@ -3294,21 +2796,21 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 				}
 				
 				
-				if( ( currentScreen != LOADINGSCREEN and device->isWindowActive() ) or debug ) {
+				if( ( currentScreen != LOADINGSCREEN and device->isWindowActive() ) or settingsManager.debug ) {
 					//It's the bots' turn to move now.
-					if( currentScreen == MAINSCREEN and numBots > 0 ) {
-						for( decltype( numBots ) i = 0; i < numBots; ++i ) {
+					if( currentScreen == MAINSCREEN and settingsManager.numBots > 0 ) {
+						for( decltype( settingsManager.numBots ) i = 0; i < settingsManager.numBots; ++i ) {
 							if( not bot.at( i ).atGoal() and ( allHumansAtGoal() or bot.at( i ).doneWaiting() ) ) {
 								bot.at( i ).move();
 							}
 						}
 					}
 					
-					device->getCursorControl()->setVisible( currentScreen not_eq MAINSCREEN or debug );
+					device->getCursorControl()->setVisible( currentScreen not_eq MAINSCREEN or settingsManager.debug );
 					drawAll();
 					
 					//Check if any of the players have landed on a collectable item
-					for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
+					for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
 						for( decltype( stuff.size() ) s = 0; s < stuff.size(); ++s ) {
 							if( not stuff.at( s ).owned and player.at( p ).getX() == stuff.at( s ).getX() and player.at( p ).getY() == stuff.at( s ).getY() ) {
 								switch( stuff.at( s ).getType() ) {
@@ -3334,11 +2836,11 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 												}
 											}
 
-											for( decltype( numBots ) b = 0; b < numBots; ++b ) {
+											for( decltype( settingsManager.numBots ) b = 0; b < settingsManager.numBots; ++b ) {
 												bot.at( b ).allKeysFound();
 											}
 										} else {
-											for( decltype( numBots ) b = 0; b < numBots; ++b ) {
+											for( decltype( settingsManager.numBots ) b = 0; b < settingsManager.numBots; ++b ) {
 												bot.at( b ).keyFound( s );
 											}
 										}
@@ -3353,11 +2855,11 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 					}
 
 
-					for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
+					for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
 						if( ( player.at( p ).getX() == goal.getX() ) and player.at( p ).getY() == goal.getY() ) { //Make a list of who finished in what order
 							bool alreadyFinished = false; //Indicates whether the player is already on the winners list
 
-							for( decltype( numPlayers ) i = 0; i < winners.size() and not alreadyFinished; ++i ) { //changed decltype( winners.size() ) to decltype( numPlayers ) because winners.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+							for( decltype( settingsManager.numPlayers ) i = 0; i < winners.size() and not alreadyFinished; ++i ) { //changed decltype( winners.size() ) to decltype( numPlayers ) because winners.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 								if( p == winners.at( i ) ) {
 									alreadyFinished = true;
 								}
@@ -3370,7 +2872,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 						}
 					}
 
-					won = ( winners.size() >= numPlayers ); //If all the players are on the winners list, we've won.
+					won = ( winners.size() >= settingsManager.numPlayers ); //If all the players are on the winners list, we've won.
 
 				} else if( not device->isWindowActive() ) { //if(( not showingLoadingScreen and device->isWindowActive() ) or debug )
 					currentScreen = MENUSCREEN;
@@ -3384,7 +2886,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 				}
 
 				//TODO: add networking stuff here
-				if( isServer or network.getConnectionStatus() ) {
+				if( settingsManager.isServer or network.getConnectionStatus() ) {
 					network.processPackets();
 				}
 			}
@@ -3392,11 +2894,11 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 			timer->stop();
 
 			if( not donePlaying ) {
-				if( debug ) {
+				if( settingsManager.debug ) {
 					std::wcout << L"On to the next levelnot " << std::endl;
 					std::wcout << L"Winners:";
 
-					for( decltype( numPlayers ) i = 0; i < winners.size(); ++i ) { //changed decltype( winners.size() ) to decltype( numPlayers ) because winners.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+					for( decltype( settingsManager.numPlayers ) i = 0; i < winners.size(); ++i ) { //changed decltype( winners.size() ) to decltype( numPlayers ) because winners.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 						std::wcout << L" " << winners.at( i );
 					}
 
@@ -3410,7 +2912,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 		return EXIT_FAILURE;
 	}
 	
-	if( debug ) {
+	if( settingsManager.debug ) {
 		std::wcout << L"end of run()" << std::endl;
 	}
 	
@@ -3422,7 +2924,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
  */
 void MainGame::setControls() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"setControls() called" << std::endl;
 		}
 		
@@ -3441,7 +2943,7 @@ void MainGame::setControls() {
 		for( auto it = configFolders.begin(); it not_eq configFolders.end(); ++it ) {
 			boost::filesystem::path controlsPath( *it/L"controls.cfg" );
 			if( exists( controlsPath ) and not is_directory( controlsPath ) ) {
-				if( debug ) {
+				if( settingsManager.debug ) {
 					std::wcout << L"Loading controls from file " << controlsPath.wstring() << std::endl;
 				}
 				boost::filesystem::wifstream controlsFile;
@@ -3458,7 +2960,7 @@ void MainGame::setControls() {
 						line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
 						boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
 						boost::algorithm::to_lower( line ); //Converts to lower case
-						if( debug ) {
+						if( settingsManager.debug ) {
 							std::wcout << L"Line " << lineNum << L": \"" << line << "\"" << std::endl;
 						}
 						
@@ -3466,7 +2968,7 @@ void MainGame::setControls() {
 							try {
 								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
 								std::wstring choiceStr = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
-								if( debug ) {
+								if( settingsManager.debug ) {
 									std::wcout << L"Control preference \"" << preference << L"\" choiceStr \"" << choiceStr << L"\""<< std::endl;
 								}
 								
@@ -3483,7 +2985,7 @@ void MainGame::setControls() {
 									{
 										std::wstring controllerNumStr = boost::algorithm::trim_copy( choiceStr.substr( 0, choiceStr.find( L' ' ) ) );
 										
-										if( debug ) {
+										if( settingsManager.debug ) {
 											std::wcout << L"controller number (string) \"" << controllerNumStr << L"\"" << std::endl;
 										}
 										
@@ -3493,7 +2995,7 @@ void MainGame::setControls() {
 										
 										controls.back().setControllerNumber( choice );
 										
-										if( debug ) {
+										if( settingsManager.debug ) {
 											std::wcout << L" converts to integer " << choice << std::endl;
 										}
 									}
@@ -3508,7 +3010,7 @@ void MainGame::setControls() {
 											std::wstring controllerButtonStr = boost::algorithm::trim_copy( choiceStr.substr( buttonOrJoystick.length() ) );
 											uint_fast8_t choice;
 											
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"controller button number (string) \"" << controllerButtonStr << L"\"" << std::endl;
 											}
 											
@@ -3516,13 +3018,13 @@ void MainGame::setControls() {
 											
 											controls.back().setControllerButton( choice );
 											
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L" converts to integer " << choice << std::endl;
 											}
 										} else { //L"joystick"
 											std::wstring joystickAxisStr = boost::algorithm::trim_copy( choiceStr.substr( buttonOrJoystick.length(), 2 ) );
 											
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"joystick axis (string) \"" << joystickAxisStr << L"\"" << std::endl;
 											}
 											
@@ -3530,7 +3032,7 @@ void MainGame::setControls() {
 												std::vector< std::wstring > possibleChoices = { L"x", L"y", L"z", L"r", L"u", L"v" };
 												std::wstring choice = possibleChoices.at( spellChecker.indexOfClosestString( joystickAxisStr, possibleChoices ) );
 												
-												if( debug ) {
+												if( settingsManager.debug ) {
 													std::wcout << L" converts to string " << choice << std::endl;
 												}
 												
@@ -3576,20 +3078,20 @@ void MainGame::setControls() {
 									
 									choiceStr = choiceStr.substr( possibleChoiceStarts.at( 2 ).length(), choiceStr.length() - possibleChoiceStarts.at( 2 ).length() ); //possibleChoiceStarts.at( 2 ).length() = length of the word "mouse"
 									boost::algorithm::trim( choiceStr ); //Remove trailing and leading spaces
-									if( debug ) {
+									if( settingsManager.debug ) {
 										std::wcout << L"choiceStr: " << choiceStr;
 									}
 									
 									{
 										std::wstring moveOrButtonOrWheel = choiceStr.substr( 0, choiceStr.find( L' ' ) );
-										if( debug ) {
+										if( settingsManager.debug ) {
 											std::wcout << L"moveOrButtonOrWheel before spell checking: " << moveOrButtonOrWheel;
 										}
 										
 										std::vector< std::wstring > possibleChoices = { L"wheel", L"leftbutton", L"middlebutton", L"rightbutton", L"move" };
 										moveOrButtonOrWheel = possibleChoices.at( spellChecker.indexOfClosestString( moveOrButtonOrWheel, possibleChoices ) );
 										
-										if( debug ) {
+										if( settingsManager.debug ) {
 											std::wcout << L"moveOrButtonOrWheel after spell checking: " << moveOrButtonOrWheel;
 										}
 										
@@ -3597,12 +3099,12 @@ void MainGame::setControls() {
 											controls.back().setMouseEvent( irr::EMIE_MOUSE_WHEEL );
 											
 											std::wstring wheelDirection = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"wheelDirection before spell checking: " << wheelDirection << std::endl;
 											}
 											std::vector< std::wstring > possibleDirections = { L"up", L"u", L"down", L"d" };
 											wheelDirection = possibleDirections.at( spellChecker.indexOfClosestString( wheelDirection, possibleDirections ) );
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"wheelDirection after spell checking: " << wheelDirection << std::endl;
 											}
 											
@@ -3613,12 +3115,12 @@ void MainGame::setControls() {
 											}
 										} else if( moveOrButtonOrWheel == possibleChoices.at( 1 ) ) { //L"leftbutton"
 											std::wstring upOrDown = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"upOrDown before spell checking: " << upOrDown << std::endl;
 											}
 											std::vector< std::wstring > possibleStates = { L"up", L"u", L"down", L"d" };
 											upOrDown = possibleStates.at( spellChecker.indexOfClosestString( upOrDown, possibleStates ) );
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"upOrDown after spell checking: " << upOrDown << std::endl;
 											}
 											
@@ -3629,12 +3131,12 @@ void MainGame::setControls() {
 											}
 										} else if( moveOrButtonOrWheel == possibleChoices.at( 2 ) ) { //L"middlebutton"
 											std::wstring upOrDown = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"upOrDown before spell checking: " << upOrDown << std::endl;
 											}
 											std::vector< std::wstring > possibleStates = { L"up", L"u", L"down", L"d" };
 											upOrDown = possibleStates.at( spellChecker.indexOfClosestString( upOrDown, possibleStates ) );
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"upOrDown after spell checking: " << upOrDown << std::endl;
 											}
 											
@@ -3645,12 +3147,12 @@ void MainGame::setControls() {
 											}
 										} else if( moveOrButtonOrWheel == possibleChoices.at( 3 ) ) { //L"rightbutton"
 											std::wstring upOrDown = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"upOrDown before spell checking: " << upOrDown << std::endl;
 											}
 											std::vector< std::wstring > possibleStates = { L"up", L"u", L"down", L"d" };
 											upOrDown = possibleStates.at( spellChecker.indexOfClosestString( upOrDown, possibleStates ) );
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"upOrDown after spell checking: " << upOrDown << std::endl;
 											}
 											
@@ -3664,12 +3166,12 @@ void MainGame::setControls() {
 											
 											std::wstring direction = boost::algorithm::trim_copy( choiceStr.substr( moveOrButtonOrWheel.length() ) );
 											
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"direction before spell checking: " << direction << std::endl;
 											}
 											std::vector< std::wstring > possibleDirections = { L"up", L"u", L"down", L"d", L"left", L"l", L"right", L"r" };
 											direction = possibleDirections.at( spellChecker.indexOfClosestString( direction, possibleDirections ) );
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"direction after spell checking: " << direction << std::endl;
 											}
 											
@@ -3707,14 +3209,14 @@ void MainGame::setControls() {
 										std::wstring playerNumStr = boost::algorithm::trim_copy( preference.substr( 0, preference.find( L' ' ) ) );
 										std::wstring actionStr = boost::algorithm::trim_copy( preference.substr( preference.find( L' ' ) ) );
 										
-										decltype( numPlayers ) playerNum;
+										decltype( settingsManager.numPlayers ) playerNum;
 										if( spellChecker.DamerauLevenshteinDistance( playerNumStr, L"mine" ) <= 1 ) {
 											playerNum = myPlayer;
 										} else {
 											playerNum = boost::lexical_cast< unsigned short int >( playerNumStr ); //Boost doesn't like casting to uint_fast8_t
 										}
 										
-										if( playerNum < numPlayers or playerNum == myPlayer ) {
+										if( playerNum < settingsManager.numPlayers or playerNum == myPlayer ) {
 											std::vector< std::wstring > possibleActions = { L"up", L"u", L"down", L"d", L"left", L"l", L"right", L"r" };
 											actionStr = possibleActions.at( spellChecker.indexOfClosestString( actionStr, possibleActions) );
 											controls.back().setPlayer( playerNum );
@@ -3739,21 +3241,21 @@ void MainGame::setControls() {
 									std::wstring menuWhat = boost::algorithm::trim_copy( preference.substr( 4 ) );
 									std::vector< std::wstring > possibleMenuStuff = { L"up", L"u", L"down", L"d", L"activate" };
 									menuWhat = possibleMenuStuff.at( spellChecker.indexOfClosestString( menuWhat, possibleMenuStuff ) );
-									if( debug ) {
+									if( settingsManager.debug ) {
 										std::wcout << L"Menu action: " << menuWhat << std::endl;
 									}
 									if( menuWhat == possibleMenuStuff.at( 0 ) or menuWhat == possibleMenuStuff.at( 1 ) ) { //L"up"
-										if( debug ) {
+										if( settingsManager.debug ) {
 											std::wcout << L"Setting control to menu up" << std::endl;
 										}
 										controls.back().setAction( ControlMapping::ACTION_MENU_UP );
 									} else if( menuWhat == possibleMenuStuff.at( 2 ) or menuWhat == possibleMenuStuff.at( 3 ) ) { //L"down"
-										if( debug ) {
+										if( settingsManager.debug ) {
 											std::wcout << L"Setting control to menu down" << std::endl;
 										}
 										controls.back().setAction( ControlMapping::ACTION_MENU_DOWN );
 									} else { //L"activate"
-										if( debug ) {
+										if( settingsManager.debug ) {
 											std::wcout << L"Setting control to menu activate" << std::endl;
 										}
 										controls.back().setAction( ControlMapping::ACTION_MENU_ACTIVATE );
@@ -3779,14 +3281,14 @@ void MainGame::setControls() {
 									}
 									
 								}*/ else {
-									if( debug ) {
+									if( settingsManager.debug ) {
 										std::wcout << L"preference before spell checking: " << preference;
 									}
 									
 									std::vector< std::wstring > possiblePrefs = { L"screenshot", L"enable controller" };
 									preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
 									
-									if( debug ) {
+									if( settingsManager.debug ) {
 										std::wcout  << "\tand after: " << preference << std::endl;
 									}
 									
@@ -3797,12 +3299,12 @@ void MainGame::setControls() {
 										choiceStr = possibleChoices.at( spellChecker.indexOfClosestString( choiceStr, possibleChoices ) );
 										
 										if( choiceStr == possibleChoices.at( 0 ) ) {
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"controller is ENABLED" << std::endl;
 											}
 											enableController = true;
 										} else {
-											if( debug ) {
+											if( settingsManager.debug ) {
 												std::wcout << L"controller is DISABLED" << std::endl;
 											}
 											enableController = false;
@@ -3828,7 +3330,7 @@ void MainGame::setControls() {
 		std::wcerr << L"Error in MainGame::setControls(): " << e.what() << std::endl;
 	}
 	
-	if( debug ) {
+	if( settingsManager.debug ) {
 		std::wcout << L"end of setControls()" << std::endl;
 	}
 	
@@ -3847,17 +3349,17 @@ void MainGame::setControls() {
  */
 void MainGame::setupBackground() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"setupBackground() called" << std::endl;
 		}
 		
 		backgroundChosen = getRandomNumber() % NUMBER_OF_BACKGROUNDS;
 		
-		if( not backgroundAnimations ) {
+		if( not settingsManager.backgroundAnimations ) {
 			backgroundChosen = IMAGES; //So far, the only background type that is not animated is #2, the image background.
 		}
 		
-		if( debug ) {
+		if( settingsManager.debug ) {
 			backgroundChosen = NUMBER_OF_BACKGROUNDS - 1; //If we're debugging, we may be testing the last background added.
 			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;
 		}
@@ -3951,7 +3453,7 @@ void MainGame::setupBackground() {
 				if( driver->queryFeature( irr::video::EVDF_RENDER_TO_TARGET  ) ) {
 					fillBackgroundTextureAfterLoading = true;
 					haveFilledBackgroundTextureAfterLoading = false;
-					backgroundTexture = driver->addRenderTargetTexture( windowSize );
+					backgroundTexture = driver->addRenderTargetTexture( settingsManager.windowSize );
 					
 					{ //Fill the texture with the background color;
 						driver->beginScene( false, false, backgroundColor );
@@ -4019,7 +3521,7 @@ void MainGame::setupBackground() {
 				if( rotator ) {
 					camera->bindTargetAndRotation( true );
 					camera->addAnimator( rotator );
-					if( debug ) {
+					if( settingsManager.debug ) {
 						std::wcout << "Camera rotator added" << std::endl;
 					}
 					rotator->drop();
@@ -4116,12 +3618,12 @@ void MainGame::setupBackground() {
 				backgroundPath = system_complete( backgroundPath );
 				//backgroundPath = absolute( backgroundPath );
 
-				if( debug ) {
+				if( settingsManager.debug ) {
 					std::wcout << L"background path is absolute? " << backgroundPath.is_absolute() << std::endl;
 				}
 
 				while( ( not exists( backgroundPath ) or not is_directory( backgroundPath ) ) and backgroundPath.has_parent_path() ) {
-					if( debug ) {
+					if( settingsManager.debug ) {
 						std::wcout << L"Path " << backgroundPath.wstring() << L" does not exist or is not a directory. Checking parent path " << backgroundPath.parent_path().wstring() << std::endl;
 					}
 
@@ -4133,7 +3635,7 @@ void MainGame::setupBackground() {
 
 					for( boost::filesystem::recursive_directory_iterator i( backgroundPath ); i not_eq end; ++i ) {
 						if( not is_directory( i->path() ) ) { //We've found a file
-							if( debug ) {
+							if( settingsManager.debug ) {
 								std::wcout << i->path().wstring() << std::endl;
 							}
 
@@ -4186,7 +3688,7 @@ void MainGame::setupBackground() {
 		std::wcerr << L"Error in MainGame::setupBackground(): " << e.what() << std::endl;
 	}
 	
-	if( debug ) {
+	if( settingsManager.debug ) {
 		std::wcout << L"end of setupBackground()" << std::endl;
 	}
 }
@@ -4250,7 +3752,7 @@ void MainGame::setRandomSeed( std::minstd_rand::result_type newSeed ) {
 	randomSeed = newSeed;
 	randomNumberGenerator.seed( randomSeed );
 	
-	if( debug ) {
+	if( settingsManager.debug ) {
 		std::wcout << L"New random seed: " << randomSeed << std::endl;
 	}
 	
@@ -4282,14 +3784,14 @@ void MainGame::showSaveMazeDialog() {
  * Sets showingLoadingScreen to true and timeStartedLoading to the current time, then calls drawLoadingScreen().
  */
 void MainGame::startLoadingScreen() {
-	if( debug ) {
+	if( settingsManager.debug ) {
 		std::wcout << L"startLoadingScreen() called" << std::endl;
 	}
 	currentScreen = LOADINGSCREEN;
 	timeStartedLoading = timer->getRealTime();
 	//drawLoadingScreen();
 	
-	if( debug ) {
+	if( settingsManager.debug ) {
 		std::wcout << L"end of startLoadingScreen()" << std::endl;
 	}
 }
@@ -4299,7 +3801,7 @@ void MainGame::startLoadingScreen() {
  */
 void MainGame::takeScreenShot() {
 	try {
-		if( debug ) {
+		if( settingsManager.debug ) {
 			std::wcout << L"takeScreenShot() called" << std::endl;
 		}
 		
@@ -4327,7 +3829,7 @@ void MainGame::takeScreenShot() {
 				irr::core::stringw success = L"Screen shot saved as \"";
 				success.append( filename );
 				success.append( L"\"" );
-				if( debug ) {
+				if( settingsManager.debug ) {
 					std::wcout <<  stringConverter.toStdWString( success ) << std::endl;
 				}
 				if( not isNull( gui ) ) {
@@ -4343,7 +3845,7 @@ void MainGame::takeScreenShot() {
 		std::wcerr << L"Error in MainGame::takeScreenShot(): " << e.what() << std::endl;
 	}
 	
-	if( debug ) {
+	if( settingsManager.debug ) {
 		std::wcout << L"end of takeScreenShot()" << std::endl;
 	}
 }

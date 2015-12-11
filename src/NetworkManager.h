@@ -23,6 +23,7 @@
 #include "MazeManager.h"
 #include "PreprocessorCommands.h"
 #include "RakNet/RakPeerInterface.h"
+#include <random>
 #ifdef HAVE_SSTREAM
 	#include <sstream>
 #endif //HAVE_SSTREAM
