@@ -4,4 +4,7 @@
   <WorkspaceParserPaths/>
   <Environment Name="&lt;Use Defaults&gt;"/>
   <WorkspaceParserMacros/>
+  <FindInFilesMask>
+    <![CDATA[*.c;*.cpp;*.cxx;*.cc;*.h;*.hpp;*.inc;*.mm;*.m;*.xrc]]>
+  </FindInFilesMask>
 </Workspace>

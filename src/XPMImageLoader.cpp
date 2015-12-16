@@ -168,7 +168,28 @@ void XPMImageLoader::loadMenuOptionImage( irr::video::IVideoDriver* driver, irr:
 			xpm = freedom_xpm;
 			break;
 		}
+		case MenuOption::CANCEL: {
+			#include "compiled-images/menu icons/cancel.xpm"
+			xpm = cancel_xpm;
+			break;
+		}
+		case MenuOption::OK: {
+			#include "compiled-images/menu icons/ok.xpm"
+			xpm = ok_xpm;
+			break;
+		}
+		case MenuOption::UNDO_CHANGES: {
+			#include "compiled-images/menu icons/undo_changes.xpm"
+			xpm = undo_changes_xpm;
+			break;
+		}
+		case MenuOption::RESET_TO_DEFAULTS: {
+			#include "compiled-images/menu icons/reset_to_defaults.xpm"
+			xpm = reset_to_defaults_xpm;
+			break;
+		}
 		default: {
+			std::wcerr << L"Error in XPMImageLoader::loadMenuOptionImage(): Type " << ( unsigned int ) type << " not handled in switch statement." << std::endl;
 			break;
 		}
 	}

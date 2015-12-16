@@ -22,7 +22,7 @@ SettingsManager::~SettingsManager() {
 /**
  * Created because so many preferences are booleans
  * Arguments:
- * --- std::wstring choice: a string which should be either "true" or "false"
+ * --- std::wstring choice: a string which should be either "true" or "false" (misspellings are acceptable)
  * Returns: A Boolean indicating whether choice is closer to "true" or to "false"
  */
 bool SettingsManager::prefIsTrue( std::wstring choice ) {

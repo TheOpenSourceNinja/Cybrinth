@@ -86,7 +86,7 @@ class MainGame : public irr::IEventReceiver {
 		void newMaze( std::minstd_rand::result_type newRandomSeed );
 		void newMaze( boost::filesystem::path src );
 		
-		bool OnEvent( const irr::SEvent& );
+		bool OnEvent( const irr::SEvent& event );
 		
 		void pickLogo();
 		

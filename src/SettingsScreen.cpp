@@ -1,8 +1,10 @@
 #include "colors.h"
 #include "SettingsScreen.h"
+#include "MainGame.h"
+#include <iostream>
 
 SettingsScreen::SettingsScreen() {
-	//ctor
+	restartNotice = L"Some of these settings will only take effect when the game is closed & reopened.";
 }
 
 SettingsScreen::~SettingsScreen() {
@@ -10,12 +12,87 @@ SettingsScreen::~SettingsScreen() {
 }
 
 void SettingsScreen::draw( irr::IrrlichtDevice* device ) {
-	irr::core::stringw restartNotice( L"Some or all of these settings will only take effect when the program is closed & reopened." );
 	irr::core::dimension2d< irr::u32 > tempDimensions = textFont->getDimension( restartNotice.c_str() );
 	irr::core::rect< irr::s32 > tempRectangle( 0, 0, tempDimensions.Width + 0, tempDimensions.Height + 0 );
 	textFont->draw( restartNotice, tempRectangle, WHITE, true, true );
+	cancel.draw( device );
+	ok.draw( device );
+	undoChanges.draw( device );
+	resetToDefaults.draw( device );
+}
+
+void SettingsScreen::findHighlights( irr::s32 x, irr::s32 y ) {
+	cancel.highlighted = cancel.contains( x, y );
+	ok.highlighted = ok.contains( x, y );
+	undoChanges.highlighted = undoChanges.contains( x, y );
+	resetToDefaults.highlighted = resetToDefaults.contains( x, y );
+}
+
+void SettingsScreen::handleMouseEvents( const irr::SEvent& event ) {
+	switch( event.MouseInput.Event ) {
+		case irr::EMIE_MOUSE_MOVED: {
+			findHighlights( event.MouseInput.X, event.MouseInput.Y );
+			break;
+		}
+		case irr::EMIE_LMOUSE_PRESSED_DOWN: {
+			processSelection();
+			break;
+		}
+		default: {
+			break;
+		}
+	}
+}
+
+void SettingsScreen::processSelection() {
+	if( cancel.highlighted ) {
+		std::wcout << L"Cancel button pressed" << std::endl;
+	} else if( ok.highlighted ) {
+		std::wcout << L"OK button pressed" << std::endl;
+	} else if( undoChanges.highlighted ) {
+		std::wcout << L"Undo changes button pressed" << std::endl;
+	} else if( resetToDefaults.highlighted ) {
+		std::wcout << L"Reset to defaults button pressed" << std::endl;
+	}
+}
+
+void SettingsScreen::setPointers( MainGame* newMainGame, irr::IrrlichtDevice* newDevice, irr::gui::IGUIFont* newFont ) {
+	mainGame = newMainGame;
+	device = newDevice;
+	setTextFont( newFont );
 }
 
 void SettingsScreen::setTextFont( irr::gui::IGUIFont* newTextFont ) {
 	textFont = newTextFont;
+}
+
+void SettingsScreen::setupIconsAndStuff() {
+	cancel.setX( 0 );
+	
+	if( textFont != NULL && textFont != nullptr ) {
+		cancel.setY( textFont->getDimension( restartNotice.c_str() ).Height + 5 );
+	} else {
+		cancel.setY( 5 );
+	}
+	cancel.setType( device, MenuOption::CANCEL );
+	cancel.setFontAndResizeIcon( device, textFont );
+	cancel.loadTexture( device );
+	
+	ok.setY( cancel.getY() );
+	ok.setX( cancel.getX() + cancel.getWidth() + 1 );
+	ok.setType( device, MenuOption::OK );
+	ok.setFontAndResizeIcon( device, textFont );
+	ok.loadTexture( device );
+	
+	undoChanges.setY( cancel.getY() );
+	undoChanges.setX( ok.getX() + ok.getWidth() + 1 );
+	undoChanges.setType( device, MenuOption::UNDO_CHANGES );
+	undoChanges.setFontAndResizeIcon( device, textFont );
+	undoChanges.loadTexture( device );
+	
+	resetToDefaults.setY( cancel.getY() );
+	resetToDefaults.setX( undoChanges.getX() + undoChanges.getWidth() + 1 );
+	resetToDefaults.setType( device, MenuOption::RESET_TO_DEFAULTS );
+	resetToDefaults.setFontAndResizeIcon( device, textFont );
+	resetToDefaults.loadTexture( device );
 }

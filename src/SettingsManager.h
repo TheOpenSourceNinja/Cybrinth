@@ -54,6 +54,7 @@ class SettingsManager
 		bool vsync;
 	
 	private:
+		
 		irr::IrrlichtDevice* device;
 		
 		MainGame* mainGame;

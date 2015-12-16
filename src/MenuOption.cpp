@@ -60,49 +60,83 @@ void MenuOption::setType( irr::IrrlichtDevice* device, option_t newType ) {
 				break;
 			}
 			case NEW_MAZE: {
-				newText = L"Next maze";
+				newText = L"New maze";
+				fileName = L"new_maze"; //I'm hardcoding these file names so that in the future, the actual button text may be changed (perhaps translated)
 				break;
 			}
 			case RESTART_MAZE: {
 				newText = L"Restart maze";
+				fileName = L"restart_maze";
 				break;
 			}
 			case LOAD_MAZE: {
 				newText = L"Load maze";
+				fileName = L"load_maze";
 				break;
 			}
 			case SAVE_MAZE: {
 				newText = L"Save maze";
+				fileName = L"save_maze";
 				break;
 			}
 			case SETTINGS: {
 				newText = L"Settings";
+				fileName = L"settings";
 				break;
 			}
 			case EXIT_GAME: {
 				newText = L"Exit game";
+				fileName = L"exit_game";
 				break;
 			}
 			case BACK_TO_GAME: {
 				newText = L"Back to game";
+				fileName = L"back_to_game";
 				break;
 			}
 			case FREEDOM: {
 				newText = L"Freedom";
+				fileName = L"freedom";
+				break;
+			}
+			case CANCEL: {
+				newText = "Cancel";
+				fileName = L"cancel";
+				break;
+			}
+			case OK: {
+				newText = "OK";
+				fileName = L"ok";
+				break;
+			}
+			case UNDO_CHANGES: {
+				newText = "Undo changes";
+				fileName = L"undo_changes";
+				break;
+			}
+			case RESET_TO_DEFAULTS: {
+				newText = "Reset to defaults";
+				fileName = "reset_to_defaults";
+				break;
+			}
+			default: {
+				std::wcerr << L"Error in MenuOption::setType(): Type " << ( unsigned int ) type << " not handled in switch statement." << std::endl;
+				newText = L"ERROR";
 				break;
 			}
 		}
 		
 		text = newText;
-		fileName = text;
 		
 		if( iconTexture not_eq nullptr and device not_eq nullptr ) {
 			device->getVideoDriver()->removeTexture( iconTexture );
 			iconTexture = nullptr;
 		}
 		
-		loadTexture( device );
-		setDimension();
+		if( device not_eq nullptr ) {
+			loadTexture( device );
+			setDimension( device->getVideoDriver() );
+		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::setText(): " << e.what() << std::endl;
 	}
@@ -111,7 +145,7 @@ void MenuOption::setType( irr::IrrlichtDevice* device, option_t newType ) {
 void MenuOption::setFontAndResizeIcon( irr::IrrlichtDevice* device, irr::gui::IGUIFont* newFont ) {
 	try {
 		font = newFont;
-		setDimension();
+		setDimension( device->getVideoDriver() );
 		
 		if( not ( iconTexture == nullptr or iconTexture == NULL ) ) {
 			loadTexture( device );
@@ -121,10 +155,11 @@ void MenuOption::setFontAndResizeIcon( irr::IrrlichtDevice* device, irr::gui::IG
 	}
 }
 
-void MenuOption::setDimension() {
+void MenuOption::setDimension( irr::video::IVideoDriver* driver ) {
 	try {
-		dimension = irr::core::dimension2d<uint_fast16_t>( 0, 0 );
-		if( iconTexture not_eq nullptr ) {
+		dimension = irr::core::dimension2d< uint_fast16_t >( 0, 0 );
+		irr::core::dimension2d< uint_fast16_t > desiredIconDimension = irr::core::dimension2d< uint_fast16_t >( 0, 0 );
+		/*if( iconTexture not_eq nullptr ) {
 			dimension = iconTexture->getSize();
 		}
 		if( font not_eq nullptr ) {
@@ -134,6 +169,26 @@ void MenuOption::setDimension() {
 			if( tempDimension.Height > dimension.Height ) {
 				dimension.Height = tempDimension.Height;
 			}
+			desiredIconDimension.Height = tempDimension.Height;
+		}*/
+		
+		if( font not_eq nullptr ) {
+			StringConverter sc;
+			auto textDimension = font->getDimension( sc.toStdWString( text ).c_str() ); //sc.toWCharArray( text ) );
+			dimension.Width = textDimension.Width + textDimension.Height; //Leaves room for a square icon
+			dimension.Height = textDimension.Height;
+			desiredIconDimension.Height = textDimension.Height;
+		} else {
+			if( iconTexture not_eq nullptr ) {
+				desiredIconDimension.Height = iconTexture->getSize().Height;
+			}
+		}
+		
+		desiredIconDimension.Width = desiredIconDimension.Height;
+		
+		if( iconTexture not_eq nullptr ) {
+			ImageModifier im;
+			iconTexture = im.resize( iconTexture, desiredIconDimension.Width, desiredIconDimension.Height, driver );
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::setDimension(): " << e.what() << std::endl;
@@ -147,13 +202,13 @@ void MenuOption::draw( irr::IrrlichtDevice* device ) {
 		}
 		
 		auto* driver = device->getVideoDriver();
-		decltype( x ) textX = x;
+		auto textX = x;
 		if( iconTexture not_eq nullptr ) {
-			driver->draw2DImage( iconTexture, irr::core::position2d< irr::s32 >( x, y ) );
+			driver->draw2DImage( iconTexture, irr::core::position2d< irr::s32 >( textX, y ) );
 			textX += iconTexture->getSize().Width;
 		}
 		if( font not_eq nullptr ) {
-			irr::core::rect< irr::s32 > background( textX, y, dimension.Width, y + dimension.Height );
+			irr::core::rect< irr::s32 > background( textX, y, textX + dimension.Width - iconTexture->getSize().Width, y + dimension.Height );
 			driver->draw2DRectangle( BLACK, background );
 			
 			irr::video::SColor textColor;
@@ -167,6 +222,8 @@ void MenuOption::draw( irr::IrrlichtDevice* device ) {
 		} else {
 			throw( CustomException( L"Font is null" ) );
 		}
+	} catch( CustomException e ) {
+		std::wcerr << L"Custom exception thrown in MenuOption::draw(): " << e.what() << std::endl;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::draw(): " << e.what() << std::endl;
 	}
@@ -290,7 +347,7 @@ void MenuOption::loadTexture( irr::IrrlichtDevice* device ) {
 				iconTexture = im.imageToTexture( driver, image, textureName );
 			}
 			
-			setDimension();
+			setDimension( device->getVideoDriver() );
 		}
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in Object::loadTexture(): " << e.what() << std::endl;
@@ -305,7 +362,7 @@ void MenuOption::createTexture( irr::IrrlichtDevice* device ) {
 	
 	if( device not_eq nullptr ) {
 		XPMImageLoader loader;
-		setDimension();
+		setDimension( device->getVideoDriver() );
 		irr::video::IImage* tempImage = device->getVideoDriver()->createImage( irr::video::ECF_A8R8G8B8, irr::core::dimension2d< irr::u32 >( dimension.Height, dimension.Height ) );
 		loader.loadMenuOptionImage( device->getVideoDriver(), tempImage, type );
 		ImageModifier im;
@@ -313,4 +370,12 @@ void MenuOption::createTexture( irr::IrrlichtDevice* device ) {
 		textureName.append( L"-xpm" );
 		iconTexture = im.imageToTexture( device->getVideoDriver(), tempImage, textureName );
 	}
+}
+
+uint_fast16_t MenuOption::getHeight() {
+	return dimension.Height;
+}
+
+uint_fast16_t MenuOption::getWidth() {
+	return dimension.Width;
 }

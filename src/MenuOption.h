@@ -30,7 +30,7 @@
 
 class MenuOption {
 	public:
-		enum option_t : uint_fast8_t { NEW_MAZE, RESTART_MAZE, LOAD_MAZE, SAVE_MAZE, SETTINGS, EXIT_GAME, BACK_TO_GAME, FREEDOM, DO_NOT_USE };
+		enum option_t : uint_fast8_t { BACK_TO_GAME, CANCEL, CONTROLS, EXIT_GAME, FREEDOM, LOAD_MAZE, NEW_MAZE, NUMBOTS, OK, RESET_TO_DEFAULTS, RESTART_MAZE, SAVE_MAZE, SETTINGS, UNDO_CHANGES, DO_NOT_USE };
 
 		MenuOption();
 		virtual ~MenuOption();
@@ -40,7 +40,9 @@ class MenuOption {
 		void createTexture( irr::IrrlichtDevice* device );
 
 		void draw( irr::IrrlichtDevice* device );
-
+		
+		uint_fast16_t getHeight();
+		uint_fast16_t getWidth();
 		uint_fast16_t getMiddleX();
 		uint_fast16_t getMiddleY();
 		uint_fast16_t getX();
@@ -56,14 +58,14 @@ class MenuOption {
 		void setY( uint_fast16_t val );
 	protected:
 	private:
-		irr::core::dimension2d<uint_fast16_t> dimension;
+		irr::core::dimension2d< uint_fast16_t > dimension;
 
 		irr::core::stringw fileName;  //fileName gets set equal to text by the setText() function, but will be changed by loadTexture()
 		irr::gui::IGUIFont* font;
 
 		irr::video::ITexture* iconTexture;
 
-		void setDimension();
+		void setDimension( irr::video::IVideoDriver* driver );
 
 		irr::core::stringw text;
 		option_t type;

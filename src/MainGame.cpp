@@ -1105,7 +1105,10 @@ void MainGame::loadFonts() {
 		}
 		
 		menuManager.setFontAndResizeIcons( device, clockFont ); //Why use clockFont? Because I'm too lazy to implement loading another font.
-
+		//settingsScreen.setPointers( this, device, clockFont );
+		settingsScreen.setTextFont( clockFont );
+		settingsScreen.setupIconsAndStuff();
+		
 		uint_fast32_t size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect readability on large or small screens, but it's better on large screens than the built-in font.
 		gui->getSkin()->setFont( fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts ) );
 		
@@ -1718,9 +1721,12 @@ MainGame::MainGame() {
 				}
 			}
 		}
-
+		
+		settingsScreen.setPointers( this, device, nullptr );
+		settingsScreen.setupIconsAndStuff(); //Icon size might depend on screen/window size; that's why we call this after readPrefs()
+		
 		loadFonts();
-		settingsScreen.setTextFont( textFont );
+		//settingsScreen.setTextFont( textFont );
 		
 		menuManager.setPositions( settingsManager.windowSize.Height );
 		menuManager.loadIcons( device );
@@ -2147,6 +2153,9 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 							break;
 						}
 					}
+				} else if( currentScreen == SETTINGSSCREEN ) {
+					settingsScreen.handleMouseEvents( event );
+					break;
 				}
 
 				for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
@@ -2231,6 +2240,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 						loadFonts();
 						
 						menuManager.setPositions( settingsManager.windowSize.Height );
+						settingsScreen.setupIconsAndStuff();
 						
 						if( settingsManager.showBackgrounds ) {
 							
