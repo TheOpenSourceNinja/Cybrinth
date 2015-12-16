@@ -1105,8 +1105,8 @@ void MainGame::loadFonts() {
 		}
 		
 		menuManager.setFontAndResizeIcons( device, clockFont ); //Why use clockFont? Because I'm too lazy to implement loading another font.
-		//settingsScreen.setPointers( this, device, clockFont );
-		settingsScreen.setTextFont( clockFont );
+		settingsScreen.setButtonFont( clockFont );
+		settingsScreen.setTextFont( textFont );
 		settingsScreen.setupIconsAndStuff();
 		
 		uint_fast32_t size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect readability on large or small screens, but it's better on large screens than the built-in font.
@@ -1723,7 +1723,7 @@ MainGame::MainGame() {
 			}
 		}
 		
-		settingsScreen.setPointers( this, device, nullptr, &settingsManager );
+		settingsScreen.setPointers( this, device, nullptr, nullptr, &settingsManager );
 		settingsScreen.setupIconsAndStuff(); //Icon size might depend on screen/window size; that's why we call this after readPrefs()
 		
 		loadFonts();

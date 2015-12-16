@@ -21,13 +21,15 @@ class SettingsScreen {
 		
 		void processSelection();
 		
-		void setPointers( MainGame* newMainGame, irr::IrrlichtDevice* newDevice, irr::gui::IGUIFont* newFont, SettingsManager* newSettingsManager );
+		void setButtonFont( irr::gui::IGUIFont* newTextFont );
+		void setPointers( MainGame* newMainGame, irr::IrrlichtDevice* newDevice, irr::gui::IGUIFont* newButtonFont, irr::gui::IGUIFont* newTextFont, SettingsManager* newSettingsManager );
 		void setTextFont( irr::gui::IGUIFont* newTextFont );
 		void setupIconsAndStuff();
 		
 	protected:
 	private:
 		void backToMenu();
+		irr::gui::IGUIFont* buttonFont;
 		
 		MenuOption cancel;
 		
