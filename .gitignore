@@ -26,3 +26,5 @@ src/.deps/
 cybrinth
 how to use git
 /src/RakNet/.deps/
+.codelite/
+.clang/
