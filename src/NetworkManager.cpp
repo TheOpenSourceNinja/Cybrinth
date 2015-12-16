@@ -33,7 +33,7 @@
 NetworkManager::NetworkManager() {
 	try {
 		password = PACKAGE_STRING;
-		setPort( "0" );
+		setPort( 0 );
 		serverIP = "127.0.0.1";
 		me = nullptr;
 		isConnected = false;
@@ -477,12 +477,15 @@ std::string NetworkManager::getPort() {
 	return serverPort;
 }
 
-void NetworkManager::setPort( std::string newPort ) {
+void NetworkManager::setPort( uint_fast16_t newPort ) {
 	try {
-		boost::lexical_cast< uint16_t >( newPort ); //This is just to test whether the string represents a valid port number
-		serverPort = newPort;
+		StringConverter sc;
+		std::string tempStr = sc.toStdString( newPort );
+		serverPort = tempStr;
 	} catch( boost::bad_lexical_cast &e ) {
 		std::wcerr << L"Error in NetworkManager::setPort(): not a valid port number." << std::endl;
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in NetworkManager::setPort(): " << e.what() << std::endl;
 	}
 }
 

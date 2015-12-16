@@ -69,7 +69,9 @@ class StringConverter {
 		std::wstring toStdWString( double input );
 		std::wstring toStdWString( long double input );
 		std::string toStdString( std::wstring input );
+		std::string toStdString( int8_t input );
 		std::string toStdString( uint8_t input );
+		std::string toStdString( uint_fast16_t input );
 		const wchar_t* toWCharArray( std::wstring input );
 		const wchar_t* toWCharArray( irr::core::stringw input );
 		const wchar_t* toWCharArray( char* input );

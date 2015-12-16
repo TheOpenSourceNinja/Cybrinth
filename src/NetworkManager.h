@@ -48,7 +48,7 @@ class NetworkManager {
 		void sendPlayerPos( uint_fast8_t playerNum );
 		void sendPlayerPosXMove( uint_fast8_t playerNum, int_fast8_t direction );
 		void sendPlayerPosYMove( uint_fast8_t playerNum, int_fast8_t direction );
-		void setPort( std::string newPort );
+		void setPort( uint_fast16_t newPort );
 		void setup( MainGame* newGM, bool newIsServer );
 		
 		void tellNewClientItsPlayer( uint_fast8_t playerNum );

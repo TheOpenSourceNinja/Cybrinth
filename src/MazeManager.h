@@ -64,7 +64,7 @@ class MazeManager {
 		void recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t depth, uint_fast16_t numSoFar );
 
 		bool saveToFile( boost::filesystem::path dest );
-
+		
 		void setPointers( MainGame* newMainGame, SettingsManager* newSettingsManager );
 
 		uint_fast8_t cols;

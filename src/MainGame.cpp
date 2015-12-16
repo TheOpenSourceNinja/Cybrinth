@@ -1531,8 +1531,9 @@ MainGame::MainGame() {
 			throw( CustomException( std::wstring( L"Cannot create null device. Something is definitely wrong here!" ) ) );
 		}
 		
-		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system );
+		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system);
 		settingsManager.readPrefs();
+		network.setPort( settingsManager.networkPort );
 		
 		if ( settingsManager.debug ) {
 			std::wcout << L"Read prefs, now setting controls" << std::endl;
@@ -1722,7 +1723,7 @@ MainGame::MainGame() {
 			}
 		}
 		
-		settingsScreen.setPointers( this, device, nullptr );
+		settingsScreen.setPointers( this, device, nullptr, &settingsManager );
 		settingsScreen.setupIconsAndStuff(); //Icon size might depend on screen/window size; that's why we call this after readPrefs()
 		
 		loadFonts();

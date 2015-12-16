@@ -5,10 +5,15 @@
 
 SettingsScreen::SettingsScreen() {
 	restartNotice = L"Some of these settings will only take effect when the game is closed & reopened.";
+	setPointers( nullptr, nullptr, nullptr, nullptr );
 }
 
 SettingsScreen::~SettingsScreen() {
 	//dtor
+}
+
+void SettingsScreen::backToMenu() {
+	mainGame->currentScreen = MainGame::MENUSCREEN;
 }
 
 void SettingsScreen::draw( irr::IrrlichtDevice* device ) {
@@ -47,19 +52,41 @@ void SettingsScreen::handleMouseEvents( const irr::SEvent& event ) {
 void SettingsScreen::processSelection() {
 	if( cancel.highlighted ) {
 		std::wcout << L"Cancel button pressed" << std::endl;
+		resetChangedSettings();
+		backToMenu();
 	} else if( ok.highlighted ) {
 		std::wcout << L"OK button pressed" << std::endl;
+		if( settingsChanged ) {
+			saveSettings();
+		}
+		backToMenu();
 	} else if( undoChanges.highlighted ) {
 		std::wcout << L"Undo changes button pressed" << std::endl;
+		resetChangedSettings();
 	} else if( resetToDefaults.highlighted ) {
 		std::wcout << L"Reset to defaults button pressed" << std::endl;
+		resetToDefaultSettings();
 	}
 }
 
-void SettingsScreen::setPointers( MainGame* newMainGame, irr::IrrlichtDevice* newDevice, irr::gui::IGUIFont* newFont ) {
+void SettingsScreen::resetChangedSettings() {
+	settingsChanged = false;
+	settingsManager->readPrefs();
+}
+
+void SettingsScreen::resetToDefaultSettings() {
+	std::wcerr << L"SettingsScreen::resetToDefaultSettings() not implemented yet." << std::endl;
+}
+
+void SettingsScreen::saveSettings() {
+	settingsManager->savePrefs();
+}
+
+void SettingsScreen::setPointers( MainGame* newMainGame, irr::IrrlichtDevice* newDevice, irr::gui::IGUIFont* newFont, SettingsManager* newSettingsManager ) {
 	mainGame = newMainGame;
 	device = newDevice;
 	setTextFont( newFont );
+	settingsManager = newSettingsManager;
 }
 
 void SettingsScreen::setTextFont( irr::gui::IGUIFont* newTextFont ) {
