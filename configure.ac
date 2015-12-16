@@ -3,7 +3,7 @@
 # Cybrinth created by James Dearing, copyright 2012-2015 and licensed under the GNU AGPL (see the file COPYING).
 
 AC_PREREQ([2.69])
-AC_INIT([Cybrinth], m4_esyscmd_s(date -uI), [dearingj@lifetime.oregonstate.edu], [cybrinth], [https://github.com/dearingj/Cybrinth])
+AC_INIT([Cybrinth], m4_esyscmd_s(date -uI), [dearingj@lifetime.oregonstate.edu], [cybrinth], [https://github.com/TheOpenSourceNinja/Cybrinth])
 AC_LANG(C++)
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
