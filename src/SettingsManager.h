@@ -34,6 +34,8 @@ class SettingsManager
 		
 		bool fullscreen;
 		
+		bool getPlayMusic();
+		
 		bool isServer;
 		
 		bool markTrails;
@@ -45,8 +47,9 @@ class SettingsManager
 		uint_fast8_t numBots;
 		uint_fast8_t numPlayers;
 		
-		bool playMusic;
+		void resetToDefaults();
 		
+		void setPlayMusic( bool newSetting );
 		bool showBackgrounds;
 		
 		irr::core::dimension2d< irr::u32 > windowSize;
@@ -65,6 +68,7 @@ class SettingsManager
 		
 		NetworkManager* network;
 		
+		bool playMusic;
 		//possiblePrefs is used by both readPrefs() and savePrefs(). If this gets changed, be sure to update both functions!
 		std::vector< std::wstring > possiblePrefs = { L"bots' solving algorithm", L"volume", L"number of bots", L"show backgrounds",
 									L"fullscreen", L"mark player trails", L"debug", L"bits per pixel", L"wait for vertical sync", L"driver type", L"number of players",

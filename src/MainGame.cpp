@@ -46,7 +46,7 @@
 bool MainGame::allHumansAtGoal() {
 	try {
 		std::vector< uint_fast8_t > humanPlayers; //Get a list of players
-
+		
 		for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
 			humanPlayers.push_back( p );
 		}
@@ -97,10 +97,25 @@ void MainGame::allPlayersReady( bool tf ) {
  */
 void MainGame::drawAll() {
 	try {
-		if( currentScreen == LOADINGSCREEN ) {
-			driver->beginScene( true, true, BLACK );
-		} else {
-			driver->beginScene( true, true, backgroundColor );
+		
+		{
+			decltype( backgroundColor ) fillColor;
+			switch( currentScreen ) {
+				case LOADINGSCREEN: {
+					fillColor = BLACK;
+					break;
+				}
+				case SETTINGSSCREEN: {
+					fillColor = settingsScreen.backgroundColor;
+					break;
+				}
+				default: {
+					fillColor = backgroundColor;
+					break;
+				}
+			}
+			
+			driver->beginScene( true, true, fillColor );
 		}
 		
 		switch( currentScreen ) {
@@ -240,11 +255,12 @@ void MainGame::drawAll() {
 
 				{
 					irr::core::stringw headfor( L"Head for" );
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( headfor ).c_str() ); //stringConverter.toWCharArray( headfor ) );
 					textY += tempDimensions.Height;
-					if( textY < ( ( settingsManager.windowSize.Height / 2 ) - tempDimensions.Height ) ) {
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( headfor ).c_str() ); //stringConverter.toWCharArray( headfor ) );
+					
+					/*if( textY < ( ( settingsManager.windowSize.Height / 2 ) - tempDimensions.Height ) ) {
 						textY = ( ( settingsManager.windowSize.Height / 2 ) - tempDimensions.Height );
-					}
+					}*/
 					if( numKeysFound >= numLocks ) {
 						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 						textFont->draw( headfor, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
@@ -253,15 +269,16 @@ void MainGame::drawAll() {
 
 				{
 					irr::core::stringw theexit( L"the exit!" );
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( theexit ).c_str() ); //stringConverter.toWCharArray( theexit ) );
 					textY += tempDimensions.Height;
+					tempDimensions = textFont->getDimension( stringConverter.toStdWString( theexit ).c_str() ); //stringConverter.toWCharArray( theexit ) );
+					
 					if( numKeysFound >= numLocks ) {
 						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
 						textFont->draw( theexit, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
 					}
 				}
 
-				if( settingsManager.playMusic ) {
+				if( settingsManager.getPlayMusic() ) {
 					{
 						irr::core::stringw nowplaying( L"Now playing:" );
 						textY += tempDimensions.Height;
@@ -1129,7 +1146,7 @@ void MainGame::loadMusicFont() {
 			std::wcout << L"loadMusicFont() called" << std::endl;
 		}
 		
-		if( settingsManager.playMusic ) {
+		if( settingsManager.getPlayMusic() ) {
 			if( fontFile not_eq "" ) {
 				uint_fast32_t size = 0; //The height (I think) of the font to be loaded
 			
@@ -1184,7 +1201,9 @@ void MainGame::loadMusicFont() {
 			}
 
 			if( fontFile == "" or isNull( musicTagFont ) or musicTagFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
-				musicTagFont = gui->getBuiltInFont();
+				if( !isNull( gui ) ) { //When this function is first called, gui hasn't been set yet.
+					musicTagFont = gui->getBuiltInFont();
+				}
 			}
 		}
 		
@@ -1204,102 +1223,109 @@ void MainGame::loadNextSong() {
 		if( settingsManager.debug ) {
 			std::wcout << L"loadNextSong() called" << std::endl;
 		}
-
-		//Figure out where we are in the music list
-		std::vector<boost::filesystem::path>::size_type positionInList = 0;
-		for( decltype( musicList.size() ) i = 0; i < musicList.size(); ++i ) {
-			if( musicList.at( i ) == currentMusic ) {
-				positionInList = i;
-				break;
-			}
-		}
-
-		//Move on to the next position
-		positionInList += 1;
-		if( positionInList >= musicList.size() ) {
-			positionInList -= musicList.size();
-		}
-
-		currentMusic = musicList[ positionInList ];
-		music = Mix_LoadMUS( currentMusic.c_str() );
-
-		if( isNull( music ) ) {
-			throw( CustomException( std::wstring( L"Unable to load music file: " ) + stringConverter.toStdWString( Mix_GetError() ) ) );
-		} else {
-			auto musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to *repeat* the music. -1 means infinite, 0 means don't repeat.
-
-			if( musicStatus == -1 ) {
-				throw( CustomException( std::wstring( L"Unable to play music file: " ) + stringConverter.toStdWString( Mix_GetError() ) ) );
-			} else {
-				if( settingsManager.debug ) {
-					switch( Mix_GetMusicType( nullptr ) ) {
-						case MUS_CMD:
-							std::wcout << L"Command based";
-							break;
-						case MUS_WAV:
-							std::wcout << L"WAVE";
-							break;
-						case MUS_MOD:
-							std::wcout << L"MOD";
-							break;
-						case MUS_MID:
-							std::wcout << L"MIDI";
-							break;
-						case MUS_OGG:
-							std::wcout << L"OGG";
-							break;
-						case MUS_MP3:
-						case MUS_MP3_MAD:
-							std::wcout << L"MP3";
-							break;
-						case MUS_NONE:
-							std::wcout << L"No";
-							break;
-						case MUS_FLAC:
-							std::wcout << L"FLAC";
-							break;
-						default:
-							std::wcout << L"An unknown type of";
-							break;
-					}
-
-					std::wcout << " music is playing." << std::endl;
-				}
-
-				//Now playing
-				TagLib::FileRef musicFile( currentMusic.c_str() ); //TagLib doesn't accept wstrings as file names, but it apparently can read tags as wstrings
-
-				if( not musicFile.isNull() and not isNull( musicFile.tag() ) ) {
-					musicTitle = stringConverter.toIrrlichtStringW( musicFile.tag()->title().toWString() ); //toWString() alone doesn't work here even though these are wide character strings because Irrlicht doesn't like accepting TagLib's wstrings.
-					musicArtist = stringConverter.toIrrlichtStringW( musicFile.tag()->artist().toWString() );
-					musicAlbum = stringConverter.toIrrlichtStringW( musicFile.tag()->album().toWString() );
-
-					if( musicTitle.size() == 0 ) {
-						musicTitle = L"Unknown Title";
-					}
-
-					if( musicArtist.size() == 0 ) {
-						musicArtist = L"Unknown Artist";
-					}
-
-					if( musicAlbum.size() == 0 ) {
-						musicAlbum = L"Unknown Album";
-					}
-
-					if( settingsManager.debug ) {
-						std::wcout << L"Now playing: " << stringConverter.toStdWString( musicTitle ) << L" by " << stringConverter.toStdWString( musicArtist ) << L" from album " << stringConverter.toStdWString( musicAlbum ) << std::endl;
-					}
-				}
-
-				loadMusicFont();
-			}
-
-			Mix_VolumeMusic( settingsManager.musicVolume * MIX_MAX_VOLUME / 100 );
+		
+		if( musicList.empty() ) {
+			makeMusicList();
 		}
 		
+		if( !musicList.empty() ) {
+			//Figure out where we are in the music list
+			std::vector<boost::filesystem::path>::size_type positionInList = 0;
+			for( decltype( musicList.size() ) i = 0; i < musicList.size(); ++i ) {
+				if( musicList.at( i ) == currentMusic ) {
+					positionInList = i;
+					break;
+				}
+			}
+
+			//Move on to the next position
+			positionInList += 1;
+			if( positionInList >= musicList.size() ) {
+				positionInList -= musicList.size();
+			}
+
+			currentMusic = musicList[ positionInList ];
+			music = Mix_LoadMUS( currentMusic.c_str() );
+
+			if( isNull( music ) ) {
+				throw( CustomException( std::wstring( L"Unable to load music file: " ) + stringConverter.toStdWString( Mix_GetError() ) ) );
+			} else {
+				auto musicStatus = Mix_PlayMusic( music, 0 ); //The second argument tells how many times to *repeat* the music. -1 means infinite, 0 means don't repeat.
+
+				if( musicStatus == -1 ) {
+					throw( CustomException( std::wstring( L"Unable to play music file: " ) + stringConverter.toStdWString( Mix_GetError() ) ) );
+				} else {
+					if( settingsManager.debug ) {
+						switch( Mix_GetMusicType( nullptr ) ) {
+							case MUS_CMD:
+								std::wcout << L"Command based";
+								break;
+							case MUS_WAV:
+								std::wcout << L"WAVE";
+								break;
+							case MUS_MOD:
+								std::wcout << L"MOD";
+								break;
+							case MUS_MID:
+								std::wcout << L"MIDI";
+								break;
+							case MUS_OGG:
+								std::wcout << L"OGG";
+								break;
+							case MUS_MP3:
+							case MUS_MP3_MAD:
+								std::wcout << L"MP3";
+								break;
+							case MUS_NONE:
+								std::wcout << L"No";
+								break;
+							case MUS_FLAC:
+								std::wcout << L"FLAC";
+								break;
+							default:
+								std::wcout << L"An unknown type of";
+								break;
+						}
+
+						std::wcout << " music is playing." << std::endl;
+					}
+
+					//Now playing
+					TagLib::FileRef musicFile( currentMusic.c_str() ); //TagLib doesn't accept wstrings as file names, but it apparently can read tags as wstrings
+
+					if( not musicFile.isNull() and not isNull( musicFile.tag() ) ) {
+						musicTitle = stringConverter.toIrrlichtStringW( musicFile.tag()->title().toWString() ); //toWString() alone doesn't work here even though these are wide character strings because Irrlicht doesn't like accepting TagLib's wstrings.
+						musicArtist = stringConverter.toIrrlichtStringW( musicFile.tag()->artist().toWString() );
+						musicAlbum = stringConverter.toIrrlichtStringW( musicFile.tag()->album().toWString() );
+
+						if( musicTitle.size() == 0 ) {
+							musicTitle = L"Unknown Title";
+						}
+
+						if( musicArtist.size() == 0 ) {
+							musicArtist = L"Unknown Artist";
+						}
+
+						if( musicAlbum.size() == 0 ) {
+							musicAlbum = L"Unknown Album";
+						}
+
+						if( settingsManager.debug ) {
+							std::wcout << L"Now playing: " << stringConverter.toStdWString( musicTitle ) << L" by " << stringConverter.toStdWString( musicArtist ) << L" from album " << stringConverter.toStdWString( musicAlbum ) << std::endl;
+						}
+					}
+
+					loadMusicFont();
+				}
+
+				Mix_VolumeMusic( settingsManager.musicVolume * MIX_MAX_VOLUME / 100 );
+			}
+		}
 		if( settingsManager.debug ) {
 			std::wcout << L"end of loadNextSong()" << std::endl;
 		}
+	} catch( CustomException e ) {
+		std::wcerr << L"Error in MainGame::loadNextSong(): " << e.what() << std::endl;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::loadNextSong(): " << e.what() << std::endl;
 	}
@@ -1453,7 +1479,7 @@ MainGame::~MainGame() {
 		device->run(); //Sometimes there are problems if we don't call run() after closeDevice(). Don't remember what they are at the moment.
 		device->drop();
 
-		if( settingsManager.playMusic ) {
+		if( settingsManager.getPlayMusic() ) {
 			Mix_HaltMusic();
 			Mix_FreeMusic( music );
 			Mix_CloseAudio();
@@ -1499,6 +1525,8 @@ MainGame::MainGame() {
 		saveMazeDialog = nullptr;
 		exitConfirmation = nullptr;
 		logoTexture = nullptr;
+		device = nullptr;
+		gui = nullptr;
 		currentScreen = LOADINGSCREEN;
 		loading = L"Loading...";
 		proTipPrefix = L"Pro tip: ";
@@ -1600,7 +1628,7 @@ MainGame::MainGame() {
 			driver->setTextureCreationFlag( irr::video::ETCF_ALLOW_NON_POWER_2, false );
 		}
 		
-		setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
+		setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generated.
 		pickLogo();
 		driver->beginScene( false, false ); //These falses specify whether the back buffer and z buffer should be cleared. Since this is the first time drawing anything, there's no need to clear anything beforehand.
 		drawLogo(); //Why the fuck isn't this working consistently? Sometimes it draws, sometimes it only thinks it draws. Had to hack the drawLoadingScreen() function (which gets called several times, therefore is likely to work at least once).
@@ -1638,89 +1666,8 @@ MainGame::MainGame() {
 		}
 		
 		
-		if( settingsManager.playMusic ) {
-			
-			if( SDL_Init( SDL_INIT_AUDIO ) == -1 ) {
-				std::wcerr << L"Cannot initialize SDL audio." << std::endl;
-				settingsManager.playMusic = false;
-			}
-			
-			{//Set the audio properties we hope to get: sample rate, channels, etc.
-				int audioRate = MIX_DEFAULT_FREQUENCY; //MIX_DEFAULT_FREQUENCY is 22050 Hz, half the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
-				Uint16 audioFormat = MIX_DEFAULT_FORMAT; //AUDIO_S16SYS according to documentation. CDs use signed 16-bit audio. SYS means use the system's native endianness.
-				int audioChannels = MIX_DEFAULT_CHANNELS; //2 according to documentation. Almost everything uses stereo. I wish surround sound were more common.
-				int audioChunkSize = 4096; //Magic number! Change it if you dare, and see what happens. SDL_Mixer has no default, but its documentation says 4096 is good if all we're playing is music. Too small and sound may skip on a slow system, too large and sound effects may lag behind the action.
-
-				if( Mix_OpenAudio( audioRate, audioFormat, audioChannels, audioChunkSize ) not_eq 0 ) {
-					std::wcerr << L"Unable to initialize audio: " << Mix_GetError() << std::endl;
-					settingsManager.playMusic = false;
-				} else if( settingsManager.debug ) {
-					std::wcout << L"Initialized audio" << std::endl;
-				}
-
-				if( settingsManager.debug ) {
-					Mix_QuerySpec( &audioRate, &audioFormat, &audioChannels );//Don't assume we got everything we asked for above
-					std::wcout << L"Audio sample rate: " << audioRate << L" Hertz. Format: ";
-					// cppcheck-suppress duplicateIf
-					if( audioFormat == AUDIO_U16SYS ) {
-						std::wcout << L"AUDIO_U16SYS (equivalent to ";
-						//cppcheck-suppress duplicateIf
-						if( AUDIO_U16SYS == AUDIO_U16LSB ) {
-							std::wcout << L"AUDIO_U16LSB";
-						} else if( AUDIO_U16SYS == AUDIO_U16MSB ) {
-							std::wcout << L"AUDIO_U16MSB";
-						} else if( AUDIO_U16SYS == AUDIO_U16 ) {
-							std::wcout << L"AUDIO_U16";
-						} else {
-							std::wcout << L"unknown";
-						}
-					std::wcout << L")";
-					//cppcheck-suppress duplicateIf
-					} else if( audioFormat == AUDIO_S16SYS ) {
-						std::wcout << L"AUDIO_S16SYS (equivalent to ";
-						//cppcheck-suppress duplicateIf
-						if( AUDIO_S16SYS == AUDIO_S16LSB ) {
-							std::wcout << L"AUDIO_S16LSB";
-						} else if( AUDIO_S16SYS == AUDIO_S16MSB ) {
-							std::wcout << L"AUDIO_S16MSB";
-						} else if( AUDIO_S16SYS == AUDIO_S16 ) {
-							std::wcout << L"AUDIO_S16";
-						} else {
-							std::wcout << L"unknown";
-						}
-					std::wcout << L")";
-					} else if( audioFormat == AUDIO_U8 ) {
-						std::wcout << L"AUDIO_U8";
-					} else if( audioFormat == AUDIO_S8 ) {
-						std::wcout << L"AUDIO_S8";
-					} else if( audioFormat == AUDIO_U16LSB ) {
-						std::wcout << L"AUDIO_U16LSB";
-					} else if( audioFormat == AUDIO_S16LSB ) {
-						std::wcout << L"AUDIO_S16LSB";
-					} else if( audioFormat == AUDIO_U16MSB ) {
-						std::wcout << L"AUDIO_U16MSB";
-					} else if( audioFormat == AUDIO_S16MSB ) {
-						std::wcout << L"AUDIO_S16MSB";
-					} else if( audioFormat == AUDIO_U16 ) {
-						std::wcout << L"AUDIO_U16";
-					} else if( audioFormat == AUDIO_S16 ) {
-						std::wcout << L"AUDIO_S16";
-					} else {
-						std::wcout << L"unknown";
-					}
-
-					std::wcout << " channels: " << audioChannels  << L" chunk size: " << audioChunkSize << std::endl;
-				}
-			}
-
-			music = nullptr;
-
-			if( settingsManager.playMusic ) { //No sense in making the music list if we've been unable to initialize the audio.
-				makeMusicList();
-				if( settingsManager.playMusic ) {  //playMusic may be set to false if makeMusicList() can't find any songs to play
-					loadNextSong();
-				}
-			}
+		if( settingsManager.getPlayMusic() ) {
+			setupMusicStuff();
 		}
 		
 		settingsScreen.setPointers( this, device, nullptr, nullptr, &settingsManager );
@@ -1886,7 +1833,7 @@ void MainGame::makeMusicList() {
 			currentMusic = musicList.back();
 		} else {
 			std::wcerr << L"Could not find any music to play. Turning off playback." << std::endl;
-			settingsManager.playMusic = false;
+			settingsManager.setPlayMusic( false );
 		}
 		
 		if( settingsManager.debug ) {
@@ -2013,6 +1960,24 @@ void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromSe
 	}
 }
 
+void MainGame::musicSettingChanged() {
+	if( settingsManager.getPlayMusic() ) {
+		setupMusicStuff();
+		loadMusicFont();
+		makeMusicList();
+	} else {
+		Mix_HaltMusic();
+		Mix_FreeMusic( music );
+		Mix_CloseAudio();
+		
+		while( Mix_Init( 0 ) ) {
+			Mix_Quit();
+		}
+		
+		SDL_Quit();
+	}
+}
+
 /**
  * The network manager calls this as a way of requesting data to send to a new client.
  */
@@ -2127,286 +2092,301 @@ void MainGame::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 //cppcheck-suppress unusedFunction
 bool MainGame::OnEvent( const irr::SEvent& event ) {
 	try {
-		switch( event.EventType ) {
-			case irr::EET_KEY_INPUT_EVENT: {
-				for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
-					if( controls.at( k ).getKey() == event.KeyInput.Key ) {
-						controls.at( k ).activated = event.KeyInput.PressedDown;
-					}
-				}
+		switch( currentScreen ) {
+			case SETTINGSSCREEN: {
+				return settingsScreen.OnEvent( event );
 			}
-			break;
-
-			case irr::EET_MOUSE_INPUT_EVENT: {
-				if( currentScreen == MENUSCREEN ) {
-					switch( event.MouseInput.Event ) {
-						case irr::EMIE_MOUSE_MOVED: {
-							menuManager.findHighlights( event.MouseInput.X, event.MouseInput.Y );
-							break;
-						}
-						case irr::EMIE_LMOUSE_PRESSED_DOWN: {
-							if( ( gui->getRootGUIElement()->getChildren().getSize() == 0 ) ) {
-								menuManager.processSelection( this );
+			case MAINSCREEN:
+			case MENUSCREEN:
+			case LOADINGSCREEN:
+			case WAITINGFORPLAYERSSCREEN: {
+				switch( event.EventType ) {
+					case irr::EET_KEY_INPUT_EVENT: {
+						for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
+							if( controls.at( k ).getKey() == event.KeyInput.Key ) {
+								controls.at( k ).activated = event.KeyInput.PressedDown;
 							}
-							break;
-						}
-						default: {
-							break;
 						}
 					}
-				} else if( currentScreen == SETTINGSSCREEN ) {
-					settingsScreen.handleMouseEvents( event );
 					break;
-				}
 
-				for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
-					if( event.MouseInput.Event == controls.at( k ).getMouseEvent() ) {
-						switch( controls.at( k ).getMouseEvent() ) {
-							case irr::EMIE_MOUSE_WHEEL: {
-								controls.at( k ).activated = ( ( event.MouseInput.Wheel > 0 and controls.at( k ).getMouseWheelUp() ) or ( event.MouseInput.Wheel < 0 and not controls.at( k ).getMouseWheelUp() ) );
+					case irr::EET_MOUSE_INPUT_EVENT: {
+						if( currentScreen == MENUSCREEN ) {
+							switch( event.MouseInput.Event ) {
+								case irr::EMIE_MOUSE_MOVED: {
+									menuManager.findHighlights( event.MouseInput.X, event.MouseInput.Y );
+									break;
+								}
+								case irr::EMIE_LMOUSE_PRESSED_DOWN: {
+									if( ( gui->getRootGUIElement()->getChildren().getSize() == 0 ) ) {
+										menuManager.processSelection( this );
+									}
+									break;
+								}
+								default: {
+									break;
+								}
+							}
+						}
+
+						for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
+							if( event.MouseInput.Event == controls.at( k ).getMouseEvent() ) {
+								switch( controls.at( k ).getMouseEvent() ) {
+									case irr::EMIE_MOUSE_WHEEL: {
+										controls.at( k ).activated = ( ( event.MouseInput.Wheel > 0 and controls.at( k ).getMouseWheelUp() ) or ( event.MouseInput.Wheel < 0 and not controls.at( k ).getMouseWheelUp() ) );
+										break;
+									}
+									case irr::EMIE_MOUSE_MOVED: {
+										switch( controls.at( k ).getMouseDirection() ) {
+											case ControlMapping::MOUSE_UP: {
+												controls.at( k ).activated = ( event.MouseInput.Y < mouseY );
+												break;
+											}
+											case ControlMapping::MOUSE_DOWN: {
+												controls.at( k ).activated = ( event.MouseInput.Y > mouseY );
+												break;
+											}
+											case ControlMapping::MOUSE_LEFT: {
+												controls.at( k ).activated = ( event.MouseInput.X < mouseX );
+												break;
+											}
+											case ControlMapping::MOUSE_RIGHT: {
+												controls.at( k ).activated = ( event.MouseInput.X > mouseX );
+												break;
+											}
+											default: { //ControlMapping::MOUSE_DO_NOT_USE
+												break;
+											}
+										}
+										break;
+									}
+									default: {
+										//TODO: Add mouse handling stuff here
+										break;
+									}
+								}
+							}
+						}
+						
+						switch( event.MouseInput.Event ) { //Anything that should be updated regardless of whether it's required by any controls
+							case irr::EMIE_MOUSE_MOVED: { //So far this is the only thing that should always be updated
+								mouseX = event.MouseInput.X;
+								mouseY = event.MouseInput.Y;
 								break;
 							}
-							case irr::EMIE_MOUSE_MOVED: {
-								switch( controls.at( k ).getMouseDirection() ) {
-									case ControlMapping::MOUSE_UP: {
-										controls.at( k ).activated = ( event.MouseInput.Y < mouseY );
-										break;
+							default: {
+								break;
+							}
+						}
+					}
+					break;
+
+					case irr::EET_USER_EVENT: {
+						switch( event.UserEvent.UserData1 ) {
+							case USER_EVENT_WINDOW_RESIZE: {
+								settingsManager.windowSize.set( driver->getScreenSize().Width, driver->getScreenSize().Height );
+
+								//TODO: Find a way to resize the window or set a minimum size
+								/*if (!allowSmallSize) {
+									bool sizeChanged = false;
+
+									if (windowSize.Height < minHeight) {
+										windowSize.Height = minHeight;
+										sizeChanged = true;
 									}
-									case ControlMapping::MOUSE_DOWN: {
-										controls.at( k ).activated = ( event.MouseInput.Y > mouseY );
-										break;
+
+									if (windowSize.Width < minWidth) {
+										windowSize.Width = minWidth;
+										sizeChanged = true;
 									}
-									case ControlMapping::MOUSE_LEFT: {
-										controls.at( k ).activated = ( event.MouseInput.X < mouseX );
-										break;
+
+									if (sizeChanged) {
+										driver->OnResize( windowSize );
 									}
-									case ControlMapping::MOUSE_RIGHT: {
-										controls.at( k ).activated = ( event.MouseInput.X > mouseX );
-										break;
+								}*/
+
+								viewportSize.set( settingsManager.windowSize.Width - ( settingsManager.windowSize.Width / sideDisplaySizeDenominator ), settingsManager.windowSize.Height - 1 );
+								cellWidth = ( viewportSize.Width ) / mazeManager.cols;
+								cellHeight = ( viewportSize.Height ) / mazeManager.rows;
+								loadFonts();
+								
+								menuManager.setPositions( settingsManager.windowSize.Height );
+								settingsScreen.setupIconsAndStuff();
+								
+								if( settingsManager.showBackgrounds ) {
+									
+									irr::scene::ICameraSceneNode* camera = backgroundSceneManager->getActiveCamera();
+									if( not isNull( camera ) ) {
+										camera->setAspectRatio( static_cast< decltype( camera->getAspectRatio() ) >( settingsManager.windowSize.Width ) / settingsManager.windowSize.Height );
 									}
-									default: { //ControlMapping::MOUSE_DO_NOT_USE
-										break;
+									
+									if( backgroundChosen == IMAGES and not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
+										if( backgroundFilePath.size() > 0 ) {// not backgroundFilePath.empty() ) { Irrlicht 1.8+ has .empty() but Raspbian only has 1.7 in its repositories
+											backgroundTexture = driver->getTexture( backgroundFilePath );
+										}
+										if( not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
+											backgroundTexture = resizer.resize( backgroundTexture, settingsManager.windowSize.Width, settingsManager.windowSize.Height, driver );
+										}
+									} else if( backgroundChosen == STARTRAILS and backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
+										driver->removeTexture( backgroundTexture );
+										backgroundTexture = driver->addRenderTargetTexture( settingsManager.windowSize );
 									}
+								}
+								return true;
+							}
+							break;
+							default:
+								break;
+						}
+					}
+					break;
+
+					case irr::EET_JOYSTICK_INPUT_EVENT: {
+						if( enableController ) {
+							for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
+								if( event.JoystickEvent.Joystick == controls.at( k ).getControllerNumber() ) {
+									{ //Handle joystick axes
+										int_fast16_t joystickDeadZone = controls.at( k ).getJoystickDeadZone(); //TODO: Make the dead zone user adjustable.
+										
+										if( controls.at( k ).getJoystickDirection() == ControlMapping::JOYSTICK_INCREASE ) {
+											if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+												controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] > joystickDeadZone );
+												
+											} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+												controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] > joystickDeadZone );
+												
+											} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+												controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] > joystickDeadZone );
+												
+											} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+												controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] > joystickDeadZone );
+												
+											} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+												controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] > joystickDeadZone );
+												
+											} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+												controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] > joystickDeadZone );
+												
+											}
+										} else if( controls.at( k ).getJoystickDirection() == ControlMapping::JOYSTICK_DECREASE ) {
+											if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_X ) {
+												controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] < -joystickDeadZone );
+												
+											} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
+												controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] < -joystickDeadZone );
+												
+											} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
+												controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] < -joystickDeadZone );
+												
+											} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_R ) {
+												controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] < -joystickDeadZone );
+												
+											} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_U ) {
+												controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] < -joystickDeadZone );
+												
+											} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_V ) {
+												controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] < -joystickDeadZone );
+												
+											}
+										}
+									}
+									
+									//Handle controller buttons
+									if( controls.at( k ).getControllerButton() not_eq UINT_FAST8_MAX ) {
+										controls.at( k ).activated = event.JoystickEvent.IsButtonPressed( controls.at( k ).getControllerButton() );
+									}
+								}
+							}
+						}
+					}
+					break;
+
+					case irr::EET_GUI_EVENT: {
+						switch( event.GUIEvent.EventType ) {
+							case irr::gui::EGET_FILE_SELECTED: {
+								if( not isNull( loadMazeDialog ) and event.GUIEvent.Caller->getID() == loadMazeDialog->getID() ) {
+									if( settingsManager.debug ) {
+										std::wcout << L"File selected for loading. Folder: " << stringConverter.toStdWString( loadMazeDialog->getDirectoryName() ) << L"\tFile: " << loadMazeDialog->getFileName() << std::endl;
+									}
+									boost::filesystem::current_path( currentDirectory ); //Resets the actual current directory to currentDirectory, since the file chooser can change the current directory.
+
+									newMaze( loadMazeDialog->getFileName() );
+									loadMazeDialog = nullptr;
+									return true;
+								} else if( not isNull( saveMazeDialog ) and event.GUIEvent.Caller->getID() == saveMazeDialog->getID() ) {
+									if( settingsManager.debug ) {
+										std::wcout << L"File selected for saving. Folder: " << stringConverter.toStdWString( loadMazeDialog->getDirectoryName() ) << L"\tFile: " << loadMazeDialog->getFileName() << std::endl;
+									}
+									boost::filesystem::current_path( currentDirectory ); //Resets the actual current directory to currentDirectory, since the file chooser can change the current directory.
+
+									mazeManager.saveToFile( saveMazeDialog->getFileName() );
+									saveMazeDialog = nullptr;
+									return true;
+								}
+								break;
+							}
+							case irr::gui::EGET_DIRECTORY_SELECTED: {
+								if( not isNull( loadMazeDialog ) and event.GUIEvent.Caller->getID() == loadMazeDialog->getID() ) {
+									if( settingsManager.debug ) {
+										std::wcout << L"Folder selected." << std::endl;
+									}
+									return true;
+								} else if( not isNull( saveMazeDialog ) and event.GUIEvent.Caller->getID() == saveMazeDialog->getID() ) {
+									if( settingsManager.debug ) {
+										std::wcout << L"Folder selected." << std::endl;
+									}
+									return true;
+								}
+
+								break;
+							}
+							case irr::gui::EGET_MESSAGEBOX_YES: {
+								if( event.GUIEvent.Caller->getID() == exitConfirmation->getID() ) {
+									device->closeDevice();
+									donePlaying = true;
+									exitConfirmation = nullptr;
+									return true;
+								}
+								break;
+							}
+							case irr::gui::EGET_MESSAGEBOX_NO: {
+								if( event.GUIEvent.Caller->getID() == exitConfirmation->getID() ) {
+									exitConfirmation = nullptr;
+									return true;
+								}
+								break;
+							}
+							case irr::gui::EGET_FILE_CHOOSE_DIALOG_CANCELLED: //Deliberate fall-through
+							case irr::gui::EGET_ELEMENT_CLOSED: {
+								auto caller = event.GUIEvent.Caller;
+								if( caller == exitConfirmation ) {
+									exitConfirmation = nullptr;
+								} else if( caller == loadMazeDialog ) {
+									loadMazeDialog = nullptr;
+								} else if( caller == saveMazeDialog ) {
+									saveMazeDialog = nullptr;
+								} else {
+									std::wcerr << L"An unrecognized element was just closed." << std::endl;
 								}
 								break;
 							}
 							default: {
-								//TODO: Add mouse handling stuff here
 								break;
 							}
 						}
 					}
-				}
-				
-				switch( event.MouseInput.Event ) { //Anything that should be updated regardless of whether it's required by any controls
-					case irr::EMIE_MOUSE_MOVED: { //So far this is the only thing that should always be updated
-						mouseX = event.MouseInput.X;
-						mouseY = event.MouseInput.Y;
-						break;
-					}
 					default: {
 						break;
-					}
-				}
-			}
-			break;
-
-			case irr::EET_USER_EVENT: {
-				switch( event.UserEvent.UserData1 ) {
-					case USER_EVENT_WINDOW_RESIZE: {
-						settingsManager.windowSize.set( driver->getScreenSize().Width, driver->getScreenSize().Height );
-
-						//TODO: Find a way to resize the window or set a minimum size
-						/*if (!allowSmallSize) {
-							bool sizeChanged = false;
-
-							if (windowSize.Height < minHeight) {
-								windowSize.Height = minHeight;
-								sizeChanged = true;
-							}
-
-							if (windowSize.Width < minWidth) {
-								windowSize.Width = minWidth;
-								sizeChanged = true;
-							}
-
-							if (sizeChanged) {
-								driver->OnResize( windowSize );
-							}
-						}*/
-
-						viewportSize.set( settingsManager.windowSize.Width - ( settingsManager.windowSize.Width / sideDisplaySizeDenominator ), settingsManager.windowSize.Height - 1 );
-						cellWidth = ( viewportSize.Width ) / mazeManager.cols;
-						cellHeight = ( viewportSize.Height ) / mazeManager.rows;
-						loadFonts();
-						
-						menuManager.setPositions( settingsManager.windowSize.Height );
-						settingsScreen.setupIconsAndStuff();
-						
-						if( settingsManager.showBackgrounds ) {
-							
-							irr::scene::ICameraSceneNode* camera = backgroundSceneManager->getActiveCamera();
-							if( not isNull( camera ) ) {
-								camera->setAspectRatio( static_cast< decltype( camera->getAspectRatio() ) >( settingsManager.windowSize.Width ) / settingsManager.windowSize.Height );
-							}
-							
-							if( backgroundChosen == IMAGES and not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
-								if( backgroundFilePath.size() > 0 ) {// not backgroundFilePath.empty() ) { Irrlicht 1.8+ has .empty() but Raspbian only has 1.7 in its repositories
-									backgroundTexture = driver->getTexture( backgroundFilePath );
-								}
-								if( not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
-									backgroundTexture = resizer.resize( backgroundTexture, settingsManager.windowSize.Width, settingsManager.windowSize.Height, driver );
-								}
-							} else if( backgroundChosen == STARTRAILS and backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
-								driver->removeTexture( backgroundTexture );
-								backgroundTexture = driver->addRenderTargetTexture( settingsManager.windowSize );
-							}
-						}
-						return true;
 					}
 					break;
-					default:
-						break;
 				}
-			}
-			break;
-
-			case irr::EET_JOYSTICK_INPUT_EVENT: {
-				if( enableController ) {
-					for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
-						if( event.JoystickEvent.Joystick == controls.at( k ).getControllerNumber() ) {
-							{ //Handle joystick axes
-								int_fast16_t joystickDeadZone = controls.at( k ).getJoystickDeadZone(); //TODO: Make the dead zone user adjustable.
-								
-								if( controls.at( k ).getJoystickDirection() == ControlMapping::JOYSTICK_INCREASE ) {
-									if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_X ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] > joystickDeadZone );
-										
-									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] > joystickDeadZone );
-										
-									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] > joystickDeadZone );
-										
-									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_R ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] > joystickDeadZone );
-										
-									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_U ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] > joystickDeadZone );
-										
-									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_V ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] > joystickDeadZone );
-										
-									}
-								} else if( controls.at( k ).getJoystickDirection() == ControlMapping::JOYSTICK_DECREASE ) {
-									if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_X ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_X ] < -joystickDeadZone );
-										
-									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_Y ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Y ] < -joystickDeadZone );
-										
-									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_Z ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_Z ] < -joystickDeadZone );
-										
-									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_R ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_R ] < -joystickDeadZone );
-										
-									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_U ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_U ] < -joystickDeadZone );
-										
-									} else if( controls.at( k ).getJoystickAxis() == ( decltype( controls.at( k ).getJoystickAxis() ) ) irr::SEvent::SJoystickEvent::AXIS_V ) {
-										controls.at( k ).activated = ( event.JoystickEvent.Axis[ irr::SEvent::SJoystickEvent::AXIS_V ] < -joystickDeadZone );
-										
-									}
-								}
-							}
-							
-							//Handle controller buttons
-							if( controls.at( k ).getControllerButton() not_eq UINT_FAST8_MAX ) {
-								controls.at( k ).activated = event.JoystickEvent.IsButtonPressed( controls.at( k ).getControllerButton() );
-							}
-						}
-					}
-				}
-			}
-			break;
-
-			case irr::EET_GUI_EVENT: {
-				switch( event.GUIEvent.EventType ) {
-					case irr::gui::EGET_FILE_SELECTED: {
-						if( not isNull( loadMazeDialog ) and event.GUIEvent.Caller->getID() == loadMazeDialog->getID() ) {
-							if( settingsManager.debug ) {
-								std::wcout << L"File selected for loading. Folder: " << stringConverter.toStdWString( loadMazeDialog->getDirectoryName() ) << L"\tFile: " << loadMazeDialog->getFileName() << std::endl;
-							}
-							boost::filesystem::current_path( currentDirectory ); //Resets the actual current directory to currentDirectory, since the file chooser can change the current directory.
-
-							newMaze( loadMazeDialog->getFileName() );
-							loadMazeDialog = nullptr;
-							return true;
-						} else if( not isNull( saveMazeDialog ) and event.GUIEvent.Caller->getID() == saveMazeDialog->getID() ) {
-							if( settingsManager.debug ) {
-								std::wcout << L"File selected for saving. Folder: " << stringConverter.toStdWString( loadMazeDialog->getDirectoryName() ) << L"\tFile: " << loadMazeDialog->getFileName() << std::endl;
-							}
-							boost::filesystem::current_path( currentDirectory ); //Resets the actual current directory to currentDirectory, since the file chooser can change the current directory.
-
-							mazeManager.saveToFile( saveMazeDialog->getFileName() );
-							saveMazeDialog = nullptr;
-							return true;
-						}
-						break;
-					}
-					case irr::gui::EGET_DIRECTORY_SELECTED: {
-						if( not isNull( loadMazeDialog ) and event.GUIEvent.Caller->getID() == loadMazeDialog->getID() ) {
-							if( settingsManager.debug ) {
-								std::wcout << L"Folder selected." << std::endl;
-							}
-							return true;
-						} else if( not isNull( saveMazeDialog ) and event.GUIEvent.Caller->getID() == saveMazeDialog->getID() ) {
-							if( settingsManager.debug ) {
-								std::wcout << L"Folder selected." << std::endl;
-							}
-							return true;
-						}
-
-						break;
-					}
-					case irr::gui::EGET_MESSAGEBOX_YES: {
-						if( event.GUIEvent.Caller->getID() == exitConfirmation->getID() ) {
-							device->closeDevice();
-							donePlaying = true;
-							exitConfirmation = nullptr;
-							return true;
-						}
-						break;
-					}
-					case irr::gui::EGET_MESSAGEBOX_NO: {
-						if( event.GUIEvent.Caller->getID() == exitConfirmation->getID() ) {
-							exitConfirmation = nullptr;
-							return true;
-						}
-						break;
-					}
-					case irr::gui::EGET_FILE_CHOOSE_DIALOG_CANCELLED: //Deliberate fall-through
-					case irr::gui::EGET_ELEMENT_CLOSED: {
-						auto caller = event.GUIEvent.Caller;
-						if( caller == exitConfirmation ) {
-							exitConfirmation = nullptr;
-						} else if( caller == loadMazeDialog ) {
-							loadMazeDialog = nullptr;
-						} else if( caller == saveMazeDialog ) {
-							saveMazeDialog = nullptr;
-						} else {
-							std::wcerr << L"An unrecognized element was just closed." << std::endl;
-						}
-						break;
-					}
-					default: {
-						break;
-					}
-				}
-			}
-			default:
+				
 				break;
+			}
+			default: {
+				std::wcerr << L"Error in MainGame::OnEvent(): currentScreen " << ( unsigned int ) currentScreen << L" not handled in switch statement." << std::endl;
+				break;
+			}
 		}
 
 	} catch( std::exception &e ) {
@@ -2794,7 +2774,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 					device->postEventFromUser( temp );
 				}
 
-				if( settingsManager.playMusic and not Mix_PlayingMusic() ) { //If we've finished playing a song.
+				if( settingsManager.getPlayMusic() and not Mix_PlayingMusic() ) { //If we've finished playing a song.
 					loadNextSong();
 				}
 				
@@ -2886,7 +2866,9 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 					won = ( winners.size() >= settingsManager.numPlayers ); //If all the players are on the winners list, we've won.
 
 				} else if( not device->isWindowActive() ) { //if(( not showingLoadingScreen and device->isWindowActive() ) or debug )
-					currentScreen = MENUSCREEN;
+					if( currentScreen != MENUSCREEN and currentScreen != SETTINGSSCREEN ) {
+						currentScreen = MENUSCREEN;
+					}
 					device->yield();
 				}
 
@@ -3701,6 +3683,90 @@ void MainGame::setupBackground() {
 	
 	if( settingsManager.debug ) {
 		std::wcout << L"end of setupBackground()" << std::endl;
+	}
+}
+
+void MainGame::setupMusicStuff() {
+	if( SDL_Init( SDL_INIT_AUDIO ) == -1 ) {
+		std::wcerr << L"Cannot initialize SDL audio." << std::endl;
+		settingsManager.setPlayMusic( false );
+	}
+	
+	{//Set the audio properties we hope to get: sample rate, channels, etc.
+		int audioRate = MIX_DEFAULT_FREQUENCY; //MIX_DEFAULT_FREQUENCY is 22050 Hz, half the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
+		Uint16 audioFormat = MIX_DEFAULT_FORMAT; //AUDIO_S16SYS according to documentation. CDs use signed 16-bit audio. SYS means use the system's native endianness.
+		int audioChannels = MIX_DEFAULT_CHANNELS; //2 according to documentation. Almost everything uses stereo. I wish surround sound were more common.
+		int audioChunkSize = 4096; //Magic number! Change it if you dare, and see what happens. SDL_Mixer has no default, but its documentation says 4096 is good if all we're playing is music. Too small and sound may skip on a slow system, too large and sound effects may lag behind the action.
+
+		if( Mix_OpenAudio( audioRate, audioFormat, audioChannels, audioChunkSize ) not_eq 0 ) {
+			std::wcerr << L"Unable to initialize audio: " << Mix_GetError() << std::endl;
+			settingsManager.setPlayMusic( false );
+		} else if( settingsManager.debug ) {
+			std::wcout << L"Initialized audio" << std::endl;
+		}
+	
+		if( settingsManager.debug ) {
+			Mix_QuerySpec( &audioRate, &audioFormat, &audioChannels );//Don't assume we got everything we asked for above
+			std::wcout << L"Audio sample rate: " << audioRate << L" Hertz. Format: ";
+			// cppcheck-suppress duplicateIf
+			if( audioFormat == AUDIO_U16SYS ) {
+				std::wcout << L"AUDIO_U16SYS (equivalent to ";
+				//cppcheck-suppress duplicateIf
+				if( AUDIO_U16SYS == AUDIO_U16LSB ) {
+					std::wcout << L"AUDIO_U16LSB";
+				} else if( AUDIO_U16SYS == AUDIO_U16MSB ) {
+					std::wcout << L"AUDIO_U16MSB";
+				} else if( AUDIO_U16SYS == AUDIO_U16 ) {
+					std::wcout << L"AUDIO_U16";
+				} else {
+					std::wcout << L"unknown";
+				}
+			std::wcout << L")";
+			//cppcheck-suppress duplicateIf
+			} else if( audioFormat == AUDIO_S16SYS ) {
+				std::wcout << L"AUDIO_S16SYS (equivalent to ";
+				//cppcheck-suppress duplicateIf
+				if( AUDIO_S16SYS == AUDIO_S16LSB ) {
+					std::wcout << L"AUDIO_S16LSB";
+				} else if( AUDIO_S16SYS == AUDIO_S16MSB ) {
+					std::wcout << L"AUDIO_S16MSB";
+				} else if( AUDIO_S16SYS == AUDIO_S16 ) {
+					std::wcout << L"AUDIO_S16";
+				} else {
+					std::wcout << L"unknown";
+				}
+			std::wcout << L")";
+			} else if( audioFormat == AUDIO_U8 ) {
+				std::wcout << L"AUDIO_U8";
+			} else if( audioFormat == AUDIO_S8 ) {
+				std::wcout << L"AUDIO_S8";
+			} else if( audioFormat == AUDIO_U16LSB ) {
+				std::wcout << L"AUDIO_U16LSB";
+			} else if( audioFormat == AUDIO_S16LSB ) {
+				std::wcout << L"AUDIO_S16LSB";
+			} else if( audioFormat == AUDIO_U16MSB ) {
+				std::wcout << L"AUDIO_U16MSB";
+			} else if( audioFormat == AUDIO_S16MSB ) {
+				std::wcout << L"AUDIO_S16MSB";
+			} else if( audioFormat == AUDIO_U16 ) {
+				std::wcout << L"AUDIO_U16";
+			} else if( audioFormat == AUDIO_S16 ) {
+				std::wcout << L"AUDIO_S16";
+			} else {
+				std::wcout << L"unknown";
+			}
+	
+			std::wcout << " channels: " << audioChannels  << L" chunk size: " << audioChunkSize << std::endl;
+		}
+	}
+	
+	music = nullptr;
+	
+	if( settingsManager.getPlayMusic() ) { //No sense in making the music list if we've been unable to initialize the audio.
+		makeMusicList();
+		if( settingsManager.getPlayMusic() ) {  //playMusic may be set to false if makeMusicList() can't find any songs to play
+			loadNextSong();
+		}
 	}
 }
 

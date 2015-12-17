@@ -1,4 +1,5 @@
 #include "colors.h"
+#include "CustomException.h"
 #include "SettingsScreen.h"
 #include "MainGame.h"
 #include <iostream>
@@ -6,6 +7,7 @@
 SettingsScreen::SettingsScreen() {
 	restartNotice = L"Some of these settings will only take effect when the game is closed & reopened.";
 	setPointers( nullptr, nullptr, nullptr, nullptr, nullptr );
+	backgroundColor = LIGHTGRAY;
 }
 
 SettingsScreen::~SettingsScreen() {
@@ -14,42 +16,147 @@ SettingsScreen::~SettingsScreen() {
 
 void SettingsScreen::backToMenu() {
 	mainGame->currentScreen = MainGame::MENUSCREEN;
+	changeFromSettingsScreen();
+}
+
+void SettingsScreen::changeToSettingsScreen() {
+	try {
+		if( device == nullptr or device == NULL ) {
+			CustomException e( L"device is null" );
+			throw e;
+		}
+		
+		driver = device->getVideoDriver();
+		environment = device->getGUIEnvironment();
+		skin = environment->getSkin();
+		
+		if( textFont != nullptr ) {
+			skin->setFont( textFont );
+		}
+		
+		{
+			auto textDimensions = skin->getFont()->getDimension( restartNotice.c_str() );
+			if( textDimensions.Width > settingsManager->windowSize.Width ) {
+				textDimensions.Width = settingsManager->windowSize.Width;
+				textDimensions.Height = textDimensions.Height * 2;
+			}
+			auto textRectangle = irr::core::rect< irr::s32 >( 0, 0, textDimensions.Width, textDimensions.Height );
+			environment->addStaticText( restartNotice.c_str(), textRectangle );
+			
+			decltype( settingsManager->windowSize.Height ) itemY = textDimensions.Height + 1;
+			
+			{
+				auto buttonWidth = settingsManager->windowSize.Width / 4;
+				auto buttonHeight = 30; //Not sure how tall these buttons should be; this is just a guess.
+				
+				auto cancelButtonRectangle = irr::core::rect< irr::s32 >( 0, itemY, 0 + buttonWidth, itemY + buttonHeight );
+				cancelButton = environment->addButton( cancelButtonRectangle, 0, CANCEL_ID, L"Cancel" );
+				
+				auto okButtonRectangle = irr::core::rect< irr::s32 >( cancelButtonRectangle.LowerRightCorner.X , cancelButtonRectangle.UpperLeftCorner.Y, cancelButtonRectangle.LowerRightCorner.X + buttonWidth, cancelButtonRectangle.UpperLeftCorner.Y + buttonHeight );
+				okButton = environment->addButton( okButtonRectangle, 0, OK_ID, L"OK" );
+				
+				auto resetToDefaultsButtonRectangle = irr::core::rect< irr::s32 >( okButtonRectangle.LowerRightCorner.X , okButtonRectangle.UpperLeftCorner.Y, okButtonRectangle.LowerRightCorner.X + buttonWidth, okButtonRectangle.UpperLeftCorner.Y + buttonHeight );
+				resetToDefaultsButton = environment->addButton( resetToDefaultsButtonRectangle, 0, RESET_TO_DEFAULTS_ID, L"Reset to defaults" );
+				
+				auto undoChangesButtonRectangle = irr::core::rect< irr::s32 >( resetToDefaultsButtonRectangle.LowerRightCorner.X , resetToDefaultsButtonRectangle.UpperLeftCorner.Y, resetToDefaultsButtonRectangle.LowerRightCorner.X + buttonWidth, resetToDefaultsButtonRectangle.UpperLeftCorner.Y + buttonHeight );
+				undoChangesButton = environment->addButton( undoChangesButtonRectangle, 0, UNDO_CHANGES_ID, L"Undo changes" );
+				
+				itemY += buttonHeight + 1;
+			}
+			
+			{
+				irr::core::stringw buttonText = L"Play music";
+				auto buttonTextDimensions = environment->getSkin()->getFont()->getDimension( buttonText.c_str() );
+				auto MusicBoxRectangle = irr::core::rect< irr::s32 >( 0, itemY, buttonTextDimensions.Width + 30, itemY + buttonTextDimensions.Height ); //I measured the width of a checkbox as 18 pixels, plus an additional 6 pixels of space between that and the text. Then I upped it to 30 just to leave some room. Feel free to up it some more.
+				playMusicCheckBox = environment->addCheckBox( settingsManager->getPlayMusic(), MusicBoxRectangle, 0, PLAY_MUSIC_CHECKBOX_ID, buttonText.c_str() );
+			}
+		}
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in SettingsScreen::changeToSettingsScreen(): " << e.what() << std::endl;
+	}
+}
+
+void SettingsScreen::changeFromSettingsScreen() {
+	environment->clear();
 }
 
 void SettingsScreen::draw( irr::IrrlichtDevice* device ) {
-	irr::core::dimension2d< irr::u32 > tempDimensions = textFont->getDimension( restartNotice.c_str() );
+	/*irr::core::dimension2d< irr::u32 > tempDimensions = textFont->getDimension( restartNotice.c_str() );
 	irr::core::rect< irr::s32 > tempRectangle( 0, 0, tempDimensions.Width + 0, tempDimensions.Height + 0 );
 	textFont->draw( restartNotice, tempRectangle, WHITE, true, true );
 	cancel.draw( device );
 	ok.draw( device );
 	undoChanges.draw( device );
-	resetToDefaults.draw( device );
+	resetToDefaults.draw( device );*/
+	environment->drawAll();
 }
 
-void SettingsScreen::findHighlights( irr::s32 x, irr::s32 y ) {
-	cancel.highlighted = cancel.contains( x, y );
-	ok.highlighted = ok.contains( x, y );
-	undoChanges.highlighted = undoChanges.contains( x, y );
-	resetToDefaults.highlighted = resetToDefaults.contains( x, y );
-}
-
-void SettingsScreen::handleMouseEvents( const irr::SEvent& event ) {
-	switch( event.MouseInput.Event ) {
-		case irr::EMIE_MOUSE_MOVED: {
-			findHighlights( event.MouseInput.X, event.MouseInput.Y );
-			break;
+bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
+	try {
+		switch( event.EventType ) {
+			case irr::EET_GUI_EVENT: {
+				auto id = event.GUIEvent.Caller->getID();
+				
+				switch( event.GUIEvent.EventType ) {
+					case irr::gui::EGET_BUTTON_CLICKED: {
+						switch( id ) {
+							case CANCEL_ID: {
+								resetChangedSettings();
+								backToMenu();
+								return true;
+							}
+							case OK_ID: {
+								if( settingsChanged ) {
+									saveSettings();
+								}
+								backToMenu();
+								return true;
+							}
+							case RESET_TO_DEFAULTS_ID: {
+								resetToDefaultSettings();
+								return true;
+							}
+							case UNDO_CHANGES_ID: {
+								resetChangedSettings();
+								return true;
+							}
+							default: {
+								CustomException e( L"Unhandled button ID" );
+								throw( e );
+							}
+						}
+						
+						break;
+					}
+					case irr::gui::EGET_CHECKBOX_CHANGED: {
+						switch( id ) {
+							case PLAY_MUSIC_CHECKBOX_ID: {
+								settingsManager->setPlayMusic( playMusicCheckBox->isChecked() );
+							}
+						}
+						
+						break;
+					}
+					default: {
+						CustomException e( L"Unhandled event.GUIEvent.EventType" );
+						throw( e );
+					}
+				}
+				
+				break;
+			}
+			default: {
+				CustomException e( L"Unhandled event.EventType" );
+				throw( e );
+			}
 		}
-		case irr::EMIE_LMOUSE_PRESSED_DOWN: {
-			processSelection();
-			break;
-		}
-		default: {
-			break;
-		}
+	} catch( CustomException e ) {
+		std::wcerr << L"Error in SettingsScreen::OnEvent(): " << e.what() << std::endl;
+		return false;
 	}
 }
 
-void SettingsScreen::processSelection() {
+/*void SettingsScreen::processSelection() {
 	if( cancel.highlighted ) {
 		std::wcout << L"Cancel button pressed" << std::endl;
 		resetChangedSettings();
@@ -67,7 +174,7 @@ void SettingsScreen::processSelection() {
 		std::wcout << L"Reset to defaults button pressed" << std::endl;
 		resetToDefaultSettings();
 	}
-}
+}*/
 
 void SettingsScreen::resetChangedSettings() {
 	settingsChanged = false;
@@ -75,7 +182,9 @@ void SettingsScreen::resetChangedSettings() {
 }
 
 void SettingsScreen::resetToDefaultSettings() {
-	std::wcerr << L"SettingsScreen::resetToDefaultSettings() not implemented yet." << std::endl;
+	std::wcerr << L"SettingsScreen::resetToDefaultSettings() not fully implemented yet." << std::endl;
+	settingsChanged = true;
+	settingsManager->resetToDefaults();
 }
 
 void SettingsScreen::saveSettings() {
@@ -99,7 +208,7 @@ void SettingsScreen::setTextFont( irr::gui::IGUIFont* newTextFont ) {
 }
 
 void SettingsScreen::setupIconsAndStuff() {
-	cancel.setX( 0 );
+	/*cancel.setX( 0 );
 	
 	if( buttonFont != NULL && buttonFont != nullptr ) {
 		cancel.setY( textFont->getDimension( restartNotice.c_str() ).Height + 5 );
@@ -126,5 +235,5 @@ void SettingsScreen::setupIconsAndStuff() {
 	resetToDefaults.setX( undoChanges.getX() + undoChanges.getWidth() + 1 );
 	resetToDefaults.setType( device, MenuOption::RESET_TO_DEFAULTS );
 	resetToDefaults.setFontAndResizeIcon( device, buttonFont );
-	resetToDefaults.loadTexture( device );
+	resetToDefaults.loadTexture( device );*/
 }

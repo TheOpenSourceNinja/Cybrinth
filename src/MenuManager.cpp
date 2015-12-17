@@ -163,6 +163,7 @@ void MenuManager::processSelection( MainGame* mg ) {
 		mg->gui->addMessageBox( L"Freedom", message.c_str() );
 	} else if( options.at( settings ).highlighted ) {
 		mg->currentScreen = MainGame::SETTINGSSCREEN;
+		mg->settingsScreen.changeToSettingsScreen();
 	}
 }
 

@@ -80,6 +80,7 @@ class MainGame : public irr::IEventReceiver {
 		
 		void movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromServer );
 		void movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromServer );
+		void musicSettingChanged(); //Called by settingsManager to notify us the playMusic setting has been changed.
 		
 		void networkHasNewConnection(); //Called by NetworkManager
 		void newMaze();
@@ -105,6 +106,9 @@ class MainGame : public irr::IEventReceiver {
 		//Non-functions----------------------------------
 		std::vector< AI > bot;
 		
+		enum screen_t : uint_fast8_t { MAINSCREEN, LOADINGSCREEN, MENUSCREEN, SETTINGSSCREEN, WAITINGFORPLAYERSSCREEN };
+		screen_t currentScreen;
+		
 		irr::IrrlichtDevice* device;
 		irr::video::IVideoDriver* driver;
 		
@@ -118,9 +122,7 @@ class MainGame : public irr::IEventReceiver {
 		std::vector< Player > player;
 		std::vector< PlayerStart > playerStart;
 		
-		enum screen_t : uint_fast8_t { MAINSCREEN, LOADINGSCREEN, MENUSCREEN, SETTINGSSCREEN, WAITINGFORPLAYERSSCREEN };
-		screen_t currentScreen;
-		
+		SettingsScreen settingsScreen;
 		StringConverter stringConverter;
 		std::vector< Collectable > stuff;
 		
@@ -154,6 +156,7 @@ class MainGame : public irr::IEventReceiver {
 		void processControls();
 		
 		void setupBackground();
+		void setupMusicStuff();
 		void startLoadingScreen();
 		
 		void takeScreenShot();
@@ -242,7 +245,6 @@ class MainGame : public irr::IEventReceiver {
 		ImageModifier resizer;
 		
 		SettingsManager settingsManager;
-		SettingsScreen settingsScreen;
 		SpellChecker spellChecker;
 		
 		SystemSpecificsManager system; // Flawfinder: ignore

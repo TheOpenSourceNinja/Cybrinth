@@ -11,6 +11,7 @@
 #include "CustomException.h"
 #include "SettingsManager.h"
 
+#include "MainGame.h"
 #include "MazeManager.h"
 
 SettingsManager::SettingsManager() {
@@ -44,6 +45,11 @@ std::wstring SettingsManager::boolToWString( bool input ) {
 	} else {
 		return L"false";
 	}
+}
+
+void SettingsManager::setPlayMusic( bool newSetting ) {
+	playMusic = newSetting;
+	mainGame->musicSettingChanged();
 }
 
 void SettingsManager::savePrefs() {
@@ -151,6 +157,10 @@ void SettingsManager::savePrefs() {
 	}
 }
 
+bool SettingsManager::getPlayMusic() {
+	return playMusic;
+}
+
 /**
  * Reads preferences from prefs.cfg. Sets defaults for any preference not found in the file. If the file does not exist, creates it.
  */
@@ -166,27 +176,7 @@ void SettingsManager::readPrefs() {
 		}
 
 		//Set default prefs, in case we can't get them from the file
-		showBackgrounds = true;
-		fullscreen = false;
-		bitsPerPixel = 8;
-		vsync = true;
-		driverType = irr::video::EDT_OPENGL;
-		windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( minWidth, minHeight );
-		allowSmallSize = false;
-		playMusic = true;
-		numBots = 0;
-		numPlayers = 1;
-		markTrails = false;
-		musicVolume = 50;
-		networkPort = 61187;
-		//network->setPort( "61187" );
-		alwaysServer = true;
-		isServer = alwaysServer;
-		botsKnowSolution = false;
-		botAlgorithm = AI::DEPTH_FIRST_SEARCH;
-		botMovementDelay = 300;
-		mazeManager->hideUnseen = false;
-		backgroundAnimations = true;
+		resetToDefaults();
 		
 		auto prefsNotFound = possiblePrefs;
 		
@@ -410,7 +400,7 @@ void SettingsManager::readPrefs() {
 									}
 									
 									case PLAY_MUSIC: { //L"play music"
-										playMusic = wStringToBool( choice );
+										setPlayMusic( wStringToBool( choice ) );
 										break;
 									}
 									
@@ -511,6 +501,36 @@ void SettingsManager::readPrefs() {
 	if( debug ) {
 		std::wcout << L"end of readPrefs()" << std::endl;
 	}
+}
+
+
+/**
+ * @brief Sets default settings.
+ * Moved this code out of readPrefs() and into a separate function so that settingsScreen can use it too.
+ */
+void SettingsManager::resetToDefaults() {
+	showBackgrounds = true;
+	fullscreen = false;
+	bitsPerPixel = 8;
+	vsync = true;
+	driverType = irr::video::EDT_OPENGL;
+	windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( minWidth, minHeight );
+	allowSmallSize = false;
+	playMusic = true;
+	numBots = 0;
+	numPlayers = 1;
+	markTrails = false;
+	musicVolume = 50;
+	networkPort = 61187;
+	alwaysServer = true;
+	isServer = alwaysServer;
+	botsKnowSolution = false;
+	botAlgorithm = AI::DEPTH_FIRST_SEARCH;
+	botMovementDelay = 300;
+	mazeManager->hideUnseen = false;
+	backgroundAnimations = true;
+	
+	mainGame->musicSettingChanged();
 }
 
 void SettingsManager::setPointers( irr::IrrlichtDevice* newDevice, MainGame* newMainGame, MazeManager* newMazeManager, NetworkManager* newNetwork, SpellChecker* newSpellChecker, SystemSpecificsManager* newSystem ) {
