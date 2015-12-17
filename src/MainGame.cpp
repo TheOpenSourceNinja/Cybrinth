@@ -333,7 +333,7 @@ void MainGame::drawAll() {
 					}
 
 					{
-						irr::core::stringw volumeNumber( settingsManager.musicVolume );
+						irr::core::stringw volumeNumber( settingsManager.getMusicVolume() );
 						volumeNumber.append( L"%" );
 						textY += tempDimensions.Height;
 						tempDimensions = textFont->getDimension( stringConverter.toStdWString( volumeNumber ).c_str() ); //stringConverter.toWCharArray( volumeNumber ) );
@@ -1318,7 +1318,7 @@ void MainGame::loadNextSong() {
 					loadMusicFont();
 				}
 
-				Mix_VolumeMusic( settingsManager.musicVolume * MIX_MAX_VOLUME / 100 );
+				musicVolumeChanged();//Mix_VolumeMusic( settingsManager.getMusicVolume() * MIX_MAX_VOLUME / 100 );
 			}
 		}
 		if( settingsManager.debug ) {
@@ -1978,6 +1978,10 @@ void MainGame::musicSettingChanged() {
 	}
 }
 
+void MainGame::musicVolumeChanged() {
+	Mix_VolumeMusic( settingsManager.getMusicVolume() * MIX_MAX_VOLUME / 100 );
+}
+
 /**
  * The network manager calls this as a way of requesting data to send to a new client.
  */
@@ -2553,18 +2557,17 @@ void MainGame::processControls() {
 						break;
 					}
 					case ControlMapping::ACTION_VOLUME_UP: {
-						settingsManager.musicVolume = std::max( ( settingsManager.musicVolume + 5 ), ( decltype( settingsManager.musicVolume ) ) 100 );
-						Mix_VolumeMusic( settingsManager.musicVolume * MIX_MAX_VOLUME / 100 );
+						settingsManager.setMusicVolume( settingsManager.getMusicVolume() + 5 );
 						break;
 					}
 					case ControlMapping::ACTION_VOLUME_DOWN: {
-						if( settingsManager.musicVolume >= 5 ) {
-							settingsManager.musicVolume -= 5;
+						if( settingsManager.getMusicVolume() >= 5 ) {
+							settingsManager.setMusicVolume( settingsManager.getMusicVolume() - 5 );
 						} else {
-							settingsManager.musicVolume = 0;
+							settingsManager.setMusicVolume( 0 );
 						}
 						
-						Mix_VolumeMusic( settingsManager.musicVolume * MIX_MAX_VOLUME / 100 );
+						musicVolumeChanged();//Mix_VolumeMusic( settingsManager.musicVolume * MIX_MAX_VOLUME / 100 );
 						break;
 					}
 					default: { //Handle player controls

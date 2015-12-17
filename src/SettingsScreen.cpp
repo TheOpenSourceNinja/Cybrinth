@@ -69,6 +69,19 @@ void SettingsScreen::changeToSettingsScreen() {
 				auto buttonTextDimensions = environment->getSkin()->getFont()->getDimension( buttonText.c_str() );
 				auto MusicBoxRectangle = irr::core::rect< irr::s32 >( 0, itemY, buttonTextDimensions.Width + 30, itemY + buttonTextDimensions.Height ); //I measured the width of a checkbox as 18 pixels, plus an additional 6 pixels of space between that and the text. Then I upped it to 30 just to leave some room. Feel free to up it some more.
 				playMusicCheckBox = environment->addCheckBox( settingsManager->getPlayMusic(), MusicBoxRectangle, 0, PLAY_MUSIC_CHECKBOX_ID, buttonText.c_str() );
+				
+				irr::core::stringw volumeTextString = L"Volume";
+				auto volumeTextDimensions = skin->getFont()->getDimension( volumeTextString.c_str() );
+				auto volumeTextRectangle = irr::core::rect< irr::s32 >( MusicBoxRectangle.LowerRightCorner.X + 1, itemY, MusicBoxRectangle.LowerRightCorner.X + 1 + volumeTextDimensions.Width, itemY + volumeTextDimensions.Height );
+				volumeText = environment->addStaticText( volumeTextString.c_str(), volumeTextRectangle );
+				volumeText->setEnabled( playMusicCheckBox->isChecked() );
+				
+				auto volumeBarRectangle = irr::core::rect< irr::s32 >( volumeTextRectangle.LowerRightCorner.X + 1, itemY, settingsManager->windowSize.Width, volumeTextRectangle.LowerRightCorner.Y );
+				volumeBar = environment->addScrollBar( true, volumeBarRectangle, 0, VOLUME_BAR_ID );
+				volumeBar->setEnabled( playMusicCheckBox->isChecked() );
+				volumeBar->setMax( 100 );
+				volumeBar->setMin( 0 );
+				volumeBar->setPos( settingsManager->getMusicVolume() );
 			}
 		}
 	} catch( std::exception e ) {
@@ -132,9 +145,29 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 						switch( id ) {
 							case PLAY_MUSIC_CHECKBOX_ID: {
 								settingsManager->setPlayMusic( playMusicCheckBox->isChecked() );
+								volumeText->setEnabled( playMusicCheckBox->isChecked() );
+								volumeBar->setEnabled( playMusicCheckBox->isChecked() );
+								break;
+							}
+							default: {
+								CustomException e( L"Unhandled checkbox ID" );
+								throw( e );
 							}
 						}
 						
+						break;
+					}
+					case irr::gui::EGET_SCROLL_BAR_CHANGED: {
+						switch( id ) {
+							case VOLUME_BAR_ID: {
+								settingsManager->setMusicVolume( volumeBar->getPos() );
+								break;
+							}
+							default: {
+								CustomException e( L"Unhandled scroll bar ID" );
+								throw( e );
+							}
+						}
 						break;
 					}
 					default: {

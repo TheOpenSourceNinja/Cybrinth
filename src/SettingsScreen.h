@@ -38,7 +38,7 @@ class SettingsScreen : public irr::IEventReceiver {
 		
 		irr::gui::IGUIEnvironment* environment;
 		
-		enum gui_id_t : uint_fast8_t { CANCEL_ID, OK_ID, RESET_TO_DEFAULTS_ID, UNDO_CHANGES_ID, PLAY_MUSIC_CHECKBOX_ID, DO_NOT_USE_ID };
+		enum gui_id_t : uint_fast8_t { CANCEL_ID, OK_ID, RESET_TO_DEFAULTS_ID, UNDO_CHANGES_ID, PLAY_MUSIC_CHECKBOX_ID, VOLUME_BAR_ID, DO_NOT_USE_ID };
 		
 		MainGame* mainGame;
 		
@@ -59,6 +59,9 @@ class SettingsScreen : public irr::IEventReceiver {
 		irr::gui::IGUIFont* textFont;
 		
 		irr::gui::IGUIButton* undoChangesButton;
+		
+		irr::gui::IGUIScrollBar* volumeBar;
+		irr::gui::IGUIStaticText* volumeText;
 };
 
 #endif // SETTINGSSCREEN_H

@@ -81,6 +81,7 @@ class MainGame : public irr::IEventReceiver {
 		void movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromServer );
 		void movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromServer );
 		void musicSettingChanged(); //Called by settingsManager to notify us the playMusic setting has been changed.
+		void musicVolumeChanged();
 		
 		void networkHasNewConnection(); //Called by NetworkManager
 		void newMaze();

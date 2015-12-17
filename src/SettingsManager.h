@@ -34,6 +34,7 @@ class SettingsManager
 		
 		bool fullscreen;
 		
+		uint_fast16_t getMusicVolume();
 		bool getPlayMusic();
 		
 		bool isServer;
@@ -41,7 +42,6 @@ class SettingsManager
 		bool markTrails;
 		uint_fast32_t minHeight;
 		uint_fast32_t minWidth;
-		uint_fast16_t musicVolume;
 		
 		uint_fast16_t networkPort;
 		uint_fast8_t numBots;
@@ -49,6 +49,7 @@ class SettingsManager
 		
 		void resetToDefaults();
 		
+		void setMusicVolume( uint_fast16_t newVolume );
 		void setPlayMusic( bool newSetting );
 		bool showBackgrounds;
 		
@@ -65,6 +66,7 @@ class SettingsManager
 		
 		MainGame* mainGame;
 		MazeManager* mazeManager;
+		uint_fast16_t musicVolume;
 		
 		NetworkManager* network;
 		

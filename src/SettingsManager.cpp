@@ -47,6 +47,11 @@ std::wstring SettingsManager::boolToWString( bool input ) {
 	}
 }
 
+void SettingsManager::setMusicVolume( uint_fast16_t newVolume ) {
+	musicVolume = std::min( newVolume, ( decltype( musicVolume ) ) 100 );
+	mainGame->musicVolumeChanged();
+}
+
 void SettingsManager::setPlayMusic( bool newSetting ) {
 	playMusic = newSetting;
 	mainGame->musicSettingChanged();
@@ -155,6 +160,10 @@ void SettingsManager::savePrefs() {
 	if( debug ) {
 		std::wcout << L"end of savePrefs()" << std::endl;
 	}
+}
+
+uint_fast16_t SettingsManager::getMusicVolume() {
+	return musicVolume;
 }
 
 bool SettingsManager::getPlayMusic() {
