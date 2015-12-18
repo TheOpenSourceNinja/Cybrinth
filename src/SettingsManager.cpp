@@ -520,7 +520,7 @@ void SettingsManager::readPrefs() {
 void SettingsManager::resetToDefaults() {
 	showBackgrounds = true;
 	fullscreen = false;
-	bitsPerPixel = 8;
+	bitsPerPixel = 16;
 	vsync = true;
 	driverType = irr::video::EDT_OPENGL;
 	windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( minWidth, minHeight );
