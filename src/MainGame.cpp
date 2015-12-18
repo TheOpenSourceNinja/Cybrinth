@@ -1588,7 +1588,7 @@ MainGame::MainGame() {
 		bool sbuffershadows = false; //Would not be visible anyway since this game is 2D
 		IEventReceiver* receiver = this;
 		
-		device = createDevice( settingsManager.driverType, settingsManager.windowSize, settingsManager.bitsPerPixel, settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver ); //Most of these parameters were read from the preferences file
+		device = createDevice( settingsManager.driverType, settingsManager.windowSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver ); //Most of these parameters were read from the preferences file
 		
 		if( isNull( device ) ) {
 			std::wcerr << L"Error: Cannot create device. Trying other driver types." << std::endl;
@@ -1597,13 +1597,13 @@ MainGame::MainGame() {
 			for( auto i = ( uint_fast8_t ) irr::video::EDT_COUNT; isNull( device ) and i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
 				if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
 					settingsManager.driverType = ( irr::video::E_DRIVER_TYPE ) i;
-					device = createDevice( settingsManager.driverType, settingsManager.windowSize, settingsManager.bitsPerPixel, settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver );
+					device = createDevice( settingsManager.driverType, settingsManager.windowSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver );
 				}
 			}
 			
 			if( isNull( device ) ) {
 				std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
-				device = createDevice( irr::video::EDT_NULL, settingsManager.windowSize, settingsManager.bitsPerPixel, settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver );
+				device = createDevice( irr::video::EDT_NULL, settingsManager.windowSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver );
 				settingsManager.debug = true;
 			}
 		} else if ( settingsManager.debug ) {

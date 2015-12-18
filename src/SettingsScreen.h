@@ -29,25 +29,35 @@ class SettingsScreen : public irr::IEventReceiver {
 	protected:
 	private:
 		void backToMenu();
+		irr::gui::IGUICheckBox* bpp16CheckBox;
+		irr::gui::IGUICheckBox* bpp32CheckBox;
+		irr::gui::IGUIStaticText* bppText;
+		irr::gui::IGUICheckBox* burningsSoftwareCheckBox;
 		irr::gui::IGUIFont* buttonFont;
 		
 		irr::gui::IGUIButton* cancelButton;
 		
 		irr::IrrlichtDevice* device;
+		irr::gui::IGUICheckBox* direct3D8CheckBox;
+		irr::gui::IGUICheckBox* direct3D9CheckBox;
 		irr::video::IVideoDriver* driver;
+		irr::gui::IGUIStaticText* driverTypeText;
 		
 		irr::gui::IGUIEnvironment* environment;
 		
 		irr::gui::IGUICheckBox* fullscreenCheckBox;
 		
 		irr::gui::IGUITab* graphicsTab;
-		enum gui_id_t : uint_fast8_t { CANCEL_ID, OK_ID, RESET_TO_DEFAULTS_ID, UNDO_CHANGES_ID, TAB_CONTROL_ID, PLAY_MUSIC_CHECKBOX_ID, VOLUME_BAR_ID, FULLSCREEN_CHECKBOX_ID, DO_NOT_USE_ID };
+		enum gui_id_t : uint_fast8_t { DIRECT3D8_CHECKBOX_ID, DIRECT3D9_CHECKBOX_ID, OPENGL_CHECKBOX_ID, IRRLICHTSOFTWARE_CHECKBOX_ID, BURNINGSSOFTWARE_CHECKBOX_ID, CANCEL_ID, OK_ID, RESET_TO_DEFAULTS_ID, UNDO_CHANGES_ID, TAB_CONTROL_ID, PLAY_MUSIC_CHECKBOX_ID, VOLUME_BAR_ID, FULLSCREEN_CHECKBOX_ID, BPP16_CHECKBOX_ID, BPP32_CHECKBOX_ID, VSYNC_CHECKBOX_ID, DO_NOT_USE_ID }; //I made these an enum because I'm too lazy to manually assign values to each one, so why not make the compiler do it?
+		
+		irr::gui::IGUICheckBox* irrlichtSoftwareCheckBox;
 		
 		MainGame* mainGame;
 		irr::gui::IGUITab* miscTab;
 		irr::gui::IGUITab* multiplayerTab;
 		
 		irr::gui::IGUIButton* okButton;
+		irr::gui::IGUICheckBox* openGLCheckBox;
 		
 		irr::gui::IGUICheckBox* playMusicCheckBox;
 		
@@ -69,6 +79,7 @@ class SettingsScreen : public irr::IEventReceiver {
 		
 		irr::gui::IGUIScrollBar* volumeBar;
 		irr::gui::IGUIStaticText* volumeText;
+		irr::gui::IGUICheckBox* vsyncCheckBox;
 };
 
 #endif // SETTINGSSCREEN_H

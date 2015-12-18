@@ -47,7 +47,15 @@ std::wstring SettingsManager::boolToWString( bool input ) {
 	}
 }
 
-void SettingsManager::setMusicVolume( uint_fast16_t newVolume ) {
+void SettingsManager::setBitsPerPixel( uint_fast8_t newBPP ) {
+	if( newBPP < 32 ) {
+		bitsPerPixel = 16;
+	} else {
+		bitsPerPixel = 32;
+	}
+}
+
+void SettingsManager::setMusicVolume( uint_fast8_t newVolume ) {
 	musicVolume = std::min( newVolume, ( decltype( musicVolume ) ) 100 );
 	mainGame->musicVolumeChanged();
 }
@@ -162,7 +170,11 @@ void SettingsManager::savePrefs() {
 	}
 }
 
-uint_fast16_t SettingsManager::getMusicVolume() {
+uint_fast8_t SettingsManager::getBitsPerPixel() {
+	return bitsPerPixel;
+}
+
+uint_fast8_t SettingsManager::getMusicVolume() {
 	return musicVolume;
 }
 
@@ -318,17 +330,9 @@ void SettingsManager::readPrefs() {
 									
 									case BPP: { //L"bits per pixel"
 										try {
-											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
+											uint_fast8_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
+											setBitsPerPixel( choiceAsInt );
 											
-											if( choiceAsInt <= 16 ) {
-												bitsPerPixel = choiceAsInt;
-												if( debug ) {
-													std::wcout << L"Bits per pixel is " << choiceAsInt << std::endl;
-												}
-											} else {
-												std::wcerr << L"Warning: Bits per pixel not less than or equal to 16: " << choiceAsInt << std::endl;
-												bitsPerPixel = choiceAsInt;
-											}
 										} catch( boost::bad_lexical_cast &e ) {
 											std::wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
 										}

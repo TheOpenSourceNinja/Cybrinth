@@ -46,7 +46,7 @@ void SettingsScreen::changeToSettingsScreen() {
 			auto buttonsY = textDimensions.Height + 1;
 			decltype( buttonsY ) tabsY;
 			
-			{
+			{ //Buttons above tab bar
 				auto buttonWidth = settingsManager->windowSize.Width / 4;
 				auto buttonHeight = 30; //Not sure how tall these buttons should be; this is just a guess.
 				
@@ -65,7 +65,7 @@ void SettingsScreen::changeToSettingsScreen() {
 				tabsY = buttonsY + buttonHeight + 1;
 			}
 			
-			{
+			{ //Tab bar
 				irr::core::rect< irr::s32 > tabControlRectangle( 0, tabsY, settingsManager->windowSize.Width, settingsManager->windowSize.Height );
 				tabControl = environment->addTabControl( tabControlRectangle, 0, false, true, TAB_CONTROL_ID );
 				
@@ -75,11 +75,11 @@ void SettingsScreen::changeToSettingsScreen() {
 				miscTab = tabControl->addTab( L"Miscellaneous" );
 			}
 			
-			{
+			{ //Sound tab
 				decltype( settingsManager->windowSize.Height ) itemY = 0;
 				
 				irr::core::stringw buttonText = L"Play music";
-				auto buttonTextDimensions = environment->getSkin()->getFont()->getDimension( buttonText.c_str() );
+				auto buttonTextDimensions = skin->getFont()->getDimension( buttonText.c_str() );
 				auto MusicBoxRectangle = irr::core::rect< irr::s32 >( 0, itemY, buttonTextDimensions.Width + 30, itemY + buttonTextDimensions.Height ); //I measured the width of a checkbox as 18 pixels, plus an additional 6 pixels of space between that and the text. Then I upped it to 30 just to leave some room. Feel free to up it some more.
 				playMusicCheckBox = environment->addCheckBox( settingsManager->getPlayMusic(), MusicBoxRectangle, soundTab, PLAY_MUSIC_CHECKBOX_ID, buttonText.c_str() );
 				
@@ -99,13 +99,84 @@ void SettingsScreen::changeToSettingsScreen() {
 				itemY += buttonTextDimensions.Height + 1;
 			}
 			
-			{
+			{ //Graphics tab
 				decltype( settingsManager->windowSize.Height ) itemY = 0;
 				
 				irr::core::stringw checkboxText = L"Fullscreen";
-				auto cbTextDimensions = environment->getSkin()->getFont()->getDimension( checkboxText.c_str() );
+				auto cbTextDimensions = skin->getFont()->getDimension( checkboxText.c_str() );
 				auto fullscreenBoxRectangle = irr::core::rect< irr::s32 >( 0, itemY, cbTextDimensions.Width + 30, itemY + cbTextDimensions.Height );
 				fullscreenCheckBox = environment->addCheckBox( settingsManager->fullscreen, fullscreenBoxRectangle, graphicsTab, FULLSCREEN_CHECKBOX_ID, checkboxText.c_str() );
+				
+				itemY = fullscreenBoxRectangle.LowerRightCorner.Y + 1;
+				
+				irr::core::stringw bppTextString = L"Bits per pixel";
+				auto bppTextDimensions = skin->getFont()->getDimension( bppTextString.c_str() );
+				auto bppTextRectangle = irr::core::rect< irr::s32 >( 0, itemY, bppTextDimensions.Width, itemY + bppTextDimensions.Height );
+				bppText = environment->addStaticText( bppTextString.c_str(), bppTextRectangle, false, true, graphicsTab );
+				bppText->setEnabled( fullscreenCheckBox->isChecked() );
+				
+				irr::core::stringw bpp16Text = L"16";
+				auto bpp16TextDimensions = skin->getFont()->getDimension( bpp16Text.c_str() );
+				auto bpp16TextRectangle = irr::core::rect< irr::s32 >( bppTextRectangle.LowerRightCorner.X, bppTextRectangle.UpperLeftCorner.Y, bppTextRectangle.LowerRightCorner.X + bpp16TextDimensions.Width + 30, bppTextRectangle.UpperLeftCorner.Y + bpp16TextDimensions.Height );
+				bpp16CheckBox = environment->addCheckBox( ( settingsManager->getBitsPerPixel() == 16 ), bpp16TextRectangle, graphicsTab, BPP16_CHECKBOX_ID, bpp16Text.c_str() );
+				bpp16CheckBox->setEnabled( fullscreenCheckBox->isChecked() );
+				
+				irr::core::stringw bpp32Text = L"32";
+				auto bpp32TextDimensions = skin->getFont()->getDimension( bpp32Text.c_str() );
+				auto bpp32TextRectangle = irr::core::rect< irr::s32 >( bpp16TextRectangle.LowerRightCorner.X, bpp16TextRectangle.UpperLeftCorner.Y, bpp16TextRectangle.LowerRightCorner.X + bpp32TextDimensions.Width + 30, bpp16TextRectangle.UpperLeftCorner.Y + bpp32TextDimensions.Height );
+				bpp32CheckBox = environment->addCheckBox( ( !bpp16CheckBox->isChecked() ), bpp32TextRectangle, graphicsTab, BPP32_CHECKBOX_ID, bpp32Text.c_str() );
+				bpp32CheckBox->setEnabled( fullscreenCheckBox->isChecked() );
+				
+				itemY = bpp32TextRectangle.LowerRightCorner.Y + 1;
+				
+				irr::core::stringw vsyncText = L"Vertical sync";
+				auto vsyncTextDimensions = skin->getFont()->getDimension( vsyncText.c_str() );
+				auto vsyncTextRectangle = irr::core::rect< irr::s32 >( 0, itemY, 0 + vsyncTextDimensions.Width + 30, itemY + vsyncTextDimensions.Height );
+				vsyncCheckBox = environment->addCheckBox( settingsManager->vsync, vsyncTextRectangle, graphicsTab, VSYNC_CHECKBOX_ID, vsyncText.c_str() );
+				
+				itemY = vsyncTextRectangle.LowerRightCorner.Y + 1;
+				irr::core::stringw driverTypeTextString = L"Driver type";
+				auto driverTypeTextDimensions = skin->getFont()->getDimension( driverTypeTextString.c_str() );
+				auto driverTypeTextRectangle = irr::core::rect< irr::s32 >( 0, itemY, 0 + driverTypeTextDimensions.Width, itemY + driverTypeTextDimensions.Height );
+				driverTypeText = environment->addStaticText( driverTypeTextString.c_str(), driverTypeTextRectangle, false, true, graphicsTab );
+				
+				irr::core::stringw openGLTextString = L"OpenGL";
+				auto openGLTextDimensions = skin->getFont()->getDimension( openGLTextString.c_str() );
+				auto openGLTextRectangle = irr::core::rect< irr::s32 >( driverTypeTextRectangle.LowerRightCorner.X, driverTypeTextRectangle.UpperLeftCorner.Y, driverTypeTextRectangle.LowerRightCorner.X + openGLTextDimensions.Width + 30, driverTypeTextRectangle.UpperLeftCorner.Y + openGLTextDimensions.Height );
+				openGLCheckBox = environment->addCheckBox( ( settingsManager->driverType == irr::video::EDT_OPENGL ), openGLTextRectangle, graphicsTab, OPENGL_CHECKBOX_ID, openGLTextString.c_str() );
+				openGLCheckBox->setEnabled( device->isDriverSupported( irr::video::EDT_OPENGL ) );
+				
+				irr::core::stringw d3d9TextString = L"Direct3D 9";
+				auto d3d9TextDimensions = skin->getFont()->getDimension( d3d9TextString.c_str() );
+				auto d3d9TextRectangle = irr::core::rect< irr::s32 >( openGLTextRectangle.LowerRightCorner.X, openGLTextRectangle.UpperLeftCorner.Y, openGLTextRectangle.LowerRightCorner.X + d3d9TextDimensions.Width + 30, openGLTextRectangle.UpperLeftCorner.Y + d3d9TextDimensions.Height );
+				direct3D9CheckBox = environment->addCheckBox( ( settingsManager->driverType == irr::video::EDT_DIRECT3D9 ), d3d9TextRectangle, graphicsTab, DIRECT3D9_CHECKBOX_ID, d3d9TextString.c_str() );
+				direct3D9CheckBox->setEnabled( device->isDriverSupported( irr::video::EDT_DIRECT3D9 ) );
+				
+				irr::core::stringw d3d8TextString = L"Direct3D 8";
+				auto d3d8TextDimensions = skin->getFont()->getDimension( d3d8TextString.c_str() );
+				auto d3d8TextRectangle = irr::core::rect< irr::s32 >( d3d9TextRectangle.LowerRightCorner.X, d3d9TextRectangle.UpperLeftCorner.Y, d3d9TextRectangle.LowerRightCorner.X + d3d8TextDimensions.Width + 30, d3d9TextRectangle.UpperLeftCorner.Y + d3d8TextDimensions.Height );
+				direct3D8CheckBox = environment->addCheckBox( ( settingsManager->driverType == irr::video::EDT_DIRECT3D8 ), d3d8TextRectangle, graphicsTab, DIRECT3D8_CHECKBOX_ID, d3d8TextString.c_str() );
+				direct3D8CheckBox->setEnabled( device->isDriverSupported( irr::video::EDT_DIRECT3D8 ) );
+				
+				irr::core::stringw burningsTextString = L"Software 1";
+				auto burningsTextDimensions = skin->getFont()->getDimension( burningsTextString.c_str() );
+				auto burningsTextRectangle = irr::core::rect< irr::s32 >( d3d8TextRectangle.LowerRightCorner.X, d3d8TextRectangle.UpperLeftCorner.Y, d3d8TextRectangle.LowerRightCorner.X + burningsTextDimensions.Width + 30, d3d8TextRectangle.UpperLeftCorner.Y + burningsTextDimensions.Height );
+				burningsSoftwareCheckBox = environment->addCheckBox( ( settingsManager->driverType == irr::video::EDT_BURNINGSVIDEO ), burningsTextRectangle, graphicsTab, BURNINGSSOFTWARE_CHECKBOX_ID, burningsTextString.c_str() );
+				burningsSoftwareCheckBox->setEnabled( device->isDriverSupported( irr::video::EDT_BURNINGSVIDEO ) );
+				
+				irr::core::stringw irrlichtTextString = L"Software 2";
+				auto irrlichtTextDimensions = skin->getFont()->getDimension( irrlichtTextString.c_str() );
+				auto irrlichtTextRectangle = irr::core::rect< irr::s32 >( burningsTextRectangle.LowerRightCorner.X, burningsTextRectangle.UpperLeftCorner.Y, burningsTextRectangle.LowerRightCorner.X + irrlichtTextDimensions.Width + 30, burningsTextRectangle.UpperLeftCorner.Y + irrlichtTextDimensions.Height );
+				irrlichtSoftwareCheckBox = environment->addCheckBox( ( settingsManager->driverType == irr::video::EDT_SOFTWARE ), irrlichtTextRectangle, graphicsTab, IRRLICHTSOFTWARE_CHECKBOX_ID, irrlichtTextString.c_str() );
+				irrlichtSoftwareCheckBox->setEnabled( device->isDriverSupported( irr::video::EDT_SOFTWARE ) );
+			}
+			
+			{ //Multiplayer tab
+				
+			}
+			
+			{ //Miscellaneous tab
+				
 			}
 		}
 	} catch( std::exception e ) {
@@ -175,6 +246,77 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 							}
 							case FULLSCREEN_CHECKBOX_ID: {
 								settingsManager->fullscreen = fullscreenCheckBox->isChecked();
+								bppText->setEnabled( fullscreenCheckBox->isChecked() );
+								bpp16CheckBox->setEnabled( fullscreenCheckBox->isChecked() );
+								bpp32CheckBox->setEnabled( fullscreenCheckBox->isChecked() );
+								break;
+							}
+							case BPP16_CHECKBOX_ID: {
+								bpp32CheckBox->setChecked( !bpp16CheckBox->isChecked() );
+								//break; Deliberate fall-through here
+							}
+							case BPP32_CHECKBOX_ID: {
+								if( bpp32CheckBox->isChecked() ) {
+									settingsManager->setBitsPerPixel( 32 );
+								} else {
+									settingsManager->setBitsPerPixel( 16 );
+								}
+								
+								bpp16CheckBox->setChecked( !bpp32CheckBox->isChecked() );
+								break;
+							}
+							case VSYNC_CHECKBOX_ID: {
+								settingsManager->vsync = vsyncCheckBox->isChecked();
+								break;
+							}
+							case OPENGL_CHECKBOX_ID: {
+								if( openGLCheckBox->isChecked() ) {
+									settingsManager->driverType = irr::video::EDT_OPENGL;
+									direct3D8CheckBox->setChecked( false );
+									direct3D9CheckBox->setChecked( false );
+									burningsSoftwareCheckBox->setChecked( false );
+									irrlichtSoftwareCheckBox->setChecked( false );
+								}
+								break;
+							}
+							case DIRECT3D9_CHECKBOX_ID: {
+								if( direct3D9CheckBox->isChecked() ) {
+									settingsManager->driverType = irr::video::EDT_DIRECT3D9;
+									direct3D8CheckBox->setChecked( false );
+									openGLCheckBox->setChecked( false );
+									burningsSoftwareCheckBox->setChecked( false );
+									irrlichtSoftwareCheckBox->setChecked( false );
+								}
+								break;
+							}
+							case DIRECT3D8_CHECKBOX_ID: {
+								if( direct3D8CheckBox->isChecked() ) {
+									settingsManager->driverType = irr::video::EDT_DIRECT3D8;
+									openGLCheckBox->setChecked( false );
+									direct3D9CheckBox->setChecked( false );
+									burningsSoftwareCheckBox->setChecked( false );
+									irrlichtSoftwareCheckBox->setChecked( false );
+								}
+								break;
+							}
+							case BURNINGSSOFTWARE_CHECKBOX_ID: {
+								if( burningsSoftwareCheckBox->isChecked() ) {
+									settingsManager->driverType = irr::video::EDT_BURNINGSVIDEO;
+									direct3D8CheckBox->setChecked( false );
+									direct3D9CheckBox->setChecked( false );
+									openGLCheckBox->setChecked( false );
+									irrlichtSoftwareCheckBox->setChecked( false );
+								}
+								break;
+							}
+							case IRRLICHTSOFTWARE_CHECKBOX_ID: {
+								if( irrlichtSoftwareCheckBox->isChecked() ) {
+									settingsManager->driverType = irr::video::EDT_SOFTWARE;
+									direct3D8CheckBox->setChecked( false );
+									direct3D9CheckBox->setChecked( false );
+									burningsSoftwareCheckBox->setChecked( false );
+									openGLCheckBox->setChecked( false );
+								}
 								break;
 							}
 							default: {
@@ -207,14 +349,16 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 				break;
 			}
 			default: {
-				CustomException e( L"Unhandled event.EventType" );
-				throw( e );
+				/*CustomException e( L"Unhandled event.EventType" );
+				throw( e );*/
+				return false;
 			}
 		}
 	} catch( CustomException e ) {
 		std::wcerr << L"Error in SettingsScreen::OnEvent(): " << e.what() << std::endl;
 		return false;
 	}
+	return false; //Control should never actually get this far, but gcc thinks it will so I'm putting this return statement here.
 }
 
 /*void SettingsScreen::processSelection() {

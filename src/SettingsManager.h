@@ -24,7 +24,7 @@ class SettingsManager
 		bool alwaysServer;
 		
 		bool backgroundAnimations;
-		uint_fast16_t bitsPerPixel;
+		
 		AI::algorithm_t botAlgorithm;
 		uint_fast16_t botMovementDelay;
 		bool botsKnowSolution;
@@ -34,7 +34,8 @@ class SettingsManager
 		
 		bool fullscreen;
 		
-		uint_fast16_t getMusicVolume();
+		uint_fast8_t getBitsPerPixel();
+		uint_fast8_t getMusicVolume();
 		bool getPlayMusic();
 		
 		bool isServer;
@@ -49,7 +50,8 @@ class SettingsManager
 		
 		void resetToDefaults();
 		
-		void setMusicVolume( uint_fast16_t newVolume );
+		void setBitsPerPixel( uint_fast8_t newBPP );
+		void setMusicVolume( uint_fast8_t newVolume );
 		void setPlayMusic( bool newSetting );
 		bool showBackgrounds;
 		
@@ -58,6 +60,7 @@ class SettingsManager
 		bool vsync;
 	
 	private:
+		uint_fast8_t bitsPerPixel;
 		std::wstring boolToWString( bool input );
 		
 		irr::IrrlichtDevice* device;
@@ -66,7 +69,7 @@ class SettingsManager
 		
 		MainGame* mainGame;
 		MazeManager* mazeManager;
-		uint_fast16_t musicVolume;
+		uint_fast8_t musicVolume;
 		
 		NetworkManager* network;
 		
