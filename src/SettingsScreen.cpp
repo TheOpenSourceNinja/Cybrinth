@@ -43,13 +43,14 @@ void SettingsScreen::changeToSettingsScreen() {
 			auto textRectangle = irr::core::rect< irr::s32 >( 0, 0, textDimensions.Width, textDimensions.Height );
 			environment->addStaticText( restartNotice.c_str(), textRectangle );
 			
-			decltype( settingsManager->windowSize.Height ) itemY = textDimensions.Height + 1;
+			auto buttonsY = textDimensions.Height + 1;
+			decltype( buttonsY ) tabsY;
 			
 			{
 				auto buttonWidth = settingsManager->windowSize.Width / 4;
 				auto buttonHeight = 30; //Not sure how tall these buttons should be; this is just a guess.
 				
-				auto cancelButtonRectangle = irr::core::rect< irr::s32 >( 0, itemY, 0 + buttonWidth, itemY + buttonHeight );
+				auto cancelButtonRectangle = irr::core::rect< irr::s32 >( 0, buttonsY, 0 + buttonWidth, buttonsY + buttonHeight );
 				cancelButton = environment->addButton( cancelButtonRectangle, 0, CANCEL_ID, L"Cancel" );
 				
 				auto okButtonRectangle = irr::core::rect< irr::s32 >( cancelButtonRectangle.LowerRightCorner.X , cancelButtonRectangle.UpperLeftCorner.Y, cancelButtonRectangle.LowerRightCorner.X + buttonWidth, cancelButtonRectangle.UpperLeftCorner.Y + buttonHeight );
@@ -61,27 +62,50 @@ void SettingsScreen::changeToSettingsScreen() {
 				auto undoChangesButtonRectangle = irr::core::rect< irr::s32 >( resetToDefaultsButtonRectangle.LowerRightCorner.X , resetToDefaultsButtonRectangle.UpperLeftCorner.Y, resetToDefaultsButtonRectangle.LowerRightCorner.X + buttonWidth, resetToDefaultsButtonRectangle.UpperLeftCorner.Y + buttonHeight );
 				undoChangesButton = environment->addButton( undoChangesButtonRectangle, 0, UNDO_CHANGES_ID, L"Undo changes" );
 				
-				itemY += buttonHeight + 1;
+				tabsY = buttonsY + buttonHeight + 1;
 			}
 			
 			{
+				irr::core::rect< irr::s32 > tabControlRectangle( 0, tabsY, settingsManager->windowSize.Width, settingsManager->windowSize.Height );
+				tabControl = environment->addTabControl( tabControlRectangle, 0, false, true, TAB_CONTROL_ID );
+				
+				soundTab = tabControl->addTab( L"Sound" );
+				graphicsTab = tabControl->addTab( L"Graphics" );
+				multiplayerTab = tabControl->addTab( L"Multiplayer" );
+				miscTab = tabControl->addTab( L"Miscellaneous" );
+			}
+			
+			{
+				decltype( settingsManager->windowSize.Height ) itemY = 0;
+				
 				irr::core::stringw buttonText = L"Play music";
 				auto buttonTextDimensions = environment->getSkin()->getFont()->getDimension( buttonText.c_str() );
 				auto MusicBoxRectangle = irr::core::rect< irr::s32 >( 0, itemY, buttonTextDimensions.Width + 30, itemY + buttonTextDimensions.Height ); //I measured the width of a checkbox as 18 pixels, plus an additional 6 pixels of space between that and the text. Then I upped it to 30 just to leave some room. Feel free to up it some more.
-				playMusicCheckBox = environment->addCheckBox( settingsManager->getPlayMusic(), MusicBoxRectangle, 0, PLAY_MUSIC_CHECKBOX_ID, buttonText.c_str() );
+				playMusicCheckBox = environment->addCheckBox( settingsManager->getPlayMusic(), MusicBoxRectangle, soundTab, PLAY_MUSIC_CHECKBOX_ID, buttonText.c_str() );
 				
 				irr::core::stringw volumeTextString = L"Volume";
 				auto volumeTextDimensions = skin->getFont()->getDimension( volumeTextString.c_str() );
 				auto volumeTextRectangle = irr::core::rect< irr::s32 >( MusicBoxRectangle.LowerRightCorner.X + 1, itemY, MusicBoxRectangle.LowerRightCorner.X + 1 + volumeTextDimensions.Width, itemY + volumeTextDimensions.Height );
-				volumeText = environment->addStaticText( volumeTextString.c_str(), volumeTextRectangle );
+				volumeText = environment->addStaticText( volumeTextString.c_str(), volumeTextRectangle, false, true, soundTab );
 				volumeText->setEnabled( playMusicCheckBox->isChecked() );
 				
 				auto volumeBarRectangle = irr::core::rect< irr::s32 >( volumeTextRectangle.LowerRightCorner.X + 1, itemY, settingsManager->windowSize.Width, volumeTextRectangle.LowerRightCorner.Y );
-				volumeBar = environment->addScrollBar( true, volumeBarRectangle, 0, VOLUME_BAR_ID );
+				volumeBar = environment->addScrollBar( true, volumeBarRectangle, soundTab, VOLUME_BAR_ID );
 				volumeBar->setEnabled( playMusicCheckBox->isChecked() );
 				volumeBar->setMax( 100 );
 				volumeBar->setMin( 0 );
 				volumeBar->setPos( settingsManager->getMusicVolume() );
+				
+				itemY += buttonTextDimensions.Height + 1;
+			}
+			
+			{
+				decltype( settingsManager->windowSize.Height ) itemY = 0;
+				
+				irr::core::stringw checkboxText = L"Fullscreen";
+				auto cbTextDimensions = environment->getSkin()->getFont()->getDimension( checkboxText.c_str() );
+				auto fullscreenBoxRectangle = irr::core::rect< irr::s32 >( 0, itemY, cbTextDimensions.Width + 30, itemY + cbTextDimensions.Height );
+				fullscreenCheckBox = environment->addCheckBox( settingsManager->fullscreen, fullscreenBoxRectangle, graphicsTab, FULLSCREEN_CHECKBOX_ID, checkboxText.c_str() );
 			}
 		}
 	} catch( std::exception e ) {
@@ -147,6 +171,10 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 								settingsManager->setPlayMusic( playMusicCheckBox->isChecked() );
 								volumeText->setEnabled( playMusicCheckBox->isChecked() );
 								volumeBar->setEnabled( playMusicCheckBox->isChecked() );
+								break;
+							}
+							case FULLSCREEN_CHECKBOX_ID: {
+								settingsManager->fullscreen = fullscreenCheckBox->isChecked();
 								break;
 							}
 							default: {

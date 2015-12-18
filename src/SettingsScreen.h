@@ -38,9 +38,14 @@ class SettingsScreen : public irr::IEventReceiver {
 		
 		irr::gui::IGUIEnvironment* environment;
 		
-		enum gui_id_t : uint_fast8_t { CANCEL_ID, OK_ID, RESET_TO_DEFAULTS_ID, UNDO_CHANGES_ID, PLAY_MUSIC_CHECKBOX_ID, VOLUME_BAR_ID, DO_NOT_USE_ID };
+		irr::gui::IGUICheckBox* fullscreenCheckBox;
+		
+		irr::gui::IGUITab* graphicsTab;
+		enum gui_id_t : uint_fast8_t { CANCEL_ID, OK_ID, RESET_TO_DEFAULTS_ID, UNDO_CHANGES_ID, TAB_CONTROL_ID, PLAY_MUSIC_CHECKBOX_ID, VOLUME_BAR_ID, FULLSCREEN_CHECKBOX_ID, DO_NOT_USE_ID };
 		
 		MainGame* mainGame;
+		irr::gui::IGUITab* miscTab;
+		irr::gui::IGUITab* multiplayerTab;
 		
 		irr::gui::IGUIButton* okButton;
 		
@@ -55,7 +60,9 @@ class SettingsScreen : public irr::IEventReceiver {
 		bool settingsChanged; //If no settings were changed, don't bother saving them.
 		SettingsManager* settingsManager;
 		irr::gui::IGUISkin* skin;
+		irr::gui::IGUITab* soundTab;
 		
+		irr::gui::IGUITabControl* tabControl;
 		irr::gui::IGUIFont* textFont;
 		
 		irr::gui::IGUIButton* undoChangesButton;
