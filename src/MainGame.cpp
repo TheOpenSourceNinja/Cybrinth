@@ -186,7 +186,7 @@ void MainGame::drawAll() {
 				
 				mazeManager.draw( device, cellWidth, cellHeight );
 				
-				uint_fast32_t spaceBetween = settingsManager.windowSize.Height / 30;
+				uint_fast32_t spaceBetween = screenSize.Height / 30;
 				uint_fast32_t textY = spaceBetween;
 				irr::core::dimension2d< irr::u32 > tempDimensions;
 				
@@ -258,8 +258,8 @@ void MainGame::drawAll() {
 					textY += tempDimensions.Height;
 					tempDimensions = textFont->getDimension( stringConverter.toStdWString( headfor ).c_str() ); //stringConverter.toWCharArray( headfor ) );
 					
-					/*if( textY < ( ( settingsManager.windowSize.Height / 2 ) - tempDimensions.Height ) ) {
-						textY = ( ( settingsManager.windowSize.Height / 2 ) - tempDimensions.Height );
+					/*if( textY < ( ( screenSize.Height / 2 ) - tempDimensions.Height ) ) {
+						textY = ( ( screenSize.Height / 2 ) - tempDimensions.Height );
 					}*/
 					if( numKeysFound >= numLocks ) {
 						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
@@ -361,15 +361,15 @@ void MainGame::drawBackground() {
 			case ORIGINAL_STARFIELD:
 			case ROTATING_STARFIELD: {
 				backgroundSceneManager->drawAll();
-				irr::core::rect< irr::s32 > pos( viewportSize.Width, 0, settingsManager.windowSize.Width, settingsManager.windowSize.Height );
-				irr::core::rect< irr::s32 > clipRect = irr::core::rect< irr::s32 >( 0, 0, settingsManager.windowSize.Width, settingsManager.windowSize.Height );
+				irr::core::rect< irr::s32 > pos( viewportSize.Width, 0, screenSize.Width, screenSize.Height );
+				irr::core::rect< irr::s32 > clipRect = irr::core::rect< irr::s32 >( 0, 0, screenSize.Width, screenSize.Height );
 				driver->draw2DRectangle( BLACK, pos, &clipRect );
 				break;
 			}
 			case IMAGES: {
 				if( backgroundTexture not_eq 0 ) {
-					if( backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
-						backgroundTexture = resizer.resize( backgroundTexture, settingsManager.windowSize.Width, settingsManager.windowSize.Height, driver );
+					if( backgroundTexture->getSize() not_eq screenSize ) {
+						backgroundTexture = resizer.resize( backgroundTexture, screenSize.Width, screenSize.Height, driver );
 					}
 					driver->draw2DImage( backgroundTexture, irr::core::position2d< irr::s32 >( 0, 0 ) );
 				}
@@ -381,8 +381,8 @@ void MainGame::drawBackground() {
 				backgroundSceneManager->drawAll();
 				driver->setRenderTarget( 0, false, false, backgroundColor ); //From Irrlicht's documentation: "If set to 0, it sets the previous render target which was set before the last setRenderTarget() call."
 				driver->draw2DImage( backgroundTexture, irr::core::position2d< irr::s32 >( 0, 0 ) );
-				irr::core::rect< irr::s32 > pos( viewportSize.Width, 0, settingsManager.windowSize.Width, settingsManager.windowSize.Height );
-				irr::core::rect< irr::s32 > clipRect = irr::core::rect< irr::s32 >( 0, 0, settingsManager.windowSize.Width, settingsManager.windowSize.Height );
+				irr::core::rect< irr::s32 > pos( viewportSize.Width, 0, screenSize.Width, screenSize.Height );
+				irr::core::rect< irr::s32 > clipRect = irr::core::rect< irr::s32 >( 0, 0, screenSize.Width, screenSize.Height );
 				driver->draw2DRectangle( BLACK, pos, &clipRect );
 				break;
 			}
@@ -413,8 +413,8 @@ void MainGame::drawLoadingScreen() {
 			int_fast32_t Y = 0;
 			{
 				auto loadingDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
-				int_fast32_t textX = ( settingsManager.windowSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
-				irr::core::rect< irr::s32 > tempRectangle( textX, Y, ( settingsManager.windowSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + Y );
+				int_fast32_t textX = ( screenSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
+				irr::core::rect< irr::s32 > tempRectangle( textX, Y, ( screenSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + Y );
 				loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
 				Y += loadingDimensions.Height + 1;
 			}
@@ -422,12 +422,12 @@ void MainGame::drawLoadingScreen() {
 			{
 				std::wstring percentString = stringConverter.toStdWString( loadingProgress, L"%05.1f%%", 7 ); //7 is the length that L"%05.1f%%" expands to plus one extra to terminate the resulting string with a null
 				auto percentDimensions = loadingFont->getDimension( percentString.c_str() );
-				irr::core::recti progressBarOutline( 0, Y, settingsManager.windowSize.Width, Y + percentDimensions.Height );
+				irr::core::recti progressBarOutline( 0, Y, screenSize.Width, Y + percentDimensions.Height );
 				driver->draw2DRectangleOutline( progressBarOutline, GRAY );
-				irr::core::recti progressBarFilled( 0, Y, settingsManager.windowSize.Width * loadingProgress / 100, Y + percentDimensions.Height );
+				irr::core::recti progressBarFilled( 0, Y, screenSize.Width * loadingProgress / 100, Y + percentDimensions.Height );
 				driver->draw2DRectangle( LIGHTGRAY, progressBarFilled );
-				int_fast32_t textX = ( settingsManager.windowSize.Width / 2 ) - ( percentDimensions.Width / 2 );
-				irr::core::recti percentRectangle( textX, Y, ( settingsManager.windowSize.Width / 2 ) + ( percentDimensions.Width / 2 ), percentDimensions.Height + Y );
+				int_fast32_t textX = ( screenSize.Width / 2 ) - ( percentDimensions.Width / 2 );
+				irr::core::recti percentRectangle( textX, Y, ( screenSize.Width / 2 ) + ( percentDimensions.Width / 2 ), percentDimensions.Height + Y );
 				loadingFont->draw( stringConverter.toIrrlichtStringW( percentString ), percentRectangle, YELLOW, true, true, &percentRectangle );
 				Y += percentDimensions.Height + 1;
 			}
@@ -471,8 +471,8 @@ void MainGame::drawLoadingScreen() {
  */
  void MainGame::drawLogo() {
 	try {
-		if( not isNull( logoTexture ) and logoTexture->getSize() not_eq settingsManager.windowSize ) {
-			logoTexture = resizer.resize( logoTexture, settingsManager.windowSize.Width, settingsManager.windowSize.Height, driver );
+		if( not isNull( logoTexture ) and logoTexture->getSize() not_eq screenSize ) {
+			logoTexture = resizer.resize( logoTexture, screenSize.Width, screenSize.Height, driver );
 		}
 		
 		if( not isNull( logoTexture ) ) {
@@ -583,11 +583,11 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 				dummy.append( irr::core::stringw( winnersLoadingScreen.size() ) );
 				dummy.append( L" " );
 				auto tempDimensions = statsFont->getDimension( stringConverter.toStdWString( dummy ).c_str() );
-				if( textX >= settingsManager.windowSize.Width - tempDimensions.Width ) {
+				if( textX >= screenSize.Width - tempDimensions.Width ) {
 					textX = 0;
 					textXOld = 0;
 					decltype( textY ) separatorY = textYScoresTotal + tempDimensions.Height + 1;
-					driver->draw2DLine( irr::core::position2d< irr::s32  >( 0, separatorY ), irr::core::position2d< irr::s32 >( settingsManager.windowSize.Width, separatorY ) );
+					driver->draw2DLine( irr::core::position2d< irr::s32  >( 0, separatorY ), irr::core::position2d< irr::s32 >( screenSize.Width, separatorY ) );
 					textY = separatorY + 1;
 					textYSteps += ( textY - textYOriginal );
 					textYTimes += ( textY - textYOriginal );
@@ -864,6 +864,13 @@ std::minstd_rand::result_type MainGame::getRandomSeed() {
 }
 
 /**
+ * Lets objects see what the screen size is.
+ **/
+irr::core::dimension2d< irr::u32 > MainGame::getScreenSize() {
+	return screenSize;
+}
+
+/**
  * Lets other objects get a pointer to the player start objects.
  * Arguments:
  * --- uint_fast8_t ps: The desired player start
@@ -941,7 +948,7 @@ void MainGame::loadFonts() {
 
 		{ //Load loadingFont
 			irr::core::dimension2d< uint_fast32_t > fontDimensions;
-			uint_fast32_t size = settingsManager.windowSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
+			uint_fast32_t size = screenSize.Width / 30; //30 found through experimentation: much larger and it takes too long to load fonts, much smaller and the font doesn't get as big as it should. Feel free to change at will if your computer's faster than mine.
 
 			if( fontFile not_eq "" ) {
 				do { //TODO: Repeatedly loading fonts like this seems like a waste of time. Is there a way we could load the font only once and still get this kind of size adjustment?
@@ -950,7 +957,7 @@ void MainGame::loadFonts() {
 						fontDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
 						size -= 2;
 					}
-				} while( not isNull( loadingFont ) and ( fontDimensions.Width > ( settingsManager.windowSize.Width / sideDisplaySizeDenominator ) or fontDimensions.Height > ( settingsManager.windowSize.Height / 5 ) ) );
+				} while( not isNull( loadingFont ) and ( fontDimensions.Width > ( screenSize.Width / sideDisplaySizeDenominator ) or fontDimensions.Height > ( screenSize.Height / 5 ) ) );
 
 				size += 3;
 
@@ -960,7 +967,7 @@ void MainGame::loadFonts() {
 						fontDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
 						size -= 1;
 					}
-				} while( not isNull( loadingFont ) and ( fontDimensions.Width > ( settingsManager.windowSize.Width / sideDisplaySizeDenominator ) or fontDimensions.Height > ( settingsManager.windowSize.Height / 5 ) ) );
+				} while( not isNull( loadingFont ) and ( fontDimensions.Width > ( screenSize.Width / sideDisplaySizeDenominator ) or fontDimensions.Height > ( screenSize.Height / 5 ) ) );
 			}
 
 			if( fontFile == "" or isNull( loadingFont ) or size <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
@@ -976,7 +983,7 @@ void MainGame::loadFonts() {
 		{ //load textFont
 			irr::core::dimension2d< uint_fast32_t > fontDimensions;
 			if( fontFile not_eq "" ) {
-				uint_fast32_t size = ( settingsManager.windowSize.Width / sideDisplaySizeDenominator ) / 6; //found through experimentation, adjust it however you like and see how many times the font gets loaded
+				uint_fast32_t size = ( screenSize.Width / sideDisplaySizeDenominator ) / 6; //found through experimentation, adjust it however you like and see how many times the font gets loaded
 
 				do {
 					textFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
@@ -991,7 +998,7 @@ void MainGame::loadFonts() {
 						}
 						size -= 2;
 					}
-				} while( not isNull( textFont ) and ( fontDimensions.Width + viewportSize.Width > settingsManager.windowSize.Width ) );
+				} while( not isNull( textFont ) and ( fontDimensions.Width + viewportSize.Width > screenSize.Width ) );
 
 				size += 3;
 
@@ -1008,7 +1015,7 @@ void MainGame::loadFonts() {
 						}
 						size -= 1;
 					}
-				} while( not isNull( textFont ) and ( fontDimensions.Width + viewportSize.Width > settingsManager.windowSize.Width ) );
+				} while( not isNull( textFont ) and ( fontDimensions.Width + viewportSize.Width > screenSize.Width ) );
 			}
 
 			if( fontFile == "" or isNull( textFont ) or textFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
@@ -1024,7 +1031,7 @@ void MainGame::loadFonts() {
 		{ //Load clockFont
 			irr::core::dimension2d< uint_fast32_t > fontDimensions;
 			if( fontFile not_eq "" ) {
-				uint_fast32_t size = ( settingsManager.windowSize.Width / sideDisplaySizeDenominator );
+				uint_fast32_t size = ( screenSize.Width / sideDisplaySizeDenominator );
 
 				do {
 					clockFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
@@ -1032,7 +1039,7 @@ void MainGame::loadFonts() {
 						fontDimensions = clockFont->getDimension( L"00:00:00" );
 						size -= 2;
 					}
-				} while( not isNull( clockFont ) and ( fontDimensions.Width + viewportSize.Width > settingsManager.windowSize.Width  or fontDimensions.Height > ( settingsManager.windowSize.Height / 5 ) ) );
+				} while( not isNull( clockFont ) and ( fontDimensions.Width + viewportSize.Width > screenSize.Width  or fontDimensions.Height > ( screenSize.Height / 5 ) ) );
 
 				size += 3;
 
@@ -1042,7 +1049,7 @@ void MainGame::loadFonts() {
 						fontDimensions = clockFont->getDimension( L"00:00:00" );
 						size -= 1;
 					}
-				} while( not isNull( clockFont ) and ( fontDimensions.Width + viewportSize.Width > settingsManager.windowSize.Width  or fontDimensions.Height > ( settingsManager.windowSize.Height / 5 ) ) );
+				} while( not isNull( clockFont ) and ( fontDimensions.Width + viewportSize.Width > screenSize.Width  or fontDimensions.Height > ( screenSize.Height / 5 ) ) );
 			}
 
 			if( fontFile == "" or isNull( clockFont ) or clockFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
@@ -1061,7 +1068,7 @@ void MainGame::loadFonts() {
 			if( fontFile not_eq "" ) {
 				auto aboveStats = loadingFont->getDimension( loading.c_str() ).Height * 2 + std::max( tipFont->getDimension( proTipPrefix.c_str() ).Height, tipFont->getDimension( proTips.at( currentProTip ).c_str() ).Height );
 			
-				uint_fast32_t size = settingsManager.windowSize.Width / settingsManager.numPlayers / 3; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
+				uint_fast32_t size = screenSize.Width / settingsManager.numPlayers / 3; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
 				uint_fast8_t builtInFontHeight = gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height;
 				if( size > builtInFontHeight ) { //If the text needs to be that small, go with the built-in font because it's readable at that size.
 					do {
@@ -1084,7 +1091,7 @@ void MainGame::loadFonts() {
 							tempDimensions = statsFont->getDimension( keysFoundPerPlayer.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
 							fontDimensions = irr::core::dimension2d< uint_fast32_t >( fontDimensions.Width + tempDimensions.Width, std::max( fontDimensions.Height, tempDimensions.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
 						}
-					} while( size > builtInFontHeight and not isNull( statsFont ) and ( fontDimensions.Width >= settingsManager.windowSize.Width  or fontDimensions.Height + aboveStats >= settingsManager.windowSize.Height ) );
+					} while( size > builtInFontHeight and not isNull( statsFont ) and ( fontDimensions.Width >= screenSize.Width  or fontDimensions.Height + aboveStats >= screenSize.Height ) );
 
 					size += 3;
 
@@ -1108,7 +1115,7 @@ void MainGame::loadFonts() {
 							tempDimensions = statsFont->getDimension( keysFoundPerPlayer.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
 							fontDimensions = irr::core::dimension2d< uint_fast32_t >( fontDimensions.Width + tempDimensions.Width, std::max( fontDimensions.Height, tempDimensions.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
 						}
-					} while( size > builtInFontHeight and not isNull( statsFont ) and ( fontDimensions.Width >= settingsManager.windowSize.Width  or fontDimensions.Height + aboveStats >= settingsManager.windowSize.Height ) );
+					} while( size > builtInFontHeight and not isNull( statsFont ) and ( fontDimensions.Width >= screenSize.Width  or fontDimensions.Height + aboveStats >= screenSize.Height ) );
 				}
 			}
 
@@ -1150,7 +1157,7 @@ void MainGame::loadMusicFont() {
 			if( fontFile not_eq "" ) {
 				uint_fast32_t size = 0; //The height (I think) of the font to be loaded
 			
-				uint_fast32_t maxWidth = ( settingsManager.windowSize.Width / sideDisplaySizeDenominator );
+				uint_fast32_t maxWidth = ( screenSize.Width / sideDisplaySizeDenominator );
 				
 				uint_fast32_t numerator = 2.5 * maxWidth; //2.5 is an arbitrarily chosen number, it has no special meaning. Change it to anything you want.
 
@@ -1406,7 +1413,7 @@ void MainGame::loadTipFont() {
 		
 		if( fontFile not_eq "" ) {
 			uint_fast32_t size; //The height (I think) of the font to be loaded
-			uint_fast32_t maxWidth = settingsManager.windowSize.Width;
+			uint_fast32_t maxWidth = screenSize.Width;
 			
 			irr::core::stringw tipIncludingPrefix = proTipPrefix;
 
@@ -1573,13 +1580,15 @@ MainGame::MainGame() {
 		if( settingsManager.fullscreen ) {
 			irr::video::IVideoModeList* vmList = device->getVideoModeList();
 			if( settingsManager.allowSmallSize ) {
-				settingsManager.windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), device->getVideoModeList()->getDesktopResolution() ); //Gets a video resolution between minimum (1,1) and maximum (desktop resolution)
+				screenSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), device->getVideoModeList()->getDesktopResolution() ); //Gets a video resolution between minimum (1,1) and maximum (desktop resolution)
 			} else {
-				settingsManager.windowSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( settingsManager.minWidth, settingsManager.minHeight ), device->getVideoModeList()->getDesktopResolution() );
+				screenSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( settingsManager.minWidth, settingsManager.minHeight ), device->getVideoModeList()->getDesktopResolution() );
 			}
+		} else {
+			screenSize = settingsManager.windowSize;
 		}
 		
-		viewportSize.set( settingsManager.windowSize.Width - ( settingsManager.windowSize.Width / sideDisplaySizeDenominator ), settingsManager.windowSize.Height - 1 );
+		viewportSize.set( screenSize.Width - ( screenSize.Width / sideDisplaySizeDenominator ), screenSize.Height - 1 );
 		
 		device->closeDevice(); //Signals to the existing device that it needs to close itself on next run() so that we can create a new device
 		device->run(); //This is next run()
@@ -1588,7 +1597,7 @@ MainGame::MainGame() {
 		bool sbuffershadows = false; //Would not be visible anyway since this game is 2D
 		IEventReceiver* receiver = this;
 		
-		device = createDevice( settingsManager.driverType, settingsManager.windowSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver ); //Most of these parameters were read from the preferences file
+		device = createDevice( settingsManager.driverType, screenSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver ); //Most of these parameters were read from the preferences file
 		
 		if( isNull( device ) ) {
 			std::wcerr << L"Error: Cannot create device. Trying other driver types." << std::endl;
@@ -1597,13 +1606,13 @@ MainGame::MainGame() {
 			for( auto i = ( uint_fast8_t ) irr::video::EDT_COUNT; isNull( device ) and i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
 				if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
 					settingsManager.driverType = ( irr::video::E_DRIVER_TYPE ) i;
-					device = createDevice( settingsManager.driverType, settingsManager.windowSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver );
+					device = createDevice( settingsManager.driverType, screenSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver );
 				}
 			}
 			
 			if( isNull( device ) ) {
 				std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
-				device = createDevice( irr::video::EDT_NULL, settingsManager.windowSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver );
+				device = createDevice( irr::video::EDT_NULL, screenSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver );
 				settingsManager.debug = true;
 			}
 		} else if ( settingsManager.debug ) {
@@ -1676,7 +1685,7 @@ MainGame::MainGame() {
 		loadFonts();
 		//settingsScreen.setTextFont( textFont );
 		
-		menuManager.setPositions( settingsManager.windowSize.Height );
+		menuManager.setPositions( screenSize.Height );
 		menuManager.loadIcons( device );
 
 		if ( settingsManager.debug ) {
@@ -2188,52 +2197,52 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 					case irr::EET_USER_EVENT: {
 						switch( event.UserEvent.UserData1 ) {
 							case USER_EVENT_WINDOW_RESIZE: {
-								settingsManager.windowSize.set( driver->getScreenSize().Width, driver->getScreenSize().Height );
+								screenSize.set( driver->getScreenSize().Width, driver->getScreenSize().Height );
 
 								//TODO: Find a way to resize the window or set a minimum size
 								/*if (!allowSmallSize) {
 									bool sizeChanged = false;
 
-									if (windowSize.Height < minHeight) {
-										windowSize.Height = minHeight;
+									if (screenSize.Height < minHeight) {
+										screenSize.Height = minHeight;
 										sizeChanged = true;
 									}
 
-									if (windowSize.Width < minWidth) {
-										windowSize.Width = minWidth;
+									if (screenSize.Width < minWidth) {
+										screenSize.Width = minWidth;
 										sizeChanged = true;
 									}
 
 									if (sizeChanged) {
-										driver->OnResize( windowSize );
+										driver->OnResize( screenSize );
 									}
 								}*/
 
-								viewportSize.set( settingsManager.windowSize.Width - ( settingsManager.windowSize.Width / sideDisplaySizeDenominator ), settingsManager.windowSize.Height - 1 );
+								viewportSize.set( screenSize.Width - ( screenSize.Width / sideDisplaySizeDenominator ), screenSize.Height - 1 );
 								cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 								cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 								loadFonts();
 								
-								menuManager.setPositions( settingsManager.windowSize.Height );
+								menuManager.setPositions( screenSize.Height );
 								settingsScreen.setupIconsAndStuff();
 								
 								if( settingsManager.showBackgrounds ) {
 									
 									irr::scene::ICameraSceneNode* camera = backgroundSceneManager->getActiveCamera();
 									if( not isNull( camera ) ) {
-										camera->setAspectRatio( static_cast< decltype( camera->getAspectRatio() ) >( settingsManager.windowSize.Width ) / settingsManager.windowSize.Height );
+										camera->setAspectRatio( static_cast< decltype( camera->getAspectRatio() ) >( screenSize.Width ) / screenSize.Height );
 									}
 									
-									if( backgroundChosen == IMAGES and not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
+									if( backgroundChosen == IMAGES and not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq screenSize ) {
 										if( backgroundFilePath.size() > 0 ) {// not backgroundFilePath.empty() ) { Irrlicht 1.8+ has .empty() but Raspbian only has 1.7 in its repositories
 											backgroundTexture = driver->getTexture( backgroundFilePath );
 										}
-										if( not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
-											backgroundTexture = resizer.resize( backgroundTexture, settingsManager.windowSize.Width, settingsManager.windowSize.Height, driver );
+										if( not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq screenSize ) {
+											backgroundTexture = resizer.resize( backgroundTexture, screenSize.Width, screenSize.Height, driver );
 										}
-									} else if( backgroundChosen == STARTRAILS and backgroundTexture->getSize() not_eq settingsManager.windowSize ) {
+									} else if( backgroundChosen == STARTRAILS and backgroundTexture->getSize() not_eq screenSize ) {
 										driver->removeTexture( backgroundTexture );
-										backgroundTexture = driver->addRenderTargetTexture( settingsManager.windowSize );
+										backgroundTexture = driver->addRenderTargetTexture( screenSize );
 									}
 								}
 								return true;
@@ -2770,7 +2779,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 					//SDL_Delay( 17 );
 				}
 				
-				if( driver->getScreenSize() not_eq settingsManager.windowSize ) { //If the window has been resized. Only here until Irrlicht implements proper window resize events.
+				if( driver->getScreenSize() not_eq screenSize ) { //If the window has been resized. Only here until Irrlicht implements proper window resize events.
 					irr::SEvent temp;
 					temp.EventType = irr::EET_USER_EVENT;
 					temp.UserEvent.UserData1 = USER_EVENT_WINDOW_RESIZE;
@@ -3349,15 +3358,24 @@ void MainGame::setupBackground() {
 			std::wcout << L"setupBackground() called" << std::endl;
 		}
 		
-		backgroundChosen = getRandomNumber() % NUMBER_OF_BACKGROUNDS;
-		
-		if( not settingsManager.backgroundAnimations ) {
-			backgroundChosen = IMAGES; //So far, the only background type that is not animated is #2, the image background.
-		}
-		
 		if( settingsManager.debug ) {
+			//backgroundChosen = IMAGES;
 			backgroundChosen = NUMBER_OF_BACKGROUNDS - 1; //If we're debugging, we may be testing the last background added.
-			std::wcout << L"Background chosen: " << backgroundChosen << std::endl;
+		} else {
+			if( settingsManager.backgroundAnimations ) {
+				backgroundChosen = getRandomNumber() % NUMBER_OF_BACKGROUNDS;
+			} else {
+				switch( getRandomNumber() % 2 ) {
+					case 0: {
+						backgroundChosen = IMAGES;
+						break;
+					}
+					case 1: {
+						backgroundChosen = PLAIN_COLOR;
+						break;
+					}
+				}
+			}
 		}
 		
 		backgroundTexture = nullptr;
@@ -3445,11 +3463,11 @@ void MainGame::setupBackground() {
 				ps->setMaterialTexture( 0, pixelTexture );
 				break;
 			}
-			case STARTRAILS: { //"STARTRAILS" background (deliberately falls through to starfield, do not add a break). This smearing background started out as a bug, but I liked the look so much I decided to replicate it as a feature.
+			case STAR_TRAILS: { //"STARTRAILS" background (deliberately falls through to starfield, do not add a break). This smearing background started out as a bug, but I liked the look so much I decided to replicate it as a feature.
 				if( driver->queryFeature( irr::video::EVDF_RENDER_TO_TARGET  ) ) {
 					fillBackgroundTextureAfterLoading = true;
 					haveFilledBackgroundTextureAfterLoading = false;
-					backgroundTexture = driver->addRenderTargetTexture( settingsManager.windowSize );
+					backgroundTexture = driver->addRenderTargetTexture( screenSize );
 					
 					{ //Fill the texture with the background color;
 						driver->beginScene( false, false, backgroundColor );
@@ -3459,7 +3477,7 @@ void MainGame::setupBackground() {
 					}
 					
 				} else {
-					backgroundChosen = 1;
+					backgroundChosen = ROTATING_STARFIELD;
 				}
 			}
 			case ROTATING_STARFIELD: { //New starfield: rotates the camera around.
@@ -3531,9 +3549,11 @@ void MainGame::setupBackground() {
 				
 				switch( getRandomNumber() % 8 ) { //Not a magic number: count the cases
 					case 0: {
-						darkStarColor = BLACK;
-						lightStarColor = WHITE;
-						break;
+						if( backgroundChosen != STAR_TRAILS ) { //I don't think this color combination looks good with STAR_TRAILS, so I let it fall through to the next case
+							darkStarColor = BLACK;
+							lightStarColor = WHITE;
+							break;
+						}
 					}
 					case 1: {
 						darkStarColor = BLUE;
@@ -3572,9 +3592,9 @@ void MainGame::setupBackground() {
 					}
 				}
 				
-				if( backgroundChosen == 1 ) {
+				if( backgroundChosen == ROTATING_STARFIELD ) {
 					backgroundColor = BLACK;
-				} else { //backgroundChosen == 3;
+				} else { //backgroundChosen == STAR_TRAILS;
 					backgroundColor = darkStarColor;
 				}
 				
@@ -3603,6 +3623,23 @@ void MainGame::setupBackground() {
 				pixelImage->setPixel( 0, 0, WHITE, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
 				irr::video::ITexture* pixelTexture = driver->addTexture( "pixel", pixelImage );
 				ps->setMaterialTexture( 0, pixelTexture );
+				break;
+			}
+			case PLAIN_COLOR: {
+				switch( getRandomNumber() % 3 ) { //Black, blue, and gray are the only CGA colors that don't make your eyes bleed when they fill the screen
+					case 0: {
+						backgroundColor = BLACK;
+						break;
+					}
+					case 1: {
+						backgroundColor = BLUE;
+						break;
+					}
+					case 2: {
+						backgroundColor = GRAY;
+						break;
+					}
+				}
 				break;
 			}
 			case IMAGES: { //Image files

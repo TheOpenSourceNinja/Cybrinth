@@ -36,8 +36,8 @@ void SettingsScreen::changeToSettingsScreen() {
 		
 		{
 			auto textDimensions = skin->getFont()->getDimension( restartNotice.c_str() );
-			if( textDimensions.Width > settingsManager->windowSize.Width ) {
-				textDimensions.Width = settingsManager->windowSize.Width;
+			if( textDimensions.Width > mainGame->getScreenSize().Width ) {
+				textDimensions.Width = mainGame->getScreenSize().Width;
 				textDimensions.Height = textDimensions.Height * 2;
 			}
 			auto textRectangle = irr::core::rect< irr::s32 >( 0, 0, textDimensions.Width, textDimensions.Height );
@@ -47,7 +47,7 @@ void SettingsScreen::changeToSettingsScreen() {
 			decltype( buttonsY ) tabsY;
 			
 			{ //Buttons above tab bar
-				auto buttonWidth = settingsManager->windowSize.Width / 4;
+				auto buttonWidth = mainGame->getScreenSize().Width / 4;
 				auto buttonHeight = 30; //Not sure how tall these buttons should be; this is just a guess.
 				
 				auto cancelButtonRectangle = irr::core::rect< irr::s32 >( 0, buttonsY, 0 + buttonWidth, buttonsY + buttonHeight );
@@ -66,7 +66,7 @@ void SettingsScreen::changeToSettingsScreen() {
 			}
 			
 			{ //Tab bar
-				irr::core::rect< irr::s32 > tabControlRectangle( 0, tabsY, settingsManager->windowSize.Width, settingsManager->windowSize.Height );
+				irr::core::rect< irr::s32 > tabControlRectangle( 0, tabsY, mainGame->getScreenSize().Width, mainGame->getScreenSize().Height );
 				tabControl = environment->addTabControl( tabControlRectangle, 0, false, true, TAB_CONTROL_ID );
 				
 				soundTab = tabControl->addTab( L"Sound" );
@@ -76,7 +76,7 @@ void SettingsScreen::changeToSettingsScreen() {
 			}
 			
 			{ //Sound tab
-				decltype( settingsManager->windowSize.Height ) itemY = 0;
+				decltype( mainGame->getScreenSize().Height ) itemY = 0;
 				
 				irr::core::stringw buttonText = L"Play music";
 				auto buttonTextDimensions = skin->getFont()->getDimension( buttonText.c_str() );
@@ -89,7 +89,7 @@ void SettingsScreen::changeToSettingsScreen() {
 				volumeText = environment->addStaticText( volumeTextString.c_str(), volumeTextRectangle, false, true, soundTab );
 				volumeText->setEnabled( playMusicCheckBox->isChecked() );
 				
-				auto volumeBarRectangle = irr::core::rect< irr::s32 >( volumeTextRectangle.LowerRightCorner.X + 1, itemY, settingsManager->windowSize.Width, volumeTextRectangle.LowerRightCorner.Y );
+				auto volumeBarRectangle = irr::core::rect< irr::s32 >( volumeTextRectangle.LowerRightCorner.X + 1, itemY, mainGame->getScreenSize().Width, volumeTextRectangle.LowerRightCorner.Y );
 				volumeBar = environment->addScrollBar( true, volumeBarRectangle, soundTab, VOLUME_BAR_ID );
 				volumeBar->setEnabled( playMusicCheckBox->isChecked() );
 				volumeBar->setMax( 100 );
@@ -100,7 +100,7 @@ void SettingsScreen::changeToSettingsScreen() {
 			}
 			
 			{ //Graphics tab
-				decltype( settingsManager->windowSize.Height ) itemY = 0;
+				decltype( mainGame->getScreenSize().Height ) itemY = 0;
 				
 				irr::core::stringw checkboxText = L"Fullscreen";
 				auto cbTextDimensions = skin->getFont()->getDimension( checkboxText.c_str() );
@@ -239,12 +239,14 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 					case irr::gui::EGET_CHECKBOX_CHANGED: {
 						switch( id ) {
 							case PLAY_MUSIC_CHECKBOX_ID: {
+								settingsChanged = true;
 								settingsManager->setPlayMusic( playMusicCheckBox->isChecked() );
 								volumeText->setEnabled( playMusicCheckBox->isChecked() );
 								volumeBar->setEnabled( playMusicCheckBox->isChecked() );
 								break;
 							}
 							case FULLSCREEN_CHECKBOX_ID: {
+								settingsChanged = true;
 								settingsManager->fullscreen = fullscreenCheckBox->isChecked();
 								bppText->setEnabled( fullscreenCheckBox->isChecked() );
 								bpp16CheckBox->setEnabled( fullscreenCheckBox->isChecked() );
@@ -256,6 +258,7 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 								//break; Deliberate fall-through here
 							}
 							case BPP32_CHECKBOX_ID: {
+								settingsChanged = true;
 								if( bpp32CheckBox->isChecked() ) {
 									settingsManager->setBitsPerPixel( 32 );
 								} else {
@@ -266,10 +269,12 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 								break;
 							}
 							case VSYNC_CHECKBOX_ID: {
+								settingsChanged = true;
 								settingsManager->vsync = vsyncCheckBox->isChecked();
 								break;
 							}
 							case OPENGL_CHECKBOX_ID: {
+								settingsChanged = true;
 								if( openGLCheckBox->isChecked() ) {
 									settingsManager->driverType = irr::video::EDT_OPENGL;
 									direct3D8CheckBox->setChecked( false );
@@ -280,6 +285,7 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 								break;
 							}
 							case DIRECT3D9_CHECKBOX_ID: {
+								settingsChanged = true;
 								if( direct3D9CheckBox->isChecked() ) {
 									settingsManager->driverType = irr::video::EDT_DIRECT3D9;
 									direct3D8CheckBox->setChecked( false );
@@ -290,6 +296,7 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 								break;
 							}
 							case DIRECT3D8_CHECKBOX_ID: {
+								settingsChanged = true;
 								if( direct3D8CheckBox->isChecked() ) {
 									settingsManager->driverType = irr::video::EDT_DIRECT3D8;
 									openGLCheckBox->setChecked( false );
@@ -300,6 +307,7 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 								break;
 							}
 							case BURNINGSSOFTWARE_CHECKBOX_ID: {
+								settingsChanged = true;
 								if( burningsSoftwareCheckBox->isChecked() ) {
 									settingsManager->driverType = irr::video::EDT_BURNINGSVIDEO;
 									direct3D8CheckBox->setChecked( false );
@@ -310,6 +318,7 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 								break;
 							}
 							case IRRLICHTSOFTWARE_CHECKBOX_ID: {
+								settingsChanged = true;
 								if( irrlichtSoftwareCheckBox->isChecked() ) {
 									settingsManager->driverType = irr::video::EDT_SOFTWARE;
 									direct3D8CheckBox->setChecked( false );
@@ -330,6 +339,7 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 					case irr::gui::EGET_SCROLL_BAR_CHANGED: {
 						switch( id ) {
 							case VOLUME_BAR_ID: {
+								settingsChanged = true;
 								settingsManager->setMusicVolume( volumeBar->getPos() );
 								break;
 							}

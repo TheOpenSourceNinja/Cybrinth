@@ -76,6 +76,7 @@ class MainGame : public irr::IEventReceiver {
 		Player* getPlayer( uint_fast8_t p );
 		std::minstd_rand::result_type getRandomNumber(); //C++'s rand() function can very between platforms or compilers; for consistency, therefore, we use a specific one of C++11's random number generators.
 		std::minstd_rand::result_type getRandomSeed();
+		irr::core::dimension2d< irr::u32 > getScreenSize();
 		PlayerStart* getStart( uint_fast8_t ps );
 		
 		void movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromServer );
@@ -275,6 +276,8 @@ class MainGame : public irr::IEventReceiver {
 		
 		irr::gui::IGUIWindow* exitConfirmation;
 		
+		irr::core::dimension2d< irr::u32 > screenSize;
+		
 		//irr::gui::IGUIFileOpenDialog* fileChooser;
 		
 		FileSelectorDialog* loadMazeDialog;
@@ -297,7 +300,7 @@ class MainGame : public irr::IEventReceiver {
 		size_t currentProTip;
 		std::minstd_rand randomNumberGenerator;
 		std::minstd_rand::result_type randomSeed;
-		enum background_t : uint_fast8_t { ORIGINAL_STARFIELD, ROTATING_STARFIELD, IMAGES, STARTRAILS, NUMBER_OF_BACKGROUNDS };
+		enum background_t : uint_fast8_t { ORIGINAL_STARFIELD, ROTATING_STARFIELD, IMAGES, STAR_TRAILS, PLAIN_COLOR, NUMBER_OF_BACKGROUNDS };
 		enum user_event_t : uint_fast8_t { USER_EVENT_WINDOW_RESIZE };
 };
 
