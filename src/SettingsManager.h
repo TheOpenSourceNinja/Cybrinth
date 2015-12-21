@@ -22,58 +22,78 @@ class SettingsManager
 		
 		bool allowSmallSize;
 		bool alwaysServer;
+		bool alwaysServerDefault;
 		
 		bool backgroundAnimations;
+		bool backgroundAnimationsDefault;
 		
 		AI::algorithm_t botAlgorithm;
+		AI::algorithm_t botAlgorithmDefault;
 		uint_fast16_t botMovementDelay;
+		uint_fast16_t botMovementDelayDefault;
 		bool botsKnowSolution;
+		bool botsKnowSolutionDefault;
 		
 		bool debug;
+		bool debugDefault;
 		irr::video::E_DRIVER_TYPE driverType;
+		irr::video::E_DRIVER_TYPE driverTypeDefault;
 		
 		bool fullscreen;
+		bool fullscreenDefault;
 		
 		uint_fast8_t getBitsPerPixel();
+		irr::core::dimension2d< irr::u32 > getMinimumWindowSize();
 		uint_fast8_t getMusicVolume();
 		bool getPlayMusic();
+		irr::core::dimension2d< irr::u32 > getWindowSize();
 		
 		bool isServer;
+		bool isServerDefault;
 		
 		bool markTrails;
-		uint_fast32_t minHeight;
-		uint_fast32_t minWidth;
+		bool markTrailsDefault;
 		
 		uint_fast16_t networkPort;
+		uint_fast16_t networkPortDefault;
 		uint_fast8_t numBots;
+		uint_fast8_t numBotsDefault;
 		uint_fast8_t numPlayers;
+		uint_fast8_t numPlayersDefault;
 		
 		void resetToDefaults();
 		
 		void setBitsPerPixel( uint_fast8_t newBPP );
 		void setMusicVolume( uint_fast8_t newVolume );
 		void setPlayMusic( bool newSetting );
+		void setWindowSize( irr::core::dimension2d< irr::u32 > newSize );
 		bool showBackgrounds;
-		
-		irr::core::dimension2d< irr::u32 > windowSize;
+		bool showBackgroundsDefault;
 		
 		bool vsync;
+		bool vsyncDefault;
 	
 	private:
 		uint_fast8_t bitsPerPixel;
+		uint_fast8_t bitsPerPixelDefault;
 		std::wstring boolToWString( bool input );
 		
 		irr::IrrlichtDevice* device;
 		std::vector< std::wstring > driverTypes = { L"opengl", L"direct3d9", L"direct3d8", L"burning's video", L"software", L"null" };
 		enum driver_t : uint_fast8_t { OPENGL = 0, DIRECT3D9 = 1, DIRECT3D8 = 2, BURNINGS = 3, SOFTWARE = 4, DRIVERNULL = 5, DRIVERDO_NOT_USE = 255 };
 		
+		bool hideUnseenDefault;
+		
 		MainGame* mainGame;
 		MazeManager* mazeManager;
+		irr::core::dimension2d< irr::u32 > minimumWindowSize; //This should be ignored if allowSmallSize is true.
 		uint_fast8_t musicVolume;
+		uint_fast8_t musicVolumeDefault;
 		
 		NetworkManager* network;
 		
 		bool playMusic;
+		bool playMusicDefault;
 		//possiblePrefs is used by both readPrefs() and savePrefs(). If this gets changed, be sure to update both functions!
 		std::vector< std::wstring > possiblePrefs = { L"bots' solving algorithm", L"volume", L"number of bots", L"show backgrounds",
 									L"fullscreen", L"mark player trails", L"debug", L"bits per pixel", L"wait for vertical sync", L"driver type", L"number of players",
@@ -85,6 +105,8 @@ class SettingsManager
 		SpellChecker* spellChecker;
 		SystemSpecificsManager* system; // Flawfinder: ignore
 		
+		irr::core::dimension2d< irr::u32 > windowSize;
+		irr::core::dimension2d< irr::u32 > windowSizeDefault;
 		bool wStringToBool( std::wstring choice );
 };
 

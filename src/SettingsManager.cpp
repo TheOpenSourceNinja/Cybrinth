@@ -16,6 +16,29 @@
 
 SettingsManager::SettingsManager() {
 	setPointers( nullptr, nullptr, nullptr, nullptr, nullptr, nullptr );
+	minimumWindowSize.Width = 640;
+	minimumWindowSize.Height = 480;
+	showBackgroundsDefault = true;
+	fullscreenDefault = false;
+	bitsPerPixelDefault = 16;
+	vsyncDefault = true;
+	driverTypeDefault = irr::video::EDT_OPENGL;
+	windowSizeDefault = minimumWindowSize;
+	playMusicDefault = true;
+	numBotsDefault = 0;
+	numPlayersDefault = 1;
+	markTrailsDefault = false;
+	musicVolumeDefault = 50;
+	networkPortDefault = 61187;
+	alwaysServerDefault = true;
+	isServerDefault = true;
+	botsKnowSolutionDefault = false;
+	botAlgorithmDefault = AI::DEPTH_FIRST_SEARCH;
+	botMovementDelayDefault = 300;
+	hideUnseenDefault = false;
+	backgroundAnimationsDefault = true;
+	
+	alwaysServer = alwaysServerDefault;
 }
 
 SettingsManager::~SettingsManager() {
@@ -85,76 +108,140 @@ void SettingsManager::savePrefs() {
 					{
 						StringConverter sc;
 						
-						{
-							AI temp;
-							prefsFile << possiblePrefs.at( ALGORITHM ) << L"\t" << temp.stringFromAlgorithm( botAlgorithm ) << std::endl;
-						}
+						//Save header comments------------
+						prefsFile << L"//Single-line comments like this are allowed, and must begin with two slashes (//). Anything before the slashes is considered not part of a comment." << std::endl;
+						prefsFile << L"//Preference and value must be separated by a tab character, not spaces." << std::endl;
+						prefsFile << L"//Any preference not specified here will use its default value. The same goes for things specified in invalid ways (i.e. putting letters where numbers should be)." << std::endl;
+						prefsFile << L"//Preferences are not case-sensitive. \"Play music\" is the same as \"PLAY muSic\"." << std::endl;
+						prefsFile << L"//Preferences and values do not have to be spelled correctly: \"treu\" will be interepreted as \"true\", \"flse\" as \"false\", etc." << std::endl;
+						prefsFile << std::endl;
 						
-						prefsFile << possiblePrefs.at( VOLUME ) << L"\t" << musicVolume << std::endl;
+						//Done with header comments-------------
+						std::wstring commentMark = L"//";
+						std::wstring defaultString = L" " + commentMark + L"Default: ";
+						std::wstring line = L"------------------------";
 						
-						prefsFile << possiblePrefs.at( NUMBOTS ) << L"\t" << numBots << std::endl;
 						
-						prefsFile << possiblePrefs.at( SHOW_BACKGROUNDS ) << L"\t" << boolToWString( showBackgrounds ) << std::endl;
-						
-						prefsFile << possiblePrefs.at( FULLSCREEN ) << L"\t" << boolToWString( fullscreen ) << std::endl;
-						
-						prefsFile << possiblePrefs.at( MARK_TRAILS ) << L"\t" << boolToWString( markTrails ) << std::endl;
-						
-						prefsFile << possiblePrefs.at( DEBUG ) << L"\t" << boolToWString( debug ) << std::endl;
-						
-						prefsFile << possiblePrefs.at( BPP ) << L"\t" << bitsPerPixel << std::endl;
-						
-						prefsFile << possiblePrefs.at( VSYNC ) << L"\t" << boolToWString( vsync ) << std::endl;
-						
-						{
-							prefsFile << possiblePrefs.at( DRIVER_TYPE ) << L"\t";
-							switch( driverType ) {
-								case irr::video::EDT_OPENGL: {
-									prefsFile << driverTypes.at( OPENGL );
-									break;
+						{ //Graphics tab
+							prefsFile << std::endl << commentMark << L"Graphics" << line << std::endl;
+							
+							prefsFile << possiblePrefs.at( FULLSCREEN ) << L"\t" << boolToWString( fullscreen ) << defaultString << boolToWString( fullscreenDefault ) << L". Determines whether we try to use full-screen graphics." << std::endl;
+							
+							prefsFile << possiblePrefs.at( BPP ) << L"\t" << bitsPerPixel << defaultString << bitsPerPixelDefault << L". Determines the color depth when running in fullscreen; will be ignored when not running in fullscreen. Note that on the vast majority of systems, changing this setting will have no visible effect." << std::endl;
+							
+							prefsFile << possiblePrefs.at( VSYNC ) << L"\t" << boolToWString( vsync ) << defaultString << boolToWString( vsyncDefault ) << L". Set this to false if the game seems slow, but expect graphical 'ripping' of moving objects." << std::endl;
+							
+							{ //driver type
+								prefsFile << possiblePrefs.at( DRIVER_TYPE ) << L"\t";
+								switch( driverType ) {
+									case irr::video::EDT_OPENGL: {
+										prefsFile << driverTypes.at( OPENGL );
+										break;
+									}
+									case irr::video::EDT_DIRECT3D9: {
+										prefsFile << driverTypes.at( DIRECT3D9 );
+										break;
+									}
+									case irr::video::EDT_DIRECT3D8: {
+										prefsFile << driverTypes.at( DIRECT3D8 );
+										break;
+									}
+									case irr::video::EDT_BURNINGSVIDEO: {
+										prefsFile << driverTypes.at( BURNINGS );
+										break;
+									}
+									case irr::video::EDT_SOFTWARE: {
+										prefsFile << driverTypes.at( SOFTWARE );
+										break;
+									}
+									case irr::video::EDT_NULL: {
+										prefsFile << driverTypes.at( DRIVERNULL );
+										break;
+									}
 								}
-								case irr::video::EDT_DIRECT3D9: {
-									prefsFile << driverTypes.at( DIRECT3D9 );
-									break;
+								
+								prefsFile << defaultString;
+								
+								switch( driverTypeDefault ) {
+									case irr::video::EDT_OPENGL: {
+										prefsFile << driverTypes.at( OPENGL );
+										break;
+									}
+									case irr::video::EDT_DIRECT3D9: {
+										prefsFile << driverTypes.at( DIRECT3D9 );
+										break;
+									}
+									case irr::video::EDT_DIRECT3D8: {
+										prefsFile << driverTypes.at( DIRECT3D8 );
+										break;
+									}
+									case irr::video::EDT_BURNINGSVIDEO: {
+										prefsFile << driverTypes.at( BURNINGS );
+										break;
+									}
+									case irr::video::EDT_SOFTWARE: {
+										prefsFile << driverTypes.at( SOFTWARE );
+										break;
+									}
+									case irr::video::EDT_NULL: {
+										prefsFile << driverTypes.at( DRIVERNULL );
+										break;
+									}
 								}
-								case irr::video::EDT_DIRECT3D8: {
-									prefsFile << driverTypes.at( DIRECT3D8 );
-									break;
-								}
-								case irr::video::EDT_BURNINGSVIDEO: {
-									prefsFile << driverTypes.at( BURNINGS );
-									break;
-								}
-								case irr::video::EDT_SOFTWARE: {
-									prefsFile << driverTypes.at( SOFTWARE );
-									break;
-								}
-								case irr::video::EDT_NULL: {
-									prefsFile << driverTypes.at( DRIVERNULL );
-									break;
-								}
+								
+								prefsFile << L". Possible values are OpenGL, Direct3D9, Direct3D8, Burning's Video, Software, and NULL (only for debugging, do not use!). If the selected driver type is not available for your system, the game will automatically choose one that is." << std::endl;
 							}
 							
-							prefsFile << std::endl;
+							prefsFile << possiblePrefs.at( WINDOW_SIZE ) << L"\t" << windowSize.Width << L"x" << windowSize.Height << defaultString << windowSizeDefault.Width << L"x" << windowSizeDefault.Height << L". Determines how big the game window will be in pixels. The numbers must be positive integers separated by an x. Only applicable if not running in fullscreen. If running in fullscreen, the screen resolution will be detected automatically. Playability is not guaranteed at sizes below the default." << std::endl;
+							
+							prefsFile << possiblePrefs.at( SHOW_BACKGROUNDS ) << L"\t" << boolToWString( showBackgrounds ) << defaultString << boolToWString( showBackgroundsDefault ) << L". Setting this to false can really speed the game up on slow systems like the Raspberry Pi." << std::endl;
+							
+							prefsFile << possiblePrefs.at( BACKGROUND_ANIMATIONS ) << L"\t" << boolToWString( backgroundAnimations ) << defaultString << boolToWString( backgroundAnimationsDefault ) << L". If set to false, only non-animated backgrounds will be shown." << std::endl;
+							
+							prefsFile << possiblePrefs.at( MARK_TRAILS ) << L"\t" << boolToWString( markTrails ) << defaultString << boolToWString( markTrailsDefault ) << L". Makes solving the maze easier by marking where you've already been." << std::endl;
+							
 						}
 						
-						prefsFile << possiblePrefs.at( NUMPLAYERS ) << L"\t" << numPlayers << std::endl;
+						{ //Sound tab
+							prefsFile << std::endl << commentMark << L"Sound" << line << std::endl;
+							
+							prefsFile << possiblePrefs.at( PLAY_MUSIC ) << L"\t" << boolToWString( playMusic ) << defaultString << boolToWString( playMusicDefault ) << L". If set to true, the game will search for music files in the ./music folder and attempt to play them. Supported music formats may vary from system to system, but generally will include WAVE (.wav), MOD (.mod, .xm, .s3m, .669, .it, or .med), MIDI (.mid), OGG Vorbis (.ogg), MP3 (.mp3), and FLAC (.flac)." << std::endl;
+							
+							prefsFile << possiblePrefs.at( VOLUME ) << L"\t" << musicVolume << defaultString << musicVolumeDefault << L". Sets the music volume. Must be an integer between 0 and 100. The volume can be adjusted as the game is playing." << std::endl;
+							
+						}
 						
-						prefsFile << possiblePrefs.at( WINDOW_SIZE ) << L"\t" << windowSize.Width << L"x" << windowSize.Height << std::endl;
 						
-						prefsFile << possiblePrefs.at( PLAY_MUSIC ) << L"\t" << boolToWString( playMusic ) << std::endl;
+						{ //Multiplayer tab
+							prefsFile << std::endl << commentMark << L"Multiplayer" << line << std::endl;
+							
+							prefsFile << possiblePrefs.at( NUMPLAYERS ) << L"\t" << numPlayers << defaultString << numPlayersDefault<< L". This represents the total number of bots and human players. It must be an integer greater than or equal to the number of AI bots and less than or equal to 255. The game supports up to 4 human players on one keyboard, plus any number using other control devices. Online play to come soon." << std::endl;
+							
+							prefsFile << possiblePrefs.at( NUMBOTS ) << L"\t" << numBots << defaultString << numBotsDefault << L". Sets the number of AI bots you play against. Must be an integer less than or equal to the number of players." << std::endl;
+							
+							prefsFile << possiblePrefs.at( NETWORK_PORT ) << L"\t" << networkPort << defaultString << networkPortDefault << L". This controls which port the server listens for connections on and the clients will attempt to connect to. Ports below 1024 may not work if you're on a Unix-like system and don't have superuser privileges, see https://en.wikipedia.org/w/index.php?title=List_of_TCP_and_UDP_port_numbers&oldid=501310028#Well-known_ports" << std::endl;
+							
+							prefsFile << possiblePrefs.at( ALWAYS_SERVER ) << L"\t" << boolToWString( alwaysServer ) << defaultString << boolToWString( alwaysServerDefault ) << L" for now. Sets whether this copy of the program will always assume itself to be a server or ask." << std::endl;
+							
+							prefsFile << possiblePrefs.at( MOVEMENT_DELAY ) << L"\t" << botMovementDelay << defaultString << botMovementDelayDefault << L". The minimum amount of time in milliseconds that all bots will wait between moves. The actual waiting time depends on your computer's processor speed and clock precision. Must be an integer between 0 and 65,535." << std::endl;
+							
+							{
+								AI temp;
+								prefsFile << possiblePrefs.at( ALGORITHM ) << L"\t" << temp.stringFromAlgorithm( botAlgorithm ) << defaultString << temp.stringFromAlgorithm( botAlgorithmDefault ) << L". Controls which algorithm bots use to solve the maze. Possible values are Depth-First Search (will always find a way to a key/goal, not necessarily the nearest key/goal), Iterative Deepening Depth-First Search (will always find the nearest key/goal, but is really slow. May cause the game to freeze for short periods of time. Not recommended for slow computers!), Left Hand Rule and Right Hand Rule (inefficient), and Dijkstra (experimental!)." << std::endl;
+							}
+							
+							prefsFile << possiblePrefs.at( SOLUTION_KNOWN ) << L"\t" << boolToWString( botsKnowSolution ) << defaultString << boolToWString( botsKnowSolutionDefault ) << L". Whether the bots know the solution or have to find it as they play. Note that they do not necessarily know the *best* solution, just one that works." << std::endl;
+							
+						}
 						
-						prefsFile << possiblePrefs.at( NETWORK_PORT ) << L"\t" << sc.toStdWString( network->getPort() ) << std::endl;
-						
-						prefsFile << possiblePrefs.at( ALWAYS_SERVER ) << L"\t" << boolToWString( alwaysServer ) << std::endl;
-						
-						prefsFile << possiblePrefs.at( SOLUTION_KNOWN ) << L"\t" << boolToWString( botsKnowSolution ) << std::endl;
-						
-						prefsFile << possiblePrefs.at( MOVEMENT_DELAY ) << L"\t" << botMovementDelay << std::endl;
-						
-						prefsFile << possiblePrefs.at( HIDE_UNSEEN ) << L"\t" << boolToWString( mazeManager->hideUnseen ) << std::endl;
-						
-						prefsFile << possiblePrefs.at( BACKGROUND_ANIMATIONS ) << L"\t" << boolToWString( backgroundAnimations ) << std::endl;
+						{ //Miscellaneous tab
+							prefsFile << std::endl << commentMark << L"Miscellaneous" << line << std::endl;
+							
+							prefsFile << possiblePrefs.at( DEBUG ) << L"\t" << boolToWString( debug ) << defaultString << boolToWString( debugDefault ) << L". Makes the program output more text to standard output. Also makes the AIs insanely fast." << std::endl;
+							
+							prefsFile << possiblePrefs.at( HIDE_UNSEEN ) << L"\t" << boolToWString( mazeManager->hideUnseen ) << defaultString << boolToWString( hideUnseenDefault ) << L". Hides parts of the maze that no player has seen yet (seen means unobstructed line-of-sight from any player's position)" << std::endl;
+							
+						}
 					}
 					
 					prefsFile.close();
@@ -174,12 +261,20 @@ uint_fast8_t SettingsManager::getBitsPerPixel() {
 	return bitsPerPixel;
 }
 
+irr::core::dimension2d< irr::u32 > SettingsManager::getMinimumWindowSize() {
+	return minimumWindowSize;
+}
+
 uint_fast8_t SettingsManager::getMusicVolume() {
 	return musicVolume;
 }
 
 bool SettingsManager::getPlayMusic() {
 	return playMusic;
+}
+
+irr::core::dimension2d< irr::u32 > SettingsManager::getWindowSize() {
+	return windowSize;
 }
 
 /**
@@ -391,23 +486,29 @@ void SettingsManager::readPrefs() {
 									}
 									
 									case WINDOW_SIZE: { //L"window size"
-										size_t locationOfX = choice.find( L"x" );
-										std::wstring width = choice.substr( 0, locationOfX );
-										std::wstring height = choice.substr( locationOfX + 1 );
-										if( debug ) {
-											std::wcout << L"Window size: " << width << L"x" << height << std::endl;
-										}
-										
-										decltype( windowSize.Width ) widthAsInt = boost::lexical_cast< decltype( windowSize.Width ) >( width );
-										decltype( windowSize.Height ) heightAsInt = boost::lexical_cast< decltype( windowSize.Height ) >( height );
-										
-										if( widthAsInt < 160 or heightAsInt < 240 ) {
-											std::wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << std::endl;
-										} else if( widthAsInt == 160 and heightAsInt == 240 ) {
-											std::wcout << L"Rock on, CGA graphics. Rock on." << std::endl;
-											windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
-										} else {
-											windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
+										try {
+											size_t locationOfX = choice.find( L"x" );
+											std::wstring width = choice.substr( 0, locationOfX );
+											std::wstring height = choice.substr( locationOfX + 1 );
+											if( debug ) {
+												std::wcout << L"Window size: " << width << L"x" << height << std::endl;
+											}
+											
+											decltype( windowSize.Width ) widthAsInt = boost::lexical_cast< decltype( windowSize.Width ) >( width );
+											decltype( windowSize.Height ) heightAsInt = boost::lexical_cast< decltype( windowSize.Height ) >( height );
+											
+											setWindowSize( irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt ) ); 
+											
+											/*if( widthAsInt < 160 or heightAsInt < 240 ) {
+												std::wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << std::endl;
+											} else if( widthAsInt == 160 and heightAsInt == 240 ) {
+												std::wcout << L"Rock on, CGA graphics. Rock on." << std::endl;
+												windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
+											} else {
+												windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
+											}*/
+										} catch( boost::bad_lexical_cast e ) {
+											std::wcerr << L"Error reading window size. It must be composed of two integers separated by an x, e.g. 640x480." << std::endl;
 										}
 										break;
 									}
@@ -522,28 +623,31 @@ void SettingsManager::readPrefs() {
  * Moved this code out of readPrefs() and into a separate function so that settingsScreen can use it too.
  */
 void SettingsManager::resetToDefaults() {
-	showBackgrounds = true;
-	fullscreen = false;
-	bitsPerPixel = 16;
-	vsync = true;
-	driverType = irr::video::EDT_OPENGL;
-	windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( minWidth, minHeight );
-	allowSmallSize = false;
-	playMusic = true;
-	numBots = 0;
-	numPlayers = 1;
-	markTrails = false;
-	musicVolume = 50;
-	networkPort = 61187;
-	alwaysServer = true;
-	isServer = alwaysServer;
-	botsKnowSolution = false;
-	botAlgorithm = AI::DEPTH_FIRST_SEARCH;
-	botMovementDelay = 300;
-	mazeManager->hideUnseen = false;
-	backgroundAnimations = true;
+	auto oldPlayMusic = playMusic; //This needs to be known at the end of this function
 	
-	mainGame->musicSettingChanged();
+	showBackgrounds = showBackgroundsDefault;
+	fullscreen = fullscreenDefault;
+	bitsPerPixel = bitsPerPixelDefault;
+	vsync = vsyncDefault;
+	driverType = driverTypeDefault;
+	windowSize = windowSizeDefault;
+	playMusic = playMusicDefault;
+	numBots = numBotsDefault;
+	numPlayers = numPlayersDefault;
+	markTrails = markTrailsDefault;
+	musicVolume = musicVolumeDefault;
+	networkPort = networkPortDefault;
+	alwaysServer = alwaysServerDefault;
+	isServer = isServerDefault;
+	botsKnowSolution = botsKnowSolutionDefault;
+	botAlgorithm = botAlgorithmDefault;
+	botMovementDelay = botMovementDelayDefault;
+	mazeManager->hideUnseen = hideUnseenDefault;
+	backgroundAnimations = backgroundAnimationsDefault;
+	
+	if( oldPlayMusic not_eq playMusic ) {
+		mainGame->musicSettingChanged();
+	}
 }
 
 void SettingsManager::setPointers( irr::IrrlichtDevice* newDevice, MainGame* newMainGame, MazeManager* newMazeManager, NetworkManager* newNetwork, SpellChecker* newSpellChecker, SystemSpecificsManager* newSystem ) {
@@ -553,4 +657,15 @@ void SettingsManager::setPointers( irr::IrrlichtDevice* newDevice, MainGame* new
 	network = newNetwork;
 	spellChecker = newSpellChecker;
 	system = newSystem;
+}
+
+void SettingsManager::setWindowSize( irr::core::dimension2d< irr::u32 > newSize ) {
+	if( !allowSmallSize && ( newSize.Width < minimumWindowSize.Width or newSize.Height < minimumWindowSize.Height ) ) {
+		std::wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << std::endl;
+	} else if( newSize.Width == 160 and newSize.Height == 240 ) {
+		std::wcout << L"Rock on, CGA graphics. Rock on." << std::endl;
+		windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( newSize.Width, newSize.Height );
+	} else {
+		windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( newSize.Width, newSize.Height );
+	}
 }

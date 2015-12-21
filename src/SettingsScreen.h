@@ -28,6 +28,7 @@ class SettingsScreen : public irr::IEventReceiver {
 		
 	protected:
 	private:
+		irr::gui::IGUICheckBox* backgroundAnimationsCheckBox;
 		void backToMenu();
 		irr::gui::IGUICheckBox* bpp16CheckBox;
 		irr::gui::IGUICheckBox* bpp32CheckBox;
@@ -48,11 +49,12 @@ class SettingsScreen : public irr::IEventReceiver {
 		irr::gui::IGUICheckBox* fullscreenCheckBox;
 		
 		irr::gui::IGUITab* graphicsTab;
-		enum gui_id_t : uint_fast8_t { DIRECT3D8_CHECKBOX_ID, DIRECT3D9_CHECKBOX_ID, OPENGL_CHECKBOX_ID, IRRLICHTSOFTWARE_CHECKBOX_ID, BURNINGSSOFTWARE_CHECKBOX_ID, CANCEL_ID, OK_ID, RESET_TO_DEFAULTS_ID, UNDO_CHANGES_ID, TAB_CONTROL_ID, PLAY_MUSIC_CHECKBOX_ID, VOLUME_BAR_ID, FULLSCREEN_CHECKBOX_ID, BPP16_CHECKBOX_ID, BPP32_CHECKBOX_ID, VSYNC_CHECKBOX_ID, DO_NOT_USE_ID }; //I made these an enum because I'm too lazy to manually assign values to each one, so why not make the compiler do it?
+		enum gui_id_t : uint_fast8_t { MARK_TRAILS_CHECKBOX_ID, BACKGROUND_ANIMATIONS_CHECKBOX_ID, SHOW_BACKGROUNDS_CHECKBOX_ID, WINDOW_HEIGHT_SPINBOX_ID, WINDOW_WIDTH_SPINBOX_ID, DIRECT3D8_CHECKBOX_ID, DIRECT3D9_CHECKBOX_ID, OPENGL_CHECKBOX_ID, IRRLICHTSOFTWARE_CHECKBOX_ID, BURNINGSSOFTWARE_CHECKBOX_ID, CANCEL_ID, OK_ID, RESET_TO_DEFAULTS_ID, UNDO_CHANGES_ID, TAB_CONTROL_ID, PLAY_MUSIC_CHECKBOX_ID, VOLUME_BAR_ID, FULLSCREEN_CHECKBOX_ID, BPP16_CHECKBOX_ID, BPP32_CHECKBOX_ID, VSYNC_CHECKBOX_ID, DO_NOT_USE_ID }; //I made these an enum because I'm too lazy to manually assign values to each one, so why not make the compiler do it?
 		
 		irr::gui::IGUICheckBox* irrlichtSoftwareCheckBox;
 		
 		MainGame* mainGame;
+		irr::gui::IGUICheckBox* markTrailsCheckBox;
 		irr::gui::IGUITab* miscTab;
 		irr::gui::IGUITab* multiplayerTab;
 		
@@ -69,6 +71,7 @@ class SettingsScreen : public irr::IEventReceiver {
 		void saveSettings();
 		bool settingsChanged; //If no settings were changed, don't bother saving them.
 		SettingsManager* settingsManager;
+		irr::gui::IGUICheckBox* showBackgroundsCheckBox;
 		irr::gui::IGUISkin* skin;
 		irr::gui::IGUITab* soundTab;
 		
@@ -80,6 +83,10 @@ class SettingsScreen : public irr::IEventReceiver {
 		irr::gui::IGUIScrollBar* volumeBar;
 		irr::gui::IGUIStaticText* volumeText;
 		irr::gui::IGUICheckBox* vsyncCheckBox;
+		
+		irr::gui::IGUIStaticText* windowSizeText;
+		irr::gui::IGUISpinBox* windowHeightSpinBox;
+		irr::gui::IGUISpinBox* windowWidthSpinBox;
 };
 
 #endif // SETTINGSSCREEN_H

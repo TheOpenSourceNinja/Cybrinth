@@ -428,4 +428,10 @@
   </Settings>
   <Dependencies Name="Debug"/>
   <Dependencies Name="Release"/>
+  <VirtualDirectory Name="Cybrinth">
+    <File Name="prefs-slowcomputers.cfg"/>
+    <File Name="prefs (copy).cfg"/>
+    <File Name="controls.cfg"/>
+    <File Name="prefs.cfg"/>
+  </VirtualDirectory>
 </CodeLite_Project>

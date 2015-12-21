@@ -375,7 +375,7 @@ void MainGame::drawBackground() {
 				}
 				break;
 			}
-			case STARTRAILS: {
+			case STAR_TRAILS: {
 				driver->setRenderTarget( backgroundTexture, ( fillBackgroundTextureAfterLoading and not haveFilledBackgroundTextureAfterLoading ), true, backgroundColor );
 				haveFilledBackgroundTextureAfterLoading = true;
 				backgroundSceneManager->drawAll();
@@ -1548,8 +1548,6 @@ MainGame::MainGame() {
 		antiAliasFonts = true;
 		currentProTip = 0;
 		sideDisplaySizeDenominator = 6; //What fraction of the screen's width is set aside for displaying text, statistics, etc. during play.
-		settingsManager.minWidth = 640;
-		settingsManager.minHeight = 480;
 		currentDirectory = boost::filesystem::current_path();
 		haveShownLogo = false;
 		donePlaying = false;
@@ -1559,6 +1557,7 @@ MainGame::MainGame() {
 		controlProcessDelay = 100;
 		backgroundColor = BLACK; //Every background should set this in setupBackground(); putting it here just in case.
 		backgroundFilePath = L"";
+		music = nullptr;
 		
 		device = irr::createDevice( irr::video::EDT_NULL ); //Must create a device before calling readPrefs();
 		
@@ -1582,10 +1581,10 @@ MainGame::MainGame() {
 			if( settingsManager.allowSmallSize ) {
 				screenSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), device->getVideoModeList()->getDesktopResolution() ); //Gets a video resolution between minimum (1,1) and maximum (desktop resolution)
 			} else {
-				screenSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( settingsManager.minWidth, settingsManager.minHeight ), device->getVideoModeList()->getDesktopResolution() );
+				screenSize = vmList->getVideoModeResolution( settingsManager.getMinimumWindowSize(), device->getVideoModeList()->getDesktopResolution() );
 			}
 		} else {
-			screenSize = settingsManager.windowSize;
+			screenSize = settingsManager.getWindowSize();
 		}
 		
 		viewportSize.set( screenSize.Width - ( screenSize.Width / sideDisplaySizeDenominator ), screenSize.Height - 1 );
@@ -1973,10 +1972,13 @@ void MainGame::musicSettingChanged() {
 	if( settingsManager.getPlayMusic() ) {
 		setupMusicStuff();
 		loadMusicFont();
-		makeMusicList();
 	} else {
 		Mix_HaltMusic();
-		Mix_FreeMusic( music );
+		
+		if( !isNull( music ) ) {
+			Mix_FreeMusic( music );
+		}
+		
 		Mix_CloseAudio();
 		
 		while( Mix_Init( 0 ) ) {
@@ -2240,7 +2242,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 										if( not isNull( backgroundTexture ) and backgroundTexture->getSize() not_eq screenSize ) {
 											backgroundTexture = resizer.resize( backgroundTexture, screenSize.Width, screenSize.Height, driver );
 										}
-									} else if( backgroundChosen == STARTRAILS and backgroundTexture->getSize() not_eq screenSize ) {
+									} else if( backgroundChosen == STAR_TRAILS and backgroundTexture->getSize() not_eq screenSize ) {
 										driver->removeTexture( backgroundTexture );
 										backgroundTexture = driver->addRenderTargetTexture( screenSize );
 									}
