@@ -1579,9 +1579,9 @@ MainGame::MainGame() {
 		if( settingsManager.fullscreen ) {
 			irr::video::IVideoModeList* vmList = device->getVideoModeList();
 			if( settingsManager.allowSmallSize ) {
-				screenSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), device->getVideoModeList()->getDesktopResolution() ); //Gets a video resolution between minimum (1,1) and maximum (desktop resolution)
+				screenSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), settingsManager.getFullscreenResolution() ); //Gets a video resolution between minimum (1,1) and maximum (fullscreen resolution setting)
 			} else {
-				screenSize = vmList->getVideoModeResolution( settingsManager.getMinimumWindowSize(), device->getVideoModeList()->getDesktopResolution() );
+				screenSize = vmList->getVideoModeResolution( settingsManager.getMinimumWindowSize(), settingsManager.getFullscreenResolution() );
 			}
 		} else {
 			screenSize = settingsManager.getWindowSize();
@@ -1617,6 +1617,8 @@ MainGame::MainGame() {
 		} else if ( settingsManager.debug ) {
 			std::wcout << L"Got the new device" << std::endl;
 		}
+		
+		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system);
 		
 		driver = device->getVideoDriver(); //Not sure if this would be possible with a null device, which is why we don't exit
 		if( isNull( driver ) ) {

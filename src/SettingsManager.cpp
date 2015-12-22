@@ -37,6 +37,7 @@ SettingsManager::SettingsManager() {
 	botMovementDelayDefault = 300;
 	hideUnseenDefault = false;
 	backgroundAnimationsDefault = true;
+	autoDetectFullscreenResolutionDefault = true;
 	
 	alwaysServer = alwaysServerDefault;
 }
@@ -75,6 +76,16 @@ void SettingsManager::setBitsPerPixel( uint_fast8_t newBPP ) {
 		bitsPerPixel = 16;
 	} else {
 		bitsPerPixel = 32;
+	}
+}
+
+void SettingsManager::setFullscreenResolution( irr::core::dimension2d< irr::u32 > newResolution ) {
+	if( allowSmallSize || newResolution.Width >= minimumWindowSize.Width ) {
+		fullscreenResolution.Width = newResolution.Width;
+	}
+	
+	if( allowSmallSize || newResolution.Height >= minimumWindowSize.Height ) {
+		fullscreenResolution.Height = newResolution.Height;
 	}
 }
 
@@ -192,7 +203,7 @@ void SettingsManager::savePrefs() {
 								prefsFile << L". Possible values are OpenGL, Direct3D9, Direct3D8, Burning's Video, Software, and NULL (only for debugging, do not use!). If the selected driver type is not available for your system, the game will automatically choose one that is." << std::endl;
 							}
 							
-							prefsFile << possiblePrefs.at( WINDOW_SIZE ) << L"\t" << windowSize.Width << L"x" << windowSize.Height << defaultString << windowSizeDefault.Width << L"x" << windowSizeDefault.Height << L". Determines how big the game window will be in pixels. The numbers must be positive integers separated by an x. Only applicable if not running in fullscreen. If running in fullscreen, the screen resolution will be detected automatically. Playability is not guaranteed at sizes below the default." << std::endl;
+							prefsFile << possiblePrefs.at( WINDOW_SIZE ) << L"\t" << windowSize.Width << L"x" << windowSize.Height << defaultString << windowSizeDefault.Width << L"x" << windowSizeDefault.Height << L". Determines how big the game window will be in pixels. The numbers must be positive integers separated by an x. Only applicable if not running in fullscreen. Playability is not guaranteed at sizes below the default." << std::endl;
 							
 							prefsFile << possiblePrefs.at( SHOW_BACKGROUNDS ) << L"\t" << boolToWString( showBackgrounds ) << defaultString << boolToWString( showBackgroundsDefault ) << L". Setting this to false can really speed the game up on slow systems like the Raspberry Pi." << std::endl;
 							
@@ -200,12 +211,16 @@ void SettingsManager::savePrefs() {
 							
 							prefsFile << possiblePrefs.at( MARK_TRAILS ) << L"\t" << boolToWString( markTrails ) << defaultString << boolToWString( markTrailsDefault ) << L". Makes solving the maze easier by marking where you've already been." << std::endl;
 							
+							prefsFile << possiblePrefs.at( AUTODETECT_RESOLUTION ) << L"\t" << boolToWString( autoDetectFullscreenResolution ) << defaultString << boolToWString( autoDetectFullscreenResolutionDefault ) << L". Only applicable if running in fullscreen." << std::endl;
+							
+							prefsFile << possiblePrefs.at( FULLSCREEN_RESOLUTION ) << L"\t" << fullscreenResolution.Width << L"x" << fullscreenResolution.Height << defaultString << fullscreenResolutionDefault.Width << L"x" << fullscreenResolutionDefault.Height << L". Determines what screen resolution to use in fullscreen. The numbers must be positive integers separated by an x. Only applicable if running in fullscreen and \"autodetect fullscreen resolution\" is false." << std::endl;
+							
 						}
 						
 						{ //Sound tab
 							prefsFile << std::endl << commentMark << L"Sound" << line << std::endl;
 							
-							prefsFile << possiblePrefs.at( PLAY_MUSIC ) << L"\t" << boolToWString( playMusic ) << defaultString << boolToWString( playMusicDefault ) << L". If set to true, the game will search for music files in the ./music folder and attempt to play them. Supported music formats may vary from system to system, but generally will include WAVE (.wav), MOD (.mod, .xm, .s3m, .669, .it, or .med), MIDI (.mid), OGG Vorbis (.ogg), MP3 (.mp3), and FLAC (.flac)." << std::endl;
+							prefsFile << possiblePrefs.at( PLAY_MUSIC ) << L"\t" << boolToWString( playMusic ) << defaultString << boolToWString( playMusicDefault ) << L". If set to true, the game will search for music files in the ./music folder and attempt to play them. Supported music formats may vary from system to system, but generally will include WAVE (.wav), MOD (.mod), MIDI (.mid), OGG Vorbis (.ogg), MP3 (.mp3), and FLAC (.flac)." << std::endl;
 							
 							prefsFile << possiblePrefs.at( VOLUME ) << L"\t" << musicVolume << defaultString << musicVolumeDefault << L". Sets the music volume. Must be an integer between 0 and 100. The volume can be adjusted as the game is playing." << std::endl;
 							
@@ -259,6 +274,10 @@ void SettingsManager::savePrefs() {
 
 uint_fast8_t SettingsManager::getBitsPerPixel() {
 	return bitsPerPixel;
+}
+
+irr::core::dimension2d< irr::u32 > SettingsManager::getFullscreenResolution() {
+	return fullscreenResolution;
 }
 
 irr::core::dimension2d< irr::u32 > SettingsManager::getMinimumWindowSize() {
@@ -349,6 +368,28 @@ void SettingsManager::readPrefs() {
 								}
 								
 								switch( preferenceNum ) {
+									case AUTODETECT_RESOLUTION: {
+										autoDetectFullscreenResolution = wStringToBool( choice );
+										break;
+									}
+									case FULLSCREEN_RESOLUTION: {
+										try {
+											size_t locationOfX = choice.find( L"x" );
+											std::wstring width = choice.substr( 0, locationOfX );
+											std::wstring height = choice.substr( locationOfX + 1 );
+											if( debug ) {
+												std::wcout << L"Fullscreen resolution: " << width << L"x" << height << std::endl;
+											}
+											
+											decltype( fullscreenResolution.Width ) widthAsInt = boost::lexical_cast< decltype( fullscreenResolution.Width ) >( width );
+											decltype( fullscreenResolution.Height ) heightAsInt = boost::lexical_cast< decltype( fullscreenResolution.Height ) >( height );
+											
+											setFullscreenResolution( irr::core::dimension2d< decltype( fullscreenResolution.Height ) >( widthAsInt, heightAsInt ) );
+										} catch( boost::bad_lexical_cast e ) {
+											std::wcerr << L"Error reading fullscreen resolution. It must be composed of two integers separated by an x, e.g. 640x480." << std::endl;
+										}
+										break;
+									}
 									case ALGORITHM: { //L"bots' solving algorithm"
 										AI temp;
 										temp.setup( mainGame, false, AI::ALGORITHM_DO_NOT_USE, 0 );
@@ -497,16 +538,7 @@ void SettingsManager::readPrefs() {
 											decltype( windowSize.Width ) widthAsInt = boost::lexical_cast< decltype( windowSize.Width ) >( width );
 											decltype( windowSize.Height ) heightAsInt = boost::lexical_cast< decltype( windowSize.Height ) >( height );
 											
-											setWindowSize( irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt ) ); 
-											
-											/*if( widthAsInt < 160 or heightAsInt < 240 ) {
-												std::wcerr << L"Error reading window size: Width and/or height are really really tiny. Sorry but you'll have to recompile the game yourself if you want a window that small." << std::endl;
-											} else if( widthAsInt == 160 and heightAsInt == 240 ) {
-												std::wcout << L"Rock on, CGA graphics. Rock on." << std::endl;
-												windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
-											} else {
-												windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt );
-											}*/
+											setWindowSize( irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt ) );
 										} catch( boost::bad_lexical_cast e ) {
 											std::wcerr << L"Error reading window size. It must be composed of two integers separated by an x, e.g. 640x480." << std::endl;
 										}
@@ -644,6 +676,8 @@ void SettingsManager::resetToDefaults() {
 	botMovementDelay = botMovementDelayDefault;
 	mazeManager->hideUnseen = hideUnseenDefault;
 	backgroundAnimations = backgroundAnimationsDefault;
+	fullscreenResolution = device->getVideoModeList()->getDesktopResolution();
+	autoDetectFullscreenResolution = autoDetectFullscreenResolutionDefault;
 	
 	if( oldPlayMusic not_eq playMusic ) {
 		mainGame->musicSettingChanged();
