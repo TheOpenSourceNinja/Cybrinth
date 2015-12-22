@@ -38,6 +38,8 @@ SettingsManager::SettingsManager() {
 	hideUnseenDefault = false;
 	backgroundAnimationsDefault = true;
 	autoDetectFullscreenResolutionDefault = true;
+	fullscreenResolutionDefault.Width = 640;
+	fullscreenResolutionDefault.Height = 480;
 	
 	alwaysServer = alwaysServerDefault;
 }
