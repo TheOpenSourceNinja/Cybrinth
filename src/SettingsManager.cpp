@@ -40,7 +40,7 @@ SettingsManager::SettingsManager() {
 	autoDetectFullscreenResolutionDefault = true;
 	fullscreenResolutionDefault.Width = 640;
 	fullscreenResolutionDefault.Height = 480;
-	
+	allowSmallSize = false;
 	alwaysServer = alwaysServerDefault;
 }
 
