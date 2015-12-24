@@ -80,7 +80,7 @@ class Player : public Object {
 		uint_fast8_t playerNumber; //Each player knows what number it is. That knowledge is only needed for setColorBasedOnNum() and loadTexture().
 		
 		intmax_t scoreLastMaze;
-		intmax_t scoreTotal;
+		intmax_t scoreTotal; //Scores can be negative
 };
 
 #endif // PLAYER_H

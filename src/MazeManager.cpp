@@ -97,7 +97,7 @@ void MazeManager::draw( irr::IrrlichtDevice* device, uint_fast16_t cellWidth, ui
 		irr::video::SColor lockColor = BROWN;
 		irr::video::SColor acidProofWallColor = LIGHTGREEN;
 		irr::video::SColor wallShadowColor = BLACK;
-		irr::video::SColor lockShadowColor = BLACK;
+		irr::video::SColor lockShadowColor = MAGENTA;
 		irr::video::SColor acidProofWallShadowColor = BLACK;
 		irr::core::position2d< irr::s32 > shadowOffset( 1, 1 );
 

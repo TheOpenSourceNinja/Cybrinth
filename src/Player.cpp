@@ -159,24 +159,28 @@ void Player::loadTexture( irr::IrrlichtDevice* device ) {
 }
 
 void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
-	irr::core::stringw fileName = L"player";
+	irr::core::stringw fileNameUnNumbered = L"player";
 	if( not ( texture == nullptr or texture == NULL ) ) {
 		device->getVideoDriver()->removeTexture( texture );
 		texture = nullptr;
 	}
-	Object::loadTexture( device, size, fileName );
 	
-	if( texture == nullptr or texture == NULL ) {
+	{ //First, we look for an image specifically meant for this player number
+		irr::core::stringw fileNameNumbered = fileNameUnNumbered;
 		if( playerNumber < 10 ) {
-			fileName += L"00";
+			fileNameNumbered += L"00";
 		} else if( playerNumber < 100 ) {
-			fileName += L"0";
+			fileNameNumbered += L"0";
 		}
-		fileName += playerNumber;
-		Object::loadTexture( device, size, fileName );
+		fileNameNumbered += playerNumber;
+		Object::loadTexture( device, size, fileNameNumbered );
 	}
 	
-	if( texture == nullptr or texture == NULL ) {
+	if( texture == nullptr or texture == NULL ) { //If we couldn't load an image specific to this number, try a generic player image
+		Object::loadTexture( device, size, fileNameUnNumbered );
+	}
+	
+	if( texture == nullptr or texture == NULL ) { //If we still don't have an image loaded, just create one
 		createTexture( device, size );
 	}
 }
