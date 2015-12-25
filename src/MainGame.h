@@ -68,6 +68,7 @@ class MainGame : public irr::IEventReceiver {
 		bool getDebugStatus();
 		Goal* getGoal();
 		Collectable* getKey( uint_fast8_t key );
+		std::vector< boost::filesystem::path > getLoadableTexturesList( boost::filesystem::path searchLocation );
 		float getLoadingPercentage();
 		std::minstd_rand::result_type getMaxRandomNumber(); //The highest value the random number generator can output.
 		MazeManager* getMazeManager();

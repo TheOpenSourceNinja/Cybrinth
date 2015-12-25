@@ -775,6 +775,59 @@ Collectable* MainGame::getKey( uint_fast8_t key ) {
 }
 
 /**
+ * Split this into its own function because it's needed in multiple places now
+ */
+std::vector< boost::filesystem::path > MainGame::getLoadableTexturesList( boost::filesystem::path searchLocation ) {
+	//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
+	searchLocation = system_complete( searchLocation );
+	//logoPath = absolute( logoPath );
+	
+	while( ( not exists( searchLocation ) or not is_directory( searchLocation ) ) and searchLocation.has_parent_path() ) {
+		if( settingsManager.debug ) {
+			std::wcout << L"Path " << searchLocation.wstring() << L" does not exist or is not a directory. Checking parent path " << searchLocation.parent_path().wstring() << std::endl;
+		}
+		
+		searchLocation = searchLocation.parent_path();
+	}
+	
+	std::vector< boost::filesystem::path > textureList;
+	
+	if( exists( searchLocation ) ) {
+		boost::filesystem::recursive_directory_iterator end;
+	
+		for( boost::filesystem::recursive_directory_iterator i( searchLocation ); i not_eq end; ++i ) {
+			if( not is_directory( i->path() ) ) { //We've found a file
+				if( settingsManager.debug ) {
+					std::wcout << i->path().wstring() << std::endl;
+				}
+				
+				//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
+				for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
+					
+					irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
+					irr::io::IFileSystem* fileSystem = device->getFileSystem();
+					irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
+					
+					//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
+						irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
+						if( not isNull( file ) ) {
+							if( loader->isALoadableFileFormat( file ) ) {
+								textureList.push_back( i->path() );
+								file->drop();
+								break;
+							}
+							file->drop();
+						}
+					//}
+				}
+			}
+		}
+	}
+	
+	return textureList;
+}
+
+/**
  * Other objects can't properly add to the loading percentage if they can't see what it is first
  */
 float MainGame::getLoadingPercentage() {
@@ -1697,12 +1750,18 @@ MainGame::MainGame() {
 		playerStart.resize( settingsManager.numPlayers );
 		playerAssigned.resize( settingsManager.numPlayers );
 		
-		for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
-			player.at( p ).setPlayerNumber( p );
-			player.at( p ).setColorBasedOnNum();
-			player.at( p ).loadTexture( device );
-			player.at( p ).setGM( this );
-			playerAssigned.at( p ) = false;
+		{
+			auto textureSearchLocation = boost::filesystem::path( boost::filesystem::current_path()/L"images/players" );
+			
+			std::vector< boost::filesystem::path > loadableTextures = getLoadableTexturesList( textureSearchLocation );
+			
+			for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
+				player.at( p ).setPlayerNumber( p );
+				player.at( p ).setColorBasedOnNum();
+				player.at( p ).loadTexture( device, 100, loadableTextures );
+				player.at( p ).setGM( this );
+				playerAssigned.at( p ) = false;
+			}
 		}
 		
 		if( settingsManager.isServer ) {
@@ -2422,64 +2481,14 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 			std::wcout << L"pickLogo() called" << std::endl;
 		}
 		
-		std::vector< boost::filesystem::path > logoList;
-
 		boost::filesystem::path logoPath( boost::filesystem::current_path()/L"images/logos" );
-
-		//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
-		logoPath = system_complete( logoPath );
-		//logoPath = absolute( logoPath );
-
-		while( ( not exists( logoPath ) or not is_directory( logoPath ) ) and logoPath.has_parent_path() ) {
-			if( settingsManager.debug ) {
-				std::wcout << L"Path " << logoPath.wstring() << L" does not exist or is not a directory. Checking parent path " << logoPath.parent_path().wstring() << std::endl;
-			}
-
-			logoPath = logoPath.parent_path();
-		}
-
-		if( exists( logoPath ) ) {
-			boost::filesystem::recursive_directory_iterator end;
-
-			for( boost::filesystem::recursive_directory_iterator i( logoPath ); i not_eq end; ++i ) {
-				if( not is_directory( i->path() ) ) { //We've found a file
-					if( settingsManager.debug ) {
-						std::wcout << i->path().wstring() << std::endl;
-					}
-
-					//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
-					for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
-
-						irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
-						irr::io::IFileSystem* fileSystem = device->getFileSystem();
-						irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
-
-						//if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
-							irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
-							if( not isNull( file ) ) {
-								if( loader->isALoadableFileFormat( file ) ) {
-									logoList.push_back( i->path() );
-									file->drop();
-									break;
-								}
-								file->drop();
-							}
-						/*} else {
-							if( debug ) {
-								bool isLoadableExtension = loader->isALoadableFileExtension( filePath );
-								bool isLoadableFormat = loader->isALoadableFileFormat( fileSystem->createAndOpenFile( filePath ) );
-								std::wcout << "is loadable extension? " << isLoadableExtension << " is loadable format? " << isLoadableFormat << std::endl;
-							}
-						}*/
-					}
-				}
-			}
-		}
-
+		
+		auto logoList = getLoadableTexturesList( logoPath);
+		
 		if( logoList.size() > 0 ) {
 			std::vector< boost::filesystem::path >::iterator newEnd = std::unique( logoList.begin(), logoList.end() ); //unique "removes all but the first element from every consecutive group of equivalent elements in the range [first,last)." (source: http://www.cplusplus.com/reference/algorithm/unique/ )
 			logoList.resize( std::distance( logoList.begin(), newEnd ) );
-
+			
 			//Pick a random logo and load it
 			auto logoChosen = getRandomNumber() % logoList.size();
 			if( settingsManager.debug ) {
@@ -2492,7 +2501,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 				std::wstring error = L"Cannot load logo texture, even though Irrlicht said it was loadable?!?";
 				throw CustomException( error );
 			}
-
+			
 			drawLogo();
 		} else {
 			std::wcerr << L"Could not find any logo images." << std::endl;
@@ -3827,6 +3836,13 @@ void MainGame::setExitConfirmation( irr::gui::IGUIWindow* newWindow ) {
  **/
 void MainGame::setLoadingPercentage( float newPercent ) {
  	if( newPercent < 100 and newPercent > 0 ) {
+		
+		/*if( settingsManager.debug and ( newPercent > 97.5 and newPercent < 98.5 ) ) { //Every once in a while, loading gets stuck at 98%. I think I've fixed it.
+			std::wcout << L"Loading percentage is " << newPercent << std::endl;
+			std::wcout << L"Maze size is " << mazeManager.cols << L"x" << mazeManager.rows << std::endl;
+			std::wcout << L"Number of locks is " << numLocks << std::endl;
+		}*/
+		
 		loadingProgress = newPercent;
  	} else if( newPercent >= 100 ) {
  		loadingProgress = 100;

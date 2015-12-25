@@ -465,8 +465,14 @@ void MazeManager::makeRandomLevel() {
 			}
 
 			decltype( mainGame->numLocks ) numLocksPlaced = 1;
-
-			while( mainGame->device->run() not_eq false and numLocksPlaced < mainGame->numLocks and mainGame->timer->getTime() < mainGame->timeStartedLoading + mainGame->loadingDelay and cols > 0 and rows > 0 ) {
+			
+			auto startTime = time( nullptr ); //Very rarely, there may be more keys than can be placed, or it may take too long to find places for them all.
+			
+			while( ( startTime != -1 and difftime( time( nullptr ), startTime ) < 10 ) //while time limit hasn't been reached... (10 seconds just seemed like a convenient number, you can raise or lower it)
+				and ( mainGame->device->run() not_eq false ) //...and the window hasn't been closed...
+				and ( numLocksPlaced < mainGame->numLocks ) //...and we haven't placed all the locks...
+				and ( cols > 0 and rows > 0 ) ) { //...and the size of the maze is not zero...
+					
 				decltype( cols ) tempX = mainGame->getRandomNumber() % cols;
 				decltype( rows ) tempY = mainGame->getRandomNumber() % rows;
 
@@ -494,7 +500,7 @@ void MazeManager::makeRandomLevel() {
 					}
 				}
 			}
-
+			
 			mainGame->timer->stop();
 			mainGame->timer->setTime( 0 );
 			if( mainGame->getDebugStatus() ) {
@@ -602,7 +608,7 @@ void MazeManager::newMaze( uint_fast8_t newCols, uint_fast8_t newRows ) {
 void MazeManager::recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t depth, uint_fast16_t numSoFar ) {
 	try {
 		mainGame->setLoadingPercentage( mainGame->getLoadingPercentage() + ( 90.0f / ( cols * rows ) ) ); //I figure this recursion takes up about 90% of loading time. That's not based on any measurements, it's just a guess.
-		//At one point I included the following line because I hoped to show the maze as it was being generated. Might still add that as an option. Now they're there so that the loading screen gets drawn and lasts long enough to read it.
+		//At one point I included the following line because I hoped to show the maze as it was being generated. Might still add that as an option. Now it's there so that the loading screen gets drawn and lasts long enough to read it.
 		mainGame->drawAll();
 		
 		maze[ x ][ y ].visited = true;
