@@ -19,7 +19,9 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <boost/filesystem.hpp>
 #include <irrlicht/irrlicht.h>
+#include <vector>
 #include "Collectable.h"
 #include "Object.h"
 #include "colors.h"
@@ -52,7 +54,9 @@ class Player : public Object {
 		uint_fast8_t keysCollectedLastMaze;
 		
 		void loadTexture( irr::IrrlichtDevice* device );
-		void loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size );
+		void loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::core::stringw name );
+		//void loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size );
+		void loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, std::vector< boost::filesystem::path > usableFiles );
 		
 		void moveX( int_fast8_t val );
 		void moveY( int_fast8_t val );
@@ -81,6 +85,8 @@ class Player : public Object {
 		
 		intmax_t scoreLastMaze;
 		intmax_t scoreTotal; //Scores can be negative
+		
+		irr::core::stringw textureFilePath;
 };
 
 #endif // PLAYER_H

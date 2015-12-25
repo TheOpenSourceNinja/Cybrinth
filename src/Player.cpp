@@ -44,6 +44,7 @@ Player::Player() {
 		setPlayerNumber( UINT_FAST8_MAX );
 		reset();
 		setGM( nullptr );
+		textureFilePath = L"";
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::Player(): " << e.what() << std::endl;
 	}
@@ -98,7 +99,8 @@ void Player::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16
 		}
 
 		if( texture->getSize().Width not_eq size ) {
-			loadTexture( device, size );
+			
+			loadTexture( device, size, textureFilePath );
 			if( texture == nullptr or texture == NULL ) {
 				createTexture( device, size );
 			}
@@ -149,7 +151,7 @@ void Player::loadTexture( irr::IrrlichtDevice* device ) {
 			device->getVideoDriver()->removeTexture( texture );
 			texture = nullptr;
 		}
-		loadTexture( device, 1 );
+		loadTexture( device, 1, std::vector< boost::filesystem::path>() );
 		if( texture == nullptr or texture == NULL ) {
 			createTexture( device, 1 );
 		}
@@ -158,7 +160,7 @@ void Player::loadTexture( irr::IrrlichtDevice* device ) {
 	}
 }
 
-void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
+/*void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 	irr::core::stringw fileNameUnNumbered = L"player";
 	if( not ( texture == nullptr or texture == NULL ) ) {
 		device->getVideoDriver()->removeTexture( texture );
@@ -182,6 +184,51 @@ void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size ) {
 	
 	if( texture == nullptr or texture == NULL ) { //If we still don't have an image loaded, just create one
 		createTexture( device, size );
+	}
+}*/
+
+void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::core::stringw name ) {
+	try {
+		if( not ( texture == nullptr or texture == NULL ) ) {
+			device->getVideoDriver()->removeTexture( texture );
+			texture = nullptr;
+		}
+		
+		Object::loadTexture( device, size, name );
+		
+		if( texture == nullptr or texture == NULL ) { //If we still don't have an image loaded, just create one
+			createTexture( device, size );
+		}
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in Player::loadTexture(): " << e.what() << std::endl;
+	}
+}
+
+void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, std::vector< boost::filesystem::path > usableFiles ) {
+	try {
+		
+		if( not ( texture == nullptr or texture == NULL ) ) {
+			device->getVideoDriver()->removeTexture( texture );
+		}
+		
+		texture = nullptr;
+		
+		{
+			StringConverter sc;
+			textureFilePath = sc.toIrrlichtStringW( usableFiles.at( playerNumber % usableFiles.size() ).wstring() );
+			
+			Object::loadTexture( device, size, textureFilePath );
+		}
+		
+		if( texture == nullptr or texture == NULL ) { //If we still don't have an image loaded, just create one
+			std::wcout << L"Texture not loaded, creating one." << std::endl;
+			createTexture( device, size );
+		} else {
+			std::wcout << L"Texture loaded successfully. Name: " << irr::core::stringw( texture->getName() ).c_str() << std::endl;
+		}
+		
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in Player::loadTexture(): " << e.what() << std::endl;
 	}
 }
 

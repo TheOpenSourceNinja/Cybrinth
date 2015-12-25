@@ -201,8 +201,8 @@ void XPMImageLoader::loadOtherImage( irr::video::IVideoDriver* driver, irr::vide
 	char ** xpm = nullptr;
 	switch( type ) {
 		case PLAYER: {
-			#include "compiled-images/players/player.xpm"
-			xpm = player_xpm;
+			#include "compiled-images/players/poker_chip.xpm"
+			xpm = poker_chip_xpm;
 			break;
 		}
 		case GOAL: {
