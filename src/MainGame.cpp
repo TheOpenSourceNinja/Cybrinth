@@ -192,11 +192,30 @@ void MainGame::drawAll() {
 				
 				{
 					time_t currentTime = time( nullptr );
-					wchar_t clockTime[ 9 ];
-					wcsftime( clockTime, 9, L"%H:%M:%S", localtime( &currentTime ) );
-					clockTime[ 8 ] = '\0';
+					size_t maxSize = std::max( settingsManager.timeFormat.length() * 2, ( size_t ) UINT_FAST8_MAX );
+					wchar_t clockTime[ maxSize ];
+					auto numCharsConverted = wcsftime( clockTime, maxSize, settingsManager.timeFormat.c_str(), localtime( &currentTime ) );
+					
+					if( numCharsConverted == 0 ) {
+						numCharsConverted = wcsftime( clockTime, maxSize, settingsManager.timeFormatDefault.c_str(), localtime( &currentTime ) );
+					
+						if( numCharsConverted == 0 ) {
+							numCharsConverted = wcsftime( clockTime, maxSize, L"%T", localtime( &currentTime ) );
+							
+							if( numCharsConverted == 0 ) {
+								throw( CustomException( std::wstring( L"Could not convert the time to either the specified format, the default format, nor to ISO 8601." ) ) );
+							}
+						}
+					}
+					
 					tempDimensions = clockFont->getDimension( clockTime );
 					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+					
+					if( tempRectangle.LowerRightCorner.X > screenSize.Width ) {
+						//If using a variable-width font, the clock size may become too big to display, so we reload the font at a smaller size
+						loadClockFont();
+					}
+					
 					clockFont->draw( clockTime, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
 				}
 
@@ -347,6 +366,8 @@ void MainGame::drawAll() {
 		}
 		
 		driver->endScene();
+	} catch ( CustomException &e ) {
+		std::wcerr << L"Error in MainGame::drawAll(): " << e.what() << std::endl;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::drawAll(): " << e.what() << std::endl;
 	}
@@ -954,7 +975,70 @@ bool MainGame::isNull( void* ptr ) {
 }
 
 /**
- * Loads fonts. Calls loadMusicFont() and loadTipFont().
+ * @brief Loads the clock font.
+ */
+void MainGame::loadClockFont() { //Load clockFont
+	irr::core::dimension2d< uint_fast32_t > fontDimensions;
+	if( fontFile not_eq "" ) {
+		uint_fast32_t size = ( screenSize.Width / sideDisplaySizeDenominator );
+		
+		std::wstring timeDummy = L"";
+		
+		{
+			time_t currentTime = time( nullptr );
+			size_t maxSize = std::max( settingsManager.timeFormat.length() * 2, ( size_t ) UINT_FAST8_MAX );
+			wchar_t clockTime[ maxSize ];
+			auto numCharsConverted = wcsftime( clockTime, maxSize, settingsManager.timeFormat.c_str(), localtime( &currentTime ) );
+			
+			if( numCharsConverted == 0 ) {
+				numCharsConverted = wcsftime( clockTime, maxSize, settingsManager.timeFormatDefault.c_str(), localtime( &currentTime ) );
+				
+				if( numCharsConverted == 0 ) {
+					numCharsConverted = wcsftime( clockTime, maxSize, L"%T", localtime( &currentTime ) );
+				}
+			}
+			
+			if( numCharsConverted != 0 ) {
+				timeDummy = clockTime;
+			} else {
+				timeDummy = L"00:00:00";
+			}
+		}
+		
+		if( timeDummy.empty() ) {
+			timeDummy = L"00:00:00";
+		}
+		
+		do {
+			clockFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
+			if( not isNull( clockFont ) ) {
+				fontDimensions = clockFont->getDimension( timeDummy.c_str() );
+				size -= 2;
+			}
+		} while( not isNull( clockFont ) and ( fontDimensions.Width + viewportSize.Width > screenSize.Width  or fontDimensions.Height > ( screenSize.Height / 5 ) ) );
+		
+		size += 3;
+		
+		do {
+			clockFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
+			if( not isNull( clockFont ) ) {
+				fontDimensions = clockFont->getDimension( timeDummy.c_str() );
+				size -= 1;
+			}
+		} while( not isNull( clockFont ) and ( fontDimensions.Width + viewportSize.Width > screenSize.Width  or fontDimensions.Height > ( screenSize.Height / 5 ) ) );
+	}
+	
+	if( fontFile == "" or isNull( clockFont ) or clockFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
+		clockFont = gui->getBuiltInFont();
+	}
+	
+	if( settingsManager.debug ) {
+		std::wcout << L"clockFont is loaded" << std::endl;
+	}
+}
+
+/**
+ * Loads fonts. Calls loadMusicFont(), loadTipFont(), and loadClockFont().
  */
 void MainGame::loadFonts() {
 	try {
@@ -998,6 +1082,7 @@ void MainGame::loadFonts() {
 		//These were split off into separate functions because they are needed more often than loadFonts()
 		loadTipFont();
 		loadMusicFont();
+		loadClockFont();
 
 		{ //Load loadingFont
 			irr::core::dimension2d< uint_fast32_t > fontDimensions;
@@ -1081,40 +1166,7 @@ void MainGame::loadFonts() {
 		}
 
 
-		{ //Load clockFont
-			irr::core::dimension2d< uint_fast32_t > fontDimensions;
-			if( fontFile not_eq "" ) {
-				uint_fast32_t size = ( screenSize.Width / sideDisplaySizeDenominator );
-
-				do {
-					clockFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
-					if( not isNull( clockFont ) ) {
-						fontDimensions = clockFont->getDimension( L"00:00:00" );
-						size -= 2;
-					}
-				} while( not isNull( clockFont ) and ( fontDimensions.Width + viewportSize.Width > screenSize.Width  or fontDimensions.Height > ( screenSize.Height / 5 ) ) );
-
-				size += 3;
-
-				do {
-					clockFont = fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts );
-					if( not isNull( clockFont ) ) {
-						fontDimensions = clockFont->getDimension( L"00:00:00" );
-						size -= 1;
-					}
-				} while( not isNull( clockFont ) and ( fontDimensions.Width + viewportSize.Width > screenSize.Width  or fontDimensions.Height > ( screenSize.Height / 5 ) ) );
-			}
-
-			if( fontFile == "" or isNull( clockFont ) or clockFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
-				clockFont = gui->getBuiltInFont();
-			}
-
-			if( settingsManager.debug ) {
-				std::wcout << L"clockFont is loaded" << std::endl;
-			}
-		}
-
-
+		
 		{ //Load statsFont
 			irr::core::dimension2d< uint_fast32_t > fontDimensions;
 			
@@ -1758,8 +1810,8 @@ MainGame::MainGame() {
 			for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
 				player.at( p ).setPlayerNumber( p );
 				player.at( p ).setColorBasedOnNum();
+				player.at( p ).setMG( this );
 				player.at( p ).loadTexture( device, 100, loadableTextures );
-				player.at( p ).setGM( this );
 				playerAssigned.at( p ) = false;
 			}
 		}
@@ -2913,7 +2965,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 
 			if( not donePlaying ) {
 				if( settingsManager.debug ) {
-					std::wcout << L"On to the next levelnot " << std::endl;
+					std::wcout << L"On to the next level! " << std::endl;
 					std::wcout << L"Winners:";
 
 					for( decltype( settingsManager.numPlayers ) i = 0; i < winners.size(); ++i ) { //changed decltype( winners.size() ) to decltype( numPlayers ) because winners.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
@@ -3924,6 +3976,8 @@ void MainGame::startLoadingScreen() {
 	if( settingsManager.debug ) {
 		std::wcout << L"startLoadingScreen() called" << std::endl;
 	}
+	drawAll();
+	
 	currentScreen = LOADINGSCREEN;
 	timeStartedLoading = timer->getRealTime();
 	//drawLoadingScreen();
@@ -3951,13 +4005,25 @@ void MainGame::takeScreenShot() {
 			irr::core::stringw filename = stringConverter.toIrrlichtStringW( PACKAGE_NAME );
 			filename.append( L" screenshot " );
 			
-			time_t currentTime = time( nullptr );
-			wchar_t clockTime[ 20 ];
-			if( wcsftime( clockTime, 20, L"%FT%T", localtime( &currentTime ) ) == 0 ) {
-				throw( CustomException( std::wstring( L"Could not convert the time to ISO 8601 format.") ) );
+			{
+				time_t currentTime = time( nullptr );
+				size_t maxSize = std::max( settingsManager.dateFormat.length() * 2, ( size_t ) UINT_FAST8_MAX );
+				wchar_t clockTime[ maxSize ];
+				
+				auto numChars = wcsftime( clockTime, maxSize, settingsManager.dateFormat.c_str(), localtime( &currentTime ) );
+				if( numChars == 0 ) {
+					
+					numChars = wcsftime( clockTime, maxSize, settingsManager.dateFormatDefault.c_str(), localtime( &currentTime ) );
+					if( numChars == 0 ) {
+						
+						numChars = wcsftime( clockTime, maxSize, L"%FT%T", localtime( &currentTime ) );
+						if( numChars == 0 ) {
+							throw( CustomException( std::wstring( L"Could not convert the time to either the specified format, nor to the default format, nor to ISO 8601.") ) );
+						}
+					}
+				}
+				filename.append( clockTime );
 			}
-			clockTime[ 19 ] = L'\0';
-			filename.append( clockTime );
 			filename.append( L".png" );
 			
 			if( not driver->writeImageToFile( image, filename ) ) {
@@ -3978,6 +4044,8 @@ void MainGame::takeScreenShot() {
 		} else {
 			throw( CustomException( std::wstring( L"takeScreenShot(): Failed to take screen shot" ) ) );
 		}
+	} catch ( CustomException &e ) {
+		std::wcerr << L"Error in MainGame::takeScreenShot(): " << e.what() << std::endl;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::takeScreenShot(): " << e.what() << std::endl;
 	}

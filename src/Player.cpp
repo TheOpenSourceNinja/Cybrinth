@@ -43,7 +43,7 @@ Player::Player() {
 		scoreTotal = 0;
 		setPlayerNumber( UINT_FAST8_MAX );
 		reset();
-		setGM( nullptr );
+		setMG( nullptr );
 		textureFilePath = L"";
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in Player::Player(): " << e.what() << std::endl;
@@ -215,7 +215,7 @@ void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, std::
 		
 		{
 			StringConverter sc;
-			textureFilePath = sc.toIrrlichtStringW( usableFiles.at( playerNumber % usableFiles.size() ).wstring() );
+			textureFilePath = sc.toIrrlichtStringW( usableFiles.at( mg->getRandomNumber() % usableFiles.size() ).wstring() );
 			
 			Object::loadTexture( device, size, textureFilePath );
 		}
@@ -224,7 +224,9 @@ void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, std::
 			std::wcout << L"Texture not loaded, creating one." << std::endl;
 			createTexture( device, size );
 		} else {
-			std::wcout << L"Texture loaded successfully. Name: " << irr::core::stringw( texture->getName() ).c_str() << std::endl;
+			if( mg->getDebugStatus() ) {
+				std::wcout << L"Texture loaded successfully. Name: " << irr::core::stringw( texture->getName() ).c_str() << std::endl;
+			}
 		}
 		
 	} catch( std::exception e ) {
@@ -282,8 +284,8 @@ void Player::setColorBasedOnNum() {
 	Object::setColorBasedOnNum( playerNumber );
 }
 
-void Player::setGM( MainGame* newGM ) {
-	mg = newGM;
+void Player::setMG( MainGame* newMG ) {
+	mg = newMG;
 }
 
 void Player::setPlayerNumber( uint_fast8_t newNumber ) {

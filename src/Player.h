@@ -65,7 +65,7 @@ class Player : public Object {
 		void reset();
 		
 		void setColorBasedOnNum(); //We provide our own version of this function here because we know which number to use.
-		void setGM( MainGame* newGM );
+		void setMG( MainGame* newMG );
 		void setPlayerNumber( uint_fast8_t newNumber );
 		void setScore( intmax_t newScore );
 		

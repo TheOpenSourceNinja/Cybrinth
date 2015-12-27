@@ -146,6 +146,7 @@ class MainGame : public irr::IEventReceiver {
 		
 		bool isNull( void* ptr );
 		
+		void loadClockFont();
 		void loadFonts();
 		void loadMusicFont();
 		void loadNextSong();

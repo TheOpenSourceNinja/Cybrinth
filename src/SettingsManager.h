@@ -36,6 +36,8 @@ class SettingsManager
 		bool botsKnowSolution;
 		bool botsKnowSolutionDefault;
 		
+		std::wstring dateFormat; //for use by wcsftime()
+		std::wstring dateFormatDefault;
 		bool debug;
 		bool debugDefault;
 		irr::video::E_DRIVER_TYPE driverType;
@@ -74,6 +76,9 @@ class SettingsManager
 		bool showBackgrounds;
 		bool showBackgroundsDefault;
 		
+		std::wstring timeFormat; //for use by wcsftime()
+		std::wstring timeFormatDefault;
+		
 		bool vsync;
 		bool vsyncDefault;
 	
@@ -105,11 +110,11 @@ class SettingsManager
 		std::vector< std::wstring > possiblePrefs = { L"bots' solving algorithm", L"volume", L"number of bots", L"show backgrounds",
 									L"fullscreen", L"mark player trails", L"debug", L"bits per pixel", L"wait for vertical sync", L"driver type", L"number of players",
 									L"window size", L"play music", L"network port", L"always server", L"bots know the solution", L"bot movement delay", L"hide unseen maze areas", L"background animations",
-									L"autodetect fullscreen resolution", L"fullscreen resolution" };
-		//Each item in pref_t, except the last one, must match with an item in possiblePrefs.
+									L"autodetect fullscreen resolution", L"fullscreen resolution", L"time format", L"date format" };
+		//Each item in pref_t must match with an item in possiblePrefs.
 		enum pref_t : uint_fast8_t { ALGORITHM = 0, VOLUME = 1, NUMBOTS = 2, SHOW_BACKGROUNDS = 3, FULLSCREEN = 4, MARK_TRAILS = 5, DEBUG = 6, BPP = 7, VSYNC = 8, DRIVER_TYPE = 9, NUMPLAYERS = 10,
 									WINDOW_SIZE = 11, PLAY_MUSIC = 12, NETWORK_PORT = 13, ALWAYS_SERVER = 14, SOLUTION_KNOWN = 15, MOVEMENT_DELAY = 16, HIDE_UNSEEN = 17, BACKGROUND_ANIMATIONS = 18, 
-									AUTODETECT_RESOLUTION = 19, FULLSCREEN_RESOLUTION = 20, DO_NOT_USE = 255 };
+									AUTODETECT_RESOLUTION = 19, FULLSCREEN_RESOLUTION = 20, TIME_FORMAT = 21, DATE_FORMAT = 22 };
 		
 		SpellChecker* spellChecker;
 		SystemSpecificsManager* system; // Flawfinder: ignore

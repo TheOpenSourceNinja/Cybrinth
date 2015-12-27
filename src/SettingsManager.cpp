@@ -42,6 +42,9 @@ SettingsManager::SettingsManager() {
 	fullscreenResolutionDefault.Height = 480;
 	allowSmallSize = false;
 	alwaysServer = alwaysServerDefault;
+	dateFormatDefault = L"%FT%T";
+	timeFormatDefault = L"%T";
+	debugDefault = false;
 }
 
 SettingsManager::~SettingsManager() {
@@ -258,6 +261,9 @@ void SettingsManager::savePrefs() {
 							
 							prefsFile << possiblePrefs.at( HIDE_UNSEEN ) << L"\t" << boolToWString( mazeManager->hideUnseen ) << defaultString << boolToWString( hideUnseenDefault ) << L". Hides parts of the maze that no player has seen yet (seen means unobstructed line-of-sight from any player's position)" << std::endl;
 							
+							prefsFile << possiblePrefs.at( TIME_FORMAT ) << L"\t" << timeFormat << defaultString << timeFormatDefault << L". Must be in wcsftime format. See http://www.cplusplus.com/reference/ctime/strftime/ for a format reference." << std::endl;
+							
+							prefsFile << possiblePrefs.at( DATE_FORMAT ) << L"\t" << dateFormat << defaultString << dateFormatDefault << L". Must be in wcsftime format. See http://www.cplusplus.com/reference/ctime/strftime/ for a format reference." << std::endl;
 						}
 					}
 					
@@ -315,8 +321,6 @@ void SettingsManager::readPrefs() {
 		//Set default prefs, in case we can't get them from the file
 		resetToDefaults();
 		
-		auto prefsNotFound = possiblePrefs;
-		
 		std::vector< boost::filesystem::path > configFolders = system->getConfigFolders(); // Flawfinder: ignore
 		bool prefsFileFound = false;
 		
@@ -340,7 +344,7 @@ void SettingsManager::readPrefs() {
 						getline( prefsFile, line );
 						line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
 						boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
-						boost::algorithm::to_lower( line );
+						
 						if( debug ) {
 							std::wcout << L"Line " << lineNum << L": \"" << line << "\"" << std::endl;
 						}
@@ -348,6 +352,9 @@ void SettingsManager::readPrefs() {
 						
 						if( not line.empty() ) {
 							try {
+								std::wstring choiceOriginalCase = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) ); //The time and date format settings need values that might be upper or lower case
+								boost::algorithm::to_lower( line );
+								
 								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
 								std::wstring choice = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
 								
@@ -362,14 +369,15 @@ void SettingsManager::readPrefs() {
 									std::wcout << L"Preference after spellchecking \"" << preference << std::endl;
 								}
 								
-								{
-									auto toRemove = std::find( prefsNotFound.begin(), prefsNotFound.end(), possiblePrefs.at( preferenceNum ) );
-									if( toRemove not_eq prefsNotFound.end() ) {
-										prefsNotFound.erase( toRemove );
-									}
-								}
-								
 								switch( preferenceNum ) {
+									case DATE_FORMAT: {
+										dateFormat = choiceOriginalCase;
+										break;
+									}
+									case TIME_FORMAT: {
+										timeFormat = choiceOriginalCase;
+										break;
+									}
 									case AUTODETECT_RESOLUTION: {
 										autoDetectFullscreenResolution = wStringToBool( choice );
 										break;
@@ -680,6 +688,8 @@ void SettingsManager::resetToDefaults() {
 	backgroundAnimations = backgroundAnimationsDefault;
 	fullscreenResolution = device->getVideoModeList()->getDesktopResolution();
 	autoDetectFullscreenResolution = autoDetectFullscreenResolutionDefault;
+	dateFormat = dateFormatDefault;
+	timeFormat = timeFormatDefault;
 	
 	if( oldPlayMusic not_eq playMusic ) {
 		mainGame->musicSettingChanged();
