@@ -146,7 +146,13 @@ void MenuManager::processSelection( MainGame* mg ) {
 	} else if( options.at( saveMaze ).highlighted ) {
 		mg->showSaveMazeDialog();
 	} else if( options.at( nextMaze ).highlighted ) {
-		mg->newMaze();
+		if( mg->network.getIsServer() ) {
+			mg->newMaze();
+		} else {
+			if( mg->getDebugStatus() ) {
+				std::wcout << L"Cannot create new maze: we're a client, not a server." << std::endl;
+			}
+		}
 	} else if( options.at( restartMaze ).highlighted ) {
 		mg->newMaze( mg->getRandomSeed() );
 	} else if( options.at( backToGame ).highlighted ) {

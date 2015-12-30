@@ -324,10 +324,12 @@ void SettingsManager::readPrefs() {
 		std::vector< boost::filesystem::path > configFolders = system->getConfigFolders(); // Flawfinder: ignore
 		bool prefsFileFound = false;
 		
+		std::wcout << L"configFolders.size(): " << configFolders.size() << std::endl;
+		
 		for( auto it = configFolders.begin(); it not_eq configFolders.end(); ++it ) {
 			boost::filesystem::path prefsPath( *it/L"prefs.cfg" );
 			
-			if( ( exists( prefsPath ) and not is_directory( prefsPath ) ) or not exists( prefsPath ) ) {
+			if( ( exists( prefsPath ) and not is_directory( prefsPath ) ) ) {
 				if( debug ) {
 					std::wcout << L"Loading preferences from file " << prefsPath.wstring() << std::endl;
 				}

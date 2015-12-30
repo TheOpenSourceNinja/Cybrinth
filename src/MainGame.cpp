@@ -28,7 +28,7 @@
 #include <fileref.h>
 #include <tag.h>
 
-//TODO: Implement an options screen
+//TODO: Implement an options screen (working on it: see SettingsScreen.h/.cpp)
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
 //TODO: Get multiplayer working online
 //TODO: Improve AI. Add any solving algorithms we can think of.
@@ -41,22 +41,22 @@
 
 /**
  * Figures out which players are human, then figures out whether they're all at the goal.
- * Returns: True if all humans are at the goal, false otherwise.
+ * Returns: True if there is at least one human player and all humans are at the goal, false otherwise.
  */
 bool MainGame::allHumansAtGoal() {
 	try {
 		std::vector< uint_fast8_t > humanPlayers; //Get a list of players
 		
-		for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
+		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 			humanPlayers.push_back( p );
 		}
 
 		bool result = false;
 
-		for( decltype( settingsManager.numBots ) b = 0; b < settingsManager.numBots; ++b ) { //Remove bots from the list
-			decltype( settingsManager.numPlayers ) botPlayer = bot.at( b ).getPlayer(); //changed decltype( bot.at( b ).getPlayer() ) to decltype( numPlayers ) because getPlayer can never exceed numPlayers, and this avoids needless function calls.
+		for( decltype( numBots ) b = 0; b < numBots; ++b ) { //Remove bots from the list
+			decltype( numPlayers ) botPlayer = bot.at( b ).getPlayer(); //changed decltype( bot.at( b ).getPlayer() ) to decltype( numPlayers ) because getPlayer can never exceed numPlayers, and this avoids needless function calls.
 
-			for( decltype( settingsManager.numPlayers ) p = 0; p < humanPlayers.size(); ++p ) { //changed decltype( humanPlayers.size() ) to decltype( numPlayers ) because humanPlayers.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+			for( decltype( numPlayers ) p = 0; p < humanPlayers.size(); ++p ) { //changed decltype( humanPlayers.size() ) to decltype( numPlayers ) because humanPlayers.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 				if( humanPlayers.at( p ) == botPlayer ) {
 					humanPlayers.erase( humanPlayers.begin() + p );
 				}
@@ -66,7 +66,7 @@ bool MainGame::allHumansAtGoal() {
 		if( humanPlayers.size() > 0 ) {
 			result = true;
 
-			for( decltype( settingsManager.numPlayers ) p = 0; ( p < humanPlayers.size() and result == true ); ++p ) { //changed decltype( humanPlayers.size() ) to decltype( numPlayers ) because humanPlayers.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+			for( decltype( numPlayers ) p = 0; ( p < humanPlayers.size() and result == true ); ++p ) { //changed decltype( humanPlayers.size() ) to decltype( numPlayers ) because humanPlayers.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 				if( not ( player.at( humanPlayers.at( p ) ).getX() == goal.getX() and player.at( humanPlayers.at( p ) ).getY() == goal.getY() ) ) {
 					result = false;
 				}
@@ -161,17 +161,17 @@ void MainGame::drawAll() {
 					}
 				}
 				
-				for( decltype( settingsManager.numPlayers ) ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts. Changed decltype( playerStart.size() ) to decltype( numPlayers ) because playerStart.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+				for( decltype( numPlayers ) ps = 0; ps < playerStart.size(); ++ps ) { //Put this in a separate loop from the players (below) so that the players would all be drawn after the playerStarts. Changed decltype( playerStart.size() ) to decltype( numPlayers ) because playerStart.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 					playerStart.at( ps ).draw( device, cellWidth, cellHeight );
 				}
 				
 				//Drawing bots before human players makes it easier to play against large numbers of bots
-				for( decltype( settingsManager.numBots ) i = 0; i < settingsManager.numBots; ++i ) {
+				for( decltype( numBots ) i = 0; i < numBots; ++i ) {
 					player.at( bot.at( i ).getPlayer() ).draw( device, cellWidth, cellHeight );
 				}
 				
 				//Now we draw the players
-				for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
+				for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 					if( player.at( p ).isHuman ) {
 						player.at( p ).draw( device, cellWidth, cellHeight );
 					}
@@ -591,7 +591,7 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 
 		textY = textYOriginal;
 		//Now we go through and draw the actual player stats
-		for( decltype( settingsManager.numPlayers ) p = 0; p < winnersLoadingScreen.size(); ++p ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+		for( decltype( numPlayers ) p = 0; p < winnersLoadingScreen.size(); ++p ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 			auto textXOld = textX;
 			
 			auto backgroundColor = player.at( winnersLoadingScreen.at( p ) ).getColorOne();
@@ -701,7 +701,7 @@ void MainGame::eraseCollectable( uint_fast8_t item ) {
 		
 		if( item < stuff.size() ) {
 			stuff.erase( stuff.begin() + item );
-			for( decltype( settingsManager.numPlayers ) p = 0; p < player.size(); ++p ) {
+			for( decltype( numPlayers ) p = 0; p < player.size(); ++p ) {
 				if( player.at( p ).hasItem() and player.at( p ).getItem() > item ) {
 					player.at( p ).giveItem( player.at( p ).getItem() - 1, player.at( p ).getItemType() );
 				}
@@ -912,10 +912,10 @@ uint_fast8_t MainGame::getNumKeys() {
  **/
 Player* MainGame::getPlayer( uint_fast8_t p ) {
 	try {
-		if( p < settingsManager.numPlayers ) {
+		if( p < numPlayers ) {
 			return &player.at( p );
 		} else {
-			throw( CustomException( std::wstring( L"Request for player (" ) + stringConverter.toStdWString( p ) + L") >= numPlayers (" + stringConverter.toStdWString( settingsManager.numPlayers ) + L")" ) );
+			throw( CustomException( std::wstring( L"Request for player (" ) + stringConverter.toStdWString( p ) + L") >= numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")" ) );
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::getPlayer(): " << e.what() << std::endl;
@@ -1173,7 +1173,7 @@ void MainGame::loadFonts() {
 			if( fontFile not_eq "" ) {
 				auto aboveStats = loadingFont->getDimension( loading.c_str() ).Height * 2 + std::max( tipFont->getDimension( proTipPrefix.c_str() ).Height, tipFont->getDimension( proTips.at( currentProTip ).c_str() ).Height );
 			
-				uint_fast32_t size = screenSize.Width / settingsManager.numPlayers / 3; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
+				uint_fast32_t size = screenSize.Width / numPlayers / 3; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
 				uint_fast8_t builtInFontHeight = gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height;
 				if( size > builtInFontHeight ) { //If the text needs to be that small, go with the built-in font because it's readable at that size.
 					do {
@@ -1182,17 +1182,17 @@ void MainGame::loadFonts() {
 						if( not isNull( statsFont ) ) {
 							irr::core::dimension2d< uint_fast32_t > tempDimensions;
 							std::wstring tempString;
-							if( settingsManager.numPlayers <= 10 ) {
+							if( numPlayers <= 10 ) {
 								tempString = L"0.P";
-							} else if( settingsManager.numPlayers <= 100 ) {
+							} else if( numPlayers <= 100 ) {
 								tempString = L"00.P";
 							} else {
 								tempString = L"000.P";
 							}
-							tempString += stringConverter.toStdWString( settingsManager.numPlayers );
+							tempString += stringConverter.toStdWString( numPlayers );
 							
 							tempDimensions = statsFont->getDimension( tempString.c_str() );
-							fontDimensions = irr::core::dimension2d< uint_fast32_t >( tempDimensions.Width * settingsManager.numPlayers, tempDimensions.Height );
+							fontDimensions = irr::core::dimension2d< uint_fast32_t >( tempDimensions.Width * numPlayers, tempDimensions.Height );
 							tempDimensions = statsFont->getDimension( keysFoundPerPlayer.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
 							fontDimensions = irr::core::dimension2d< uint_fast32_t >( fontDimensions.Width + tempDimensions.Width, std::max( fontDimensions.Height, tempDimensions.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
 						}
@@ -1206,17 +1206,17 @@ void MainGame::loadFonts() {
 						if( not isNull( statsFont ) ) {
 							irr::core::dimension2d< uint_fast32_t > tempDimensions;
 							std::wstring tempString;
-							if( settingsManager.numPlayers <= 10 ) {
+							if( numPlayers <= 10 ) {
 								tempString = L"0.P";
-							} else if( settingsManager.numPlayers <= 100 ) {
+							} else if( numPlayers <= 100 ) {
 								tempString = L"00.P";
 							} else {
 								tempString = L"000.P";
 							}
-							tempString += stringConverter.toStdWString( settingsManager.numPlayers );
+							tempString += stringConverter.toStdWString( numPlayers );
 							
 							tempDimensions = statsFont->getDimension( tempString.c_str() );
-							fontDimensions = irr::core::dimension2d< uint_fast32_t >( tempDimensions.Width * settingsManager.numPlayers, tempDimensions.Height );
+							fontDimensions = irr::core::dimension2d< uint_fast32_t >( tempDimensions.Width * numPlayers, tempDimensions.Height );
 							tempDimensions = statsFont->getDimension( keysFoundPerPlayer.c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
 							fontDimensions = irr::core::dimension2d< uint_fast32_t >( fontDimensions.Width + tempDimensions.Width, std::max( fontDimensions.Height, tempDimensions.Height ) * 6 ); //6 = the number of rows of stats displayed on the loading screen
 						}
@@ -1460,35 +1460,53 @@ void MainGame::loadProTips() {
 				if( settingsManager.debug ) {
 					std::wcout << L"Loading pro tips from file " << proTipsPath.wstring() << std::endl;
 				}
-				boost::filesystem::wifstream proTipsFile;
-				proTipsFile.open( proTipsPath );
+				/*boost::filesystem::wifstream proTipsFile;
+				proTipsFile.open( proTipsPath );*/
 				
-				if( proTipsFile.is_open() ) {
-					std::wstring line;
+				/*std::wifstream proTipsFile;
+				proTipsFile.open( proTipsPath.string() );*/
+				
+				FILE* proTipsFile = fopen( proTipsPath.c_str(), "r" );
+				
+				if( !isNull( proTipsFile ) ) { //proTipsFile.is_open() ) {
 					uint_fast16_t lineNum = 0;
 					
-					while( proTipsFile.good() ) {
+					wchar_t* linePointer;
+					
+					do { //proTipsFile.good() ) {
 						++lineNum;
-						getline( proTipsFile, line );
 						
-						if( not line.empty() ) {
-							line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
-							boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
+						//std::wstring line;
+						uint_fast8_t lineMax = 255;
+						std::wstring::value_type lineArray[ lineMax ];
+						
+						//getline( proTipsFile, line );
+						//proTipsFile.getline( lineArray, lineMax );
+						linePointer = fgetws( lineArray, lineMax, proTipsFile );
+						if( !isNull( linePointer ) ) {
+							std::wstring line = linePointer;
 							
 							if( not line.empty() ) {
-								proTips.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
+								line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
+								boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
 								
-								if( settingsManager.debug ) {
-									std::wcout << line << std::endl;
+								if( not line.empty() ) {
+									proTips.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
+									
+									if( settingsManager.debug ) {
+										std::wcout << line << std::endl;
+									}
 								}
 							}
 						}
-					}
+					} while( !isNull( linePointer ) );
 					
-					proTipsFile.close();
+					//proTipsFile.close();
+					fclose( proTipsFile );
 					
 					setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows random_shuffle() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
-					random_shuffle( proTips.begin(), proTips.end() );
+					//random_shuffle( proTips.begin(), proTips.end(), &randomNumberGenerator() );
+					shuffle( proTips.begin(), proTips.end(), randomNumberGenerator );
 				} else {
 					throw( CustomException( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) ) );
 				}
@@ -1673,6 +1691,8 @@ MainGame::MainGame() {
 		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system);
 		settingsManager.readPrefs();
 		network.setPort( settingsManager.networkPort );
+		numPlayers = settingsManager.numPlayers;
+		numBots = settingsManager.numBots;
 		
 		if ( settingsManager.debug ) {
 			std::wcout << L"Read prefs, now setting controls" << std::endl;
@@ -1795,19 +1815,19 @@ MainGame::MainGame() {
 		menuManager.loadIcons( device );
 
 		if ( settingsManager.debug ) {
-			std::wcout << L"Resizing player and playerStart vectors to " << settingsManager.numPlayers << std::endl;
+			std::wcout << L"Resizing player and playerStart vectors to " << numPlayers << std::endl;
 		}
 
-		player.resize( settingsManager.numPlayers );
-		playerStart.resize( settingsManager.numPlayers );
-		playerAssigned.resize( settingsManager.numPlayers );
+		player.resize( numPlayers );
+		playerStart.resize( numPlayers );
+		playerAssigned.resize( numPlayers );
 		
 		{
 			auto textureSearchLocation = boost::filesystem::path( boost::filesystem::current_path()/L"images/players" );
 			
 			std::vector< boost::filesystem::path > loadableTextures = getLoadableTexturesList( textureSearchLocation );
 			
-			for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
+			for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 				player.at( p ).setPlayerNumber( p );
 				player.at( p ).setColorBasedOnNum();
 				player.at( p ).setMG( this );
@@ -1819,22 +1839,22 @@ MainGame::MainGame() {
 		if( settingsManager.isServer ) {
 			setMyPlayer( 0 );
 		} else {
-			settingsManager.numBots = 0; //Only the server can control the bots. Clients should see them as other players.
+			numBots = 0; //Only the server can control the bots. Clients should see them as other players.
 		}
 		
-		if( settingsManager.numBots > settingsManager.numPlayers ) {
-			settingsManager.numBots = settingsManager.numPlayers;
+		if( numBots > numPlayers ) {
+			numBots = numPlayers;
 		}
 		
-		if( settingsManager.numBots > 0 ) {
+		if( numBots > 0 ) {
 			if ( settingsManager.debug ) {
-				std::wcout << L"Resizing numBots vector to " << settingsManager.numBots << std::endl;
+				std::wcout << L"Resizing numBots vector to " << numBots << std::endl;
 			}
 			
-			bot.resize( settingsManager.numBots );
+			bot.resize( numBots );
 			
-			for( decltype( settingsManager.numBots ) i = 0; i < settingsManager.numBots; ++i ) {
-				decltype( bot.at( i ).getPlayer() ) p = settingsManager.numPlayers - ( i + 1 );
+			for( decltype( numBots ) i = 0; i < numBots; ++i ) {
+				decltype( bot.at( i ).getPlayer() ) p = numPlayers - ( i + 1 );
 				bot.at( i ).setPlayer( p ) ;
 				playerAssigned.at( p ) = true;
 				player.at( bot.at( i ).getPlayer() ).isHuman = false;
@@ -1994,7 +2014,7 @@ void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromSe
 			network.sendPlayerPosXMove( p, direction );
 		}
 		
-		if( settingsManager.numPlayers > p and mazeManager.cols > 0 ) {
+		if( numPlayers > p and mazeManager.cols > 0 ) {
 			if( direction < 0 ) {
 				if( player.at( p ).hasItem() and player.at( p ).getItemType() == Collectable::ACID and player.at( p ).getX() > 0 and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() not_eq MazeCell::ACIDPROOF and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() not_eq MazeCell::LOCK  and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getLeft() not_eq MazeCell::NONE ) {
 					player.at( p ).removeItem();
@@ -2022,9 +2042,11 @@ void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromSe
 				throw CustomException( L"Player "+ stringConverter.toStdWString( p ) + L"'s Y (" + stringConverter.toStdWString( player.at( p ).getY() ) + L") is outside mazeManager's rows (" + stringConverter.toStdWString( mazeManager.rows ) + L")." );
 			}
 		} else {
-			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( settingsManager.numPlayers ) + L")";
+			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
 			throw CustomException( e );
 		}
+	} catch( CustomException &e ) {
+		std::wcerr << L"Error in MainGame::movePlayerOnX(): " << e.what() << std::endl;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::movePlayerOnX(): " << e.what() << std::endl;
 	}
@@ -2044,7 +2066,7 @@ void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromSe
 			network.sendPlayerPosYMove( p, direction );
 		}
 		
-		if( settingsManager.numPlayers > p and mazeManager.rows > 0 ) {
+		if( numPlayers > p and mazeManager.rows > 0 ) {
 			if( direction < 0 ) {
 				if( player.at( p ).hasItem() and player.at( p ).getItemType() == Collectable::ACID and player.at( p ).getY() > 0 and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() not_eq MazeCell::ACIDPROOF and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() not_eq MazeCell::LOCK and mazeManager.maze[ player.at( p ).getX() ][ player.at( p ).getY() ].getTop() not_eq MazeCell::NONE ) {
 					player.at( p ).removeItem();
@@ -2073,9 +2095,11 @@ void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromSe
 
 			movePlayerCommon( p );
 		} else {
-			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( settingsManager.numPlayers ) + L")";
+			std::wstring e = L"Player " + stringConverter.toStdWString( p ) + L" is greater than numPlayers (" + stringConverter.toStdWString( numPlayers ) + L")";
 			throw CustomException( e );
 		}
+	} catch( CustomException &e ) {
+		std::wcerr << L"Error in MainGame::movePlayerOnY(): " << e.what() << std::endl;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::movePlayerOnY(): " << e.what() << std::endl;
 	}
@@ -2112,7 +2136,7 @@ void MainGame::musicVolumeChanged() {
 void MainGame::networkHasNewConnection() {
 	network.sendMaze( randomSeed );
 	
-	for( decltype( myPlayer ) p = 0; p < settingsManager.numPlayers; ++p ) {
+	for( decltype( myPlayer ) p = 0; p < numPlayers; ++p ) {
 		std::wcout << p << " ";
 		if( !playerAssigned.at( p ) ) {
 			std::wcout << "false";
@@ -2122,7 +2146,7 @@ void MainGame::networkHasNewConnection() {
 		std::wcout << std::endl;
 	}
 	
-	for( decltype( myPlayer ) p = 0; p < settingsManager.numPlayers; ++p ) {
+	for( decltype( myPlayer ) p = 0; p < numPlayers; ++p ) {
 		if( !playerAssigned.at( p ) ) {
 			network.tellNewClientItsPlayer( p );
 			playerAssigned.at( p ) = true;
@@ -2130,7 +2154,7 @@ void MainGame::networkHasNewConnection() {
 		}
 	}
 	
-	for( uint_fast8_t p = 0; p < settingsManager.numPlayers; ++p ) {
+	for( uint_fast8_t p = 0; p < numPlayers; ++p ) {
 		network.sendPlayerPos( p );
 	}
 }
@@ -2191,17 +2215,19 @@ void MainGame::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 		
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
-		for( decltype( settingsManager.numBots ) b = 0; b < settingsManager.numBots; ++b ) {
+		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
 			bot.at( b ).setup( this, settingsManager.botsKnowSolution, settingsManager.botAlgorithm, settingsManager.botMovementDelay );
 		}
 		
 		if( numLocks == 0 ) {
-			for( decltype( settingsManager.numBots ) b = 0; b < settingsManager.numBots; ++b ) {
+			for( decltype( numBots ) b = 0; b < numBots; ++b ) {
 				bot.at( b ).allKeysFound(); //Lets all the bots know they don't need to search for keys
 			}
 		}
 		
 		setLoadingPercentage( 100 );
+		
+		network.ImReadyToPlay();
 		
 		if( settingsManager.debug ) {
 			std::wcout << L"end of newMaze() with an argument" << std::endl;
@@ -2651,7 +2677,7 @@ void MainGame::processControls() {
 							ignoreKey = true;
 						}
 						
-						for( decltype( settingsManager.numBots ) b = 0; not settingsManager.isServer and not ignoreKey and b < settingsManager.numBots; ++b ) { //Ignore controls that affect bots
+						for( decltype( numBots ) b = 0; not settingsManager.isServer and not ignoreKey and b < numBots; ++b ) { //Ignore controls that affect bots
 							if( controls.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
 								ignoreKey = true;
 							}
@@ -2721,13 +2747,13 @@ void MainGame::resetThings() {
 		numLocks = 0;
 		donePlaying = false;
 
-		for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
+		for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 			playerStart.at( p ).reset();
 			player.at( p ).reset();
 		}
 
 		//Calculate players' total scores
-		for( decltype( settingsManager.numPlayers ) w = 0; w < winnersLoadingScreen.size(); ++w ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+		for( decltype( numPlayers ) w = 0; w < winnersLoadingScreen.size(); ++w ) { //changed decltype( winnersLoadingScreen.size() ) to decltype( numPlayers ) because winnersLoadingScreen.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) score = 0;
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) additiveMultiplier = 10; //So the scores don't get too negative, numbers that add to the score get multiplied by a magic number.
 			decltype( player.at( winnersLoadingScreen.at( w ) ).getScoreTotal() ) subtractiveDivisor = 10; //Likewise, numbers that subtract from the score get divided by a magic number.
@@ -2767,7 +2793,7 @@ void MainGame::resetThings() {
 			player.at( winnersLoadingScreen.at( w ) ).setScore( score );
 		}
 
-		for( decltype( settingsManager.numBots ) b = 0; b < settingsManager.numBots; ++b ) {
+		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
 			bot.at( b ).reset();
 		}
 
@@ -2866,8 +2892,8 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 				
 				if( ( currentScreen != LOADINGSCREEN and device->isWindowActive() ) or settingsManager.debug ) {
 					//It's the bots' turn to move now.
-					if( currentScreen == MAINSCREEN and settingsManager.numBots > 0 ) {
-						for( decltype( settingsManager.numBots ) i = 0; i < settingsManager.numBots; ++i ) {
+					if( currentScreen == MAINSCREEN and numBots > 0 ) {
+						for( decltype( numBots ) i = 0; i < numBots; ++i ) {
 							if( not bot.at( i ).atGoal() and ( allHumansAtGoal() or bot.at( i ).doneWaiting() ) ) {
 								bot.at( i ).move();
 							}
@@ -2878,7 +2904,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 					drawAll();
 					
 					//Check if any of the players have landed on a collectable item
-					for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
+					for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 						for( decltype( stuff.size() ) s = 0; s < stuff.size(); ++s ) {
 							if( not stuff.at( s ).owned and player.at( p ).getX() == stuff.at( s ).getX() and player.at( p ).getY() == stuff.at( s ).getY() ) {
 								switch( stuff.at( s ).getType() ) {
@@ -2904,11 +2930,11 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 												}
 											}
 
-											for( decltype( settingsManager.numBots ) b = 0; b < settingsManager.numBots; ++b ) {
+											for( decltype( numBots ) b = 0; b < numBots; ++b ) {
 												bot.at( b ).allKeysFound();
 											}
 										} else {
-											for( decltype( settingsManager.numBots ) b = 0; b < settingsManager.numBots; ++b ) {
+											for( decltype( numBots ) b = 0; b < numBots; ++b ) {
 												bot.at( b ).keyFound( s );
 											}
 										}
@@ -2923,11 +2949,11 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 					}
 
 
-					for( decltype( settingsManager.numPlayers ) p = 0; p < settingsManager.numPlayers; ++p ) {
+					for( decltype( numPlayers ) p = 0; p < numPlayers; ++p ) {
 						if( ( player.at( p ).getX() == goal.getX() ) and player.at( p ).getY() == goal.getY() ) { //Make a list of who finished in what order
 							bool alreadyFinished = false; //Indicates whether the player is already on the winners list
 
-							for( decltype( settingsManager.numPlayers ) i = 0; i < winners.size() and not alreadyFinished; ++i ) { //changed decltype( winners.size() ) to decltype( numPlayers ) because winners.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+							for( decltype( numPlayers ) i = 0; i < winners.size() and not alreadyFinished; ++i ) { //changed decltype( winners.size() ) to decltype( numPlayers ) because winners.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 								if( p == winners.at( i ) ) {
 									alreadyFinished = true;
 								}
@@ -2940,7 +2966,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 						}
 					}
 
-					won = ( winners.size() >= settingsManager.numPlayers ); //If all the players are on the winners list, we've won.
+					won = ( winners.size() >= numPlayers ); //If all the players are on the winners list, we've won.
 
 				} else if( not device->isWindowActive() ) { //if(( not showingLoadingScreen and device->isWindowActive() ) or debug )
 					if( currentScreen != MENUSCREEN and currentScreen != SETTINGSSCREEN ) {
@@ -2959,6 +2985,10 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 				if( settingsManager.isServer or network.getConnectionStatus() ) {
 					network.processPackets();
 				}
+				
+				if( !settingsManager.isServer and !network.getConnectionStatus() ) {
+					donePlaying = true;
+				}
 			}
 
 			timer->stop();
@@ -2968,7 +2998,7 @@ uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
 					std::wcout << L"On to the next level! " << std::endl;
 					std::wcout << L"Winners:";
 
-					for( decltype( settingsManager.numPlayers ) i = 0; i < winners.size(); ++i ) { //changed decltype( winners.size() ) to decltype( numPlayers ) because winners.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
+					for( decltype( numPlayers ) i = 0; i < winners.size(); ++i ) { //changed decltype( winners.size() ) to decltype( numPlayers ) because winners.size() can never exceed numPlayers but can be stored in a needlessly slow integer type.
 						std::wcout << L" " << winners.at( i );
 					}
 
@@ -3279,14 +3309,14 @@ void MainGame::setControls() {
 										std::wstring playerNumStr = boost::algorithm::trim_copy( preference.substr( 0, preference.find( L' ' ) ) );
 										std::wstring actionStr = boost::algorithm::trim_copy( preference.substr( preference.find( L' ' ) ) );
 										
-										decltype( settingsManager.numPlayers ) playerNum;
+										decltype( numPlayers ) playerNum;
 										if( spellChecker.DamerauLevenshteinDistance( playerNumStr, L"mine" ) <= 1 ) {
 											playerNum = myPlayer;
 										} else {
 											playerNum = boost::lexical_cast< unsigned short int >( playerNumStr ); //Boost doesn't like casting to uint_fast8_t
 										}
 										
-										if( playerNum < settingsManager.numPlayers or playerNum == myPlayer ) {
+										if( playerNum < numPlayers or playerNum == myPlayer ) {
 											std::vector< std::wstring > possibleActions = { L"up", L"u", L"down", L"d", L"left", L"l", L"right", L"r" };
 											actionStr = possibleActions.at( spellChecker.indexOfClosestString( actionStr, possibleActions) );
 											controls.back().setPlayer( playerNum );

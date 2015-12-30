@@ -40,7 +40,10 @@ class NetworkManager {
 		virtual ~NetworkManager();
 		
 		bool getConnectionStatus();
+		bool getIsServer();
 		std::string getPort();
+		
+		void ImReadyToPlay();
 		
 		void processPackets();
 		

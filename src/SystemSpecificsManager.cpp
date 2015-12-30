@@ -21,6 +21,7 @@
 #endif //HAVE_STDLIB_H. I don't know what we'll do if we don't have this header.
 
 #include <wchar.h>
+#include <iostream>
 #include <boost/algorithm/string/split.hpp>
 
 #include "CustomException.h"
@@ -100,8 +101,6 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 	
 	return fontFolders;
 }
-
-//TODO: Add getConfigFolders()
 
 std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders() {
 	std::vector< boost::filesystem::path > imageFolders;
@@ -196,58 +195,121 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getMusicFolders()
 }
 
 std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders() {
-	std::vector< boost::filesystem::path > configFolders;
-	configFolders.push_back( boost::filesystem::current_path() );
+	std::vector< boost::filesystem::path > configFolders;\
 	std::wstring packageName = sc.toStdWString( PACKAGE_NAME );
 	packageName += L"/";
 	#if defined WINDOWS
 		try {
-			configFolders.push_back( getEnvironmentVariable( "%APPDATA%" ) + L"/" + packageName );
+			configFolders.push_back( getEnvironmentVariable( "%ProgramW6432%" ) + L"/" + packageName );
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
+		
 		try {
-			configFolders.push_back( getEnvironmentVariable( "%LOCALAPPDATA%" ) + L"/" + packageName );
+			configFolders.push_back( getEnvironmentVariable( "%ProgramFiles%" ) + L"/" + packageName );
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
+		
+		try {
+			configFolders.push_back( getEnvironmentVariable( "%ProgramFiles(X86)%" ) + L"/" + packageName );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		
 		try {
 			configFolders.push_back( getEnvironmentVariable( "%PROGRAMDATA%" ) + L"/" + packageName );
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
-	#elif defined LINUX
-		configFolders.push_back( L"/etc/" + sc.toStdWString( PACKAGE_NAME ) );
+		
 		try {
-			configFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/." + packageName );
+			configFolders.push_back( getEnvironmentVariable( "%ALLUSERSPROFILE%" ) + L"/" + packageName );
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
+		
+		try {
+			configFolders.push_back( getEnvironmentVariable( "%APPDATA%" ) + L"/" + packageName );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		
+		try {
+			configFolders.push_back( getEnvironmentVariable( "%LOCALAPPDATA%" ) + L"/" + packageName );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		
+		try {
+			configFolders.push_back( getEnvironmentVariable( "%HOMEPATH%" ) + L"/" + packageName );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#elif defined LINUX
+		configFolders.push_back( L"/etc/" + packageName );
+		
+		try {
+			auto xdgFoldersString = getEnvironmentVariable( "XDG_CONFIG_DIRS" );
+			
+			std::vector< decltype( xdgFoldersString ) > xdgFoldersVector;
+			boost::algorithm::split( xdgFoldersVector, xdgFoldersString, [](wchar_t c) { return c == L':'; } );
+			
+			for( decltype( xdgFoldersVector.size() ) i = 0; i < xdgFoldersVector.size(); ++i ) {
+				configFolders.push_back( xdgFoldersVector.at( i ) );
+			}
+			
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		
 		try {
 			configFolders.push_back( getEnvironmentVariable( "XDG_CONFIG_HOME" ) + L"/" + packageName );
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
+		
+		try {
+			configFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/." + packageName );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		
 	#elif defined MACOSX
+		configFolders.push_back( L"/Network/Library/Preferences/" + packageName );
+		
+		try {
+			configFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/Library/Preferences/" + packageName );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		
 		try {
 			configFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/Library/Application Support/" + packageName );
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#else
+		//What about other operating systems? I don't know where BSD etc. put their config files.
 		//This section is just a copy of the Linux section above.
 		configFolders.push_back( L"/etc/" + packageName );
-		try {
-			configFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/." + packageName );
-		} catch( std::exception &error ) {
-			//Environment variable not found, so ignore it. Do nothing.
-		}
+		
 		try {
 			configFolders.push_back( getEnvironmentVariable( "XDG_CONFIG_HOME" ) + L"/" + packageName );
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
-	#endif //What about other operating systems? I don't know where BSD etc. put their config files.
+		
+		try {
+			configFolders.push_back( getEnvironmentVariable( "HOME" ) + L"/." + packageName );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#endif
+	
+	configFolders.push_back( boost::filesystem::current_path() );
+	
+	std::wcout << L"configFolders.size() before removing stuff: " << configFolders.size() << std::endl;
 	
 	for( decltype( configFolders.size() ) i = 0; i < configFolders.size(); i++ ) {
 		if( not canBeUsedAsFolder( configFolders.at( i ) ) ) {
@@ -255,6 +317,8 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 			i -= 1;
 		}
 	}
+	
+	std::wcout << L"configFolders.size() after removing stuff: " << configFolders.size() << std::endl;
 	
 	return configFolders;
 }
@@ -273,6 +337,8 @@ bool SystemSpecificsManager::canBeUsedAsFolder( boost::filesystem::path folder )
 			}
 		}
 	}
+	
+	std::wcout << folder.wstring().c_str();
 	
 	return goodSoFar;
 }

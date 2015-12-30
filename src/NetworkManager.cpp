@@ -59,6 +59,35 @@ bool NetworkManager::getConnectionStatus() {
 	return isConnected;
 }
 
+bool NetworkManager::getIsServer() {
+	return isServer;
+}
+
+void NetworkManager::ImReadyToPlay() {
+	if( isServer and isConnected ) {
+		for( uint_fast8_t c = 0; c < clients.size(); ++c ) {
+			if( clients.at( c ).guid == me->GetGuidFromSystemAddress( RakNet::UNASSIGNED_SYSTEM_ADDRESS ) ) {
+				clients.at( c ).isReadyToPlay = true;
+				break;
+			}
+		}
+		
+		bool ready = true;
+		for( uint_fast8_t c = 0; c < clients.size(); ++c ) {
+			if( not clients.at( c ).isReadyToPlay ) {
+				ready = false;
+				break;
+			}
+		}
+		
+		if( ready ) {
+			std::string notice = serializeU8( READYTOPLAY );
+			me->Send( notice.c_str(), notice.length(), HIGH_PRIORITY, RELIABLE_ORDERED, SERVER_SEND_CHANNEL, RakNet::UNASSIGNED_SYSTEM_ADDRESS, true );
+			mg->allPlayersReady( true );
+		}
+	}
+}
+
 void NetworkManager::processPackets() {
 	try {
 		for( RakNet::Packet* p = me->Receive(); p != 0; me->DeallocatePacket( p ), p = me->Receive() ) {
@@ -310,7 +339,7 @@ void NetworkManager::processPackets() {
 }
 
 void NetworkManager::sendMaze( std::minstd_rand::result_type randomSeed ) {
-	if( me not_eq nullptr and isConnected ) {
+	if( me not_eq nullptr and isConnected and isServer ) {
 		std::wcout << L"Sending random seed " << randomSeed << std::endl;
 		//auto data = serializeU32( randomSeed );
 		std::string data = "";
@@ -320,9 +349,9 @@ void NetworkManager::sendMaze( std::minstd_rand::result_type randomSeed ) {
 		char channel;
 		if( isServer ) {
 			channel = SERVER_SEND_CHANNEL;
-		} else {
+		} /*else {
 			channel = CLIENT_SEND_CHANNEL;
-		}
+		}*/
 		me->Send( data.c_str(), data.length(), MEDIUM_PRIORITY, RELIABLE_ORDERED, channel, latestClientAddress, false ); //The Boolean being false means we will send only to the specified address.
 	} else {
 		//std::wcerr << L"Error: Cannot send data, not yet connected to anything." << std::endl;

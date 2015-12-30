@@ -433,5 +433,6 @@
     <File Name="prefs (copy).cfg"/>
     <File Name="controls.cfg"/>
     <File Name="prefs.cfg"/>
+    <File Name="protips.txt"/>
   </VirtualDirectory>
 </CodeLite_Project>

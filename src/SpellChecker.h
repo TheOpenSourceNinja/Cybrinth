@@ -28,6 +28,8 @@
 #include <string>
 #endif //HAVE_STRING
 
+
+//Spell checker: A class used for general ad-hackery.
 class SpellChecker {
 	public:
 		SpellChecker();

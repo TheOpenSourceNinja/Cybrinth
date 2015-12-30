@@ -35,7 +35,7 @@ class SystemSpecificsManager {
 		std::vector< boost::filesystem::path > getFontFolders();
 		std::vector< boost::filesystem::path > getImageFolders();
 		std::vector< boost::filesystem::path > getMusicFolders();
-		std::vector< boost::filesystem::path > getConfigFolders();
+		std::vector< boost::filesystem::path > getConfigFolders(); //Order: Increasing specificity of who can read/write to the folder. I.e. start with system-wide stuff, end with stuff specific to the current user.
 		bool canBeUsedAsFolder( boost::filesystem::path folder );
 	protected:
 		std::wstring getEnvironmentVariable( std::string name );
