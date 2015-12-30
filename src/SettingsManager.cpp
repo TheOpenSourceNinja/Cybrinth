@@ -334,287 +334,299 @@ void SettingsManager::readPrefs() {
 					std::wcout << L"Loading preferences from file " << prefsPath.wstring() << std::endl;
 				}
 				prefsFileFound = true;
-				boost::filesystem::wfstream prefsFile;
-				prefsFile.open( prefsPath, boost::filesystem::wfstream::in );
+				/*boost::filesystem::wfstream prefsFile;
+				prefsFile.open( prefsPath, boost::filesystem::wfstream::in );*/
 				
-				if( prefsFile.is_open() ) {
-					std::wstring line;
+				FILE* prefsFile = fopen( prefsPath.c_str(), "r" );
+				
+				if( prefsFile != NULL ) {//prefsFile.is_open() ) {
 					uintmax_t lineNum = 0; //This used to be a uint_fast8_t, which should be good enough. However, when dealing with user input (such as a file), we don't want to make assumptions.
 					
-					while( prefsFile.good() ) {
+					wchar_t* linePointer;
+					do { //while( prefsFile.good() ) {
 						++lineNum;
-						getline( prefsFile, line );
-						line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
-						boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
+						//getline( prefsFile, line );
 						
-						if( debug ) {
-							std::wcout << L"Line " << lineNum << L": \"" << line << "\"" << std::endl;
-						}
+						uint_fast8_t lineMax = 255;
+						std::wstring::value_type lineArray[ lineMax ];
+						linePointer = fgetws( lineArray, lineMax, prefsFile );
 						
-						
-						if( not line.empty() ) {
-							try {
-								std::wstring choiceOriginalCase = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) ); //The time and date format settings need values that might be upper or lower case
-								boost::algorithm::to_lower( line );
-								
-								std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
-								std::wstring choice = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
-								
-								if( debug ) {
-									std::wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< std::endl;
-								}
-								
-								//preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
-								auto preferenceNum = spellChecker->indexOfClosestString( preference, possiblePrefs );
-								
-								if( debug ) {
-									std::wcout << L"Preference after spellchecking \"" << preference << std::endl;
-								}
-								
-								switch( preferenceNum ) {
-									case DATE_FORMAT: {
-										dateFormat = choiceOriginalCase;
-										break;
+						if( linePointer != NULL ) {
+							std::wstring line = linePointer;
+							
+							line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
+							boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
+							
+							if( debug ) {
+								std::wcout << L"Line " << lineNum << L": \"" << line << "\"" << std::endl;
+							}
+							
+							
+							if( not line.empty() ) {
+								try {
+									std::wstring choiceOriginalCase = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) ); //The time and date format settings need values that might be upper or lower case
+									boost::algorithm::to_lower( line );
+									
+									std::wstring preference = boost::algorithm::trim_copy( line.substr( 0, line.find( L'\t' ) ) );
+									std::wstring choice = boost::algorithm::trim_copy( line.substr( line.find( L'\t' ) ) );
+									
+									if( debug ) {
+										std::wcout << L"Preference \"" << preference << L"\" choice \"" << choice << L"\""<< std::endl;
 									}
-									case TIME_FORMAT: {
-										timeFormat = choiceOriginalCase;
-										break;
+									
+									//preference = possiblePrefs.at( spellChecker.indexOfClosestString( preference, possiblePrefs ) );
+									auto preferenceNum = spellChecker->indexOfClosestString( preference, possiblePrefs );
+									
+									if( debug ) {
+										std::wcout << L"Preference after spellchecking \"" << preference << std::endl;
 									}
-									case AUTODETECT_RESOLUTION: {
-										autoDetectFullscreenResolution = wStringToBool( choice );
-										break;
-									}
-									case FULLSCREEN_RESOLUTION: {
-										try {
-											size_t locationOfX = choice.find( L"x" );
-											std::wstring width = choice.substr( 0, locationOfX );
-											std::wstring height = choice.substr( locationOfX + 1 );
+									
+									switch( preferenceNum ) {
+										case DATE_FORMAT: {
+											dateFormat = choiceOriginalCase;
+											break;
+										}
+										case TIME_FORMAT: {
+											timeFormat = choiceOriginalCase;
+											break;
+										}
+										case AUTODETECT_RESOLUTION: {
+											autoDetectFullscreenResolution = wStringToBool( choice );
+											break;
+										}
+										case FULLSCREEN_RESOLUTION: {
+											try {
+												size_t locationOfX = choice.find( L"x" );
+												std::wstring width = choice.substr( 0, locationOfX );
+												std::wstring height = choice.substr( locationOfX + 1 );
+												if( debug ) {
+													std::wcout << L"Fullscreen resolution: " << width << L"x" << height << std::endl;
+												}
+												
+												decltype( fullscreenResolution.Width ) widthAsInt = boost::lexical_cast< decltype( fullscreenResolution.Width ) >( width );
+												decltype( fullscreenResolution.Height ) heightAsInt = boost::lexical_cast< decltype( fullscreenResolution.Height ) >( height );
+												
+												setFullscreenResolution( irr::core::dimension2d< decltype( fullscreenResolution.Height ) >( widthAsInt, heightAsInt ) );
+											} catch( boost::bad_lexical_cast e ) {
+												std::wcerr << L"Error reading fullscreen resolution. It must be composed of two integers separated by an x, e.g. 640x480." << std::endl;
+											}
+											break;
+										}
+										case ALGORITHM: { //L"bots' solving algorithm"
+											AI temp;
+											temp.setup( mainGame, false, AI::ALGORITHM_DO_NOT_USE, 0 );
+											botAlgorithm = temp.algorithmFromString( choice );
+											break;
+										}
+										
+										case VOLUME: { //L"volume"
+											try {
+												uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
+												
+												if( choiceAsInt <= 100 ) {
+													musicVolume = choiceAsInt;
+													Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
+													if( debug ) {
+														std::wcout << L"Volume should be " << choiceAsInt << "%" << std::endl;
+														std::wcout << L"Volume is really " << 100 * Mix_VolumeMusic( -1 ) / MIX_MAX_VOLUME << "%" << std::endl;
+													}
+												} else {
+													std::wcerr << L"Warning: Volume greater than 100%: " << choiceAsInt << std::endl;
+													Mix_VolumeMusic( MIX_MAX_VOLUME );
+													musicVolume = 100;
+												}
+											} catch( boost::bad_lexical_cast &e ) {
+												std::wcerr << L"Error reading volume preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+											}
+											break;
+										}
+										
+										case NUMBOTS: { //L"number of bots"
+											try {
+												decltype( numBots ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
+												
+												if( choiceAsInt <= numPlayers ) {
+													numBots = choiceAsInt;
+													if( debug ) {
+														std::wcout << L"Number of bots is " << choiceAsInt << std::endl;
+													}
+												} else {
+													std::wcerr << L"Warning: Number of bots not less than or equal to number of players (number of players may not have been read yet): " << choiceAsInt << std::endl;
+													numBots = choiceAsInt;
+												}
+											} catch( boost::bad_lexical_cast &e ) {
+												std::wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+											}
+											break;
+										}
+										
+										case SHOW_BACKGROUNDS: { //L"show backgrounds"
+											showBackgrounds = wStringToBool( choice );
+											break;
+										}
+										
+										case FULLSCREEN: { //L"fullscreen"
+											fullscreen = wStringToBool( choice );
+											break;
+										}
+										
+										case MARK_TRAILS: { //L"mark player trails"
+											markTrails = wStringToBool( choice );
+											break;
+										}
+										
+										case DEBUG: { //L"debug"
+											#ifndef DEBUG
+												debug = wStringToBool( choice );
+											#endif
+											
 											if( debug ) {
-												std::wcout << L"Fullscreen resolution: " << width << L"x" << height << std::endl;
+												std::wcout << L"Debug is ON" << std::endl;
 											}
-											
-											decltype( fullscreenResolution.Width ) widthAsInt = boost::lexical_cast< decltype( fullscreenResolution.Width ) >( width );
-											decltype( fullscreenResolution.Height ) heightAsInt = boost::lexical_cast< decltype( fullscreenResolution.Height ) >( height );
-											
-											setFullscreenResolution( irr::core::dimension2d< decltype( fullscreenResolution.Height ) >( widthAsInt, heightAsInt ) );
-										} catch( boost::bad_lexical_cast e ) {
-											std::wcerr << L"Error reading fullscreen resolution. It must be composed of two integers separated by an x, e.g. 640x480." << std::endl;
-										}
-										break;
-									}
-									case ALGORITHM: { //L"bots' solving algorithm"
-										AI temp;
-										temp.setup( mainGame, false, AI::ALGORITHM_DO_NOT_USE, 0 );
-										botAlgorithm = temp.algorithmFromString( choice );
-										break;
-									}
-									
-									case VOLUME: { //L"volume"
-										try {
-											uint_fast16_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-											
-											if( choiceAsInt <= 100 ) {
-												musicVolume = choiceAsInt;
-												Mix_VolumeMusic( musicVolume * MIX_MAX_VOLUME / 100 );
-												if( debug ) {
-													std::wcout << L"Volume should be " << choiceAsInt << "%" << std::endl;
-													std::wcout << L"Volume is really " << 100 * Mix_VolumeMusic( -1 ) / MIX_MAX_VOLUME << "%" << std::endl;
-												}
-											} else {
-												std::wcerr << L"Warning: Volume greater than 100%: " << choiceAsInt << std::endl;
-												Mix_VolumeMusic( MIX_MAX_VOLUME );
-												musicVolume = 100;
-											}
-										} catch( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading volume preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-										}
-										break;
-									}
-									
-									case NUMBOTS: { //L"number of bots"
-										try {
-											decltype( numBots ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
-											
-											if( choiceAsInt <= numPlayers ) {
-												numBots = choiceAsInt;
-												if( debug ) {
-													std::wcout << L"Number of bots is " << choiceAsInt << std::endl;
-												}
-											} else {
-												std::wcerr << L"Warning: Number of bots not less than or equal to number of players (number of players may not have been read yet): " << choiceAsInt << std::endl;
-												numBots = choiceAsInt;
-											}
-										} catch( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading number of bots preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-										}
-										break;
-									}
-									
-									case SHOW_BACKGROUNDS: { //L"show backgrounds"
-										showBackgrounds = wStringToBool( choice );
-										break;
-									}
-									
-									case FULLSCREEN: { //L"fullscreen"
-										fullscreen = wStringToBool( choice );
-										break;
-									}
-									
-									case MARK_TRAILS: { //L"mark player trails"
-										markTrails = wStringToBool( choice );
-										break;
-									}
-									
-									case DEBUG: { //L"debug"
-										#ifndef DEBUG
-											debug = wStringToBool( choice );
-										#endif
-										
-										if( debug ) {
-											std::wcout << L"Debug is ON" << std::endl;
-										}
-										break;
-									}
-									
-									case BPP: { //L"bits per pixel"
-										try {
-											uint_fast8_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
-											setBitsPerPixel( choiceAsInt );
-											
-										} catch( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
-										}
-										break;
-									}
-									
-									case VSYNC: { //L"wait for vertical sync"
-										vsync = wStringToBool( choice );
-										break;
-									}
-									
-									case DRIVER_TYPE: { //L"driver type"
-										std::vector< std::wstring > possibleChoices = driverTypes;
-										choice = possibleChoices.at( spellChecker->indexOfClosestString( choice, possibleChoices ) );
-										
-										if( choice == possibleChoices.at( OPENGL ) ) { //L"opengl"
-											driverType = irr::video::EDT_OPENGL;
-										} else if( choice == possibleChoices.at( DIRECT3D9 ) ) { //L"direct3d9"
-											driverType = irr::video::EDT_DIRECT3D9;
-										} else if( choice == possibleChoices.at( DIRECT3D8 ) ) { //L"direct3d8"
-											driverType = irr::video::EDT_DIRECT3D8;
-										} else if( choice == possibleChoices.at( BURNINGS ) ) { //L"burning's video"
-											driverType = irr::video::EDT_BURNINGSVIDEO;
-										} else if( choice == possibleChoices.at( SOFTWARE ) ) { //L"software"
-											driverType = irr::video::EDT_SOFTWARE;
-										} else if( choice == possibleChoices.at( DRIVERNULL ) ) { //L"null"
-											driverType = irr::video::EDT_NULL;
+											break;
 										}
 										
-										if( debug ) {
-											std::wcout << L"Selected driver type is " << choice << std::endl;
+										case BPP: { //L"bits per pixel"
+											try {
+												uint_fast8_t choiceAsInt = boost::lexical_cast< uint_fast16_t >( choice );
+												setBitsPerPixel( choiceAsInt );
+												
+											} catch( boost::bad_lexical_cast &e ) {
+												std::wcerr << L"Error reading bitsPerPixel preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+											}
+											break;
 										}
 										
-										break;
-									}
-									
-									case NUMPLAYERS: { //L"number of players"
-										try {
-											decltype( numPlayers ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
-											
-											if( choiceAsInt <= 4 and choiceAsInt > 0 ) {
-												numPlayers = choiceAsInt;
-												if( debug ) {
-													std::wcout << L"Number of players is " << choiceAsInt << std::endl;
-												}
-											} else if( choiceAsInt > 4 ) {
-												std::wcerr << L"Warning: Number of players not less than or equal to 4: " << choiceAsInt << std::endl;
-												numPlayers = choiceAsInt;
-											} else {
-												std::wcerr << L"Warning: Number of players is zero or not a number: " << choiceAsInt << L". Setting number of players to default." << std::endl;
-											}
-										} catch( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+										case VSYNC: { //L"wait for vertical sync"
+											vsync = wStringToBool( choice );
+											break;
 										}
-										break;
-									}
-									
-									case WINDOW_SIZE: { //L"window size"
-										try {
-											size_t locationOfX = choice.find( L"x" );
-											std::wstring width = choice.substr( 0, locationOfX );
-											std::wstring height = choice.substr( locationOfX + 1 );
+										
+										case DRIVER_TYPE: { //L"driver type"
+											std::vector< std::wstring > possibleChoices = driverTypes;
+											choice = possibleChoices.at( spellChecker->indexOfClosestString( choice, possibleChoices ) );
+											
+											if( choice == possibleChoices.at( OPENGL ) ) { //L"opengl"
+												driverType = irr::video::EDT_OPENGL;
+											} else if( choice == possibleChoices.at( DIRECT3D9 ) ) { //L"direct3d9"
+												driverType = irr::video::EDT_DIRECT3D9;
+											} else if( choice == possibleChoices.at( DIRECT3D8 ) ) { //L"direct3d8"
+												driverType = irr::video::EDT_DIRECT3D8;
+											} else if( choice == possibleChoices.at( BURNINGS ) ) { //L"burning's video"
+												driverType = irr::video::EDT_BURNINGSVIDEO;
+											} else if( choice == possibleChoices.at( SOFTWARE ) ) { //L"software"
+												driverType = irr::video::EDT_SOFTWARE;
+											} else if( choice == possibleChoices.at( DRIVERNULL ) ) { //L"null"
+												driverType = irr::video::EDT_NULL;
+											}
+											
 											if( debug ) {
-												std::wcout << L"Window size: " << width << L"x" << height << std::endl;
+												std::wcout << L"Selected driver type is " << choice << std::endl;
 											}
 											
-											decltype( windowSize.Width ) widthAsInt = boost::lexical_cast< decltype( windowSize.Width ) >( width );
-											decltype( windowSize.Height ) heightAsInt = boost::lexical_cast< decltype( windowSize.Height ) >( height );
-											
-											setWindowSize( irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt ) );
-										} catch( boost::bad_lexical_cast e ) {
-											std::wcerr << L"Error reading window size. It must be composed of two integers separated by an x, e.g. 640x480." << std::endl;
-										}
-										break;
-									}
-									
-									case PLAY_MUSIC: { //L"play music"
-										setPlayMusic( wStringToBool( choice ) );
-										break;
-									}
-									
-									case NETWORK_PORT: { //L"network port"
-										if( debug ) {
-											std::wcout << L"Network port: " << choice << std::endl;
+											break;
 										}
 										
-										try {
-											//StringConverter sc;
-											//network->setPort( sc.toStdString( choice ) );
-											networkPort = boost::lexical_cast< decltype( networkPort ) >( choice );
-										} catch( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+										case NUMPLAYERS: { //L"number of players"
+											try {
+												decltype( numPlayers ) choiceAsInt = boost::lexical_cast< unsigned short int >( choice ); //uint_fast8_t is typedef'd as a kind of char apparently, at least on my raspberry pi, and Boost lexical_cast() won't convert from wchar_t to char.
+												
+												if( choiceAsInt <= 4 and choiceAsInt > 0 ) {
+													numPlayers = choiceAsInt;
+													if( debug ) {
+														std::wcout << L"Number of players is " << choiceAsInt << std::endl;
+													}
+												} else if( choiceAsInt > 4 ) {
+													std::wcerr << L"Warning: Number of players not less than or equal to 4: " << choiceAsInt << std::endl;
+													numPlayers = choiceAsInt;
+												} else {
+													std::wcerr << L"Warning: Number of players is zero or not a number: " << choiceAsInt << L". Setting number of players to default." << std::endl;
+												}
+											} catch( boost::bad_lexical_cast &e ) {
+												std::wcerr << L"Error reading number of players preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+											}
+											break;
 										}
-										break;
-									}
-									
-									case ALWAYS_SERVER: { //L"always server"
-										alwaysServer = wStringToBool( choice );
-										isServer = alwaysServer;
-										break;
-									}
-									
-									case SOLUTION_KNOWN: { //L"bots know the solution"
-										botsKnowSolution = wStringToBool( choice );
-										break;
-									}
-									
-									case MOVEMENT_DELAY: { //L"bot movement delay"
-										try {
-											botMovementDelay = boost::lexical_cast< uint_fast16_t >( choice );
-										} catch( boost::bad_lexical_cast &e ) {
-											std::wcerr << L"Error reading botMovementDelay preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+										
+										case WINDOW_SIZE: { //L"window size"
+											try {
+												size_t locationOfX = choice.find( L"x" );
+												std::wstring width = choice.substr( 0, locationOfX );
+												std::wstring height = choice.substr( locationOfX + 1 );
+												if( debug ) {
+													std::wcout << L"Window size: " << width << L"x" << height << std::endl;
+												}
+												
+												decltype( windowSize.Width ) widthAsInt = boost::lexical_cast< decltype( windowSize.Width ) >( width );
+												decltype( windowSize.Height ) heightAsInt = boost::lexical_cast< decltype( windowSize.Height ) >( height );
+												
+												setWindowSize( irr::core::dimension2d< decltype( windowSize.Height ) >( widthAsInt, heightAsInt ) );
+											} catch( boost::bad_lexical_cast e ) {
+												std::wcerr << L"Error reading window size. It must be composed of two integers separated by an x, e.g. 640x480." << std::endl;
+											}
+											break;
 										}
-										break;
+										
+										case PLAY_MUSIC: { //L"play music"
+											setPlayMusic( wStringToBool( choice ) );
+											break;
+										}
+										
+										case NETWORK_PORT: { //L"network port"
+											if( debug ) {
+												std::wcout << L"Network port: " << choice << std::endl;
+											}
+											
+											try {
+												//StringConverter sc;
+												//network->setPort( sc.toStdString( choice ) );
+												networkPort = boost::lexical_cast< decltype( networkPort ) >( choice );
+											} catch( boost::bad_lexical_cast &e ) {
+												std::wcerr << L"Error reading network port (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+											}
+											break;
+										}
+										
+										case ALWAYS_SERVER: { //L"always server"
+											alwaysServer = wStringToBool( choice );
+											isServer = alwaysServer;
+											break;
+										}
+										
+										case SOLUTION_KNOWN: { //L"bots know the solution"
+											botsKnowSolution = wStringToBool( choice );
+											break;
+										}
+										
+										case MOVEMENT_DELAY: { //L"bot movement delay"
+											try {
+												botMovementDelay = boost::lexical_cast< uint_fast16_t >( choice );
+											} catch( boost::bad_lexical_cast &e ) {
+												std::wcerr << L"Error reading botMovementDelay preference (is it not a number?) on line " << lineNum << L": " << e.what() << std::endl;
+											}
+											break;
+										}
+										
+										case HIDE_UNSEEN: { //L"hide unseen maze areas"
+											mazeManager->hideUnseen = wStringToBool( choice );
+											break;
+										}
+										
+										case BACKGROUND_ANIMATIONS: { //L"ackground animations"
+											backgroundAnimations = wStringToBool( choice );
+											break;
+										}
 									}
 									
-									case HIDE_UNSEEN: { //L"hide unseen maze areas"
-										mazeManager->hideUnseen = wStringToBool( choice );
-										break;
-									}
-									
-									case BACKGROUND_ANIMATIONS: { //L"ackground animations"
-										backgroundAnimations = wStringToBool( choice );
-										break;
-									}
+								} catch ( std::exception &e ) {
+									std::wcerr << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << std::endl;
 								}
-								
-							} catch ( std::exception &e ) {
-								std::wcerr << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << std::endl;
 							}
 						}
-					}
+					} while( linePointer != NULL );
 					
-					prefsFile.close();
+					//prefsFile.close();
+					fclose( prefsFile );
 					
 					if( debug ) {
 						botMovementDelay = 0;
