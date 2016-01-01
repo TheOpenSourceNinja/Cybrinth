@@ -117,157 +117,164 @@ void SettingsManager::savePrefs() {
 					std::wcout << L"Saving preferences to file " << prefsPath.wstring() << std::endl;
 				}
 				prefsFileFound = true;
-				boost::filesystem::wfstream prefsFile;
-				prefsFile.open( prefsPath, boost::filesystem::wfstream::out );
+				/*boost::filesystem::wfstream prefsFile;
+				prefsFile.open( prefsPath, boost::filesystem::wfstream::out );*/
 				
-				if( prefsFile.is_open() ) {
+				FILE* prefsFile = fopen( prefsPath.c_str(), "w" );
+				
+				if( prefsFile != NULL ) { //prefsFile.is_open() ) {
 					{
 						StringConverter sc;
 						
+						fputws( L"test", prefsFile );
+						fputws( L"Cala¡s! Just openn this Êmail\n", prefsFile );
+						
+						std::wstring commentMark = L"//";
+						
 						//Save header comments------------
-						prefsFile << L"//Single-line comments like this are allowed, and must begin with two slashes (//). Anything before the slashes is considered not part of a comment." << std::endl;
-						prefsFile << L"//Preference and value must be separated by a tab character, not spaces." << std::endl;
-						prefsFile << L"//Any preference not specified here will use its default value. The same goes for things specified in invalid ways (i.e. putting letters where numbers should be)." << std::endl;
-						prefsFile << L"//Preferences are not case-sensitive. \"Play music\" is the same as \"PLAY muSic\"." << std::endl;
-						prefsFile << L"//Preferences and values do not have to be spelled correctly: \"treu\" will be interepreted as \"true\", \"flse\" as \"false\", etc." << std::endl;
-						prefsFile << std::endl;
+						fputws( std::wstring( commentMark + L"Single-line comments like this are allowed, and must begin with two slashes (//). Anything before the slashes is considered not part of a comment.\n" ).c_str() , prefsFile );
+						fputws( std::wstring( commentMark + L"Preference and value must be separated by a tab character, not spaces.\n" ).c_str(), prefsFile );
+						fputws( std::wstring( commentMark + L"Any preference not specified here will use its default value. The same goes for things specified in invalid ways (i.e. putting letters where numbers should be).\n" ).c_str(), prefsFile );
+						fputws( std::wstring( commentMark + L"Preferences are not case-sensitive. \"Play music\" is the same as \"PLAY muSic\".\n" ).c_str(), prefsFile );
+						fputws( std::wstring( commentMark + L"Preferences and values do not have to be spelled correctly: \"treu\" will be interepreted as \"true\", \"flse\" as \"false\", etc.\n" ).c_str(), prefsFile );
+						fputws( L"\n", prefsFile );
 						
 						//Done with header comments-------------
-						std::wstring commentMark = L"//";
 						std::wstring defaultString = L" " + commentMark + L"Default: ";
 						std::wstring line = L"------------------------";
 						
 						
 						{ //Graphics tab
-							prefsFile << std::endl << commentMark << L"Graphics" << line << std::endl;
+							fputws( std::wstring( commentMark + L"Graphics" + line + L"\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( FULLSCREEN ) << L"\t" << boolToWString( fullscreen ) << defaultString << boolToWString( fullscreenDefault ) << L". Determines whether we try to use full-screen graphics." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( FULLSCREEN ) + L"\t" + boolToWString( fullscreen ) + defaultString + boolToWString( fullscreenDefault ) + L". Determines whether we try to use full-screen graphics.\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( BPP ) << L"\t" << bitsPerPixel << defaultString << bitsPerPixelDefault << L". Determines the color depth when running in fullscreen; will be ignored when not running in fullscreen. Note that on the vast majority of systems, changing this setting will have no visible effect." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( BPP ) + L"\t" + sc.toStdWString( bitsPerPixel ) + defaultString + sc.toStdWString( bitsPerPixelDefault ) + L". Determines the color depth when running in fullscreen; will be ignored when not running in fullscreen. Note that on the vast majority of systems, changing this setting will have no visible effect.\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( VSYNC ) << L"\t" << boolToWString( vsync ) << defaultString << boolToWString( vsyncDefault ) << L". Set this to false if the game seems slow, but expect graphical 'ripping' of moving objects." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( VSYNC ) + L"\t" + boolToWString( vsync ) + defaultString + boolToWString( vsyncDefault ) + L". Set this to false if the game seems slow, but expect graphical 'ripping' of moving objects.\n" ).c_str(), prefsFile );
 							
 							{ //driver type
-								prefsFile << possiblePrefs.at( DRIVER_TYPE ) << L"\t";
+								fputws( std::wstring( possiblePrefs.at( DRIVER_TYPE ) + L"\t" ).c_str(), prefsFile );
 								switch( driverType ) {
 									case irr::video::EDT_OPENGL: {
-										prefsFile << driverTypes.at( OPENGL );
+										fputws( driverTypes.at( OPENGL ).c_str(), prefsFile );
 										break;
 									}
 									case irr::video::EDT_DIRECT3D9: {
-										prefsFile << driverTypes.at( DIRECT3D9 );
+										fputws( driverTypes.at( DIRECT3D9 ).c_str(), prefsFile );
 										break;
 									}
 									case irr::video::EDT_DIRECT3D8: {
-										prefsFile << driverTypes.at( DIRECT3D8 );
+										fputws( driverTypes.at( DIRECT3D8 ).c_str(), prefsFile );
 										break;
 									}
 									case irr::video::EDT_BURNINGSVIDEO: {
-										prefsFile << driverTypes.at( BURNINGS );
+										fputws( driverTypes.at( BURNINGS ).c_str(), prefsFile );
 										break;
 									}
 									case irr::video::EDT_SOFTWARE: {
-										prefsFile << driverTypes.at( SOFTWARE );
+										fputws( driverTypes.at( SOFTWARE ).c_str(), prefsFile );
 										break;
 									}
 									case irr::video::EDT_NULL: {
-										prefsFile << driverTypes.at( DRIVERNULL );
+										fputws( driverTypes.at( DRIVERNULL ).c_str(), prefsFile );
 										break;
 									}
 								}
 								
-								prefsFile << defaultString;
+								fputws( defaultString.c_str(), prefsFile );
 								
 								switch( driverTypeDefault ) {
 									case irr::video::EDT_OPENGL: {
-										prefsFile << driverTypes.at( OPENGL );
+										fputws( driverTypes.at( OPENGL ).c_str(), prefsFile );
 										break;
 									}
 									case irr::video::EDT_DIRECT3D9: {
-										prefsFile << driverTypes.at( DIRECT3D9 );
+										fputws( driverTypes.at( DIRECT3D9 ).c_str(), prefsFile );
 										break;
 									}
 									case irr::video::EDT_DIRECT3D8: {
-										prefsFile << driverTypes.at( DIRECT3D8 );
+										fputws( driverTypes.at( DIRECT3D8 ).c_str(), prefsFile );
 										break;
 									}
 									case irr::video::EDT_BURNINGSVIDEO: {
-										prefsFile << driverTypes.at( BURNINGS );
+										fputws( driverTypes.at( BURNINGS ).c_str(), prefsFile );
 										break;
 									}
 									case irr::video::EDT_SOFTWARE: {
-										prefsFile << driverTypes.at( SOFTWARE );
+										fputws( driverTypes.at( SOFTWARE ).c_str(), prefsFile );
 										break;
 									}
 									case irr::video::EDT_NULL: {
-										prefsFile << driverTypes.at( DRIVERNULL );
+										fputws( driverTypes.at( DRIVERNULL ).c_str(), prefsFile );
 										break;
 									}
 								}
 								
-								prefsFile << L". Possible values are OpenGL, Direct3D9, Direct3D8, Burning's Video, Software, and NULL (only for debugging, do not use!). If the selected driver type is not available for your system, the game will automatically choose one that is." << std::endl;
+								fputws( std::wstring( L". Possible values are OpenGL, Direct3D9, Direct3D8, Burning's Video, Software, and NULL (only for debugging, do not use!). If the selected driver type is not available for your system, the game will automatically choose one that is.\n" ).c_str(), prefsFile );
 							}
 							
-							prefsFile << possiblePrefs.at( WINDOW_SIZE ) << L"\t" << windowSize.Width << L"x" << windowSize.Height << defaultString << windowSizeDefault.Width << L"x" << windowSizeDefault.Height << L". Determines how big the game window will be in pixels. The numbers must be positive integers separated by an x. Only applicable if not running in fullscreen. Playability is not guaranteed at sizes below the default." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( WINDOW_SIZE ) + L"\t" + sc.toStdWString( windowSize.Width ) + L"x" + sc.toStdWString( windowSize.Height ) + defaultString + sc.toStdWString( windowSizeDefault.Width ) + L"x" + sc.toStdWString( windowSizeDefault.Height ) + L". Determines how big the game window will be in pixels. The numbers must be positive integers separated by an x. Only applicable if not running in fullscreen. Playability is not guaranteed at sizes below the default.\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( SHOW_BACKGROUNDS ) << L"\t" << boolToWString( showBackgrounds ) << defaultString << boolToWString( showBackgroundsDefault ) << L". Setting this to false can really speed the game up on slow systems like the Raspberry Pi." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( SHOW_BACKGROUNDS ) + L"\t" + boolToWString( showBackgrounds ) + defaultString + boolToWString( showBackgroundsDefault ) + L". Setting this to false can really speed the game up on slow systems like the Raspberry Pi.\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( BACKGROUND_ANIMATIONS ) << L"\t" << boolToWString( backgroundAnimations ) << defaultString << boolToWString( backgroundAnimationsDefault ) << L". If set to false, only non-animated backgrounds will be shown." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( BACKGROUND_ANIMATIONS ) + L"\t" + boolToWString( backgroundAnimations ) + defaultString + boolToWString( backgroundAnimationsDefault ) + L". If set to false, only non-animated backgrounds will be shown.\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( MARK_TRAILS ) << L"\t" << boolToWString( markTrails ) << defaultString << boolToWString( markTrailsDefault ) << L". Makes solving the maze easier by marking where you've already been." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( MARK_TRAILS ) + L"\t" + boolToWString( markTrails ) + defaultString + boolToWString( markTrailsDefault ) + L". Makes solving the maze easier by marking where you've already been.\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( AUTODETECT_RESOLUTION ) << L"\t" << boolToWString( autoDetectFullscreenResolution ) << defaultString << boolToWString( autoDetectFullscreenResolutionDefault ) << L". Only applicable if running in fullscreen." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( AUTODETECT_RESOLUTION ) + L"\t" + boolToWString( autoDetectFullscreenResolution ) + defaultString + boolToWString( autoDetectFullscreenResolutionDefault ) + L". Only applicable if running in fullscreen.\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( FULLSCREEN_RESOLUTION ) << L"\t" << fullscreenResolution.Width << L"x" << fullscreenResolution.Height << defaultString << fullscreenResolutionDefault.Width << L"x" << fullscreenResolutionDefault.Height << L". Determines what screen resolution to use in fullscreen. The numbers must be positive integers separated by an x. Only applicable if running in fullscreen and \"autodetect fullscreen resolution\" is false." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( FULLSCREEN_RESOLUTION ) + L"\t" + sc.toStdWString( fullscreenResolution.Width ) + L"x" + sc.toStdWString( fullscreenResolution.Height ) + defaultString + sc.toStdWString( fullscreenResolutionDefault.Width ) + L"x" + sc.toStdWString( fullscreenResolutionDefault.Height ) + L". Determines what screen resolution to use in fullscreen. The numbers must be positive integers separated by an x. Only applicable if running in fullscreen and \"autodetect fullscreen resolution\" is false.\n" ).c_str(), prefsFile );
 							
 						}
 						
 						{ //Sound tab
-							prefsFile << std::endl << commentMark << L"Sound" << line << std::endl;
+							fputws( std::wstring( L"\n" + commentMark + L"Sound" + line + L"\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( PLAY_MUSIC ) << L"\t" << boolToWString( playMusic ) << defaultString << boolToWString( playMusicDefault ) << L". If set to true, the game will search for music files in the ./music folder and attempt to play them. Supported music formats may vary from system to system, but generally will include WAVE (.wav), MOD (.mod), MIDI (.mid), OGG Vorbis (.ogg), MP3 (.mp3), and FLAC (.flac)." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( PLAY_MUSIC ) + L"\t" + boolToWString( playMusic ) + defaultString + boolToWString( playMusicDefault ) + L". If set to true, the game will search for music files in the ./music folder and attempt to play them. Supported music formats may vary from system to system, but generally will include WAVE (.wav), MOD (.mod), MIDI (.mid), OGG Vorbis (.ogg), MP3 (.mp3), and FLAC (.flac).\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( VOLUME ) << L"\t" << musicVolume << defaultString << musicVolumeDefault << L". Sets the music volume. Must be an integer between 0 and 100. The volume can be adjusted as the game is playing." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( VOLUME ) + L"\t" + sc.toStdWString( musicVolume ) + defaultString + sc.toStdWString( musicVolumeDefault ) + L". Sets the music volume. Must be an integer between 0 and 100. The volume can be adjusted as the game is playing.\n" ).c_str(), prefsFile );
 							
 						}
 						
 						
 						{ //Multiplayer tab
-							prefsFile << std::endl << commentMark << L"Multiplayer" << line << std::endl;
+							fputws( std::wstring( L"\n" + commentMark + L"Multiplayer" + line + L"\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( NUMPLAYERS ) << L"\t" << numPlayers << defaultString << numPlayersDefault<< L". This represents the total number of bots and human players. It must be an integer greater than or equal to the number of AI bots and less than or equal to 255. The game supports up to 4 human players on one keyboard, plus any number using other control devices. Online play to come soon." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( NUMPLAYERS ) + L"\t" + sc.toStdWString( numPlayers ) + defaultString + sc.toStdWString( numPlayersDefault ) + L". This represents the total number of bots and human players. It must be an integer greater than or equal to the number of AI bots and less than or equal to 255. The game supports up to 4 human players on one keyboard, plus any number using other control devices. Online play to come soon.\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( NUMBOTS ) << L"\t" << numBots << defaultString << numBotsDefault << L". Sets the number of AI bots you play against. Must be an integer less than or equal to the number of players." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( NUMBOTS ) + L"\t" + sc.toStdWString( numBots ) + defaultString + sc.toStdWString( numBotsDefault ) + L". Sets the number of AI bots you play against. Must be an integer less than or equal to the number of players.\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( NETWORK_PORT ) << L"\t" << networkPort << defaultString << networkPortDefault << L". This controls which port the server listens for connections on and the clients will attempt to connect to. Ports below 1024 may not work if you're on a Unix-like system and don't have superuser privileges, see https://en.wikipedia.org/w/index.php?title=List_of_TCP_and_UDP_port_numbers&oldid=501310028#Well-known_ports" << std::endl;
+							fputws( std::wstring( possiblePrefs.at( NETWORK_PORT ) + L"\t" + sc.toStdWString( networkPort ) + defaultString + sc.toStdWString( networkPortDefault ) + L". This controls which port the server listens for connections on and the clients will attempt to connect to. Ports below 1024 may not work if you're on a Unix-like system and don't have superuser privileges, see https://en.wikipedia.org/w/index.php?title=List_of_TCP_and_UDP_port_numbers&oldid=501310028#Well-known_ports\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( ALWAYS_SERVER ) << L"\t" << boolToWString( alwaysServer ) << defaultString << boolToWString( alwaysServerDefault ) << L" for now. Sets whether this copy of the program will always assume itself to be a server or ask." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( ALWAYS_SERVER ) + L"\t" + boolToWString( alwaysServer ) + defaultString + boolToWString( alwaysServerDefault ) + L" for now. Sets whether this copy of the program will always assume itself to be a server or ask.\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( MOVEMENT_DELAY ) << L"\t" << botMovementDelay << defaultString << botMovementDelayDefault << L". The minimum amount of time in milliseconds that all bots will wait between moves. The actual waiting time depends on your computer's processor speed and clock precision. Must be an integer between 0 and 65,535." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( MOVEMENT_DELAY ) + L"\t" + sc.toStdWString( botMovementDelay ) + defaultString + sc.toStdWString( botMovementDelayDefault ) + L". The minimum amount of time in milliseconds that all bots will wait between moves. The actual waiting time depends on your computer's processor speed and clock precision. Must be an integer between 0 and 65,535.\n" ).c_str(), prefsFile );
 							
 							{
 								AI temp;
-								prefsFile << possiblePrefs.at( ALGORITHM ) << L"\t" << temp.stringFromAlgorithm( botAlgorithm ) << defaultString << temp.stringFromAlgorithm( botAlgorithmDefault ) << L". Controls which algorithm bots use to solve the maze. Possible values are Depth-First Search (will always find a way to a key/goal, not necessarily the nearest key/goal), Iterative Deepening Depth-First Search (will always find the nearest key/goal, but is really slow. May cause the game to freeze for short periods of time. Not recommended for slow computers!), Left Hand Rule and Right Hand Rule (inefficient), and Dijkstra (experimental!)." << std::endl;
+								fputws( std::wstring( possiblePrefs.at( ALGORITHM ) + L"\t" + temp.stringFromAlgorithm( botAlgorithm ) + defaultString + temp.stringFromAlgorithm( botAlgorithmDefault ) + L". Controls which algorithm bots use to solve the maze. Possible values are Depth-First Search (will always find a way to a key/goal, not necessarily the nearest key/goal), Iterative Deepening Depth-First Search (will always find the nearest key/goal, but is really slow. May cause the game to freeze for short periods of time. Not recommended for slow computers!), Left Hand Rule and Right Hand Rule (inefficient), and Dijkstra (experimental!).\n" ).c_str(), prefsFile );
 							}
 							
-							prefsFile << possiblePrefs.at( SOLUTION_KNOWN ) << L"\t" << boolToWString( botsKnowSolution ) << defaultString << boolToWString( botsKnowSolutionDefault ) << L". Whether the bots know the solution or have to find it as they play. Note that they do not necessarily know the *best* solution, just one that works." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( SOLUTION_KNOWN ) + L"\t" + boolToWString( botsKnowSolution ) + defaultString + boolToWString( botsKnowSolutionDefault ) + L". Whether the bots know the solution or have to find it as they play. Note that they do not necessarily know the *best* solution, just one that works.\n" ).c_str(), prefsFile );
 							
 						}
 						
 						{ //Miscellaneous tab
-							prefsFile << std::endl << commentMark << L"Miscellaneous" << line << std::endl;
+							fputws( std::wstring( L"\n" + commentMark + L"Miscellaneous" + line + L"\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( DEBUG ) << L"\t" << boolToWString( debug ) << defaultString << boolToWString( debugDefault ) << L". Makes the program output more text to standard output. Also makes the AIs insanely fast." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( DEBUG ) + L"\t" + boolToWString( debug ) + defaultString + boolToWString( debugDefault ) + L". Makes the program output more text to standard output. Also makes the AIs insanely fast.\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( HIDE_UNSEEN ) << L"\t" << boolToWString( mazeManager->hideUnseen ) << defaultString << boolToWString( hideUnseenDefault ) << L". Hides parts of the maze that no player has seen yet (seen means unobstructed line-of-sight from any player's position)" << std::endl;
+							fputws( std::wstring( possiblePrefs.at( HIDE_UNSEEN ) + L"\t" + boolToWString( mazeManager->hideUnseen ) + defaultString + boolToWString( hideUnseenDefault ) + L". Hides parts of the maze that no player has seen yet (seen means unobstructed line-of-sight from any player's position)\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( TIME_FORMAT ) << L"\t" << timeFormat << defaultString << timeFormatDefault << L". Must be in wcsftime format. See http://www.cplusplus.com/reference/ctime/strftime/ for a format reference." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( TIME_FORMAT ) + L"\t" + timeFormat + defaultString + timeFormatDefault + L". Must be in wcsftime format. See http://www.cplusplus.com/reference/ctime/strftime/ for a format reference.\n" ).c_str(), prefsFile );
 							
-							prefsFile << possiblePrefs.at( DATE_FORMAT ) << L"\t" << dateFormat << defaultString << dateFormatDefault << L". Must be in wcsftime format. See http://www.cplusplus.com/reference/ctime/strftime/ for a format reference." << std::endl;
+							fputws( std::wstring( possiblePrefs.at( DATE_FORMAT ) + L"\t" + dateFormat + defaultString + dateFormatDefault + L". Must be in wcsftime format. See http://www.cplusplus.com/reference/ctime/strftime/ for a format reference.\n" ).c_str(), prefsFile );
 						}
 					}
 					
-					prefsFile.close();
+					//prefsFile.close();
+					fclose( prefsFile );
 				}
 			}
 		}
