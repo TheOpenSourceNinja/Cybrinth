@@ -68,6 +68,7 @@ class StringConverter {
 		std::wstring toStdWString( float input, const wchar_t* format, size_t maxLength );
 		std::wstring toStdWString( double input );
 		std::wstring toStdWString( long double input );
+		std::wstring toStdWString( bool input );
 		std::string toStdString( std::wstring input );
 		std::string toStdString( int8_t input );
 		std::string toStdString( uint8_t input );

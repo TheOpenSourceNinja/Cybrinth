@@ -312,6 +312,14 @@ std::wstring StringConverter::toStdWString( long double input ) {
 	}
 }
 
+std::wstring StringConverter::toStdWString( bool input ) {
+	if( input ) {
+		return L"true";
+	} else {
+		return L"false";
+	}
+}
+
 const wchar_t* StringConverter::toWCharArray( std::wstring input ) {
 	if( wCharArray not_eq nullptr ) {
 		delete wCharArray;

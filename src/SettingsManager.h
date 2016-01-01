@@ -85,7 +85,6 @@ class SettingsManager
 	private:
 		uint_fast8_t bitsPerPixel;
 		uint_fast8_t bitsPerPixelDefault;
-		std::wstring boolToWString( bool input );
 		
 		irr::IrrlichtDevice* device;
 		std::vector< std::wstring > driverTypes = { L"opengl", L"direct3d9", L"direct3d8", L"burning's video", L"software", L"null" };
