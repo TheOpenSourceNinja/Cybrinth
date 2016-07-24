@@ -81,6 +81,8 @@
     <File Name="controls.cfg"/>
     <File Name="prefs.cfg"/>
     <File Name="protips.txt"/>
+    <File Name="README"/>
+    <File Name="README.md"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
