@@ -392,6 +392,18 @@ void SettingsScreen::changeToSettingsScreen() {
 				botMovementDelaySpinBox->setDecimalPlaces( 0 );
 				
 				itemY = 1 + std::max( botMovementDelayTextRectangle.LowerRightCorner.Y, botMovementDelaySpinBoxRectangle.LowerRightCorner.Y );
+				
+				irr::core::stringw botsKnowSolutionCheckBoxText = L"Bots know the solution in advance";
+				auto botsKnowSolutionCheckBoxTextDimensions = font->getDimension( botsKnowSolutionCheckBoxText.c_str() );
+				auto botsKnowSolutionCheckBoxRectangle = Rectangle( 0, itemY, 0 + 30 + botsKnowSolutionCheckBoxTextDimensions.Width, itemY + botsKnowSolutionCheckBoxTextDimensions.Height );
+				botsKnowSolutionCheckBox = environment->addCheckBox( settingsManager->botsKnowSolution, botsKnowSolutionCheckBoxRectangle, multiplayerTab, BOTS_KNOW_SOLUTION_CHECKBOX_ID, botsKnowSolutionCheckBoxText.c_str() );
+				
+				itemY = 1 + botsKnowSolutionCheckBoxRectangle.LowerRightCorner.Y;
+				
+				irr::core::stringw botAlgorithmTextString = L"Bots' solving algorithm";
+				auto botAlgorithmTextDimensions = font->getDimension( botAlgorithmTextString.c_str() );
+				auto botAlgorithmTextRectangle = Rectangle( 0, itemY, 0 + botAlgorithmTextDimensions.Width, itemY + botAlgorithmTextDimensions.Height );
+				botAlgorithmText = environment->addStaticText( botAlgorithmTextString.c_str(), botAlgorithmTextRectangle, false, true, multiplayerTab );
 			}
 			
 			{ //Miscellaneous tab

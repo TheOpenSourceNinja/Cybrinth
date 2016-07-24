@@ -337,9 +337,9 @@ void SettingsManager::readPrefs() {
 						++lineNum;
 						//getline( prefsFile, line );
 						
-						uint_fast8_t lineMax = 255;
-						std::wstring::value_type lineArray[ lineMax ];
-						linePointer = fgetws( lineArray, lineMax, prefsFile );
+						int lineMaxLength = 640; //I'm not entirely sure if this is bytes, chars, or wide characters. What I do know is that prefs.cfg has some really long comments that brought line lengths above the previous limit of 255.
+						std::wstring::value_type lineArray[ lineMaxLength ];
+						linePointer = fgetws( lineArray, lineMaxLength, prefsFile );
 						
 						if( linePointer != NULL ) {
 							std::wstring line = linePointer;
@@ -609,8 +609,16 @@ void SettingsManager::readPrefs() {
 									}
 									
 								} catch ( std::exception &e ) {
-									std::wcerr << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says " << line << std::endl;
+									std::wcerr << L"Error: " << e.what() << L". Does line " << lineNum << L" not have a tab character separating preference and value? The line says \"" << line << "\"" << std::endl;
 								}
+							}
+						} else { //linePointer == NULL
+							std::wcerr << L"Line #" << lineNum << L": linePointer is null" << std::endl;
+							
+							if( ferror( prefsFile ) ) {
+								perror( "Error reading prefs file" );
+							} else if( feof( prefsFile ) ) {
+								std::wcerr << L"Reached end of prefs file" << std::endl;
 							}
 						}
 					} while( linePointer != NULL );
