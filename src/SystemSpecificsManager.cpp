@@ -3,12 +3,12 @@
  * @author James Dearing <dearingj@lifetime.oregonstate.edu>
  * 
  * @section LICENSE
- * Copyright © 2012-2015.
+ * Copyright © 2012-2016.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+ * Cybrinth is distributed 'as is' in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of TITLE, MERCHANTABILITY, COMPLETE DESTRUCTION OF EVIL MONSTERS, or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
  * 
@@ -118,7 +118,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders()
 		imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/images/" );
 		
 		std::wstring dataDirsString = getEnvironmentVariable( L"XDG_DATA_DIRS" );
-		//NOTE: This is where I left off 2015-07-10: Split dataDirsString into separate strings.
+		//NOTE: This is where I left off 2016-07-10: Split dataDirsString into separate strings.
 		
 	#elif defined MACOSX
 		imageFolders.push_back( L"/Library/Fonts/" );

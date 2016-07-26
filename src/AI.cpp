@@ -3,12 +3,12 @@
  * @author James Dearing <dearingj@lifetime.oregonstate.edu>
  * 
  * @section LICENSE
- * Copyright © 2012-2015.
+ * Copyright © 2012-2016.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- * Cybrinth is distributed in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+ * Cybrinth is distributed 'as is' in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of TITLE, MERCHANTABILITY, COMPLETE DESTRUCTION OF EVIL MONSTERS, or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License along with Cybrinth. If not, see <http://www.gnu.org/licenses/>.
  * 
@@ -31,7 +31,6 @@
 
 AI::AI() : controlsPlayer(0) {
 	try {
-		//setup( nullptr, 0, 0, nullptr, false, DEPTH_FIRST_SEARCH, 300 ); //setup( pointer to the maze, number of columns, number of rows, pointer to MainGame, whether to start solved, the algorithm to use, and the movement delay )
 		setup( nullptr, false, DEPTH_FIRST_SEARCH, 300 ); //setup( pointer to MainGame, whether to start solved, the algorithm to use, and the movement delay )
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::AI(): " << e.what() << std::endl;
@@ -61,29 +60,14 @@ AI::algorithm_t AI::algorithmFromString( std::wstring input ) {
 	algorithm_t result = ALGORITHM_DO_NOT_USE;
 	
 	if( choice == possibleChoices.at( 0 ) ) { //DFS
-		if( not( mg == nullptr or mg == NULL ) and mg->getDebugStatus() ) {
-			std::wcout << L"Bots will use Depth-First Search" << std::endl;
-		}
 		result = DEPTH_FIRST_SEARCH;
 	} else if( choice == possibleChoices.at( 1 ) ) { //IDDFS
-		if( not( mg == nullptr or mg == NULL ) and mg->getDebugStatus() ) {
-			std::wcout << L"Bots will use Iterative Deepening Depth-First Search" << std::endl;
-		}
 		result = ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH;
 	} else if( choice == possibleChoices.at( 2 ) ) {
-		if( not( mg == nullptr or mg == NULL ) and mg->getDebugStatus() ) {
-			std::wcout << L"Bots will use the Right Hand Rule" << std::endl;
-		}
 		result = RIGHT_HAND_RULE;
 	} else if( choice == possibleChoices.at( 3 ) ) {
-		if( not( mg == nullptr or mg == NULL ) and mg->getDebugStatus() ) {
-			std::wcout << L"Bots will use the Left Hand Rule" << std::endl;
-		}
 		result = LEFT_HAND_RULE;
 	} else if( choice == possibleChoices.at( 4 ) ) {
-		if( not( mg == nullptr or mg == NULL ) and mg->getDebugStatus() ) {
-			std::wcout << L"Bots will use Dijkstra's algorithm" << std::endl;
-		}
 		result = DIJKSTRA;
 	}
 	
@@ -165,13 +149,18 @@ bool AI::alreadyVisitedPretend( irr::core::position2d< uint_fast8_t > position )
 
 bool AI::atGoal() {
 	try {
-		Player* p = mg->getPlayer( controlsPlayer );
-		irr::core::position2d< uint_fast8_t > currentPosition( p->getX(), p->getY() );
-		Goal* goal = mg->getGoal();
-		if( currentPosition.X == goal->getX() and currentPosition.Y == goal->getY() ) {
-			return true;
+		if( mg != nullptr ) {
+			Player* p = mg->getPlayer( controlsPlayer );
+			irr::core::position2d< uint_fast8_t > currentPosition( p->getX(), p->getY() );
+			Goal* goal = mg->getGoal();
+			if( currentPosition.X == goal->getX() and currentPosition.Y == goal->getY() ) {
+				return true;
+			} else {
+				return false;
+			}
 		} else {
-			return false;
+			std::wcerr << L"Error in AI::atGoal(): mg pointer not set" << std::endl;
+			return true;
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << "Error in AI::atGoal(): " << e.what() << std::endl;
