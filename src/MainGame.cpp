@@ -299,7 +299,7 @@ void MainGame::drawAll() {
 
 				if( settingsManager.getPlayMusic() ) {
 					{
-						irr::core::stringw nowplaying( L"Now playing:" );
+						irr::core::stringw nowplaying( L"Music:" );
 						textY += tempDimensions.Height;
 						tempDimensions = textFont->getDimension( stringConverter.toStdWString( nowplaying ).c_str() ); //stringConverter.toWCharArray( nowplaying ) );
 						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
@@ -1505,8 +1505,7 @@ void MainGame::loadProTips() {
 					//proTipsFile.close();
 					fclose( proTipsFile );
 					
-					setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows random_shuffle() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
-					//random_shuffle( proTips.begin(), proTips.end(), &randomNumberGenerator() );
+					//setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows shuffle() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
 					shuffle( proTips.begin(), proTips.end(), randomNumberGenerator );
 				} else {
 					throw( CustomException( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) ) );
@@ -1690,6 +1689,8 @@ MainGame::MainGame() {
 		}
 		
 		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system);
+		
+		setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows makeMusicList() (called by SettingsManager when it reads prefs), loadProTips(), and pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generated.
 		settingsManager.readPrefs();
 		network.setPort( settingsManager.networkPort );
 		numPlayers = settingsManager.numPlayers;
@@ -1764,7 +1765,6 @@ MainGame::MainGame() {
 			driver->setTextureCreationFlag( irr::video::ETCF_ALLOW_NON_POWER_2, false );
 		}
 		
-		setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generated.
 		pickLogo();
 		driver->beginScene( false, false ); //These falses specify whether the back buffer and z buffer should be cleared. Since this is the first time drawing anything, there's no need to clear anything beforehand.
 		drawLogo(); //Why the fuck isn't this working consistently? Sometimes it draws, sometimes it only thinks it draws. Had to hack the drawLoadingScreen() function (which gets called several times, therefore is likely to work at least once).
@@ -1802,9 +1802,9 @@ MainGame::MainGame() {
 		}
 		
 		
-		if( settingsManager.getPlayMusic() ) {
+		/*if( settingsManager.getPlayMusic() ) { //Commenting this out because I think settingsManager, when reading the prefs, calls setupMusicStuff()
 			setupMusicStuff();
-		}
+		}*/
 		
 		settingsScreen.setPointers( this, device, nullptr, nullptr, &settingsManager );
 		settingsScreen.setupIconsAndStuff(); //Icon size might depend on screen/window size; that's why we call this after readPrefs()
@@ -1966,11 +1966,10 @@ void MainGame::makeMusicList() {
 			}
 		}
 
-		if( musicList.size() > 0 ) {
+		if( not musicList.empty() ) {
 			//Do we want music sorted or random?
 			//sort( musicList.begin(), musicList.end() );
-			setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows random_shuffle() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
-			random_shuffle( musicList.begin(), musicList.end() );
+			std::shuffle( musicList.begin(), musicList.end(), randomNumberGenerator );
 			
 			currentMusic = musicList.back();
 		} else {
@@ -3455,8 +3454,8 @@ void MainGame::setupBackground() {
 		}
 		
 		if( settingsManager.debug ) {
-			//backgroundChosen = IMAGES;
-			backgroundChosen = NUMBER_OF_BACKGROUNDS - 1; //If we're debugging, we may be testing the last background added.
+			backgroundChosen = IMAGES;
+			//backgroundChosen = NUMBER_OF_BACKGROUNDS - 1; //If we're debugging, we may be testing the last background added.
 		} else {
 			if( settingsManager.backgroundAnimations ) {
 				backgroundChosen = getRandomNumber() % NUMBER_OF_BACKGROUNDS;
@@ -3763,7 +3762,7 @@ void MainGame::setupBackground() {
 							std::wcout << L"background path is absolute? " << backgroundPath.is_absolute() << std::endl;
 						}
 
-						while( ( not exists( backgroundPath ) or not is_directory( backgroundPath ) ) and backgroundPath.has_parent_path() ) {
+						while( ( not exists( backgroundPath ) or not is_directory( backgroundPath ) ) and backgroundPath.has_parent_path() and not useBackgroundsSubfolder ) {
 							if( settingsManager.debug ) {
 								std::wcout << L"Path " << backgroundPath.wstring() << L" does not exist or is not a directory. Checking parent path " << backgroundPath.parent_path().wstring() << std::endl;
 							}
@@ -3771,9 +3770,9 @@ void MainGame::setupBackground() {
 							backgroundPath = backgroundPath.parent_path();
 						}
 
-						if( exists( backgroundPath ) ) {
+						if( backgroundList.empty() and exists( backgroundPath ) ) {
 							boost::filesystem::recursive_directory_iterator end;
-
+							
 							for( boost::filesystem::recursive_directory_iterator i( backgroundPath ); i not_eq end; ++i ) {
 								if( not is_directory( i->path() ) ) { //We've found a file
 									if( settingsManager.debug ) {
@@ -3789,12 +3788,15 @@ void MainGame::setupBackground() {
 
 										if( loader->isALoadableFileExtension( filePath ) ) { //Comment this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
 											irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
-											if( loader->isALoadableFileFormat( file ) ) {
-												backgroundList.push_back( i->path() );
+											
+											if( not isNull( file ) ) {
+												if( loader->isALoadableFileFormat( file ) ) {
+													backgroundList.push_back( i->path() );
+													file->drop();
+													break;
+												}
 												file->drop();
-												break;
 											}
-											file->drop();
 										}
 									}
 								}

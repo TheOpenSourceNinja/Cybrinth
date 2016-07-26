@@ -22,6 +22,8 @@
 
 #include <wchar.h>
 #include <iostream>
+#include <iterator>
+#include <sstream>
 #include <boost/algorithm/string/split.hpp>
 
 #include "CustomException.h"
@@ -109,31 +111,58 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders()
 	std::wstring common = L"Cybrinth\\images";
 	
 	#if defined WINDOWS
+	{
+		std::wstring pics = L"Pictures";
+		std::wstring mypics = L"My Pictures";
 		imageFolders.push_back( getEnvironmentVariable( "%ProgramFiles%" ) + common );
 		imageFolders.push_back( getEnvironmentVariable( "%AppData%" ) + common );
-		imageFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + common );
 		imageFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + common );
+		imageFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + pics );
+		imageFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + mypics );
+		imageFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + common );
+		imageFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + pics );
+		imageFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + mypics );
+	}
 	#elif defined LINUX
 		imageFolders.push_back( L"/usr/local/share/Cybrinth/images" );
-		imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/images/" );
+		try {
+			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Pictures/" + common );
+			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Pictures/" );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
 		
 		std::wstring dataDirsString = getEnvironmentVariable( L"XDG_DATA_DIRS" );
-		//NOTE: This is where I left off 2016-07-10: Split dataDirsString into separate strings.
+		std::vector< decltype( dataDirsString ) > dataDirsVector;
+		boost::algorithm::split( dataDirsVector, dataDirsString, [](wchar_t c) { return c == L':'; } );
+		
+		for( decltype( dataDirsVector.size() ) i = 0; i < dataDirsVector.size(); ++i ) {
+			imageFolders.push_back( dataDirsVector.at( i ) );
+		}
 		
 	#elif defined MACOSX
-		imageFolders.push_back( L"/Library/Fonts/" );
-		imageFolders.push_back( L"/Network/Library/Fonts/" );
-		imageFolders.push_back( L"/System/Library/Fonts/" );
-		imageFolders.push_back( L"/System Folder/Fonts/" );
+		imageFolders.push_back( L"/Library/Pictures/" + common );
+		imageFolders.push_back( L"/Network/Library/Pictures/" + common );
+		imageFolders.push_back( L"/System/Library/Pictures/" + common );
+		imageFolders.push_back( L"/System Folder/Pictures/" + common );
+		imageFolders.push_back( L"/Library/Pictures/" );
+		imageFolders.push_back( L"/Network/Library/Pictures/" );
+		imageFolders.push_back( L"/System/Library/Pictures/" );
+		imageFolders.push_back( L"/System Folder/Pictures/" );
 		try {
-			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Library/Fonts/");
+			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Pictures/" + common );
+			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Pictures/" );
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#else
-		imageFolders.push_back( L"/usr/X11R6/lib/X11/fonts/" ); //FreeBSD documentation says that X11 fonts are located here. OpenBSD documentation suggests fonts may be stored in this and the following location.
-		imageFolders.push_back( L"/usr/local/lib/X11/fonts/" );
-	#endif //What about other operating systems? I don't know where BSD etc. put their font files.
+		try {
+			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Pictures/" + common );
+			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Pictures/" );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#endif //What about other operating systems? I don't know where BSD etc. put their picture files.
 	
 	for( decltype( imageFolders.size() ) i = 0; i < imageFolders.size(); i++ ) {
 		if( not canBeUsedAsFolder( imageFolders.at( i ) ) ) {
@@ -195,10 +224,35 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getMusicFolders()
 }
 
 std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders() {
-	std::vector< boost::filesystem::path > configFolders;\
+	std::vector< boost::filesystem::path > configFolders;
 	std::wstring packageName = sc.toStdWString( PACKAGE_NAME );
 	packageName += L"/";
 	#if defined WINDOWS
+		
+		try {
+			configFolders.push_back( getEnvironmentVariable( "%APPDATA%" ) + L"/" + packageName );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		
+		try {
+			configFolders.push_back( getEnvironmentVariable( "%LOCALAPPDATA%" ) + L"/" + packageName );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		
+		try {
+			configFolders.push_back( getEnvironmentVariable( "%HOMEPATH%" ) + L"/" + packageName );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		
+		try {
+			configFolders.push_back( getEnvironmentVariable( "%ALLUSERSPROFILE%" ) + L"/" + packageName );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		
 		try {
 			configFolders.push_back( getEnvironmentVariable( "%ProgramW6432%" ) + L"/" + packageName );
 		} catch( std::exception &error ) {
@@ -222,51 +276,50 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
-		
-		try {
-			configFolders.push_back( getEnvironmentVariable( "%ALLUSERSPROFILE%" ) + L"/" + packageName );
-		} catch( std::exception &error ) {
-			//Environment variable not found, so ignore it. Do nothing.
-		}
-		
-		try {
-			configFolders.push_back( getEnvironmentVariable( "%APPDATA%" ) + L"/" + packageName );
-		} catch( std::exception &error ) {
-			//Environment variable not found, so ignore it. Do nothing.
-		}
-		
-		try {
-			configFolders.push_back( getEnvironmentVariable( "%LOCALAPPDATA%" ) + L"/" + packageName );
-		} catch( std::exception &error ) {
-			//Environment variable not found, so ignore it. Do nothing.
-		}
-		
-		try {
-			configFolders.push_back( getEnvironmentVariable( "%HOMEPATH%" ) + L"/" + packageName );
-		} catch( std::exception &error ) {
-			//Environment variable not found, so ignore it. Do nothing.
-		}
 	#elif defined LINUX
-		configFolders.push_back( L"/etc/" + packageName );
+		//NOTE: Any changes made in the Linux section should be reflected in the 'other' section below.
+		
+		{
+			//FreeDesktop.org says "There is a single base directory relative to which user-specific data files should be written.".
+			//configFolders.push_back( getEnvironmentVariable( "XDG_CONFIG_HOME" ) );
+			std::wstring folderString = L"";
+			try {
+				folderString = getEnvironmentVariable( "XDG_CONFIG_HOME" );
+			} catch( std::exception &error ) {
+				try {
+					
+					//"If $XDG_CONFIG_HOME is either not set or empty, a default equal to $HOME/.config should be used."
+					auto homeString = getEnvironmentVariable( "HOME" );
+					folderString = homeString + L"/.config";
+					
+				} catch ( std::exception &errorTwo ) {
+					//do nothing
+				}
+			}
+			configFolders.push_back( folderString + L"/" + packageName );
+			configFolders.push_back( folderString );
+			
+		}
 		
 		try {
+			//FreeDesktop.org says "There is a set of preference ordered base directories relative to which configuration files should be searched.".
 			auto xdgFoldersString = getEnvironmentVariable( "XDG_CONFIG_DIRS" );
 			
 			std::vector< decltype( xdgFoldersString ) > xdgFoldersVector;
 			boost::algorithm::split( xdgFoldersVector, xdgFoldersString, [](wchar_t c) { return c == L':'; } );
 			
 			for( decltype( xdgFoldersVector.size() ) i = 0; i < xdgFoldersVector.size(); ++i ) {
+				configFolders.push_back( xdgFoldersVector.at( i ) + L"/" + packageName );
+			}
+			
+			for( decltype( xdgFoldersVector.size() ) i = 0; i < xdgFoldersVector.size(); ++i ) {
 				configFolders.push_back( xdgFoldersVector.at( i ) );
 			}
 			
 		} catch( std::exception &error ) {
-			//Environment variable not found, so ignore it. Do nothing.
-		}
-		
-		try {
-			configFolders.push_back( getEnvironmentVariable( "XDG_CONFIG_HOME" ) + L"/" + packageName );
-		} catch( std::exception &error ) {
-			//Environment variable not found, so ignore it. Do nothing.
+			//"If $XDG_CONFIG_DIRS is either not set or empty, a value equal to /etc/xdg should be used."
+			configFolders.push_back( L"/etc/xdg" + packageName );
+			configFolders.push_back( L"/etc/xdg" );
 		}
 		
 		try {
@@ -274,6 +327,8 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
+		
+		configFolders.push_back( L"/etc/" + packageName );
 		
 	#elif defined MACOSX
 		configFolders.push_back( L"/Network/Library/Preferences/" + packageName );
@@ -292,12 +347,48 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 	#else
 		//What about other operating systems? I don't know where BSD etc. put their config files.
 		//This section is just a copy of the Linux section above.
-		configFolders.push_back( L"/etc/" + packageName );
+		
+		{
+			//FreeDesktop.org says "There is a single base directory relative to which user-specific data files should be written.".
+			//configFolders.push_back( getEnvironmentVariable( "XDG_CONFIG_HOME" ) );
+			auto folderString = L"";
+			try {
+				folderString = getEnvironmentVariable( "XDG_CONFIG_HOME" );
+			} catch( std::exception &error ) {
+				try {
+					
+					//"If $XDG_CONFIG_HOME is either not set or empty, a default equal to $HOME/.config should be used."
+					auto homeString = getEnvironmentVariable( "HOME" );
+					folderString = homeString + L"/.config";
+					
+				} catch ( std::exception &errorTwo ) {
+					//do nothing
+				}
+			}
+			configFolders.push_back( folderString + L"/" + packageName );
+			configFolders.push_back( folderString );
+			
+		}
 		
 		try {
-			configFolders.push_back( getEnvironmentVariable( "XDG_CONFIG_HOME" ) + L"/" + packageName );
+			//FreeDesktop.org says "There is a set of preference ordered base directories relative to which configuration files should be searched.".
+			auto xdgFoldersString = getEnvironmentVariable( "XDG_CONFIG_DIRS" );
+			
+			std::vector< decltype( xdgFoldersString ) > xdgFoldersVector;
+			boost::algorithm::split( xdgFoldersVector, xdgFoldersString, [](wchar_t c) { return c == L':'; } );
+			
+			for( decltype( xdgFoldersVector.size() ) i = 0; i < xdgFoldersVector.size(); ++i ) {
+				configFolders.push_back( xdgFoldersVector.at( i ) + L"/" + packageName );
+			}
+			
+			for( decltype( xdgFoldersVector.size() ) i = 0; i < xdgFoldersVector.size(); ++i ) {
+				configFolders.push_back( xdgFoldersVector.at( i ) );
+			}
+			
 		} catch( std::exception &error ) {
-			//Environment variable not found, so ignore it. Do nothing.
+			//"If $XDG_CONFIG_DIRS is either not set or empty, a value equal to /etc/xdg should be used."
+			configFolders.push_back( L"/etc/xdg" + packageName );
+			configFolders.push_back( L"/etc/xdg" );
 		}
 		
 		try {
@@ -305,11 +396,19 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
+		
+		configFolders.push_back( L"/etc/" + packageName );
+		
 	#endif
 	
 	configFolders.push_back( boost::filesystem::current_path() );
 	
 	std::wcout << L"configFolders.size() before removing stuff: " << configFolders.size() << std::endl;
+	
+	{
+		auto iter = std::unique( configFolders.begin(), configFolders.end() );
+		configFolders.resize( std::distance( configFolders.begin(), iter ) );
+	}
 	
 	for( decltype( configFolders.size() ) i = 0; i < configFolders.size(); i++ ) {
 		if( not canBeUsedAsFolder( configFolders.at( i ) ) ) {
