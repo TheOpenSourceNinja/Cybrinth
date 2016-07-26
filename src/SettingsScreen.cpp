@@ -451,7 +451,7 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 							}
 							case NUM_BOTS_SPINBOX_ID: {
 								numBotsBar->setPos( numBotsSpinBox->getValue() );
-								settingsManager->numBots = numBotsSpinBox->getValue();
+								settingsManager->setNumBots( numBotsSpinBox->getValue() );
 								settingsChanged = true;
 								break;
 							}
@@ -459,7 +459,7 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 								numPlayersBar->setPos( numPlayersSpinBox->getValue() );
 								numBotsBar->setMax( numPlayersSpinBox->getValue() );
 								numBotsSpinBox->setRange( numBotsSpinBox->getMin(), numPlayersSpinBox->getValue() );
-								settingsManager->numPlayers = numPlayersSpinBox->getValue();
+								settingsManager->setNumPlayers( numPlayersSpinBox->getValue() );
 								settingsChanged = true;
 								break;
 							}
@@ -670,7 +670,7 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 						switch( id ) {
 							case NUM_BOTS_BAR_ID: {
 								numBotsSpinBox->setValue( numBotsBar->getPos() );
-								settingsManager->numBots = numBotsBar->getPos();
+								settingsManager->setNumBots( numBotsBar->getPos() );
 								settingsChanged = true;
 								break;
 							}
@@ -678,7 +678,7 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 								numPlayersSpinBox->setValue( numPlayersBar->getPos() );
 								numBotsBar->setMax( numPlayersSpinBox->getValue() );
 								numBotsSpinBox->setRange( numBotsSpinBox->getMin(), numPlayersSpinBox->getValue() );
-								settingsManager->numPlayers = numPlayersBar->getPos();
+								settingsManager->setNumPlayers( numPlayersBar->getPos() );
 								settingsChanged = true;
 								break;
 							}

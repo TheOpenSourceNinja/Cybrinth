@@ -368,7 +368,7 @@ void SettingsManager::readPrefs() {
 									auto preferenceNum = spellChecker->indexOfClosestString( preference, possiblePrefs );
 									
 									if( debug ) {
-										std::wcout << L"Preference after spellchecking \"" << preference << std::endl;
+										std::wcout << L"Preference after spellchecking \"" << possiblePrefs.at( preferenceNum ) << L"\"" << std::endl;
 									}
 									
 									switch( preferenceNum ) {
@@ -403,9 +403,9 @@ void SettingsManager::readPrefs() {
 											break;
 										}
 										case ALGORITHM: { //L"bots' solving algorithm"
-											AI temp;
-											temp.setup( mainGame, false, AI::ALGORITHM_DO_NOT_USE, 0 );
-											botAlgorithm = temp.algorithmFromString( choice );
+											/*AI temp;
+											temp.setup( mainGame, false, AI::ALGORITHM_DO_NOT_USE, 0 );*/
+											botAlgorithm = AI::algorithmFromString( choice );
 											break;
 										}
 										
@@ -726,4 +726,20 @@ void SettingsManager::setWindowSize( irr::core::dimension2d< irr::u32 > newSize 
 	} else {
 		windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( newSize.Width, newSize.Height );
 	}
+}
+
+void SettingsManager::setNumBots( uint_fast8_t newNumBots ) {
+	numBots = newNumBots;
+	
+	mainGame->setNumBots( newNumBots );
+}
+
+void SettingsManager::setNumPlayers( uint_fast8_t newNumPlayers ) {
+	numPlayers = newNumPlayers;
+	
+	if( numBots > newNumPlayers ) {
+		setNumBots( newNumPlayers );
+	}
+	
+	mainGame->setNumPlayers( newNumPlayers );
 }

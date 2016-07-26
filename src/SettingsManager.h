@@ -71,6 +71,8 @@ class SettingsManager
 		void setBitsPerPixel( uint_fast8_t newBPP );
 		void setFullscreenResolution( irr::core::dimension2d< irr::u32 > newResolution );
 		void setMusicVolume( uint_fast8_t newVolume );
+		void setNumBots( uint_fast8_t newNumBots );
+		void setNumPlayers( uint_fast8_t newNumPlayers );
 		void setPlayMusic( bool newSetting );
 		void setWindowSize( irr::core::dimension2d< irr::u32 > newSize );
 		bool showBackgrounds;

@@ -3,7 +3,7 @@
  * @author James Dearing <dearingj@lifetime.oregonstate.edu>
  * 
  * @section LICENSE
- * Copyright © 2012-2015.
+ * Copyright © 2012-2016.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -919,6 +919,7 @@ Player* MainGame::getPlayer( uint_fast8_t p ) {
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::getPlayer(): " << e.what() << std::endl;
+		std::wcerr << L"p is: " << (int) p << L" numPlayers: " << (int) numPlayers << L" player.size(): " << (int) player.size() << std::endl;
 		return nullptr;
 	}
 }
@@ -3962,6 +3963,36 @@ void MainGame::setMyPlayer( uint_fast8_t newPlayer ) {
 	}
 }
 
+
+void MainGame::setNumBots( uint_fast8_t newNumBots ) {
+	int_fast16_t diff = ( int_fast16_t ) newNumBots - ( int_fast16_t ) numBots;
+	
+	bot.resize( numBots );
+	numBots = newNumBots;
+}
+
+void MainGame::setNumPlayers( uint_fast8_t newNumPlayers ) {
+	int_fast16_t diff = ( int_fast16_t ) newNumPlayers - ( int_fast16_t ) numPlayers;
+	
+	player.resize( newNumPlayers );
+	playerStart.resize( newNumPlayers );
+	numPlayers = newNumPlayers;
+	
+	if( numBots > newNumPlayers ) {
+		setNumBots( newNumPlayers );
+	}
+	
+	{
+		decltype( numPlayers ) botControlsPlayer = numPlayers - numBots;
+		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
+			bot.at( b ).setPlayer( ( int_fast16_t ) bot.at( b ).getPlayer() + diff );
+			//bot.at( b ).setPlayer( botControlsPlayer );
+			//bot.at( b ).setPlayer( 0 );
+			botControlsPlayer += 1;
+		}
+	}
+}
+
 /**
  * Sets the random number generator's seed.
  * Arguments:
@@ -4084,3 +4115,4 @@ void MainGame::takeScreenShot() {
 		std::wcout << L"end of takeScreenShot()" << std::endl;
 	}
 }
+

@@ -3,7 +3,7 @@
  * @author James Dearing <dearingj@lifetime.oregonstate.edu>
  * 
  * @section LICENSE
- * Copyright © 2012-2015.
+ * Copyright © 2012-2016.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -102,6 +102,8 @@ class MainGame : public irr::IEventReceiver {
 		void setFileChooser( irr::gui::IGUIFileOpenDialog* newChooser );
 		void setLoadingPercentage( float newPercent );
 		void setMyPlayer( uint_fast8_t newPlayer );
+		void setNumBots( uint_fast8_t newNumBots );
+		void setNumPlayers( uint_fast8_t newNumPlayers );
 		void setRandomSeed( std::minstd_rand::result_type newSeed );
 		void showLoadMazeDialog();
 		void showSaveMazeDialog();
