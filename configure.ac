@@ -13,6 +13,9 @@ AC_CONFIG_FILES([stamp-h], [date -uI > stamp-h])
 AM_INIT_AUTOMAKE([subdir-objects -Wall -Werror])
 AC_CONFIG_FILES([Makefile])
 
+# We'll set our own flags, thanks.
+: ${CXXFLAGS=""}
+
 # Checks for programs.
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX_11()
