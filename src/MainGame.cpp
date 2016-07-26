@@ -3740,55 +3740,72 @@ void MainGame::setupBackground() {
 			}
 			case IMAGES: { //Image files
 				std::vector< boost::filesystem::path > backgroundList;
+				
+				auto folderList = system.getImageFolders();
+				//boost::filesystem::path backgroundPath( boost::filesystem::current_path()/L"images/backgrounds" );
+				//folderList.push_back( boost::filesystem::path( boost::filesystem::current_path()/L"images/backgrounds" ) );
+				
+				//If backgroundPath (defined inside the for loop inside the following while loop) has a backgrounds subfolder, we want to find backgrounds there first.
+				bool useBackgroundsSubfolder = true;
+				while( useBackgroundsSubfolder ) {
+					for( auto folderListIterator = folderList.begin(); folderListIterator != folderList.end(); ++folderListIterator ) {
+						auto backgroundPath = *folderListIterator;
+						
+						if( useBackgroundsSubfolder ) {
+							backgroundPath = backgroundPath/L"backgrounds";
+						}
+						
+						//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
+						backgroundPath = system_complete( backgroundPath );
+						//backgroundPath = absolute( backgroundPath );
 
-				boost::filesystem::path backgroundPath( boost::filesystem::current_path()/L"images/backgrounds" );
+						if( settingsManager.debug ) {
+							std::wcout << L"background path is absolute? " << backgroundPath.is_absolute() << std::endl;
+						}
 
-				//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
-				backgroundPath = system_complete( backgroundPath );
-				//backgroundPath = absolute( backgroundPath );
-
-				if( settingsManager.debug ) {
-					std::wcout << L"background path is absolute? " << backgroundPath.is_absolute() << std::endl;
-				}
-
-				while( ( not exists( backgroundPath ) or not is_directory( backgroundPath ) ) and backgroundPath.has_parent_path() ) {
-					if( settingsManager.debug ) {
-						std::wcout << L"Path " << backgroundPath.wstring() << L" does not exist or is not a directory. Checking parent path " << backgroundPath.parent_path().wstring() << std::endl;
-					}
-
-					backgroundPath = backgroundPath.parent_path();
-				}
-
-				if( exists( backgroundPath ) ) {
-					boost::filesystem::recursive_directory_iterator end;
-
-					for( boost::filesystem::recursive_directory_iterator i( backgroundPath ); i not_eq end; ++i ) {
-						if( not is_directory( i->path() ) ) { //We've found a file
+						while( ( not exists( backgroundPath ) or not is_directory( backgroundPath ) ) and backgroundPath.has_parent_path() ) {
 							if( settingsManager.debug ) {
-								std::wcout << i->path().wstring() << std::endl;
+								std::wcout << L"Path " << backgroundPath.wstring() << L" does not exist or is not a directory. Checking parent path " << backgroundPath.parent_path().wstring() << std::endl;
 							}
 
-							//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
-							for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
+							backgroundPath = backgroundPath.parent_path();
+						}
 
-								irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
-								irr::io::IFileSystem* fileSystem = device->getFileSystem();
-								irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
+						if( exists( backgroundPath ) ) {
+							boost::filesystem::recursive_directory_iterator end;
 
-								if( loader->isALoadableFileExtension( filePath ) ) { //Commenting this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
-									irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
-									if( loader->isALoadableFileFormat( file ) ) {
-										backgroundList.push_back( i->path() );
-										file->drop();
-										break;
+							for( boost::filesystem::recursive_directory_iterator i( backgroundPath ); i not_eq end; ++i ) {
+								if( not is_directory( i->path() ) ) { //We've found a file
+									if( settingsManager.debug ) {
+										std::wcout << i->path().wstring() << std::endl;
 									}
-									file->drop();
+
+									//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
+									for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount(); ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
+
+										irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
+										irr::io::IFileSystem* fileSystem = device->getFileSystem();
+										irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
+
+										if( loader->isALoadableFileExtension( filePath ) ) { //Comment this out because extensions don't always reflect the file's contents. Uncomment it for a minor speed improvement since not all files would need to be opened.
+											irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
+											if( loader->isALoadableFileFormat( file ) ) {
+												backgroundList.push_back( i->path() );
+												file->drop();
+												break;
+											}
+											file->drop();
+										}
+									}
 								}
 							}
 						}
+					
 					}
+					
+					useBackgroundsSubfolder = backgroundList.empty();
 				}
-
+				
 				if( not backgroundList.empty() ) {
 					std::vector< boost::filesystem::path >::iterator newEnd = std::unique( backgroundList.begin(), backgroundList.end() ); //unique "removes all but the first element from every consecutive group of equivalent elements in the range [first,last)." (source: http://www.cplusplus.com/reference/algorithm/unique/ )
 					backgroundList.resize( std::distance( backgroundList.begin(), newEnd ) );
@@ -3803,7 +3820,7 @@ void MainGame::setupBackground() {
 				} else {
 					std::wcerr << L"Could not find any background images." << std::endl;
 				}
-
+				
 				break;
 			}
 
@@ -3969,6 +3986,16 @@ void MainGame::setNumBots( uint_fast8_t newNumBots ) {
 	
 	bot.resize( numBots );
 	numBots = newNumBots;
+	
+	{
+		decltype( numPlayers ) botControlsPlayer = numPlayers - numBots;
+		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
+			bot.at( b ).setPlayer( ( int_fast16_t ) bot.at( b ).getPlayer() + diff );
+			//bot.at( b ).setPlayer( botControlsPlayer );
+			//bot.at( b ).setPlayer( 0 );
+			botControlsPlayer += 1;
+		}
+	}
 }
 
 void MainGame::setNumPlayers( uint_fast8_t newNumPlayers ) {
@@ -3982,14 +4009,8 @@ void MainGame::setNumPlayers( uint_fast8_t newNumPlayers ) {
 		setNumBots( newNumPlayers );
 	}
 	
-	{
-		decltype( numPlayers ) botControlsPlayer = numPlayers - numBots;
-		for( decltype( numBots ) b = 0; b < numBots; ++b ) {
-			bot.at( b ).setPlayer( ( int_fast16_t ) bot.at( b ).getPlayer() + diff );
-			//bot.at( b ).setPlayer( botControlsPlayer );
-			//bot.at( b ).setPlayer( 0 );
-			botControlsPlayer += 1;
-		}
+	for( decltype( numBots ) b = 0; b < numBots; ++b ) {
+		bot.at( b ).setPlayer( ( int_fast16_t ) bot.at( b ).getPlayer() + diff );
 	}
 }
 
