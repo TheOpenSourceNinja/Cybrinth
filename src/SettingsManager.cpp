@@ -117,7 +117,7 @@ void SettingsManager::savePrefs() {
 						//Save header comments------------
 						fputws( std::wstring( commentMark + L"Single-line comments like this are allowed, and must begin with two slashes (//). Anything before the slashes is considered not part of a comment.\n" ).c_str() , prefsFile );
 						fputws( std::wstring( commentMark + L"Preference and value must be separated by a tab character, not spaces.\n" ).c_str(), prefsFile );
-						fputws( std::wstring( commentMark + L"Any preference not specified here will use its default value. The same goes for things specified in invalid ways (i.e. putting letters where numbers should be).\n" ).c_str(), prefsFile );
+						fputws( std::wstring( commentMark + L"Any preference not specified here will use its default value. The same goes for things specified in invalid ways (i.e. so badly spelled that the spell checker doesn't recognize them).\n" ).c_str(), prefsFile );
 						fputws( std::wstring( commentMark + L"Preferences are not case-sensitive. \"Play music\" is the same as \"PLAY muSic\".\n" ).c_str(), prefsFile );
 						fputws( std::wstring( commentMark + L"Preferences and values do not have to be spelled correctly: \"treu\" will be interepreted as \"true\", \"flse\" as \"false\", etc.\n" ).c_str(), prefsFile );
 						fputws( L"\n", prefsFile );
@@ -134,7 +134,7 @@ void SettingsManager::savePrefs() {
 							
 							fputws( std::wstring( possiblePrefs.at( BPP ) + L"\t" + sc.toStdWString( bitsPerPixel ) + defaultString + sc.toStdWString( bitsPerPixelDefault ) + L". Determines the color depth when running in fullscreen; will be ignored when not running in fullscreen. Note that on the vast majority of systems, changing this setting will have no visible effect.\n" ).c_str(), prefsFile );
 							
-							fputws( std::wstring( possiblePrefs.at( VSYNC ) + L"\t" + sc.toStdWString( vsync ) + defaultString + sc.toStdWString( vsyncDefault ) + L". Set this to false if the game seems slow, but expect graphical 'ripping' of moving objects.\n" ).c_str(), prefsFile );
+							fputws( std::wstring( possiblePrefs.at( VSYNC ) + L"\t" + sc.toStdWString( vsync ) + defaultString + sc.toStdWString( vsyncDefault ) + L". Set this to false if the game seems slow, but expect graphical 'ripping' of moving objects. See Wikipedia: https://en.wikipedia.org/w/index.php?title=Screen_tearing&oldid=726029147#V-sync\n" ).c_str(), prefsFile );
 							
 							{ //driver type
 								fputws( std::wstring( possiblePrefs.at( DRIVER_TYPE ) + L"\t" ).c_str(), prefsFile );
