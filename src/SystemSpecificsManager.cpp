@@ -106,7 +106,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders()
 	std::vector< boost::filesystem::path > imageFolders;
 	imageFolders.push_back( boost::filesystem::current_path() / boost::filesystem::path( L"images" ) );
 	
-	std::wstring common = L"Cybrinth\images";
+	std::wstring common = L"Cybrinth\\images";
 	
 	#if defined WINDOWS
 		imageFolders.push_back( getEnvironmentVariable( "%ProgramFiles%" ) + common );

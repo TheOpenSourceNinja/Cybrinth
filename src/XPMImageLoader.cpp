@@ -50,7 +50,7 @@ void XPMImageLoader::loadImageCommon( irr::video::IVideoDriver* driver, irr::vid
 			std::string kxpm = xpm[ i ];
 			std::string id = kxpm.substr( 0, charPerPixel );
 			
-			colorType_t colorType; //I don't imagine the colorType variable will ever be used.
+			//colorType_t colorType; //I don't imagine the colorType variable will ever be used.
 			auto pos = kxpm.find( 'c' ); //c means the image is in color
 			if( pos == std::string::npos ) {
 				pos = kxpm.find( 'g' ); //g means grayscale
@@ -60,13 +60,13 @@ void XPMImageLoader::loadImageCommon( irr::video::IVideoDriver* driver, irr::vid
 						pos = kxpm.find( 's' ); //s means "symbolic", which I guess means the names of colors.
 						assert( pos != std::string::npos ); //Since I don't know for sure how to deal with symbolic colors, just produce an error for now. TODO: Deal with this properly
 					} else {
-						colorType = MONOCHROME; //The monochrome color type will probably never be used in this program: GIMP, even when an image is monochrome, will save it as "color".
+						//colorType = MONOCHROME; //The monochrome color type will probably never be used in this program: GIMP, even when an image is monochrome, will save it as "color".
 					}
 				} else {
-					colorType = GRAYSCALE;
+					//colorType = GRAYSCALE;
 				}
 			} else {
-				colorType = COLOR;
+				//colorType = COLOR;
 			}
 			std::string colorString = kxpm.substr( pos + 2 );
 			

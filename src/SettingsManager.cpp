@@ -111,7 +111,7 @@ void SettingsManager::setPlayMusic( bool newSetting ) {
 void SettingsManager::savePrefs() {
 	try {
 		std::vector< boost::filesystem::path > configFolders = system->getConfigFolders(); // Flawfinder: ignore
-		bool prefsFileFound = false;
+		//bool prefsFileFound = false;
 		
 		for( auto it = configFolders.begin(); it not_eq configFolders.end(); ++it ) {
 			boost::filesystem::path prefsPath( *it/L"prefs.cfg" );
@@ -120,7 +120,7 @@ void SettingsManager::savePrefs() {
 				if( debug ) {
 					std::wcout << L"Saving preferences to file " << prefsPath.wstring() << std::endl;
 				}
-				prefsFileFound = true;
+				//prefsFileFound = true;
 				/*boost::filesystem::wfstream prefsFile;
 				prefsFile.open( prefsPath, boost::filesystem::wfstream::out );*/
 				
@@ -181,6 +181,7 @@ void SettingsManager::savePrefs() {
 										fputws( driverTypes.at( DRIVERNULL ).c_str(), prefsFile );
 										break;
 									}
+									case irr::video::EDT_COUNT: break;
 								}
 								
 								fputws( defaultString.c_str(), prefsFile );
@@ -210,6 +211,7 @@ void SettingsManager::savePrefs() {
 										fputws( driverTypes.at( DRIVERNULL ).c_str(), prefsFile );
 										break;
 									}
+									case irr::video::EDT_COUNT: break;
 								}
 								
 								fputws( std::wstring( L". Possible values are OpenGL, Direct3D9, Direct3D8, Burning's Video, Software, and NULL (only for debugging, do not use!). If the selected driver type is not available for your system, the game will automatically choose one that is.\n" ).c_str(), prefsFile );
@@ -726,6 +728,25 @@ void SettingsManager::resetToDefaults() {
 	}
 }
 
+
+
+void SettingsManager::setNumBots( uint_fast8_t newNumBots ) {
+	numBots = newNumBots;
+	
+	mainGame->setNumBots( newNumBots );
+}
+
+void SettingsManager::setNumPlayers( uint_fast8_t newNumPlayers ) {
+	numPlayers = newNumPlayers;
+	
+	if( numBots > newNumPlayers ) {
+		setNumBots( newNumPlayers );
+	}
+	
+	mainGame->setNumPlayers( newNumPlayers );
+}
+
+
 void SettingsManager::setPointers( irr::IrrlichtDevice* newDevice, MainGame* newMainGame, MazeManager* newMazeManager, NetworkManager* newNetwork, SpellChecker* newSpellChecker, SystemSpecificsManager* newSystem ) {
 	device = newDevice;
 	mainGame = newMainGame;
@@ -744,20 +765,4 @@ void SettingsManager::setWindowSize( irr::core::dimension2d< irr::u32 > newSize 
 	} else {
 		windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( newSize.Width, newSize.Height );
 	}
-}
-
-void SettingsManager::setNumBots( uint_fast8_t newNumBots ) {
-	numBots = newNumBots;
-	
-	mainGame->setNumBots( newNumBots );
-}
-
-void SettingsManager::setNumPlayers( uint_fast8_t newNumPlayers ) {
-	numPlayers = newNumPlayers;
-	
-	if( numBots > newNumPlayers ) {
-		setNumBots( newNumPlayers );
-	}
-	
-	mainGame->setNumPlayers( newNumPlayers );
 }
