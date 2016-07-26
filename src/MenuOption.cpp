@@ -289,7 +289,7 @@ void MenuOption::loadTexture( irr::IrrlichtDevice* device ) {
 			}
 			
 			{
-				boost::filesystem::path path( boost::filesystem::current_path()/L"images" );
+				boost::filesystem::path path( boost::filesystem::current_path()/L"Images" ); //TODO: Load icons from standard data directories.
 				
 				//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
 				path = system_complete( path );

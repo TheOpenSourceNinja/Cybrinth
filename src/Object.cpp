@@ -153,7 +153,7 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 		}
 		
 		{
-			boost::filesystem::path path( boost::filesystem::current_path()/L"images" );
+			boost::filesystem::path path( boost::filesystem::current_path()/L"Images" ); //TODO: Load textures from standard data directories.
 			
 			//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
 			path = system_complete( path );

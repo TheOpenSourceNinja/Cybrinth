@@ -106,9 +106,9 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 
 std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders() {
 	std::vector< boost::filesystem::path > imageFolders;
-	imageFolders.push_back( boost::filesystem::current_path() / boost::filesystem::path( L"images" ) );
+	imageFolders.push_back( boost::filesystem::current_path() / boost::filesystem::path( L"Images" ) );
 	
-	std::wstring common = L"Cybrinth\\images";
+	std::wstring common = L"Cybrinth\\Images";
 	
 	#if defined WINDOWS
 	{
@@ -124,7 +124,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders()
 		imageFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + mypics );
 	}
 	#elif defined LINUX
-		imageFolders.push_back( L"/usr/local/share/Cybrinth/images" );
+		imageFolders.push_back( L"/usr/local/share/Cybrinth/Images" );
 		try {
 			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Pictures/" + common );
 			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Pictures/" );

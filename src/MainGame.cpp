@@ -1454,7 +1454,7 @@ void MainGame::loadProTips() {
 		}
 		
 		proTips.clear(); //This line is unnecessary because loadProTips() is only called once, but I just feel safer clearing this anyway.
-		boost::filesystem::path proTipsPath( boost::filesystem::current_path()/L"protips.txt" );
+		boost::filesystem::path proTipsPath( boost::filesystem::current_path()/L"protips.txt" ); //TODO: Load pro tips from standard data directories.
 		
 		if( exists( proTipsPath ) ) {
 			if( not is_directory( proTipsPath ) ) {
@@ -1824,7 +1824,7 @@ MainGame::MainGame() {
 		playerAssigned.resize( numPlayers );
 		
 		{
-			auto textureSearchLocation = boost::filesystem::path( boost::filesystem::current_path()/L"images/players" );
+			auto textureSearchLocation = boost::filesystem::path( boost::filesystem::current_path()/L"Images/players" );
 			
 			std::vector< boost::filesystem::path > loadableTextures = getLoadableTexturesList( textureSearchLocation );
 			
@@ -1911,7 +1911,7 @@ MainGame::MainGame() {
 
 
 /**
- * Finds all playable music files in the ./music folder and compiles them into a list. If ./music does not exist or is not a folder, it uses the parent path instead.
+ * Finds all playable music files in the ./Music folder and compiles them into a list. If ./Music does not exist or is not a folder, it uses the parent path instead.
  */
 void MainGame::makeMusicList() {
 	try {
@@ -1920,7 +1920,7 @@ void MainGame::makeMusicList() {
 		}
 		
 		musicList.clear(); //The music list should be empty anyway, since makeMusicList() only gets called once, but just in case...
-
+		
 		if( settingsManager.debug ) {
 			std::wcout << L"makeMusicList() called" << std::endl;
 			decltype( Mix_GetNumMusicDecoders() ) numMusicDecoders = Mix_GetNumMusicDecoders();
@@ -1930,45 +1930,54 @@ void MainGame::makeMusicList() {
 				std::wcout << decoder << L": " << Mix_GetMusicDecoder( decoder ) << std::endl;
 			}
 		}
-
-		boost::filesystem::path musicPath( boost::filesystem::current_path()/L"music" );
-
-		//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
-		musicPath = system_complete( musicPath );
-		//musicPath = absolute( musicPath );
-
-		if( settingsManager.debug ) {
-			std::wcout << L"music path is absolute? " << musicPath.is_absolute() << std::endl;
-		}
-
-		while( ( not exists( musicPath ) or not is_directory( musicPath ) ) and musicPath.has_parent_path() ) {
-			if( settingsManager.debug ) {
-				std::wcout << L"Path " << musicPath.wstring() << L" does not exist or is not a directory. Checking parent path " << musicPath.parent_path().wstring() << std::endl;
-			}
-
-			musicPath = musicPath.parent_path();
-		}
-
-		if( exists( musicPath ) ) {
-			boost::filesystem::recursive_directory_iterator end;
-
-			for( boost::filesystem::recursive_directory_iterator i( musicPath ); i not_eq end; ++i ) {
-				if( not is_directory( i->path() ) ) { //We've found a file
-					//Attempts to load a file as music. If successful, unload the file and add it to musicList.
-					//This way the game is certain to accept any file formats the music library can use.
-					Mix_Music* temp = Mix_LoadMUS( i->path().c_str() );
-
-					if( not isNull( temp ) ) {
-						musicList.push_back( i->path() );
-						Mix_FreeMusic( temp );
+		
+		//If backgroundPath (defined inside the for loop inside the following while loop) has a backgrounds subfolder, we want to find backgrounds there first.
+		bool useMusicSubfolder = true;
+		while( useMusicSubfolder ) {
+			for( auto folderListIterator = folderList.begin(); folderListIterator != folderList.end(); ++folderListIterator ) {
+				auto musicPath = *folderListIterator;
+				
+				if( useMusicSubfolder ) {
+					musicPath = musicPath/L"Music";
+				}
+				
+				//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
+				musicPath = system_complete( musicPath );
+				//musicPath = absolute( musicPath );
+				
+				if( settingsManager.debug ) {
+					std::wcout << L"music path is absolute? " << musicPath.is_absolute() << std::endl;
+				}
+				
+				while( ( not exists( musicPath ) or not is_directory( musicPath ) ) and musicPath.has_parent_path() ) {
+					if( settingsManager.debug ) {
+						std::wcout << L"Path " << musicPath.wstring() << L" does not exist or is not a directory. Checking parent path " << musicPath.parent_path().wstring() << std::endl;
+					}
+					
+					musicPath = musicPath.parent_path();
+				}
+				
+				if( exists( musicPath ) ) {
+					boost::filesystem::recursive_directory_iterator end;
+					
+					for( boost::filesystem::recursive_directory_iterator i( musicPath ); i not_eq end; ++i ) {
+						if( not is_directory( i->path() ) ) { //We've found a file
+							//Attempts to load a file as music. If successful, unload the file and add it to musicList.
+							//This way the game is certain to accept any file formats the music library can use.
+							Mix_Music* temp = Mix_LoadMUS( i->path().c_str() );
+							
+							if( not isNull( temp ) ) {
+								musicList.push_back( i->path() );
+								Mix_FreeMusic( temp );
+							}
+						}
 					}
 				}
 			}
 		}
-
+		
 		if( not musicList.empty() ) {
-			//Do we want music sorted or random?
-			//sort( musicList.begin(), musicList.end() );
+			//The random number generator must be seeded before this point
 			std::shuffle( musicList.begin(), musicList.end(), randomNumberGenerator );
 			
 			currentMusic = musicList.back();
@@ -2559,7 +2568,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 			std::wcout << L"pickLogo() called" << std::endl;
 		}
 		
-		boost::filesystem::path logoPath( boost::filesystem::current_path()/L"images/logos" );
+		boost::filesystem::path logoPath( boost::filesystem::current_path()/L"Images/logos" );
 		
 		auto logoList = getLoadableTexturesList( logoPath);
 		
@@ -3741,8 +3750,8 @@ void MainGame::setupBackground() {
 				std::vector< boost::filesystem::path > backgroundList;
 				
 				auto folderList = system.getImageFolders();
-				//boost::filesystem::path backgroundPath( boost::filesystem::current_path()/L"images/backgrounds" );
-				//folderList.push_back( boost::filesystem::path( boost::filesystem::current_path()/L"images/backgrounds" ) );
+				//boost::filesystem::path backgroundPath( boost::filesystem::current_path()/L"Images/backgrounds" );
+				//folderList.push_back( boost::filesystem::path( boost::filesystem::current_path()/L"Images/backgrounds" ) );
 				
 				//If backgroundPath (defined inside the for loop inside the following while loop) has a backgrounds subfolder, we want to find backgrounds there first.
 				bool useBackgroundsSubfolder = true;
@@ -4039,7 +4048,7 @@ void MainGame::showLoadMazeDialog() {
 		delete loadMazeDialog;
 	}
 	loadMazeDialog = new FileSelectorDialog( L"Load Maze", gui, gui->getRootGUIElement(), 0, FileSelectorDialog::EFST_OPEN_DIALOG );
-	loadMazeDialog->addFileFilter( mazeManager.getFileTypeName(), mazeManager.getFileTypeExtension(), driver->getTexture( L"images/icon.png" ) );
+	loadMazeDialog->addFileFilter( mazeManager.getFileTypeName(), mazeManager.getFileTypeExtension(), driver->getTexture( L"Images/icon.png" ) );
 }
 
 /**
@@ -4050,7 +4059,7 @@ void MainGame::showSaveMazeDialog() {
 		delete saveMazeDialog;
 	}
 	saveMazeDialog = new FileSelectorDialog( L"Save Maze", gui, gui->getRootGUIElement(), 1, FileSelectorDialog::EFST_SAVE_DIALOG );
-	//saveMazeDialog->addFileFilter( mazeManager.getFileTypeName(), mazeManager.getFileTypeExtension(), driver->getTexture( L"images/icon.png" ) );
+	//saveMazeDialog->addFileFilter( mazeManager.getFileTypeName(), mazeManager.getFileTypeExtension(), driver->getTexture( L"Images/icon.png" ) );
 }
 
 /**

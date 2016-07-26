@@ -1,8 +1,8 @@
 #!/usr/bin/python
-#This script is intended not to be run manually but by make as part of Cybrinth's build process.
+#This script is intended not to be run manually but by GIMP as part of Cybrinth's build process.
 
 import os
-imageDir = "images"
+imageDir = "Images"
 compiledImageDir = "compiled-images"
 for roots, dirs, files in os.walk( imageDir ):
 	for name in files:
@@ -10,7 +10,7 @@ for roots, dirs, files in os.walk( imageDir ):
 		if( ( filePath.lower().rfind( ".png" ) != -1 ) or ( filePath.lower().rfind( ".xcf" ) != -1 ) ):
 			image = pdb.gimp_file_load( filePath, filePath )
 			
-			newFilePath = filePath.replace( ".png", ".xpm" )
+			newFilePath = filePath.lower().replace( ".png", ".xpm" )
 			newFilePath = newFilePath.replace( ".xcf", ".xpm" )
 			newFilePath = newFilePath.replace( imageDir, compiledImageDir )
 			
