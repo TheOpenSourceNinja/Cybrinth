@@ -18,7 +18,7 @@ class XPMImageLoader {
 		void loadOtherImage( irr::video::IVideoDriver* driver, irr::video::IImage* storage, other_t type );
 	protected:
 	private:
-		enum colorType_t { COLOR, GRAYSCALE, MONOCHROME, SYMBOLIC };
+		enum colorType_t { COLOR, GRAYSCALE, FOURLEVELGRAYSCALE, MONOCHROME, SYMBOLIC, INVALID_DO_NOT_USE };
 };
 
 #endif // XPMIMAGELOADER_H
