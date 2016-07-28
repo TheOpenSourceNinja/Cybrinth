@@ -12,7 +12,7 @@ for roots, dirs, files in os.walk( imageDir ):
 			
 			newFilePath = filePath.lower().replace( ".png", ".xpm" )
 			newFilePath = newFilePath.replace( ".xcf", ".xpm" )
-			newFilePath = newFilePath.replace( imageDir, compiledImageDir )
+			newFilePath = newFilePath.replace( imageDir.lower(), compiledImageDir )
 			
 			newDirPath = os.path.dirname( newFilePath )
 			if( not os.path.exists( newDirPath ) ):
