@@ -55,6 +55,67 @@ std::wstring SystemSpecificsManager::getEnvironmentVariable( std::wstring name )
 	}
 }
 
+std::vector< boost::filesystem::path > SystemSpecificsManager::getDataFolders() {
+	std::vector< boost::filesystem::path > dataFolders;
+	dataFolders.push_back( boost::filesystem::current_path() );
+	
+	std::wstring common = L"Cybrinth";
+	
+	#if defined WINDOWS
+	{
+		dataFolders.push_back( getEnvironmentVariable( "%ProgramFiles%" ) + common );
+		dataFolders.push_back( getEnvironmentVariable( "%AppData%" ) + common );
+		dataFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + common );
+		dataFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + common );
+	}
+	#elif defined LINUX
+		dataFolders.push_back( L"/usr/local/share/Cybrinth/" );
+		try {
+			dataFolders.push_back( getEnvironmentVariable( L"HOME" ) + common );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+		
+		std::wstring dataDirsString = getEnvironmentVariable( L"XDG_DATA_DIRS" );
+		std::vector< decltype( dataDirsString ) > dataDirsVector;
+		boost::algorithm::split( dataDirsVector, dataDirsString, [](wchar_t c) { return c == L':'; } );
+		
+		for( decltype( dataDirsVector.size() ) i = 0; i < dataDirsVector.size(); ++i ) {
+			dataFolders.push_back( dataDirsVector.at( i ) );
+		}
+		
+	#elif defined MACOSX
+		dataFolders.push_back( L"/Library/" + common );
+		dataFolders.push_back( L"/Network/Library/" + common );
+		dataFolders.push_back( L"/System/Library/" + common );
+		dataFolders.push_back( L"/System Folder/" + common );
+		dataFolders.push_back( L"/Library/" );
+		dataFolders.push_back( L"/Network/Library/" );
+		dataFolders.push_back( L"/System/Library/" );
+		dataFolders.push_back( L"/System Folder/" );
+		try {
+			dataFolders.push_back( getEnvironmentVariable( L"HOME" ) + common );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#else
+		try {
+			dataFolders.push_back( getEnvironmentVariable( L"HOME" ) + common );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
+	#endif //What about other operating systems? I don't know where BSD etc. put their picture files.
+	
+	for( decltype( dataFolders.size() ) i = 0; i < dataFolders.size(); i++ ) {
+		if( not canBeUsedAsFolder( dataFolders.at( i ) ) ) {
+			dataFolders.erase( dataFolders.begin() + i );
+			i -= 1;
+		}
+	}
+	
+	return dataFolders;
+}
+
 std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() {
 	std::vector< boost::filesystem::path > fontFolders;
 	fontFolders.push_back( boost::filesystem::current_path() );
@@ -94,6 +155,16 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 		fontFolders.push_back( L"/usr/local/lib/X11/fonts/" );
 	#endif //What about other operating systems? I don't know where BSD etc. put their font files.
 	
+	{
+		auto dataFolders = getDataFolders();
+		fontFolders.insert( fontFolders.end(), dataFolders.begin(), dataFolders.end() );
+	}
+	
+	{
+		auto iter = std::unique( fontFolders.begin(), fontFolders.end() );
+		fontFolders.resize( std::distance( fontFolders.begin(), iter ) );
+	}
+	
 	for( decltype( fontFolders.size() ) i = 0; i < fontFolders.size(); i++ ) {
 		if( not canBeUsedAsFolder( fontFolders.at( i ) ) ) {
 			fontFolders.erase( fontFolders.begin() + i );
@@ -114,14 +185,18 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders()
 	{
 		std::wstring pics = L"Pictures";
 		std::wstring mypics = L"My Pictures";
-		imageFolders.push_back( getEnvironmentVariable( "%ProgramFiles%" ) + common );
-		imageFolders.push_back( getEnvironmentVariable( "%AppData%" ) + common );
-		imageFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + common );
-		imageFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + pics );
-		imageFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + mypics );
-		imageFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + common );
-		imageFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + pics );
-		imageFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + mypics );
+		try {
+			imageFolders.push_back( getEnvironmentVariable( "%ProgramFiles%" ) + common );
+			imageFolders.push_back( getEnvironmentVariable( "%AppData%" ) + common );
+			imageFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + common );
+			imageFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + pics );
+			imageFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + mypics );
+			imageFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + common );
+			imageFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + pics );
+			imageFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + mypics );
+		} catch( std::exception &error ) {
+			//ignore exception
+		}
 	}
 	#elif defined LINUX
 		imageFolders.push_back( L"/usr/local/share/Cybrinth/Images" );
@@ -137,6 +212,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders()
 		boost::algorithm::split( dataDirsVector, dataDirsString, [](wchar_t c) { return c == L':'; } );
 		
 		for( decltype( dataDirsVector.size() ) i = 0; i < dataDirsVector.size(); ++i ) {
+			imageFolders.push_back( dataDirsVector.at( i ) + common );
 			imageFolders.push_back( dataDirsVector.at( i ) );
 		}
 		
@@ -164,6 +240,16 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders()
 		}
 	#endif //What about other operating systems? I don't know where BSD etc. put their picture files.
 	
+	{
+		auto dataFolders = getDataFolders();
+		imageFolders.insert( imageFolders.end(), dataFolders.begin(), dataFolders.end() );
+	}
+	
+	{
+		auto iter = std::unique( imageFolders.begin(), imageFolders.end() );
+		imageFolders.resize( std::distance( imageFolders.begin(), iter ) );
+	}
+	
 	for( decltype( imageFolders.size() ) i = 0; i < imageFolders.size(); i++ ) {
 		if( not canBeUsedAsFolder( imageFolders.at( i ) ) ) {
 			imageFolders.erase( imageFolders.begin() + i );
@@ -175,52 +261,85 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders()
 }
 
 std::vector< boost::filesystem::path > SystemSpecificsManager::getMusicFolders() {
-	std::vector< boost::filesystem::path > fontFolders;
-	fontFolders.push_back( boost::filesystem::current_path() );
+	std::vector< boost::filesystem::path > musicFolders;
+	musicFolders.push_back( boost::filesystem::current_path() );
+	
+	std::wstring common = L"Cybrinth\\Music";
+	
 	#if defined WINDOWS
+		std::wstring music = L"Music";
+		std::wstring myMusic = L"My Music";
 		try {
-			fontFolders.push_back( getEnvironmentVariable( "%SYSTEMROOT%" ) + L"\Fonts" );
+			musicFolders.push_back( getEnvironmentVariable( "%ProgramFiles%" ) + common );
+			musicFolders.push_back( getEnvironmentVariable( "%AppData%" ) + common );
+			musicFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + common );
+			musicFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + music );
+			musicFolders.push_back( getEnvironmentVariable( "%UserProfile%" ) + myMusic );
+			musicFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + common );
+			musicFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + music );
+			musicFolders.push_back( getEnvironmentVariable( "%AllUsersProfile%" ) + myMusic );
 		} catch( std::exception &error ) {
-			//Environment variable not found, so ignore it. Do nothing.
-		}
-		try {
-			fontFolders.push_back( getEnvironmentVariable( "%WINDIR%" ) + L"\Fonts" );
-		} catch( std::exception &error ) {
-			//Environment variable not found, so ignore it. Do nothing.
+			//ignore exception
 		}
 	#elif defined LINUX
-		fontFolders.push_back( L"/usr/share/X11/fonts/" );
-		fontFolders.push_back( L"/usr/share/fonts/opentype" ); //This and the next line are a workaround: the first font my system finds in /usr/share/fonts is invisible
-		fontFolders.push_back( L"/usr/share/fonts/truetype" );
-		fontFolders.push_back( L"/usr/share/fonts/" );
+		musicFolders.push_back( L"/usr/local/share/Cybrinth/Music" );
 		try {
-			fontFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/.fonts/" );
+			musicFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Music/" + common );
+			musicFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Music/" );
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
+		
+		std::wstring dataDirsString = getEnvironmentVariable( L"XDG_DATA_DIRS" );
+		std::vector< decltype( dataDirsString ) > dataDirsVector;
+		boost::algorithm::split( dataDirsVector, dataDirsString, [](wchar_t c) { return c == L':'; } );
+		
+		for( decltype( dataDirsVector.size() ) i = 0; i < dataDirsVector.size(); ++i ) {
+			musicFolders.push_back( dataDirsVector.at( i ) + common );
+			musicFolders.push_back( dataDirsVector.at( i ) );
+		}
 	#elif defined MACOSX
-		fontFolders.push_back( L"/Library/Fonts/" );
-		fontFolders.push_back( L"/Network/Library/Fonts/" );
-		fontFolders.push_back( L"/System/Library/Fonts/" );
-		fontFolders.push_back( L"/System Folder/Fonts/" );
+		musicFolders.push_back( L"/Library/Music/" + common );
+		musicFolders.push_back( L"/Network/Library/Music/" + common );
+		musicFolders.push_back( L"/System/Library/Music/" + common );
+		musicFolders.push_back( L"/System Folder/Music/" + common );
+		musicFolders.push_back( L"/Library/Music/" );
+		musicFolders.push_back( L"/Network/Library/Music/" );
+		musicFolders.push_back( L"/System/Library/Music/" );
+		musicFolders.push_back( L"/System Folder/Music/" );
 		try {
-			fontFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Library/Fonts/");
+			musicFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Music/" + common );
+			musicFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Music/" );
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#else
-		fontFolders.push_back( L"/usr/X11R6/lib/X11/fonts/" ); //FreeBSD documentation says that X11 fonts are located here. OpenBSD documentation suggests fonts may be stored in this and the following location.
-		fontFolders.push_back( L"/usr/local/lib/X11/fonts/" );
+		try {
+			musicFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Music/" + common );
+			musicFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Music/" );
+		} catch( std::exception &error ) {
+			//Environment variable not found, so ignore it. Do nothing.
+		}
 	#endif //What about other operating systems? I don't know where BSD etc. put their font files.
 	
-	for( decltype( fontFolders.size() ) i = 0; i < fontFolders.size(); i++ ) {
-		if( not canBeUsedAsFolder( fontFolders.at( i ) ) ) {
-			fontFolders.erase( fontFolders.begin() + i );
+	{
+		auto dataFolders = getDataFolders();
+		musicFolders.insert( musicFolders.end(), dataFolders.begin(), dataFolders.end() );
+	}
+	
+	{
+		auto iter = std::unique( musicFolders.begin(), musicFolders.end() );
+		musicFolders.resize( std::distance( musicFolders.begin(), iter ) );
+	}
+	
+	for( decltype( musicFolders.size() ) i = 0; i < musicFolders.size(); i++ ) {
+		if( not canBeUsedAsFolder( musicFolders.at( i ) ) ) {
+			musicFolders.erase( musicFolders.begin() + i );
 			i -= 1;
 		}
 	}
 	
-	return fontFolders;
+	return musicFolders;
 }
 
 std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders() {
@@ -403,8 +522,6 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 	
 	configFolders.push_back( boost::filesystem::current_path() );
 	
-	std::wcout << L"configFolders.size() before removing stuff: " << configFolders.size() << std::endl;
-	
 	{
 		auto iter = std::unique( configFolders.begin(), configFolders.end() );
 		configFolders.resize( std::distance( configFolders.begin(), iter ) );
@@ -416,8 +533,6 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 			i -= 1;
 		}
 	}
-	
-	std::wcout << L"configFolders.size() after removing stuff: " << configFolders.size() << std::endl;
 	
 	return configFolders;
 }
@@ -436,8 +551,6 @@ bool SystemSpecificsManager::canBeUsedAsFolder( boost::filesystem::path folder )
 			}
 		}
 	}
-	
-	std::wcout << folder.wstring().c_str();
 	
 	return goodSoFar;
 }
