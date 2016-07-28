@@ -1454,67 +1454,74 @@ void MainGame::loadProTips() {
 		}
 		
 		proTips.clear(); //This line is unnecessary because loadProTips() is only called once, but I just feel safer clearing this anyway.
-		boost::filesystem::path proTipsPath( boost::filesystem::current_path()/L"protips.txt" ); //TODO: Load pro tips from standard data directories.
 		
-		if( exists( proTipsPath ) ) {
-			if( not is_directory( proTipsPath ) ) {
-				if( settingsManager.debug ) {
-					std::wcout << L"Loading pro tips from file " << proTipsPath.wstring() << std::endl;
-				}
-				/*boost::filesystem::wifstream proTipsFile;
-				proTipsFile.open( proTipsPath );*/
-				
-				/*std::wifstream proTipsFile;
-				proTipsFile.open( proTipsPath.string() );*/
-				
-				FILE* proTipsFile = fopen( proTipsPath.c_str(), "r" );
-				
-				if( !isNull( proTipsFile ) ) { //proTipsFile.is_open() ) {
-					uint_fast16_t lineNum = 0;
+		auto folderList = system.getDataFolders();
+		
+		for( auto folderListIterator = folderList.begin(); folderListIterator != folderList.end(); ++folderListIterator ) {
+			auto proTipsPath = *folderListIterator;
+		
+			proTipsPath = proTipsPath/L"protips.txt";
+			
+			if( exists( proTipsPath ) ) {
+				if( not is_directory( proTipsPath ) ) {
+					if( settingsManager.debug ) {
+						std::wcout << L"Loading pro tips from file " << proTipsPath.wstring() << std::endl;
+					}
+					/*boost::filesystem::wifstream proTipsFile;
+					proTipsFile.open( proTipsPath );*/
 					
-					wchar_t* linePointer;
+					/*std::wifstream proTipsFile;
+					proTipsFile.open( proTipsPath.string() );*/
 					
-					do { //proTipsFile.good() ) {
-						++lineNum;
+					FILE* proTipsFile = fopen( proTipsPath.c_str(), "r" );
+					
+					if( !isNull( proTipsFile ) ) { //proTipsFile.is_open() ) {
+						uint_fast16_t lineNum = 0;
 						
-						//std::wstring line;
-						uint_fast8_t lineMax = 255;
-						std::wstring::value_type lineArray[ lineMax ];
+						wchar_t* linePointer;
 						
-						//getline( proTipsFile, line );
-						//proTipsFile.getline( lineArray, lineMax );
-						linePointer = fgetws( lineArray, lineMax, proTipsFile );
-						if( !isNull( linePointer ) ) {
-							std::wstring line = linePointer;
+						do { //proTipsFile.good() ) {
+							++lineNum;
 							
-							if( not line.empty() ) {
-								line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
-								boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
+							//std::wstring line;
+							uint_fast8_t lineMax = 255;
+							std::wstring::value_type lineArray[ lineMax ];
+							
+							//getline( proTipsFile, line );
+							//proTipsFile.getline( lineArray, lineMax );
+							linePointer = fgetws( lineArray, lineMax, proTipsFile );
+							if( !isNull( linePointer ) ) {
+								std::wstring line = linePointer;
 								
 								if( not line.empty() ) {
-									proTips.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
+									line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
+									boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
 									
-									if( settingsManager.debug ) {
-										std::wcout << line << std::endl;
+									if( not line.empty() ) {
+										proTips.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
+										
+										if( settingsManager.debug ) {
+											std::wcout << line << std::endl;
+										}
 									}
 								}
 							}
-						}
-					} while( !isNull( linePointer ) );
-					
-					//proTipsFile.close();
-					fclose( proTipsFile );
-					
-					//setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows shuffle() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
-					shuffle( proTips.begin(), proTips.end(), randomNumberGenerator );
+						} while( !isNull( linePointer ) );
+						
+						//proTipsFile.close();
+						fclose( proTipsFile );
+						
+						//setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows shuffle() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
+						shuffle( proTips.begin(), proTips.end(), randomNumberGenerator );
+					} else {
+						throw( CustomException( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) ) );
+					}
 				} else {
-					throw( CustomException( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) ) );
+					throw( CustomException( std::wstring( L"Pro tips file is a directory. Cannot load pro tips." ) ) );
 				}
 			} else {
-				throw( CustomException( std::wstring( L"Pro tips file is a directory. Cannot load pro tips." ) ) );
+				throw( CustomException( std::wstring( L"Pro tips file does not exist. Cannot load pro tips." ) ) );
 			}
-		} else {
-			throw( CustomException( std::wstring( L"Pro tips file does not exist. Cannot load pro tips." ) ) );
 		}
 		
 		if( settingsManager.debug ) {
@@ -1691,6 +1698,7 @@ MainGame::MainGame() {
 		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system);
 		
 		setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows makeMusicList() (called by SettingsManager when it reads prefs), loadProTips(), and pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generated.
+		
 		settingsManager.readPrefs();
 		network.setPort( settingsManager.networkPort );
 		numPlayers = settingsManager.numPlayers;
@@ -1705,10 +1713,17 @@ MainGame::MainGame() {
 		
 		if( settingsManager.fullscreen ) {
 			irr::video::IVideoModeList* vmList = device->getVideoModeList();
+			
+			auto desiredResolution = settingsManager.getFullscreenResolution();
+			
+			if( settingsManager.autoDetectFullscreenResolution ) {
+				desiredResolution = vmList->getDesktopResolution();
+			}
+			
 			if( settingsManager.allowSmallSize ) {
-				screenSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), settingsManager.getFullscreenResolution() ); //Gets a video resolution between minimum (1,1) and maximum (fullscreen resolution setting)
+				screenSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), desiredResolution ); //Gets a video resolution between minimum (1,1) and maximum (fullscreen resolution setting)
 			} else {
-				screenSize = vmList->getVideoModeResolution( settingsManager.getMinimumWindowSize(), settingsManager.getFullscreenResolution() );
+				screenSize = vmList->getVideoModeResolution( settingsManager.getMinimumWindowSize(), desiredResolution );
 			}
 		} else {
 			screenSize = settingsManager.getWindowSize();
@@ -1931,9 +1946,12 @@ void MainGame::makeMusicList() {
 			}
 		}
 		
-		//If backgroundPath (defined inside the for loop inside the following while loop) has a backgrounds subfolder, we want to find backgrounds there first.
+		auto folderList = system.getMusicFolders();
+		
+		//If musicPath (defined inside the for loop inside the following while loop) has a backgrounds subfolder, we want to find backgrounds there first.
 		bool useMusicSubfolder = true;
-		while( useMusicSubfolder ) {
+		for( uint_fast8_t repeat = 0; repeat < 2; ++repeat ) {
+			
 			for( auto folderListIterator = folderList.begin(); folderListIterator != folderList.end(); ++folderListIterator ) {
 				auto musicPath = *folderListIterator;
 				
@@ -1973,6 +1991,15 @@ void MainGame::makeMusicList() {
 						}
 					}
 				}
+				
+				if( not musicList.empty() ) {
+					break; //We found music; no need to keep searching more folders.
+				}
+			}
+			
+			useMusicSubfolder = not musicList.empty();
+			if( useMusicSubfolder ) {
+				break; //we found music; no need to try again without the music folder
 			}
 		}
 		
@@ -3753,9 +3780,9 @@ void MainGame::setupBackground() {
 				//boost::filesystem::path backgroundPath( boost::filesystem::current_path()/L"Images/backgrounds" );
 				//folderList.push_back( boost::filesystem::path( boost::filesystem::current_path()/L"Images/backgrounds" ) );
 				
-				//If backgroundPath (defined inside the for loop inside the following while loop) has a backgrounds subfolder, we want to find backgrounds there first.
+				//If backgroundPath (defined inside the for loop inside the following for loop) has a backgrounds subfolder, we want to find backgrounds there first.
 				bool useBackgroundsSubfolder = true;
-				while( useBackgroundsSubfolder ) {
+				for( uint_fast8_t repeat = 0; repeat < 2; ++repeat ) {
 					for( auto folderListIterator = folderList.begin(); folderListIterator != folderList.end(); ++folderListIterator ) {
 						auto backgroundPath = *folderListIterator;
 						
