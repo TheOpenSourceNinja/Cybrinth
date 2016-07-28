@@ -63,6 +63,8 @@ SettingsManager::SettingsManager() {
 	dateFormatDefault = L"%FT%T";
 	timeFormatDefault = L"%T";
 	debugDefault = false;
+	
+	playMusic = playMusicDefault; //This prevents resetToDefaults() from erroneously thinking that the music preference has been changed the first time that function gets called
 }
 
 SettingsManager::~SettingsManager() {
@@ -333,8 +335,6 @@ void SettingsManager::readPrefs() {
 		
 		std::vector< boost::filesystem::path > configFolders = system->getConfigFolders(); // Flawfinder: ignore
 		bool prefsFileFound = false;
-		
-		std::wcout << L"configFolders.size(): " << configFolders.size() << std::endl;
 		
 		for( auto it = configFolders.begin(); it not_eq configFolders.end(); ++it ) {
 			boost::filesystem::path prefsPath( *it/L"prefs.cfg" );
@@ -633,11 +633,9 @@ void SettingsManager::readPrefs() {
 								}
 							}
 						} else { //linePointer == NULL
-							std::wcerr << L"Line #" << lineNum << L": linePointer is null" << std::endl;
-							
 							if( ferror( prefsFile ) ) {
 								perror( "Error reading prefs file" );
-							} else if( feof( prefsFile ) ) {
+							} else if( debug and feof( prefsFile ) ) {
 								std::wcerr << L"Reached end of prefs file" << std::endl;
 							}
 						}
