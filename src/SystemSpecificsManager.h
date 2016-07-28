@@ -32,6 +32,7 @@ class SystemSpecificsManager {
 	public:
 		SystemSpecificsManager();
 		virtual ~SystemSpecificsManager();
+		std::vector< boost::filesystem::path > getDataFolders();
 		std::vector< boost::filesystem::path > getFontFolders();
 		std::vector< boost::filesystem::path > getImageFolders();
 		std::vector< boost::filesystem::path > getMusicFolders();
