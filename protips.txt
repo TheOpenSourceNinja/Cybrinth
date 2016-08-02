@@ -1,11 +1,12 @@
-// Obviously, these are not real tips. Some are just nonsense; all are meant to be funny.
+// Obviously, these are not real tips. Some are comically unhelpful, some are just nonsense; all are meant to be funny.
 // Like this game's other config files, this file can have single-line comments. Anything following the double slashes will be ignored.
+// Encoding: UTF-8.
 Mash the buttons really fast. You'll play SO much better that way!
 These aren't the droids you're looking for.
 Can't find yourself in a sea of bots? Tough luck.
 Try listening to Track 5 by Unknown Artist. You'll play better grooving to that beat!
 Don't get so angry that you explode like a blood sausage. This isn't Wasteland.
-Don't like the controls? Change them: Pry the keys off your keyboard and stick'em where they should be.
+Don't like the controls? Change them: Pry the keys off your keyboard and stick 'em where they should be.
 "All one has to do is hit the right keys at the right time and the [game] plays itself." -J. S. Bach
 To solve the maze, one must first press a button.
 To defeat the Cyberdemon, play DooM.
@@ -38,7 +39,7 @@ The journey of a thousand miles begins with a horse before the cart.
 This door is to remain closed at all times. That is why it's not a wall.
 Loading pro tips... Error: Your brain not found.
 Made you read!
-Che@p onl!ne drr0gstore. Vigarra! Cala¡s! Just openn this Êmail atachement.
+Che@p onl!ne drr0gstore. Vigarra! Cala¡s! Just openn this Êmail atachement.// For translators: Correctly spelled, this is "Cheap online drugstore. Viagra! Cialis! Just open this email attachment."
 Do not show to horses.
 Pay attention, there will be a test.
 Do nothing unless you must, and when you must act -- hesitate.
@@ -50,4 +51,51 @@ The early bird gets the worm. The 2nd mouse gets the cheese.
 To maintain perfect accuracy, shoot first and call whatever you hit the target.
 If the game seems unresponsive, just plokta. //"acronym: Press Lots Of Keys To Abort" http://www.catb.org/jargon/html/P/plokta.html
 "If you wish to make an apple pie from scratch, you must first invent the universe." -Carl Sagan
-Yvon eht nioj
+!yvon eht nioJ
+When cutting a bagel in half, put a finger in the hole to stabilize it.
+To protect your screen from scratches, apply a protective coating of peanut butter.
+You don't have free time; you've just forgotten everything you have to do.
+A place for everything, and everything wherever you happen to leave it.
+To hack any computer, just type really really fast like they do in the movies.
+Up up down down left right left right B A
+Make a tape of arcade sounds. Play it in your boom box while playing Cybrinth. So 1980s!!!
+If your son, when he's 8 years old, accidentally sets fire to the living room rug... go easy on him.
+To do way the instain mother>, frigth it until it accidentally. //making fun of a very old Yahoo! Answer: http://web.archive.org/web/20081220203315/http://answers.yahoo.com/question/index?qid=20080810030304AAz4LT9 as well as the 'I accidentally' meme: http://knowyourmeme.com/memes/i-accidentally
+I accidentally this pro tip.
+Ceiling Cat is watching you play. Try to play well.
+A fool and his free time are soon parted.
+All good games must come to an end – except Cybrinth.
+Fortune favors those with many coins to insert.
+A pixel is worth 0x3E8 words.
+There's no place like ~/
+One man's trash is another man's trash too.
+One man's trash is another man's TRS-80.
+Points come to those who wait near the goal.
+A journey of 1 KB begins with 1 B.
+Better Ctrl+S than sorry.
+If at first you don't succeed, insert coin again.
+Not just an amateur tip.
+Do a barrel roll!
+Real friends put game discs back in their cases.
+When life gives you medkits & ammo, expect a boss fight.
+The harder you mash the buttons, the faster you'll move.
+The princess really is in the next castle. Honest!
+You have no chance to survive make your time. //https://en.wikipedia.org/w/index.php?title=All_your_base_are_belong_to_us&oldid=731993757#Selected_transcript
+A winner is you!
+You are made of terrible.
+You are made of win.
+Put in more metal moneys! //Yes, this is acceptable spelling. See Wiktionary: https://en.wiktionary.org/w/index.php?title=moneys&oldid=39555449#Noun
+Pants. On. Now.
+Even electronic brain pancake crystal elderly. //http://tvtropes.org/pmwiki/pmwiki.php/Main/TranslationTrainWreck
+Forward with the butter! //"áfram með smjörið" http://tvtropes.org/pmwiki/pmwiki.php/BlindIdiotTranslation/RealLife
+Move left, move right, it's all in the mind...
+Go play Mars Matrix.
+Dying is accomplished by death, so avoid this if at all possible. // YouTube video "LGR - Joust VGA - DOS PC Game Review" https://www.youtube.com/watch?v=fUUP2FvRjW4
+Wikipedia is an encyclopedia. Wiktionary is a dictionary.
+NA NA NA NA NA NA NA NA NA NA NA NA NA NA BATMAN!!!
+Without fools there would be no wisdom.
+Without coins there would be no gameplay.
+Without cyberculture there would be no Cybrinth.
+Stop looking for the Fountain of Youth; it doesn't exist. Make one.
+Have some ANSI standard pizza and ISO standard tea. //References two entries in the Jargon File
+This game is careware. If you like it, send money.
