@@ -137,6 +137,7 @@ void SettingsManager::savePrefs() {
 						std::wstring commentMark = L"//";
 						
 						//Save header comments------------
+						fputws( std::wstring( commentMark + L"This file should be encoded as UTF-8.\n" ).c_str() , prefsFile );
 						fputws( std::wstring( commentMark + L"Single-line comments like this are allowed, and must begin with two slashes (//). Anything before the slashes is considered not part of a comment.\n" ).c_str() , prefsFile );
 						fputws( std::wstring( commentMark + L"Preference and value must be separated by a tab character, not spaces.\n" ).c_str(), prefsFile );
 						fputws( std::wstring( commentMark + L"Any preference not specified here will use its default value. The same goes for things specified in invalid ways (i.e. so badly spelled that the spell checker doesn't recognize them).\n" ).c_str(), prefsFile );
