@@ -123,9 +123,7 @@ class MainGame : public irr::IEventReceiver {
 		uint_fast16_t loadingDelay;
 		
 		NetworkManager network;
-		uint_fast8_t numBots;
 		uint_fast8_t numLocks;
-		uint_fast8_t numPlayers;
 		
 		std::vector< Player > player;
 		std::vector< PlayerStart > playerStart;
