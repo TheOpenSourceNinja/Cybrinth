@@ -33,9 +33,6 @@ class SettingsManager
 		SettingsManager();
 		~SettingsManager();
 		
-		void readPrefs();
-		
-		void savePrefs();
 		void setPointers( irr::IrrlichtDevice* newDevice, MainGame* newMainGame, MazeManager* newMazeManager, NetworkManager* newNetwork, SpellChecker* newSpellChecker, SystemSpecificsManager* newSystem ); //Must be called before readPrefs!
 		
 		bool allowSmallSize;
@@ -68,6 +65,8 @@ class SettingsManager
 		uint_fast8_t getBitsPerPixel();
 		irr::core::dimension2d< irr::u32 > getMinimumWindowSize();
 		uint_fast8_t getMusicVolume();
+		uint_fast8_t getNumBots();
+		uint_fast8_t getNumPlayers();
 		bool getPlayMusic();
 		irr::core::dimension2d< irr::u32 > getWindowSize();
 		
@@ -78,14 +77,11 @@ class SettingsManager
 		bool markTrailsDefault;
 		
 		uint_fast16_t networkPort;
-		uint_fast16_t networkPortDefault;
-		uint_fast8_t numBots;
-		uint_fast8_t numBotsDefault;
-		uint_fast8_t numPlayers;
-		uint_fast8_t numPlayersDefault;
 		
+		void readPrefs();
 		void resetToDefaults();
 		
+		void savePrefs();
 		void setBitsPerPixel( uint_fast8_t newBPP );
 		void setFullscreenResolution( irr::core::dimension2d< irr::u32 > newResolution );
 		void setMusicVolume( uint_fast8_t newVolume );
@@ -122,6 +118,12 @@ class SettingsManager
 		uint_fast8_t musicVolumeDefault;
 		
 		NetworkManager* network;
+		
+		uint_fast16_t networkPortDefault;
+		uint_fast8_t numBots;
+		uint_fast8_t numBotsDefault;
+		uint_fast8_t numPlayers;
+		uint_fast8_t numPlayersDefault;
 		
 		bool playMusic;
 		bool playMusicDefault;

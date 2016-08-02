@@ -65,6 +65,8 @@ SettingsManager::SettingsManager() {
 	debugDefault = false;
 	
 	playMusic = playMusicDefault; //This prevents resetToDefaults() from erroneously thinking that the music preference has been changed the first time that function gets called
+	
+	resetToDefaults();
 }
 
 SettingsManager::~SettingsManager() {
@@ -714,15 +716,23 @@ void SettingsManager::resetToDefaults() {
 	botsKnowSolution = botsKnowSolutionDefault;
 	botAlgorithm = botAlgorithmDefault;
 	botMovementDelay = botMovementDelayDefault;
-	mazeManager->hideUnseen = hideUnseenDefault;
+	
 	backgroundAnimations = backgroundAnimationsDefault;
-	fullscreenResolution = device->getVideoModeList()->getDesktopResolution();
+	
 	autoDetectFullscreenResolution = autoDetectFullscreenResolutionDefault;
 	dateFormat = dateFormatDefault;
 	timeFormat = timeFormatDefault;
 	
 	if( oldPlayMusic not_eq playMusic ) {
 		mainGame->musicSettingChanged();
+	}
+	
+	if( mazeManager != nullptr ) {
+		mazeManager->hideUnseen = hideUnseenDefault;
+	}
+	
+	if( device != nullptr ) {
+		fullscreenResolution = device->getVideoModeList()->getDesktopResolution();
 	}
 }
 
@@ -763,4 +773,10 @@ void SettingsManager::setWindowSize( irr::core::dimension2d< irr::u32 > newSize 
 	} else {
 		windowSize = irr::core::dimension2d< decltype( windowSize.Height ) >( newSize.Width, newSize.Height );
 	}
+}
+uint_fast8_t SettingsManager::getNumBots() {
+	return numBots;
+}
+uint_fast8_t SettingsManager::getNumPlayers() {
+	return numPlayers;
 }
