@@ -323,10 +323,10 @@ void SettingsScreen::changeToSettingsScreen() {
 				auto numPlayersSpinboxRectangle = Rectangle( mainGame->getScreenSize().Width - numPlayersSpinboxDimensions.Width, itemY, mainGame->getScreenSize().Width, itemY + numPlayersSpinboxDimensions.Height );
 				{
 					StringConverter sc;
-					numPlayersSpinBox = environment->addSpinBox( sc.toStdWString( settingsManager->numPlayers ).c_str(), numPlayersSpinboxRectangle, true, multiplayerTab, NUM_PLAYERS_SPINBOX_ID );
+					numPlayersSpinBox = environment->addSpinBox( sc.toStdWString( settingsManager->getNumPlayers() ).c_str(), numPlayersSpinboxRectangle, true, multiplayerTab, NUM_PLAYERS_SPINBOX_ID );
 				}
 				numPlayersSpinBox->setRange( 1, 255 );
-				numPlayersSpinBox->setValue( settingsManager->numPlayers );
+				numPlayersSpinBox->setValue( settingsManager->getNumPlayers() );
 				numPlayersSpinBox->setDecimalPlaces( 0 );
 				
 				auto numPlayersBarRectangle = Rectangle( numPlayersTextRectangle.LowerRightCorner.X + 1, itemY, numPlayersSpinboxRectangle.UpperLeftCorner.X, numPlayersTextRectangle.LowerRightCorner.Y );
@@ -350,10 +350,10 @@ void SettingsScreen::changeToSettingsScreen() {
 				auto numBotsSpinboxRectangle = Rectangle( mainGame->getScreenSize().Width - numBotsSpinboxDimensions.Width, itemY, mainGame->getScreenSize().Width, itemY + numBotsSpinboxDimensions.Height );
 				{
 					StringConverter sc;
-					numBotsSpinBox = environment->addSpinBox( sc.toStdWString( settingsManager->numBots ).c_str(), numBotsSpinboxRectangle, true, multiplayerTab, NUM_BOTS_SPINBOX_ID );
+					numBotsSpinBox = environment->addSpinBox( sc.toStdWString( settingsManager->getNumBots() ).c_str(), numBotsSpinboxRectangle, true, multiplayerTab, NUM_BOTS_SPINBOX_ID );
 				}
 				numBotsSpinBox->setRange( 0, numPlayersSpinBox->getValue() );
-				numBotsSpinBox->setValue( settingsManager->numBots );
+				numBotsSpinBox->setValue( settingsManager->getNumBots() );
 				numBotsSpinBox->setDecimalPlaces( 0 );
 				
 				auto numBotsBarRectangle = Rectangle( numBotsTextRectangle.LowerRightCorner.X + 1, itemY, numBotsSpinboxRectangle.UpperLeftCorner.X, numBotsTextRectangle.LowerRightCorner.Y );
@@ -422,6 +422,17 @@ void SettingsScreen::changeToSettingsScreen() {
 				auto botAlgorithmTextDimensions = font->getDimension( botAlgorithmTextString.c_str() );
 				auto botAlgorithmTextRectangle = Rectangle( 0, itemY, 0 + botAlgorithmTextDimensions.Width, itemY + botAlgorithmTextDimensions.Height );
 				botAlgorithmText = environment->addStaticText( botAlgorithmTextString.c_str(), botAlgorithmTextRectangle, false, true, multiplayerTab );
+				
+				auto botAlgorithmListBoxRectangle = Rectangle( botAlgorithmTextRectangle.LowerRightCorner.X + 1, itemY, driver->getScreenSize().Width, driver->getScreenSize().Height );
+				botAlgorithmListBox = environment->addListBox( botAlgorithmListBoxRectangle, multiplayerTab, BOT_ALGORITHM_LISTBOX_ID, true );
+				
+				for( uint_fast8_t algorithm = AI::DEPTH_FIRST_SEARCH; algorithm != AI::ALGORITHM_DO_NOT_USE; ++algorithm ) {
+					botAlgorithmListBox->addItem( AI::stringFromAlgorithm( ( AI::algorithm_t ) algorithm ).c_str() );
+				}
+				
+				botAlgorithmListBox->setSelected( AI::stringFromAlgorithm( settingsManager->botAlgorithm ).c_str() );
+				
+				itemY = 1 + std::max( botAlgorithmTextRectangle.LowerRightCorner.Y, botAlgorithmListBoxRectangle.LowerRightCorner.Y );
 			}
 			
 			{ //Miscellaneous tab
@@ -712,8 +723,33 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 						}
 						break;
 					}
+					
+					case irr::gui::EGET_LISTBOX_CHANGED: {
+						switch( id ) {
+							case BOT_ALGORITHM_LISTBOX_ID: {
+								settingsChanged = true;
+								settingsManager->botAlgorithm = (AI::algorithm_t) botAlgorithmListBox->getSelected();
+								break;
+							}
+							default: {
+								CustomException e( L"Unhandled listbox ID" );
+								throw( e );
+							}
+						}
+						break;
+					}
+					
+					case irr::gui::EGET_ELEMENT_HOVERED: //deliberate fall-through
+					case irr::gui::EGET_ELEMENT_FOCUS_LOST:
+					case irr::gui::EGET_ELEMENT_FOCUSED:
+					case irr::gui::EGET_TAB_CHANGED:
+					case irr::gui::EGET_LISTBOX_SELECTED_AGAIN:
+					case irr::gui::EGET_ELEMENT_LEFT: {
+						break;
+					}
 					default: {
-						CustomException e( L"Unhandled event.GUIEvent.EventType" );
+						StringConverter sc;
+						CustomException e( L"Unhandled event.GUIEvent.EventType: " + sc.toStdWString( (int) event.GUIEvent.EventType ) );
 						throw( e );
 					}
 				}
