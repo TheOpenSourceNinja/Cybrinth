@@ -77,7 +77,6 @@
   <Dependencies Name="Release"/>
   <VirtualDirectory Name="Non-Source Files">
     <File Name="prefs-slowcomputers.cfg"/>
-    <File Name="prefs (copy).cfg"/>
     <File Name="controls.cfg"/>
     <File Name="prefs.cfg"/>
     <File Name="protips.txt"/>
