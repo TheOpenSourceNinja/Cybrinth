@@ -1039,6 +1039,90 @@ void MainGame::loadClockFont() { //Load clockFont
 }
 
 /**
+ * @brief Loads exit confirmation questions from exitConfirmations file
+ */
+ void MainGame::loadExitConfirmations() {
+	try {
+		 if( settingsManager.debug ) {
+			std::wcout << L"loadExitConfirmations() called" << std::endl;
+		}
+		
+		exitConfirmations.clear(); //This line is unnecessary because loadExitConfirmations() is only called once, but I just feel safer clearing this anyway.
+		
+		auto folderList = system.getDataFolders();
+		
+		for( auto folderListIterator = folderList.begin(); folderListIterator != folderList.end(); ++folderListIterator ) {
+			auto exitConfirmationsPath = *folderListIterator;
+		
+			exitConfirmationsPath = exitConfirmationsPath/L"exitConfirmations.txt";
+			
+			if( exists( exitConfirmationsPath ) ) {
+				if( not is_directory( exitConfirmationsPath ) ) {
+					if( settingsManager.debug ) {
+						std::wcout << L"Loading exit confirmations from file " << exitConfirmationsPath.wstring() << std::endl;
+					}
+					
+					FILE* exitConfirmationsFile = fopen( exitConfirmationsPath.c_str(), "r" );
+					
+					if( !isNull( exitConfirmationsFile ) ) {
+						uint_fast16_t lineNum = 0;
+						
+						wchar_t* linePointer;
+						
+						do {
+							++lineNum;
+							
+							uint_fast8_t lineMax = 255;
+							std::wstring::value_type lineArray[ lineMax ];
+							
+							linePointer = fgetws( lineArray, lineMax, exitConfirmationsFile );
+							if( !isNull( linePointer ) ) {
+								std::wstring line = linePointer;
+								
+								if( not line.empty() ) {
+									line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
+									boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
+									
+									if( not line.empty() ) {
+										exitConfirmations.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
+										
+										if( settingsManager.debug ) {
+											std::wcout << line << std::endl;
+										}
+									}
+								}
+							}
+						} while( !isNull( linePointer ) );
+						
+						fclose( exitConfirmationsFile );
+						
+						//The random number generator has already been seeded
+						shuffle( exitConfirmations.begin(), exitConfirmations.end(), randomNumberGenerator );
+					} else {
+						//throw( CustomException( std::wstring( L"Unable to open exit confirmations file even though it exists. Check its access permissions." ) ) );
+					}
+				} else {
+					//throw( CustomException( std::wstring( L"Exit confirmations file is a directory. Cannot load exit confirmations." ) ) );
+				}
+			} else {
+				//throw( CustomException( std::wstring( L"Exit confirmations file does not exist. Cannot load exit confirmations." ) ) );
+			}
+		}
+		
+	} catch( CustomException e ) {
+		std::wcerr << L"Error in MainGame::loadExitConfirmations(): " << e.what() << std::endl;
+		return;
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in MainGame::loadExitConfirmations(): " << e.what() << std::endl;
+		return;
+	}
+	
+	if( settingsManager.debug ) {
+		std::wcout << L"end of loadExitConfirmations()" << std::endl;
+	}
+ }
+
+/**
  * Loads fonts. Calls loadMusicFont(), loadTipFont(), and loadClockFont().
  */
 void MainGame::loadFonts() {
@@ -1514,21 +1598,26 @@ void MainGame::loadProTips() {
 						//setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows shuffle() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
 						shuffle( proTips.begin(), proTips.end(), randomNumberGenerator );
 					} else {
-						throw( CustomException( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) ) );
+						//throw( CustomException( std::wstring( L"Unable to open pro tips file even though it exists. Check its access permissions." ) ) );
 					}
 				} else {
-					throw( CustomException( std::wstring( L"Pro tips file is a directory. Cannot load pro tips." ) ) );
+					//throw( CustomException( std::wstring( L"Pro tips file is a directory. Cannot load pro tips." ) ) );
 				}
 			} else {
-				throw( CustomException( std::wstring( L"Pro tips file does not exist. Cannot load pro tips." ) ) );
+				//throw( CustomException( std::wstring( L"Pro tips file does not exist. Cannot load pro tips." ) ) );
 			}
 		}
 		
-		if( settingsManager.debug ) {
-			std::wcout << L"end of loadProTips()" << std::endl;
-		}
+	} catch( CustomException e ) {
+		std::wcerr << L"Error in MainGame::loadProTips(): " << e.what() << std::endl;
+		return;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::loadProTips(): " << e.what() << std::endl;
+		return;
+	}
+	
+	if( settingsManager.debug ) {
+		std::wcout << L"end of loadProTips()" << std::endl;
 	}
 }
 
@@ -1676,6 +1765,7 @@ MainGame::MainGame() {
 		mazeManager.setPointers( this, &settingsManager );
 		settingsManager.isServer = false;
 		antiAliasFonts = true;
+		currentExitConfirmation = 0;
 		currentProTip = 0;
 		sideDisplaySizeDenominator = 6; //What fraction of the screen's width is set aside for displaying text, statistics, etc. during play.
 		currentDirectory = boost::filesystem::current_path();
@@ -1913,6 +2003,9 @@ MainGame::MainGame() {
 		network.setup( this, settingsManager.isServer );
 		
 		timer = device->getTimer();
+		
+		loadExitConfirmations();
+		
 
 		if( settingsManager.debug ) {
 			std::wcout << L"end of MainGame constructor" << std::endl;
@@ -3962,8 +4055,21 @@ void MainGame::setupMusicStuff() {
 /**
  * Called by menuManager.
  */
-void MainGame::setExitConfirmation( irr::gui::IGUIWindow* newWindow ) {
+/*void MainGame::setExitConfirmation( irr::gui::IGUIWindow* newWindow ) {
 	exitConfirmation = newWindow;
+}*/
+
+void MainGame::displayExitConfirmation() {
+	irr::core::stringw question;
+	
+	if( exitConfirmations.empty() ) {
+		question = L"Are you sure you want to exit?";
+	} else {
+		question = exitConfirmations.at( currentExitConfirmation );
+		currentExitConfirmation = ( currentExitConfirmation + 1 ) % exitConfirmations.size();
+	}
+	
+	exitConfirmation = gui->addMessageBox( L"Exit?", question.c_str(), true, ( irr::gui::EMBF_YES bitor irr::gui::EMBF_NO ) );
 }
 
 /**

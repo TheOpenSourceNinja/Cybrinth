@@ -60,6 +60,7 @@ class MainGame : public irr::IEventReceiver {
 		
 		void allPlayersReady( bool tf );
 		
+		void displayExitConfirmation();
 		void drawAll(); //Public because it's called by MazeManager. Otherwise the loading screen wouldn't get drawn during maze generation.
 		
 		void eraseCollectable( uint_fast8_t item );
@@ -98,7 +99,7 @@ class MainGame : public irr::IEventReceiver {
 		uint_fast8_t run( std::wstring fileToLoad ); //If a file was specified on the command line, it will be passed to run().
 		
 		void setControls();
-		void setExitConfirmation( irr::gui::IGUIWindow* newWindow );
+		//void setExitConfirmation( irr::gui::IGUIWindow* newWindow );
 		void setFileChooser( irr::gui::IGUIFileOpenDialog* newChooser );
 		void setLoadingPercentage( float newPercent );
 		void setMyPlayer( uint_fast8_t newPlayer );
@@ -150,6 +151,7 @@ class MainGame : public irr::IEventReceiver {
 		bool isNull( void* ptr );
 		
 		void loadClockFont();
+		void loadExitConfirmations();
 		void loadFonts();
 		void loadMusicFont();
 		void loadNextSong();
@@ -215,6 +217,8 @@ class MainGame : public irr::IEventReceiver {
 		float loadingProgress;
 		
 		//wide character strings----------------------------------
+		std::vector< irr::core::stringw > exitConfirmations;
+		
 		irr::core::stringw fontFile;
 		
 		irr::core::stringw heightTestString; //Used only when loading fonts
@@ -300,6 +304,7 @@ class MainGame : public irr::IEventReceiver {
 		std::vector<boost::filesystem::path> musicList;
 		
 		//Other types----------------------------------
+		size_t currentExitConfirmation;
 		size_t currentProTip;
 		std::minstd_rand randomNumberGenerator;
 		std::minstd_rand::result_type randomSeed;
