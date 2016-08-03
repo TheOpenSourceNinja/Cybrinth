@@ -44,7 +44,6 @@ class Object {
 		void loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::core::stringw fileName );
 		virtual void createTexture( irr::IrrlichtDevice* device, uint_fast16_t size = 1 ) = 0; //To be called by subclasses when they can't get their texture loaded
 		virtual void reset() = 0;
-		void setColorBasedOnNum( uint_fast8_t num );
 		void setColors( irr::video::SColor newColorOne, irr::video::SColor newColorTwo );
 		irr::video::SColor getColorOne();
 		irr::video::SColor getColorTwo();

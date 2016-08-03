@@ -63,6 +63,7 @@ SettingsManager::SettingsManager() {
 	dateFormatDefault = L"%FT%T";
 	timeFormatDefault = L"%T";
 	debugDefault = false;
+	colorModeDefault = GRAYSCALE;
 	
 	playMusic = playMusicDefault; //This prevents resetToDefaults() from erroneously thinking that the music preference has been changed the first time that function gets called
 	
@@ -717,7 +718,7 @@ void SettingsManager::resetToDefaults() {
 	botsKnowSolution = botsKnowSolutionDefault;
 	botAlgorithm = botAlgorithmDefault;
 	botMovementDelay = botMovementDelayDefault;
-	
+	colorMode = colorModeDefault;
 	backgroundAnimations = backgroundAnimationsDefault;
 	
 	autoDetectFullscreenResolution = autoDetectFullscreenResolutionDefault;

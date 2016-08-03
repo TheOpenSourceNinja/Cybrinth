@@ -66,6 +66,7 @@ class MainGame : public irr::IEventReceiver {
 		void eraseCollectable( uint_fast8_t item );
 		
 		Collectable* getCollectable( uint_fast8_t collectable );
+		irr::video::SColor getColorBasedOnNum( uint_fast8_t num );
 		bool getDebugStatus();
 		Goal* getGoal();
 		Collectable* getKey( uint_fast8_t key );
@@ -105,6 +106,7 @@ class MainGame : public irr::IEventReceiver {
 		void setMyPlayer( uint_fast8_t newPlayer );
 		void setNumBots( uint_fast8_t newNumBots );
 		void setNumPlayers( uint_fast8_t newNumPlayers );
+		void setObjectColorBasedOnNum( Object* object, uint_fast8_t num );
 		void setRandomSeed( std::minstd_rand::result_type newSeed );
 		void showLoadMazeDialog();
 		void showSaveMazeDialog();

@@ -51,6 +51,10 @@ class SettingsManager
 		bool botsKnowSolution;
 		bool botsKnowSolutionDefault;
 		
+		enum colorMode_t : uint_fast8_t { FULLCOLOR, GRAYSCALE, COLOR_MODE_DO_NOT_USE };
+		colorMode_t colorMode;
+		colorMode_t colorModeDefault;
+		
 		std::wstring dateFormat; //for use by wcsftime()
 		std::wstring dateFormatDefault;
 		bool debug;
@@ -104,7 +108,7 @@ class SettingsManager
 		
 		irr::IrrlichtDevice* device;
 		std::vector< std::wstring > driverTypes = { L"opengl", L"direct3d9", L"direct3d8", L"burning's video", L"software", L"null" };
-		enum driver_t : uint_fast8_t { OPENGL = 0, DIRECT3D9 = 1, DIRECT3D8 = 2, BURNINGS = 3, SOFTWARE = 4, DRIVERNULL = 5, DRIVERDO_NOT_USE = 255 };
+		enum driver_t : uint_fast8_t { OPENGL = 0, DIRECT3D9 = 1, DIRECT3D8 = 2, BURNINGS = 3, SOFTWARE = 4, DRIVERNULL = 5, DRIVER_DO_NOT_USE = 255 };
 		
 		irr::core::dimension2d< irr::u32 > fullscreenResolution;
 		irr::core::dimension2d< irr::u32 > fullscreenResolutionDefault;
