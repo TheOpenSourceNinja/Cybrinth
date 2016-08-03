@@ -139,7 +139,8 @@ void MenuManager::processSelection( MainGame* mg ) {
 	}
 	
 	if( options.at( exitGame ).highlighted ) {
-		mg->setExitConfirmation( mg->gui->addMessageBox( L"Exit?", L"Are you sure you want to exit?", true, ( irr::gui::EMBF_YES bitor irr::gui::EMBF_NO ) ) );
+		//mg->setExitConfirmation( mg->gui->addMessageBox( L"Exit?", L"Are you sure you want to exit?", true, ( irr::gui::EMBF_YES bitor irr::gui::EMBF_NO ) ) );
+		mg->displayExitConfirmation();
 	} else if( options.at( loadMaze ).highlighted ) {
 		//mg->setFileChooser( mg->gui->addFileOpenDialog( L"Select a Maze", true, 0, -1, true ) );
 		mg->showLoadMazeDialog();
