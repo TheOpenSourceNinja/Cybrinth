@@ -45,4 +45,27 @@
 
 #define NUMCOLORS 16 //Does not count duplicates (like grey/gray) or INVISIBLE
 
+//Grayscale conversions:
+//Converted using the luminosity method described here: http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/
+//Luminosity = round( 0.21*Red + 0.72*Green + 0.07*Blue )
+#define BLACK_GRAYSCALE irr::video::SColor( 255, 0, 0, 0 )
+#define BLUE_GRAYSCALE irr::video::SColor( 255, 12, 12, 12 )
+#define GREEN_GRAYSCALE irr::video::SColor( 255, 122, 122, 122 )
+#define CYAN_GRAYSCALE irr::video::SColor( 255, 134, 134, 134 )
+#define RED_GRAYSCALE irr::video::SColor( 255, 36, 36, 36 )
+#define MAGENTA_GRAYSCALE irr::video::SColor( 255, 48, 48, 48 )
+#define BROWN_GRAYSCALE irr::video::SColor( 255, 97, 97, 97 )
+#define GRAY_GRAYSCALE irr::video::SColor( 255, 85, 85, 85 )
+#define GREY_GRAYSCALE irr::video::SColor( 255, 85, 85, 85 )
+#define LIGHTGRAY_GRAYSCALE irr::video::SColor( 255, 170, 170, 170 )
+#define LIGHTGREY_GRAYSCALE irr::video::SColor( 255, 170, 170, 170 )
+#define LIGHTBLUE_GRAYSCALE irr::video::SColor( 255, 97, 97, 97 )
+#define LIGHTGREEN_GRAYSCALE irr::video::SColor( 255, 207, 207, 207 )
+#define LIGHTCYAN_GRAYSCALE irr::video::SColor( 255, 219, 219, 219 )
+#define LIGHTRED_GRAYSCALE irr::video::SColor( 255, 121, 121, 121 )
+#define LIGHTMAGENTA_GRAYSCALE irr::video::SColor( 255, 133, 133, 133 )
+#define YELLOW_GRAYSCALE irr::video::SColor( 255, 243, 243, 243 )
+#define WHITE_GRAYSCALE irr::video::SColor( 255, 255, 255, 255 )
+#define INVISIBLE_GRAYSCALE irr::video::SColor( 0, 0, 0, 0 )
+
 #endif // COLORS_H_INCLUDED

@@ -1933,7 +1933,7 @@ MainGame::MainGame() {
 			
 			for( decltype( settingsManager.getNumPlayers() ) p = 0; p < settingsManager.getNumPlayers(); ++p ) {
 				player.at( p ).setPlayerNumber( p );
-				player.at( p ).setColorBasedOnNum();
+				setObjectColorBasedOnNum( &( player.at( p ) ), p );
 				player.at( p ).setMG( this );
 				player.at( p ).loadTexture( device, 100, loadableTextures );
 				playerAssigned.at( p ) = false;
@@ -4151,6 +4151,279 @@ void MainGame::setNumPlayers( uint_fast8_t newNumPlayers ) {
 	
 	for( decltype( settingsManager.getNumBots() ) b = 0; b < settingsManager.getNumBots(); ++b ) {
 		bot.at( b ).setPlayer( ( int_fast16_t ) bot.at( b ).getPlayer() + diff );
+	}
+}
+
+irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
+	irr::video::SColor colorOne;
+	
+	switch( num ) {
+		case 0: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = BLACK_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = BLACK;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 1: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = BLUE_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = BLUE;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 2: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = GREEN_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = GREEN;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 3: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = CYAN_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = CYAN;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 4: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = RED_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = RED;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 5: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = MAGENTA_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = MAGENTA;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 6: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = BROWN_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = BROWN;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 7: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = GRAY_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = GRAY;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 8: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = LIGHTGRAY_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = LIGHTGRAY;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 9: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = LIGHTBLUE_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = LIGHTBLUE;
+					break;
+				}
+			}
+		
+			break;
+		}
+		case 10: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = LIGHTGREEN_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = LIGHTGREEN;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 11: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = LIGHTCYAN_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = LIGHTCYAN;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 12: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = LIGHTRED_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = LIGHTRED;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 13: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = LIGHTMAGENTA_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = LIGHTMAGENTA;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 14: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = YELLOW_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = YELLOW;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case 15: {
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = WHITE_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = WHITE;
+					break;
+				}
+			}
+			
+			break;
+		}
+		default: { //Just adding this to be extra careful
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::GRAYSCALE: {
+					colorOne = BLACK_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::FULLCOLOR: {
+					colorOne = BLACK;
+					break;
+				}
+			}
+			
+			break;
+		}
+	}
+	
+	return colorOne;
+}
+
+void MainGame::setObjectColorBasedOnNum( Object* object, uint_fast8_t num ) {
+	try {
+		uint_fast8_t maxNum = NUMCOLORS - 1; //Numbers can start at zero, thus the maximum is one less than the total
+		uint_fast8_t numOne = num % maxNum;
+		uint_fast8_t numTwo = ( num / NUMCOLORS ) % maxNum;
+		
+		numTwo = maxNum - numTwo;
+		if( numOne == numTwo ) {
+			numTwo = ( numTwo + 1 ) % maxNum;
+		}
+		
+		irr::video::SColor colorOne;
+		irr::video::SColor colorTwo;
+		
+		colorOne = getColorBasedOnNum( numOne );
+		colorTwo = getColorBasedOnNum( numTwo );
+		
+		object->setColors( colorOne, colorTwo );
+		
+	} catch ( CustomException e ) {
+		std::wcerr << L"Error in MainGame::setObjectColorBasedOnNum(): " << e.what() << std::endl;
+	} catch ( std::exception &e ) {
+		std::wcerr << L"Error in MainGame::setObjectColorBasedOnNum(): " << e.what() << std::endl;
 	}
 }
 

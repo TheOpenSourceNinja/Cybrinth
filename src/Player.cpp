@@ -280,10 +280,6 @@ void Player::reset() {
 	}
 }
 
-void Player::setColorBasedOnNum() {
-	Object::setColorBasedOnNum( playerNumber );
-}
-
 void Player::setMG( MainGame* newMG ) {
 	mg = newMG;
 }
