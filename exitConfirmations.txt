@@ -1,0 +1,11 @@
+//Encoding: UTF-8.
+//Like the game's other configuration files, this one allows single-line comments preceded by double slashes.
+//This file contains yes-or-no questions to be asked when the player tries to exit the program. A yes answer means exit, a no answer means keep playing.
+Exit-P?
+Are you sure you want to exit?
+Are you sure you want to leave the Matrix?
+Are you sure you want to go back to the real world?
+Stop playing and get back to work?
+Is your boss approaching?
+Did you forget to turn in those TPS reports?
+Do you need to get a life?
