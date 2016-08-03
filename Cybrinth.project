@@ -85,6 +85,7 @@
     <File Name="AUTHORS"/>
     <File Name="configure.ac"/>
     <File Name="Makefile.am"/>
+    <File Name="exitConfirmations.txt"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
