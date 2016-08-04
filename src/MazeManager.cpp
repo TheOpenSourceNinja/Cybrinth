@@ -32,29 +32,29 @@
 bool MazeManager::canGetTo( uint_fast8_t startX, uint_fast8_t startY, uint_fast8_t goalX, uint_fast8_t goalY ) {
 	try {
 		bool found = false;
-
+		
 		maze[ startX ][ startY ].visited = true;
-
+		
 		if( startX == goalX and startY == goalY ) {
 			found = true;
 		} else {
 			if( startY > 0 and maze[ startX ][ startY ].getTop() == MazeCell::NONE and maze[ startX ][ startY - 1 ].visited == false ) {
 				found = canGetTo( startX, startY - 1, goalX, goalY );
 			}
-
+			
 			if( found == false and startY < ( rows - 1 ) and maze[ startX ][ startY + 1 ].getTop() == MazeCell::NONE and maze[ startX ][ startY + 1 ].visited == false ) {
 				found = canGetTo( startX, startY + 1, goalX, goalY );
 			}
-
+			
 			if( found == false and startX < ( cols - 1 ) and maze[ startX + 1 ][ startY ].getLeft() == MazeCell::NONE and maze[ startX + 1 ][ startY ].visited == false ) {
 				found = canGetTo( startX + 1, startY, goalX, goalY );
 			}
-
+			
 			if( found == false and startX > 0 and maze[ startX ][ startY ].getLeft() == MazeCell::NONE and maze[ startX - 1 ][ startY ].visited == false ) {
 				found = canGetTo( startX - 1, startY, goalX, goalY );
 			}
 		}
-
+		
 		return found;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::canGetTo(): " << e.what() << std::endl;
@@ -99,6 +99,29 @@ void MazeManager::draw( irr::IrrlichtDevice* device, uint_fast16_t cellWidth, ui
 		irr::video::SColor wallShadowColor = BLACK;
 		irr::video::SColor lockShadowColor = MAGENTA;
 		irr::video::SColor acidProofWallShadowColor = BLACK;
+		
+		switch( settingsManager->colorMode ) {
+			case SettingsManager::COLOR_MODE_DO_NOT_USE:
+			case SettingsManager::FULLCOLOR: {
+				wallColor = WHITE;
+				lockColor = BROWN;
+				acidProofWallColor = LIGHTGREEN;
+				wallShadowColor = BLACK;
+				lockShadowColor = MAGENTA;
+				acidProofWallShadowColor = BLACK;
+				break;
+			}
+			case SettingsManager::GRAYSCALE: {
+				wallColor = WHITE_GRAYSCALE;
+				lockColor = BROWN_GRAYSCALE;
+				acidProofWallColor = LIGHTGREEN_GRAYSCALE;
+				wallShadowColor = BLACK_GRAYSCALE;
+				lockShadowColor = MAGENTA_GRAYSCALE;
+				acidProofWallShadowColor = BLACK_GRAYSCALE;
+				break;
+			}
+		}
+		
 		irr::core::position2d< irr::s32 > shadowOffset( 1, 1 );
 
 		for( decltype( cols ) x = 0; x < cols; ++x ) {
@@ -391,6 +414,7 @@ void MazeManager::makeRandomLevel() {
 					Collectable temp;
 					temp.setX( deadEndsX.at( chosen ) );
 					temp.setY( deadEndsY.at( chosen ) );
+					temp.setColorMode( mainGame->settingsManager.colorMode );
 					temp.setType( Collectable::KEY );
 					temp.loadTexture( mainGame->device );
 					mainGame->stuff.push_back( temp );
@@ -424,6 +448,7 @@ void MazeManager::makeRandomLevel() {
 						temp.setY( mainGame->getRandomNumber() % rows );
 					}
 					
+					temp.setColorMode( mainGame->settingsManager.colorMode );
 					temp.setType( Collectable::ACID );
 					temp.loadTexture( mainGame->device );
 					mainGame->stuff.push_back( temp );
@@ -435,6 +460,7 @@ void MazeManager::makeRandomLevel() {
 						Collectable temp;
 						temp.setX( deadEndsX.at( chosen ) );
 						temp.setY( deadEndsY.at( chosen ) );
+						temp.setColorMode( mainGame->settingsManager.colorMode );
 						temp.setType( Collectable::ACID );
 						temp.loadTexture( mainGame->device );
 						mainGame->stuff.push_back( temp );

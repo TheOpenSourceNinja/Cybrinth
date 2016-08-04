@@ -58,6 +58,7 @@ class MainGame : public irr::IEventReceiver {
 		MainGame();
 		virtual ~MainGame();
 		
+		void adjustImageColors( irr::video::IImage* image );
 		void allPlayersReady( bool tf );
 		
 		void displayExitConfirmation();
@@ -131,6 +132,7 @@ class MainGame : public irr::IEventReceiver {
 		std::vector< Player > player;
 		std::vector< PlayerStart > playerStart;
 		
+		SettingsManager settingsManager;
 		SettingsScreen settingsScreen;
 		StringConverter stringConverter;
 		std::vector< Collectable > stuff;
@@ -146,6 +148,7 @@ class MainGame : public irr::IEventReceiver {
 		void drawBackground();
 		void drawLoadingScreen();
 		void drawLogo();
+		void drawSidebarText();
 		void drawStats( uint_fast32_t textY );
 		
 		bool haveShownLogo;
@@ -254,13 +257,13 @@ class MainGame : public irr::IEventReceiver {
 		MazeManager mazeManager;
 		
 		ImageModifier resizer;
-		
-		SettingsManager settingsManager;
 		SpellChecker spellChecker;
 		
 		SystemSpecificsManager system; // Flawfinder: ignore
 		
 		//2D dimensions----------------------------------
+		irr::core::dimension2d< irr::u32 > screenSize;
+		
 		irr::core::dimension2d< uint_fast16_t > viewportSize;
 		
 		//Fonts----------------------------------
@@ -284,8 +287,6 @@ class MainGame : public irr::IEventReceiver {
 		irr::core::array< irr::SJoystickInfo > controllerInfo;
 		
 		irr::gui::IGUIWindow* exitConfirmation;
-		
-		irr::core::dimension2d< irr::u32 > screenSize;
 		
 		//irr::gui::IGUIFileOpenDialog* fileChooser;
 		

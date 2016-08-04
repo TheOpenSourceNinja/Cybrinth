@@ -40,6 +40,60 @@
 //TODO: Add an option to use only the built-in font. This should greatly speed up loading on underpowered systems like the Pi.
 
 /**
+ * @brief Colorizes a given image according to settingsManager's colorMode
+ * @param image: the image to be colorized.
+ */
+void MainGame::adjustImageColors( irr::video::IImage* image ) {
+	/*switch( settingsManager.colorMode ) {
+		case SettingsManager::FULLCOLOR: {
+			return; //no modification done
+		}
+		case SettingsManager::GRAYSCALE: {
+			lowPoint = BLACK_GRAYSCALE;
+			colorTwo = WHITE_GRAYSCALE;
+			break;
+		}
+	}*/
+	
+	
+	//Now, set pixels to their desired colors (interpolate between lowPoint and colorTwo instead of the lightest and darkest colors in the original file)
+	for( decltype( image->getDimension().Width ) x = 0; x < image->getDimension().Width; ++x ) {
+		for( decltype( image->getDimension().Height ) y = 0; y < image->getDimension().Height; ++y ) {
+			auto pixel = image->getPixel( x, y );
+			if( pixel.getAlpha() > 0 ) {
+				/*auto luminance = pixel.getLuminance();
+				if( luminance == lightestLuminance ) {
+					auto newColor = colorTwo;
+					newColor.setAlpha( pixel.getAlpha() );
+					image->setPixel( x, y, newColor );
+				} else if( luminance < lightestLuminance and luminance > darkestLuminance ) {
+					auto interpolation = ( lightestLuminance - luminance ) / 255.0f;
+					auto newColor = lowPoint.getInterpolated( colorTwo, interpolation );
+					image->setPixel( x, y , newColor );
+				} else { // if( luminance == darkestLuminance ) {
+					auto newColor = lowPoint;
+					newColor.setAlpha( pixel.getAlpha() );
+					image->setPixel( x, y, newColor );
+				}*/
+				switch( settingsManager.colorMode ) {
+					case SettingsManager::COLOR_MODE_DO_NOT_USE:
+					case SettingsManager::FULLCOLOR: {
+						return; //no modification done
+					}
+					case SettingsManager::GRAYSCALE: {
+						auto luminance = pixel.getLuminance();
+						pixel.set( pixel.getAlpha(), luminance, luminance, luminance );
+						break;
+					}
+				}
+				
+				image->setPixel( x, y, pixel );
+			}
+		}
+	}
+}
+
+/**
  * Figures out which players are human, then figures out whether they're all at the goal.
  * Returns: True if there is at least one human player and all humans are at the goal, false otherwise.
  */
@@ -186,180 +240,7 @@ void MainGame::drawAll() {
 				
 				mazeManager.draw( device, cellWidth, cellHeight );
 				
-				uint_fast32_t spaceBetween = screenSize.Height / 30;
-				uint_fast32_t textY = spaceBetween;
-				irr::core::dimension2d< irr::u32 > tempDimensions;
-				
-				{
-					time_t currentTime = time( nullptr );
-					size_t maxSize = std::max( settingsManager.timeFormat.length() * 2, ( size_t ) UINT_FAST8_MAX );
-					wchar_t clockTime[ maxSize ];
-					auto numCharsConverted = wcsftime( clockTime, maxSize, settingsManager.timeFormat.c_str(), localtime( &currentTime ) );
-					
-					if( numCharsConverted == 0 ) {
-						numCharsConverted = wcsftime( clockTime, maxSize, settingsManager.timeFormatDefault.c_str(), localtime( &currentTime ) );
-					
-						if( numCharsConverted == 0 ) {
-							numCharsConverted = wcsftime( clockTime, maxSize, L"%T", localtime( &currentTime ) );
-							
-							if( numCharsConverted == 0 ) {
-								throw( CustomException( std::wstring( L"Could not convert the time to either the specified format, the default format, nor to ISO 8601." ) ) );
-							}
-						}
-					}
-					
-					tempDimensions = clockFont->getDimension( clockTime );
-					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					
-					if( tempRectangle.LowerRightCorner.X > screenSize.Width ) {
-						//If using a variable-width font, the clock size may become too big to display, so we reload the font at a smaller size
-						loadClockFont();
-					}
-					
-					clockFont->draw( clockTime, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
-				}
-				
-				{
-					irr::core::stringw timeLabel( L"Time:" );
-					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( timeLabel ).c_str() ); //stringConverter.toWCharArray( timeLabel ) );
-					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( L"Time:", tempRectangle, YELLOW, true, true, &tempRectangle );
-				}
-				
-				{
-					irr::core::stringw timerStr( "" );
-					timerStr += ( timer->getTime() / 1000 );
-					timerStr += L" seconds";
-					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( timerStr ).c_str() ); //stringConverter.toWCharArray( timerStr ) );
-					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( timerStr, tempRectangle, YELLOW, true, true, &tempRectangle );
-				}
-
-				{
-					irr::core::stringw keysFoundStr( L"Keys found:" );
-					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( keysFoundStr ).c_str() ); //stringConverter.toWCharArray( keysFoundStr ) );
-					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( keysFoundStr, tempRectangle, YELLOW, true, true, &tempRectangle );
-				}
-
-				{
-					irr::core::stringw keyStr;
-					keyStr += numKeysFound;
-					keyStr += L"/";
-					keyStr += numLocks;
-					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( keyStr ).c_str() ); //stringConverter.toWCharArray( keyStr ) );
-					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( keyStr, tempRectangle, YELLOW, true, true, &tempRectangle );
-				}
-
-				{
-					irr::core::stringw seedLabel( L"Random seed:" );
-					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( seedLabel ).c_str() );// stringConverter.toWCharArray( seedLabel ) );
-					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( seedLabel, tempRectangle, YELLOW, true, true, &tempRectangle );
-				}
-
-				{
-					irr::core::stringw seedStr( randomSeed );
-					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( seedStr ).c_str() ); //stringConverter.toWCharArray( seedStr ) );
-					irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-					textFont->draw( seedStr, tempRectangle, YELLOW, true, true, &tempRectangle );
-				}
-
-				{
-					irr::core::stringw headfor( L"Head for" );
-					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( headfor ).c_str() ); //stringConverter.toWCharArray( headfor ) );
-					
-					/*if( textY < ( ( screenSize.Height / 2 ) - tempDimensions.Height ) ) {
-						textY = ( ( screenSize.Height / 2 ) - tempDimensions.Height );
-					}*/
-					if( numKeysFound >= numLocks ) {
-						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-						textFont->draw( headfor, tempRectangle, LIGHTMAGENTA, true, true, &tempRectangle );
-					}
-				}
-
-				{
-					irr::core::stringw theexit( L"the exit!" );
-					textY += tempDimensions.Height;
-					tempDimensions = textFont->getDimension( stringConverter.toStdWString( theexit ).c_str() ); //stringConverter.toWCharArray( theexit ) );
-					
-					if( numKeysFound >= numLocks ) {
-						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-						textFont->draw( theexit, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
-					}
-				}
-
-				if( settingsManager.getPlayMusic() ) {
-					{
-						irr::core::stringw nowplaying( L"Music:" );
-						textY += tempDimensions.Height;
-						tempDimensions = textFont->getDimension( stringConverter.toStdWString( nowplaying ).c_str() ); //stringConverter.toWCharArray( nowplaying ) );
-						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-						textFont->draw( nowplaying, tempRectangle, YELLOW, true, true, &tempRectangle );
-					}
-
-					{
-						textY += tempDimensions.Height;
-						tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicTitle ).c_str() ); //stringConverter.toWCharArray( musicTitle ) );
-						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-						musicTagFont->draw( musicTitle, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
-					}
-
-					{
-						irr::core::stringw by( L"by" );
-						textY += tempDimensions.Height;
-						tempDimensions = textFont->getDimension( stringConverter.toStdWString( by ).c_str() ); //stringConverter.toWCharArray( by ) );
-						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-						textFont->draw( by, tempRectangle, YELLOW, true, true, &tempRectangle );
-					}
-
-					{
-						textY += tempDimensions.Height;
-						tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicArtist ).c_str() ); //stringConverter.toWCharArray( musicArtist ) );
-						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-						musicTagFont->draw( musicArtist, tempRectangle, LIGHTGREEN, true, true, &tempRectangle );
-					}
-
-					{
-						irr::core::stringw fromalbum( L"from album" );
-						textY += tempDimensions.Height;
-						tempDimensions = textFont->getDimension( stringConverter.toStdWString( fromalbum ).c_str() ); //stringConverter.toWCharArray( fromalbum ) );
-						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-						textFont->draw( fromalbum, tempRectangle, YELLOW, true, true, &tempRectangle );
-					}
-
-					{
-						textY += tempDimensions.Height;
-						tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicAlbum ).c_str() ); //stringConverter.toWCharArray( musicAlbum ) );
-						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-						musicTagFont->draw( musicAlbum, tempRectangle, LIGHTGRAY, true, true, &tempRectangle );
-					}
-
-					{
-						irr::core::stringw volume( L"Volume:" );
-						textY += tempDimensions.Height;
-						tempDimensions = textFont->getDimension( stringConverter.toStdWString( volume ).c_str() ); //stringConverter.toWCharArray( volume ) );
-						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-						textFont->draw( volume, tempRectangle, YELLOW, true, true, &tempRectangle );
-					}
-
-					{
-						irr::core::stringw volumeNumber( settingsManager.getMusicVolume() );
-						volumeNumber.append( L"%" );
-						textY += tempDimensions.Height;
-						tempDimensions = textFont->getDimension( stringConverter.toStdWString( volumeNumber ).c_str() ); //stringConverter.toWCharArray( volumeNumber ) );
-						irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
-						textFont->draw( volumeNumber, tempRectangle, LIGHTRED, true, true, &tempRectangle );
-					}
-				}
+				drawSidebarText();
 
 				gui->drawAll();
 			}
@@ -436,7 +317,25 @@ void MainGame::drawLoadingScreen() {
 				auto loadingDimensions = loadingFont->getDimension( stringConverter.toStdWString( loading ).c_str() ); //stringConverter.toWCharArray( loading ) );
 				int_fast32_t textX = ( screenSize.Width / 2 ) - ( loadingDimensions.Width / 2 );
 				irr::core::rect< irr::s32 > tempRectangle( textX, Y, ( screenSize.Width / 2 ) + ( loadingDimensions.Width / 2 ), loadingDimensions.Height + Y );
-				loadingFont->draw( loading, tempRectangle, YELLOW, true, true, &tempRectangle );
+				
+				{
+					irr::video::SColor color;
+					
+					switch( settingsManager.colorMode ) {
+						case SettingsManager::COLOR_MODE_DO_NOT_USE:
+						case SettingsManager::FULLCOLOR: {
+							color = YELLOW;
+							break;
+						}
+						case SettingsManager::GRAYSCALE: {
+							color = YELLOW_GRAYSCALE;
+							break;
+						}
+					}
+					
+					loadingFont->draw( loading, tempRectangle, color, true, true, &tempRectangle );
+				}
+				
 				Y += loadingDimensions.Height + 1;
 			}
 			
@@ -444,12 +343,66 @@ void MainGame::drawLoadingScreen() {
 				std::wstring percentString = stringConverter.toStdWString( loadingProgress, L"%05.1f%%", 7 ); //7 is the length that L"%05.1f%%" expands to plus one extra to terminate the resulting string with a null
 				auto percentDimensions = loadingFont->getDimension( percentString.c_str() );
 				irr::core::recti progressBarOutline( 0, Y, screenSize.Width, Y + percentDimensions.Height );
-				driver->draw2DRectangleOutline( progressBarOutline, GRAY );
+				
+				{
+					irr::video::SColor color;
+					
+					switch( settingsManager.colorMode ) {
+						case SettingsManager::COLOR_MODE_DO_NOT_USE:
+						case SettingsManager::FULLCOLOR: {
+							color = GRAY;
+							break;
+						}
+						case SettingsManager::GRAYSCALE: {
+							color = GRAY_GRAYSCALE;
+							break;
+						}
+					}
+					
+					driver->draw2DRectangleOutline( progressBarOutline, color );
+				}
+				
 				irr::core::recti progressBarFilled( 0, Y, screenSize.Width * loadingProgress / 100, Y + percentDimensions.Height );
-				driver->draw2DRectangle( LIGHTGRAY, progressBarFilled );
+				
+				{
+					irr::video::SColor color;
+					
+					switch( settingsManager.colorMode ) {
+						case SettingsManager::COLOR_MODE_DO_NOT_USE:
+						case SettingsManager::FULLCOLOR: {
+							color = LIGHTGRAY;
+							break;
+						}
+						case SettingsManager::GRAYSCALE: {
+							color = LIGHTGRAY_GRAYSCALE;
+							break;
+						}
+					}
+					
+					driver->draw2DRectangle( color, progressBarFilled );
+				}
+				
 				int_fast32_t textX = ( screenSize.Width / 2 ) - ( percentDimensions.Width / 2 );
 				irr::core::recti percentRectangle( textX, Y, ( screenSize.Width / 2 ) + ( percentDimensions.Width / 2 ), percentDimensions.Height + Y );
-				loadingFont->draw( stringConverter.toIrrlichtStringW( percentString ), percentRectangle, YELLOW, true, true, &percentRectangle );
+				
+				{
+					irr::video::SColor color;
+					
+					switch( settingsManager.colorMode ) {
+						case SettingsManager::COLOR_MODE_DO_NOT_USE:
+						case SettingsManager::FULLCOLOR: {
+							color = YELLOW;
+							break;
+						}
+						case SettingsManager::GRAYSCALE: {
+							color = YELLOW_GRAYSCALE;
+							break;
+						}
+					}
+					
+					loadingFont->draw( stringConverter.toIrrlichtStringW( percentString ), percentRectangle, color, true, true, &percentRectangle );
+				}
+				
 				Y += percentDimensions.Height + 1;
 			}
 			
@@ -468,12 +421,40 @@ void MainGame::drawLoadingScreen() {
 					
 					{
 						irr::core::rect< irr::s32 > tempRectangle( textX, Y, proTipPrefixDimensions.Width + textX, proTipPrefixDimensions.Height + Y );
-						tipFont->draw( proTipPrefix, tempRectangle, LIGHTCYAN, true, true, &tempRectangle );
+						irr::video::SColor color;
+						
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								color = LIGHTCYAN;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								color = LIGHTCYAN_GRAYSCALE;
+								break;
+							}
+						}
+						
+						tipFont->draw( proTipPrefix, tempRectangle, color, true, true, &tempRectangle );
 					}
 					
 					{
 						irr::core::rect< irr::s32 > tempRectangle( textX + proTipPrefixDimensions.Width, Y, proTipDimensions.Width + textX + proTipPrefixDimensions.Width, proTipDimensions.Height + Y );
-						tipFont->draw( proTips.at( currentProTip ), tempRectangle, WHITE, true, true, &tempRectangle );
+						irr::video::SColor color;
+						
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								color = WHITE;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								color = WHITE_GRAYSCALE;
+								break;
+							}
+						}
+						
+						tipFont->draw( proTips.at( currentProTip ), tempRectangle, color, true, true, &tempRectangle );
 					}
 					
 					Y += proTipHeight;
@@ -493,7 +474,13 @@ void MainGame::drawLoadingScreen() {
  void MainGame::drawLogo() {
 	try {
 		if( not isNull( logoTexture ) and logoTexture->getSize() not_eq screenSize ) {
-			logoTexture = resizer.resize( logoTexture, screenSize.Width, screenSize.Height, driver );
+			ImageModifier resizer;
+			
+			if( logoTexture->getSize() not_eq screenSize ) {
+				auto newTexture = resizer.resize( logoTexture, screenSize.Width, screenSize.Height, driver );
+				driver->removeTexture( logoTexture );
+				logoTexture = newTexture;
+			}
 		}
 		
 		if( not isNull( logoTexture ) ) {
@@ -501,6 +488,422 @@ void MainGame::drawLoadingScreen() {
 		}
 	} catch( std::exception &error ) {
 		std::wcerr << L"Error in drawLogo(): " << error.what() << std::endl;
+	}
+ }
+
+
+/**
+ * @brief Draws the sidebar text. Should only be called by drawAll().
+ */
+ void MainGame::drawSidebarText() {
+	uint_fast32_t spaceBetween = screenSize.Height / 30;
+	uint_fast32_t textY = spaceBetween;
+	irr::core::dimension2d< irr::u32 > tempDimensions;
+	
+	{
+		time_t currentTime = time( nullptr );
+		size_t maxSize = std::max( settingsManager.timeFormat.length() * 2, ( size_t ) UINT_FAST8_MAX );
+		wchar_t clockTime[ maxSize ];
+		auto numCharsConverted = wcsftime( clockTime, maxSize, settingsManager.timeFormat.c_str(), localtime( &currentTime ) );
+		
+		if( numCharsConverted == 0 ) {
+			numCharsConverted = wcsftime( clockTime, maxSize, settingsManager.timeFormatDefault.c_str(), localtime( &currentTime ) );
+		
+			if( numCharsConverted == 0 ) {
+				numCharsConverted = wcsftime( clockTime, maxSize, L"%T", localtime( &currentTime ) );
+				
+				if( numCharsConverted == 0 ) {
+					throw( CustomException( std::wstring( L"Could not convert the time to either the specified format, the default format, nor to ISO 8601." ) ) );
+				}
+			}
+		}
+		
+		tempDimensions = clockFont->getDimension( clockTime );
+		irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		
+		if( tempRectangle.LowerRightCorner.X > screenSize.Width ) {
+			//If using a variable-width font, the clock size may become too big to display, so we reload the font at a smaller size
+			loadClockFont();
+		}
+		
+		irr::video::SColor color;
+		switch( settingsManager.colorMode ) {
+			case SettingsManager::COLOR_MODE_DO_NOT_USE:
+			case SettingsManager::FULLCOLOR: {
+				color = LIGHTMAGENTA;
+				break;
+			}
+			case SettingsManager::GRAYSCALE: {
+				color = LIGHTMAGENTA_GRAYSCALE;
+				break;
+			}
+		}
+		
+		clockFont->draw( clockTime, tempRectangle, color, true, true, &tempRectangle );
+	}
+	
+	{
+		irr::core::stringw timeLabel( L"Time:" );
+		textY += tempDimensions.Height;
+		tempDimensions = textFont->getDimension( stringConverter.toStdWString( timeLabel ).c_str() ); //stringConverter.toWCharArray( timeLabel ) );
+		irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		
+		irr::video::SColor color;
+		switch( settingsManager.colorMode ) {
+			case SettingsManager::COLOR_MODE_DO_NOT_USE:
+			case SettingsManager::FULLCOLOR: {
+				color = YELLOW;
+				break;
+			}
+			case SettingsManager::GRAYSCALE: {
+				color = YELLOW_GRAYSCALE;
+				break;
+			}
+		}
+		
+		textFont->draw( L"Time:", tempRectangle, color, true, true, &tempRectangle );
+	}
+	
+	{
+		irr::core::stringw timerStr( "" );
+		timerStr += ( timer->getTime() / 1000 );
+		timerStr += L" seconds";
+		textY += tempDimensions.Height;
+		tempDimensions = textFont->getDimension( stringConverter.toStdWString( timerStr ).c_str() ); //stringConverter.toWCharArray( timerStr ) );
+		irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		
+		
+		irr::video::SColor color;
+		switch( settingsManager.colorMode ) {
+			case SettingsManager::COLOR_MODE_DO_NOT_USE:
+			case SettingsManager::FULLCOLOR: {
+				color = YELLOW;
+				break;
+			}
+			case SettingsManager::GRAYSCALE: {
+				color = YELLOW_GRAYSCALE;
+				break;
+			}
+		}
+		
+		textFont->draw( timerStr, tempRectangle, color, true, true, &tempRectangle );
+	}
+	
+	{
+		irr::core::stringw keysFoundStr( L"Keys found:" );
+		textY += tempDimensions.Height;
+		tempDimensions = textFont->getDimension( stringConverter.toStdWString( keysFoundStr ).c_str() ); //stringConverter.toWCharArray( keysFoundStr ) );
+		irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		
+		irr::video::SColor color;
+		switch( settingsManager.colorMode ) {
+			case SettingsManager::COLOR_MODE_DO_NOT_USE:
+			case SettingsManager::FULLCOLOR: {
+				color = YELLOW;
+				break;
+			}
+			case SettingsManager::GRAYSCALE: {
+				color = YELLOW_GRAYSCALE;
+				break;
+			}
+		}
+		
+		textFont->draw( keysFoundStr, tempRectangle, color, true, true, &tempRectangle );
+	}
+	
+	{
+		irr::core::stringw keyStr;
+		keyStr += numKeysFound;
+		keyStr += L"/";
+		keyStr += numLocks;
+		textY += tempDimensions.Height;
+		tempDimensions = textFont->getDimension( stringConverter.toStdWString( keyStr ).c_str() ); //stringConverter.toWCharArray( keyStr ) );
+		irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		
+		irr::video::SColor color;
+		switch( settingsManager.colorMode ) {
+			case SettingsManager::COLOR_MODE_DO_NOT_USE:
+			case SettingsManager::FULLCOLOR: {
+				color = YELLOW;
+				break;
+			}
+			case SettingsManager::GRAYSCALE: {
+				color = YELLOW_GRAYSCALE;
+				break;
+			}
+		}
+		
+		textFont->draw( keyStr, tempRectangle, color, true, true, &tempRectangle );
+	}
+	
+	{
+		irr::core::stringw seedLabel( L"Random seed:" );
+		textY += tempDimensions.Height;
+		tempDimensions = textFont->getDimension( stringConverter.toStdWString( seedLabel ).c_str() );// stringConverter.toWCharArray( seedLabel ) );
+		irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		
+		irr::video::SColor color;
+		switch( settingsManager.colorMode ) {
+			case SettingsManager::COLOR_MODE_DO_NOT_USE:
+			case SettingsManager::FULLCOLOR: {
+				color = YELLOW;
+				break;
+			}
+			case SettingsManager::GRAYSCALE: {
+				color = YELLOW_GRAYSCALE;
+				break;
+			}
+		}
+		
+		textFont->draw( seedLabel, tempRectangle, color, true, true, &tempRectangle );
+	}
+	
+	{
+		irr::core::stringw seedStr( randomSeed );
+		textY += tempDimensions.Height;
+		tempDimensions = textFont->getDimension( stringConverter.toStdWString( seedStr ).c_str() ); //stringConverter.toWCharArray( seedStr ) );
+		irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+		
+		irr::video::SColor color;
+		switch( settingsManager.colorMode ) {
+			case SettingsManager::COLOR_MODE_DO_NOT_USE:
+			case SettingsManager::FULLCOLOR: {
+				color = YELLOW;
+				break;
+			}
+			case SettingsManager::GRAYSCALE: {
+				color = YELLOW_GRAYSCALE;
+				break;
+			}
+		}
+		
+		textFont->draw( seedStr, tempRectangle, color, true, true, &tempRectangle );
+	}
+	
+	{
+		irr::core::stringw headfor( L"Head for" );
+		textY += tempDimensions.Height;
+		tempDimensions = textFont->getDimension( stringConverter.toStdWString( headfor ).c_str() ); //stringConverter.toWCharArray( headfor ) );
+		
+		if( numKeysFound >= numLocks ) {
+			irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = LIGHTMAGENTA;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = LIGHTMAGENTA_GRAYSCALE;
+					break;
+				}
+			}
+			
+			textFont->draw( headfor, tempRectangle, color, true, true, &tempRectangle );
+		}
+	}
+	
+	{
+		irr::core::stringw theexit( L"the exit!" );
+		textY += tempDimensions.Height;
+		tempDimensions = textFont->getDimension( stringConverter.toStdWString( theexit ).c_str() ); //stringConverter.toWCharArray( theexit ) );
+		
+		if( numKeysFound >= numLocks ) {
+			irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = LIGHTCYAN;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = LIGHTCYAN_GRAYSCALE;
+					break;
+				}
+			}
+			
+			textFont->draw( theexit, tempRectangle, color, true, true, &tempRectangle );
+		}
+	}
+	
+	if( settingsManager.getPlayMusic() ) {
+		{
+			irr::core::stringw nowplaying( L"Music:" );
+			textY += tempDimensions.Height;
+			tempDimensions = textFont->getDimension( stringConverter.toStdWString( nowplaying ).c_str() ); //stringConverter.toWCharArray( nowplaying ) );
+			irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = YELLOW;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = YELLOW_GRAYSCALE;
+					break;
+				}
+			}
+			
+			textFont->draw( nowplaying, tempRectangle, color, true, true, &tempRectangle );
+		}
+		
+		{
+			textY += tempDimensions.Height;
+			tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicTitle ).c_str() ); //stringConverter.toWCharArray( musicTitle ) );
+			irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = LIGHTGREEN;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = LIGHTGREEN_GRAYSCALE;
+					break;
+				}
+			}
+			
+			musicTagFont->draw( musicTitle, tempRectangle, color, true, true, &tempRectangle );
+		}
+		
+		{
+			irr::core::stringw by( L"by" );
+			textY += tempDimensions.Height;
+			tempDimensions = textFont->getDimension( stringConverter.toStdWString( by ).c_str() ); //stringConverter.toWCharArray( by ) );
+			irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = YELLOW;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = YELLOW_GRAYSCALE;
+					break;
+				}
+			}
+			
+			textFont->draw( by, tempRectangle, color, true, true, &tempRectangle );
+		}
+		
+		{
+			textY += tempDimensions.Height;
+			tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicArtist ).c_str() ); //stringConverter.toWCharArray( musicArtist ) );
+			irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = LIGHTGREEN;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = LIGHTGREEN_GRAYSCALE;
+					break;
+				}
+			}
+			
+			musicTagFont->draw( musicArtist, tempRectangle, color, true, true, &tempRectangle );
+		}
+		
+		{
+			irr::core::stringw fromalbum( L"from album" );
+			textY += tempDimensions.Height;
+			tempDimensions = textFont->getDimension( stringConverter.toStdWString( fromalbum ).c_str() ); //stringConverter.toWCharArray( fromalbum ) );
+			irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = YELLOW;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = YELLOW_GRAYSCALE;
+					break;
+				}
+			}
+			
+			textFont->draw( fromalbum, tempRectangle, color, true, true, &tempRectangle );
+		}
+		
+		{
+			textY += tempDimensions.Height;
+			tempDimensions = musicTagFont->getDimension( stringConverter.toStdWString( musicAlbum ).c_str() ); //stringConverter.toWCharArray( musicAlbum ) );
+			irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = LIGHTGRAY;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = LIGHTGRAY_GRAYSCALE;
+					break;
+				}
+			}
+			
+			musicTagFont->draw( musicAlbum, tempRectangle, color, true, true, &tempRectangle );
+		}
+		
+		{
+			irr::core::stringw volume( L"Volume:" );
+			textY += tempDimensions.Height;
+			tempDimensions = textFont->getDimension( stringConverter.toStdWString( volume ).c_str() ); //stringConverter.toWCharArray( volume ) );
+			irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = YELLOW;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = YELLOW_GRAYSCALE;
+					break;
+				}
+			}
+			
+			textFont->draw( volume, tempRectangle, color, true, true, &tempRectangle );
+		}
+		
+		{
+			irr::core::stringw volumeNumber( settingsManager.getMusicVolume() );
+			volumeNumber.append( L"%" );
+			textY += tempDimensions.Height;
+			tempDimensions = textFont->getDimension( stringConverter.toStdWString( volumeNumber ).c_str() ); //stringConverter.toWCharArray( volumeNumber ) );
+			irr::core::rect< irr::s32 > tempRectangle( viewportSize.Width + 1, textY, tempDimensions.Width + ( viewportSize.Width + 1 ), tempDimensions.Height + textY );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = LIGHTRED;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = LIGHTRED_GRAYSCALE;
+					break;
+				}
+			}
+			
+			textFont->draw( volumeNumber, tempRectangle, color, true, true, &tempRectangle );
+		}
 	}
  }
 
@@ -526,7 +929,21 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( winnersLabel ).c_str() ); //stringConverter.toWCharArray( winnersLabel ) );
 			irr::core::rect< irr::s32 > tempRectangle( textXOriginal, textY, tempDimensions.Width + textXOriginal, tempDimensions.Height + textY );
-			statsFont->draw( winnersLabel, tempRectangle, WHITE, true, true, &tempRectangle );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = WHITE;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = WHITE_GRAYSCALE;
+					break;
+				}
+			}
+			
+			statsFont->draw( winnersLabel, tempRectangle, color, true, true, &tempRectangle );
 
 			if( tempDimensions.Width + textXOriginal > textX ) {
 				textX = tempDimensions.Width + textXOriginal;
@@ -537,7 +954,21 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( steps ).c_str() );// stringConverter.toWCharArray( steps ) );
 			irr::core::rect< irr::s32 > tempRectangle( textXOriginal, textYSteps, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYSteps );
-			statsFont->draw( steps, tempRectangle, WHITE, true, true, &tempRectangle );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = WHITE;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = WHITE_GRAYSCALE;
+					break;
+				}
+			}
+			
+			statsFont->draw( steps, tempRectangle, color, true, true, &tempRectangle );
 
 			if( tempDimensions.Width + textXOriginal > textX ) {
 				textX = tempDimensions.Width + textXOriginal;
@@ -548,7 +979,21 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( times ).c_str() ); //stringConverter.toWCharArray( times ) );
 			irr::core::rect< irr::s32 > tempRectangle( textXOriginal, textYTimes, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYTimes );
-			statsFont->draw( times, tempRectangle, WHITE, true, true, &tempRectangle );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = WHITE;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = WHITE_GRAYSCALE;
+					break;
+				}
+			}
+			
+			statsFont->draw( times, tempRectangle, color, true, true, &tempRectangle );
 
 			if( tempDimensions.Width + textXOriginal > textX ) {
 				textX = tempDimensions.Width + textXOriginal;
@@ -559,7 +1004,21 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( keysFoundPerPlayer ).c_str() ); //stringConverter.toWCharArray( keysFoundPerPlayer ) );
 			irr::core::rect< irr::s32 > tempRectangle( textXOriginal, textYKeys, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYKeys );
-			statsFont->draw( keysFoundPerPlayer, tempRectangle, WHITE, true, true, &tempRectangle );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = WHITE;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = WHITE_GRAYSCALE;
+					break;
+				}
+			}
+			
+			statsFont->draw( keysFoundPerPlayer, tempRectangle, color, true, true, &tempRectangle );
 
 			if( tempDimensions.Width + textXOriginal > textX ) {
 				textX = tempDimensions.Width + textXOriginal;
@@ -570,7 +1029,21 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( scores ).c_str() ); //stringConverter.toWCharArray( scores ) );
 			irr::core::rect< irr::s32 > tempRectangle( textXOriginal, textYScores, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYScores );
-			statsFont->draw( scores, tempRectangle, WHITE, true, true, &tempRectangle );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = WHITE;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = WHITE_GRAYSCALE;
+					break;
+				}
+			}
+			
+			statsFont->draw( scores, tempRectangle, color, true, true, &tempRectangle );
 
 			if( tempDimensions.Width + textXOriginal > textX ) {
 				textX = tempDimensions.Width + textXOriginal;
@@ -581,7 +1054,21 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 		{
 			decltype( statsFont->getDimension( L"" ) ) tempDimensions = statsFont->getDimension( stringConverter.toStdWString( scoresTotal ).c_str() ); //stringConverter.toWCharArray( scoresTotal ) );
 			irr::core::rect< irr::s32 > tempRectangle( textXOriginal, textYScoresTotal, tempDimensions.Width + textXOriginal, tempDimensions.Height + textYScoresTotal );
-			statsFont->draw( scoresTotal, tempRectangle, WHITE, true, true, &tempRectangle );
+			
+			irr::video::SColor color;
+			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					color = WHITE;
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					color = WHITE_GRAYSCALE;
+					break;
+				}
+			}
+			
+			statsFont->draw( scoresTotal, tempRectangle, color, true, true, &tempRectangle );
 
 			if( tempDimensions.Width + textXOriginal > textX ) {
 				textX = tempDimensions.Width + textXOriginal;
@@ -708,7 +1195,7 @@ void MainGame::eraseCollectable( uint_fast8_t item ) {
 			}
 		}
 		if( settingsManager.debug ) {
-				std::wcout << L"end of eraseCollectable()" << std::endl;
+			std::wcout << L"end of eraseCollectable()" << std::endl;
 		}
 	} catch ( std::exception &error ) {
 		std::wcerr << L"Error in eraseCollectable(): " << error.what() << std::endl;
@@ -1258,7 +1745,7 @@ void MainGame::loadFonts() {
 			if( fontFile not_eq "" ) {
 				auto aboveStats = loadingFont->getDimension( loading.c_str() ).Height * 2 + std::max( tipFont->getDimension( proTipPrefix.c_str() ).Height, tipFont->getDimension( proTips.at( currentProTip ).c_str() ).Height );
 				
-				uint_fast32_t size = screenSize.Width / screenSize.Height / settingsManager.getNumPlayers(); //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
+				uint_fast32_t size = screenSize.Width / settingsManager.getNumPlayers() / 3; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
 				uint_fast8_t builtInFontHeight = gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height;
 				if( size > builtInFontHeight ) { //If the text needs to be that small, go with the built-in font because it's readable at that size.
 					do {
@@ -1915,6 +2402,7 @@ MainGame::MainGame() {
 		loadFonts();
 		//settingsScreen.setTextFont( textFont );
 		
+		menuManager.setMainGame( this );
 		menuManager.setPositions( screenSize.Height );
 		menuManager.loadIcons( device );
 
@@ -1937,6 +2425,18 @@ MainGame::MainGame() {
 				player.at( p ).setMG( this );
 				player.at( p ).loadTexture( device, 100, loadableTextures );
 				playerAssigned.at( p ) = false;
+				
+				switch( settingsManager.colorMode ) {
+					case SettingsManager::GRAYSCALE: {
+						playerStart.at( p ).setColors( GRAY_GRAYSCALE, LIGHTRED_GRAYSCALE );
+						break;
+					}
+					case SettingsManager::COLOR_MODE_DO_NOT_USE:
+					case SettingsManager::FULLCOLOR: {
+						playerStart.at( p ).setColors( GRAY, LIGHTRED );
+						break;
+					}
+				}
 			}
 		}
 		
@@ -1967,6 +2467,17 @@ MainGame::MainGame() {
 			}
 		}
 		
+		switch( settingsManager.colorMode ) {
+			case SettingsManager::GRAYSCALE: {
+				goal.setColors( GRAY_GRAYSCALE, LIGHTGREEN_GRAYSCALE );
+				break;
+			}
+			case SettingsManager::COLOR_MODE_DO_NOT_USE:
+			case SettingsManager::FULLCOLOR: {
+				goal.setColors( GRAY, LIGHTGREEN );
+				break;
+			}
+		}
 		goal.loadTexture( device );
 		
 		if( enableController and device->activateJoysticks( controllerInfo ) and settingsManager.debug ) { //activateJoysticks fills controllerInfo with info about each controller
@@ -2400,7 +2911,7 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 								}
 								case irr::EMIE_LMOUSE_PRESSED_DOWN: {
 									if( ( gui->getRootGUIElement()->getChildren().getSize() == 0 ) ) {
-										menuManager.processSelection( this );
+										menuManager.processSelection();
 									}
 									break;
 								}
@@ -2702,6 +3213,27 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 			}
 			irr::io::path logoFilePath = stringConverter.toIrrlichtStringW( logoList.at( logoChosen ).wstring() );
 			logoTexture = driver->getTexture( logoFilePath );
+			
+			if( not isNull( logoTexture ) ) {
+				ImageModifier resizer;
+				
+				if( logoTexture->getSize() not_eq screenSize ) {
+					auto newTexture = resizer.resize( logoTexture, screenSize.Width, screenSize.Height, driver );
+					driver->removeTexture( logoTexture );
+					logoTexture = newTexture;
+				}
+				
+				irr::video::IImage* image = resizer.textureToImage( driver, logoTexture );
+				irr::core::stringw textureName = logoTexture->getName().getInternalName(); //Needed when converting the image back to a texture
+				driver->removeTexture( logoTexture );
+				logoTexture = nullptr;
+				
+				adjustImageColors( image );
+				
+				textureName += L"-recolored";
+				logoTexture = resizer.imageToTexture( driver, image, textureName );
+			}
+			
 			if( isNull( logoTexture ) ) {
 				std::wstring error = L"Cannot load logo texture, even though Irrlicht said it was loadable?!?";
 				throw CustomException( error );
@@ -2737,7 +3269,7 @@ void MainGame::processControls() {
 					case ControlMapping::ACTION_MENU_ACTIVATE: {
 						switch( currentScreen ) {
 							case MENUSCREEN: {
-								menuManager.processSelection( this );
+								menuManager.processSelection();
 								break;
 							}
 							case SETTINGSSCREEN: {
@@ -2925,6 +3457,7 @@ void MainGame::resetThings() {
 		}
 
 		for( decltype( stuff.size() ) i = 0; i < stuff.size(); ++i ) {
+			stuff.at( i ).setColorMode( settingsManager.colorMode );
 			stuff.at( i ).loadTexture( device );
 		}
 
@@ -3581,8 +4114,22 @@ void MainGame::setupBackground() {
 		}
 		
 		if( settingsManager.debug ) {
-			backgroundChosen = IMAGES;
+			//backgroundChosen = IMAGES;
 			//backgroundChosen = NUMBER_OF_BACKGROUNDS - 1; //If we're debugging, we may be testing the last background added.
+			if( settingsManager.backgroundAnimations ) {
+				backgroundChosen = getRandomNumber() % NUMBER_OF_BACKGROUNDS;
+			} else {
+				switch( getRandomNumber() % 2 ) {
+					case 0: {
+						backgroundChosen = IMAGES;
+						break;
+					}
+					case 1: {
+						backgroundChosen = PLAIN_COLOR;
+						break;
+					}
+				}
+			}
 		} else {
 			if( settingsManager.backgroundAnimations ) {
 				backgroundChosen = getRandomNumber() % NUMBER_OF_BACKGROUNDS;
@@ -3617,43 +4164,132 @@ void MainGame::setupBackground() {
 
 				switch( getRandomNumber() % 8 ) { //Not a magic number: count the cases
 					case 0: {
-						darkStarColor = BLACK;
-						lightStarColor = WHITE;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = BLACK;
+								lightStarColor = WHITE;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = BLACK_GRAYSCALE;
+								lightStarColor = WHITE_GRAYSCALE;
+								break;
+							}
+						}
+						
 						break;
 					}
 					case 1: {
-						darkStarColor = BLUE;
-						lightStarColor = LIGHTBLUE;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = BLUE;
+								lightStarColor = LIGHTBLUE;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = BLUE_GRAYSCALE;
+								lightStarColor = LIGHTBLUE_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 					case 2: {
-						darkStarColor = GREEN;
-						lightStarColor = LIGHTGREEN;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = GREEN;
+								lightStarColor = LIGHTGREEN;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = GREEN_GRAYSCALE;
+								lightStarColor = LIGHTGREEN_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 					case 3: {
-						darkStarColor = CYAN;
-						lightStarColor = LIGHTCYAN;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = CYAN;
+								lightStarColor = LIGHTCYAN;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = CYAN_GRAYSCALE;
+								lightStarColor = LIGHTCYAN_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 					case 4: {
-						darkStarColor = RED;
-						lightStarColor = LIGHTRED;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = RED;
+								lightStarColor = LIGHTRED;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = RED_GRAYSCALE;
+								lightStarColor = LIGHTRED_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 					case 5: {
-						darkStarColor = MAGENTA;
-						lightStarColor = LIGHTMAGENTA;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = MAGENTA;
+								lightStarColor = LIGHTMAGENTA;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = MAGENTA_GRAYSCALE;
+								lightStarColor = LIGHTMAGENTA_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 					case 6: {
-						darkStarColor = GRAY;
-						lightStarColor = LIGHTGRAY;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = GRAY;
+								lightStarColor = LIGHTGRAY;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = GRAY_GRAYSCALE;
+								lightStarColor = LIGHTGRAY_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 					case 7: {
-						darkStarColor = YELLOW;
-						lightStarColor = BROWN;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = YELLOW;
+								lightStarColor = BROWN;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = YELLOW_GRAYSCALE;
+								lightStarColor = BROWN_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 				}
@@ -3679,8 +4315,23 @@ void MainGame::setupBackground() {
 				ps->setMaterialType( irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL );
 				
 				irr::video::IImage* pixelImage = driver->createImage( irr::video::ECF_A1R5G5B5, irr::core::dimension2d< irr::u32 >( 1, 1 ) );
-				//pixelImage->fill( WHITE );
-				pixelImage->setPixel( 0, 0, WHITE, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
+				
+				{
+					irr::video::SColor color;
+					switch( settingsManager.colorMode ) {
+						case SettingsManager::COLOR_MODE_DO_NOT_USE:
+						case SettingsManager::FULLCOLOR: {
+							color = WHITE;
+							break;
+						}
+						case SettingsManager::GRAYSCALE: {
+							color = WHITE_GRAYSCALE;
+							break;
+						}
+					}
+					pixelImage->setPixel( 0, 0, color, false ); //Which is faster on a 1x1 pixel image: setPixel() or fill()?
+				}
+				
 				irr::video::ITexture* pixelTexture = driver->addTexture( "pixel", pixelImage );
 				ps->setMaterialTexture( 0, pixelTexture );
 				break;
@@ -3771,45 +4422,132 @@ void MainGame::setupBackground() {
 				
 				switch( getRandomNumber() % 8 ) { //Not a magic number: count the cases
 					case 0: {
-						if( backgroundChosen != STAR_TRAILS ) { //I don't think this color combination looks good with STAR_TRAILS, so I let it fall through to the next case
-							darkStarColor = BLACK;
-							lightStarColor = WHITE;
-							break;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = BLACK;
+								lightStarColor = WHITE;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = BLACK_GRAYSCALE;
+								lightStarColor = WHITE_GRAYSCALE;
+								break;
+							}
 						}
+						
+						break;
 					}
 					case 1: {
-						darkStarColor = BLUE;
-						lightStarColor = LIGHTBLUE;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = BLUE;
+								lightStarColor = LIGHTBLUE;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = BLUE_GRAYSCALE;
+								lightStarColor = LIGHTBLUE_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 					case 2: {
-						darkStarColor = GREEN;
-						lightStarColor = LIGHTGREEN;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = GREEN;
+								lightStarColor = LIGHTGREEN;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = GREEN_GRAYSCALE;
+								lightStarColor = LIGHTGREEN_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 					case 3: {
-						darkStarColor = CYAN;
-						lightStarColor = LIGHTCYAN;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = CYAN;
+								lightStarColor = LIGHTCYAN;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = CYAN_GRAYSCALE;
+								lightStarColor = LIGHTCYAN_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 					case 4: {
-						darkStarColor = RED;
-						lightStarColor = LIGHTRED;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = RED;
+								lightStarColor = LIGHTRED;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = RED_GRAYSCALE;
+								lightStarColor = LIGHTRED_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 					case 5: {
-						darkStarColor = MAGENTA;
-						lightStarColor = LIGHTMAGENTA;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = MAGENTA;
+								lightStarColor = LIGHTMAGENTA;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = MAGENTA_GRAYSCALE;
+								lightStarColor = LIGHTMAGENTA_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 					case 6: {
-						darkStarColor = GRAY;
-						lightStarColor = LIGHTGRAY;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = GRAY;
+								lightStarColor = LIGHTGRAY;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = GRAY_GRAYSCALE;
+								lightStarColor = LIGHTGRAY_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 					case 7: {
-						darkStarColor = YELLOW;
-						lightStarColor = BROWN;
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								darkStarColor = YELLOW;
+								lightStarColor = BROWN;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								darkStarColor = YELLOW_GRAYSCALE;
+								lightStarColor = BROWN_GRAYSCALE;
+								break;
+							}
+						}
 						break;
 					}
 				}
@@ -3850,15 +4588,51 @@ void MainGame::setupBackground() {
 			case PLAIN_COLOR: {
 				switch( getRandomNumber() % 3 ) { //Black, blue, and gray are the only CGA colors that don't make your eyes bleed when they fill the screen
 					case 0: {
-						backgroundColor = BLACK;
+						
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								backgroundColor = BLACK;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								backgroundColor = BLACK_GRAYSCALE;
+								break;
+							}
+						}
+						
 						break;
 					}
 					case 1: {
-						backgroundColor = BLUE;
+						
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								backgroundColor = BLUE;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								backgroundColor = BLUE_GRAYSCALE;
+								break;
+							}
+						}
+						
 						break;
 					}
 					case 2: {
-						backgroundColor = GRAY;
+						
+						switch( settingsManager.colorMode ) {
+							case SettingsManager::COLOR_MODE_DO_NOT_USE:
+							case SettingsManager::FULLCOLOR: {
+								backgroundColor = GRAY;
+								break;
+							}
+							case SettingsManager::GRAYSCALE: {
+								backgroundColor = GRAY_GRAYSCALE;
+								break;
+							}
+						}
+						
 						break;
 					}
 				}
@@ -3942,9 +4716,26 @@ void MainGame::setupBackground() {
 					//Pick a random background and load it
 					backgroundFilePath = stringConverter.toIrrlichtStringW( backgroundList.at( getRandomNumber() % backgroundList.size() ).wstring() );
 					backgroundTexture = driver->getTexture( backgroundFilePath );
-					if( backgroundTexture == 0 ) {
-						std::wstring error = L"Cannot load background texture, even though Irrlicht said it was loadable?!?";
-						throw CustomException( error );
+					if( backgroundTexture == nullptr or backgroundTexture == NULL ) {
+						throw( CustomException( L"Could not load background texture" ) );
+					} else {
+						ImageModifier resizer;
+						
+						if( backgroundTexture->getSize() not_eq screenSize ) {
+							auto newTexture = resizer.resize( backgroundTexture, screenSize.Width, screenSize.Height, driver );
+							driver->removeTexture( backgroundTexture );
+							backgroundTexture = newTexture;
+						}
+						
+						irr::video::IImage* image = resizer.textureToImage( driver, backgroundTexture );
+						irr::core::stringw textureName = backgroundTexture->getName().getInternalName(); //Needed when converting the image back to a texture
+						driver->removeTexture( backgroundTexture );
+						backgroundTexture = nullptr;
+						
+						adjustImageColors( image );
+						
+						textureName += L"-recolored";
+						backgroundTexture = resizer.imageToTexture( driver, image, textureName );
 					}
 				} else {
 					std::wcerr << L"Could not find any background images." << std::endl;
@@ -4145,6 +4936,20 @@ void MainGame::setNumPlayers( uint_fast8_t newNumPlayers ) {
 	player.resize( newNumPlayers );
 	playerStart.resize( newNumPlayers );
 	
+	for( decltype( newNumPlayers) ps = 0; ps < newNumPlayers; ++ps ) {
+		switch( settingsManager.colorMode ) {
+			case SettingsManager::COLOR_MODE_DO_NOT_USE:
+			case SettingsManager::GRAYSCALE: {
+				playerStart.at( ps ).setColors( GRAY_GRAYSCALE, LIGHTRED_GRAYSCALE );
+				break;
+			}
+			case SettingsManager::FULLCOLOR: {
+				playerStart.at( ps ).setColors( GRAY, LIGHTRED );
+				break;
+			}
+		}
+	}
+	
 	if( settingsManager.getNumBots() > newNumPlayers ) {
 		setNumBots( newNumPlayers );
 	}
@@ -4160,6 +4965,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 	switch( num ) {
 		case 0: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = BLACK_GRAYSCALE;
 					break;
@@ -4174,6 +4980,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 1: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = BLUE_GRAYSCALE;
 					break;
@@ -4188,6 +4995,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 2: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = GREEN_GRAYSCALE;
 					break;
@@ -4202,6 +5010,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 3: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = CYAN_GRAYSCALE;
 					break;
@@ -4216,6 +5025,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 4: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = RED_GRAYSCALE;
 					break;
@@ -4230,6 +5040,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 5: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = MAGENTA_GRAYSCALE;
 					break;
@@ -4244,6 +5055,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 6: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = BROWN_GRAYSCALE;
 					break;
@@ -4258,6 +5070,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 7: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = GRAY_GRAYSCALE;
 					break;
@@ -4272,6 +5085,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 8: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = LIGHTGRAY_GRAYSCALE;
 					break;
@@ -4286,6 +5100,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 9: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = LIGHTBLUE_GRAYSCALE;
 					break;
@@ -4300,6 +5115,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 10: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = LIGHTGREEN_GRAYSCALE;
 					break;
@@ -4314,6 +5130,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 11: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = LIGHTCYAN_GRAYSCALE;
 					break;
@@ -4328,6 +5145,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 12: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = LIGHTRED_GRAYSCALE;
 					break;
@@ -4342,6 +5160,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 13: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = LIGHTMAGENTA_GRAYSCALE;
 					break;
@@ -4356,6 +5175,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 14: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = YELLOW_GRAYSCALE;
 					break;
@@ -4370,6 +5190,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		case 15: {
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = WHITE_GRAYSCALE;
 					break;
@@ -4384,6 +5205,7 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 		}
 		default: { //Just adding this to be extra careful
 			switch( settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
 				case SettingsManager::GRAYSCALE: {
 					colorOne = BLACK_GRAYSCALE;
 					break;

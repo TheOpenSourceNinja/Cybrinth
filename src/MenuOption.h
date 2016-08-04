@@ -26,7 +26,7 @@
 #endif
 #include "Integers.h"
 #include "PreprocessorCommands.h"
-
+class MainGame; //Avoids circular dependency
 
 class MenuOption {
 	public:
@@ -51,8 +51,9 @@ class MenuOption {
 		bool highlighted;
 
 		void loadTexture( irr::IrrlichtDevice* device );
-
+		
 		void setFontAndResizeIcon( irr::IrrlichtDevice* device, irr::gui::IGUIFont* newFont );
+		void setMainGame( MainGame* mg );
 		void setType( irr::IrrlichtDevice* device, option_t newType );
 		void setX( uint_fast16_t val );
 		void setY( uint_fast16_t val );
@@ -64,7 +65,9 @@ class MenuOption {
 		irr::gui::IGUIFont* font;
 
 		irr::video::ITexture* iconTexture;
-
+		
+		MainGame* mainGame;
+		
 		void setDimension( irr::video::IVideoDriver* driver );
 
 		irr::core::stringw text;

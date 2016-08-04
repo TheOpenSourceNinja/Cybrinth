@@ -22,6 +22,7 @@
 #include "Object.h"
 #include "ImageModifier.h"
 #include "PreprocessorCommands.h"
+#include "Integers.h"
 
 #ifdef WINDOWS
     #include <irrlicht.h>
@@ -32,27 +33,29 @@
 class Collectable : public Object {
 	public:
 		enum type_t : uint_fast8_t { KEY, ACID };
-
+		
 		void createTexture( irr::IrrlichtDevice* device, uint_fast16_t size = 1 );
-
+		
 		Collectable();
 		virtual ~Collectable();
-
+		
 		void draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height );
-
+		
 		type_t getType();
-
+		
 		void loadTexture( irr::IrrlichtDevice* device );
 		void loadTexture( irr::IrrlichtDevice* device, uint_fast8_t size );
-
+		
 		bool owned;
-
+		
 		void reset();
-
+		
+		void setColorMode( uint_fast8_t newColorMode ); //NOTE: This is SettingsManager's colorMode_t
 		void setType( type_t newType );
 	protected:
 	private:
 		type_t type;
+		uint_fast8_t colorMode; //NOTE: This is SettingsManager's colorMode_t
 };
 
 #endif // COLLECTABLE_H
