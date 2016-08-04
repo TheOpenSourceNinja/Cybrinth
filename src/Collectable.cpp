@@ -23,10 +23,13 @@
 	#include <iostream>
 #endif //HAVE_IOSTREAM
 
+#include "SettingsManager.h"
+
 Collectable::Collectable() {
 	try {
 		x = 0;
 		y = 0;
+		setColorMode( SettingsManager::FULLCOLOR );
 		setType( KEY );
 		reset();
 	} catch( std::exception &e ) {
@@ -134,8 +137,20 @@ void Collectable::loadTexture( irr::IrrlichtDevice* device, uint_fast8_t size ) 
 	}
 }
 
+/**
+ * @brief Sets owned to false.
+ */
 void Collectable::reset() {
 	owned = false;
+}
+
+/**
+ * @brief Adjusts the item's colors based on colorMode and the particular Collectable's type
+ * @param colorMode: SettingsManager's color mode (fullcolor, grayscale, etc.)
+ */
+void Collectable::setColorMode( uint_fast8_t newColorMode ) {
+	colorMode = newColorMode;
+	setColors( colorOne, colorTwo );
 }
 
 void Collectable::setType( type_t newType ) {
@@ -144,11 +159,31 @@ void Collectable::setType( type_t newType ) {
 
 		switch( type ) {
 			case KEY: {
-				setColors( BROWN, YELLOW );
+				switch( colorMode ) {
+					case SettingsManager::FULLCOLOR: {
+						setColors( BROWN, YELLOW );
+						break;
+					}
+					case SettingsManager::GRAYSCALE: {
+						setColors( BROWN_GRAYSCALE, YELLOW_GRAYSCALE );
+						break;
+					}
+				}
+				
 				break;
 			}
 			case ACID: {
-				setColors( BLUE, LIGHTGREEN );
+				switch( colorMode ) {
+					case SettingsManager::FULLCOLOR: {
+						setColors( BLUE, LIGHTGREEN );
+						break;
+					}
+					case SettingsManager::GRAYSCALE: {
+						setColors( BLUE_GRAYSCALE, LIGHTGREEN_GRAYSCALE );
+						break;
+					}
+				}
+				
 				break;
 			}
 		}

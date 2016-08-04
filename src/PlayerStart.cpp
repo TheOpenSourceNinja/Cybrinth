@@ -80,7 +80,7 @@ void PlayerStart::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_f
 		}
 
 		if( texture == nullptr or ( texture not_eq nullptr and texture->getSize().Width not_eq size ) ) {
-			Object::loadTexture( device, size, L"start" ); //NOTE:The "playerStart" string should be the same as in the loadTexture() function above
+			Object::loadTexture( device, size, L"start" ); //NOTE:The "start" string should be the same as in the loadTexture() function above
 			if( texture == nullptr or texture == NULL ) {
 				createTexture( device, size );
 			}
@@ -94,7 +94,7 @@ void PlayerStart::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_f
 
 void PlayerStart::loadTexture( irr::IrrlichtDevice* device ) {
 	try {
-		Object::loadTexture( device, 1, L"start" ); //NOTE:The "playerStart" string should be the same as in the draw() function above
+		Object::loadTexture( device, 1, L"start" ); //NOTE:The "start" string should be the same as in the draw() function above
 		if( texture == nullptr or texture == NULL ) {
 			createTexture( device, 1 );
 		}

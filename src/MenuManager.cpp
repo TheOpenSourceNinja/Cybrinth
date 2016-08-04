@@ -133,31 +133,31 @@ void MenuManager::loadIcons( irr::IrrlichtDevice* device ) {
 * Arguments:
 * A pointer to the MainGame.
 */
-void MenuManager::processSelection( MainGame* mg ) {
-	if( mg == nullptr or mg == NULL ) {
+void MenuManager::processSelection() {
+	if( mainGame == nullptr or mainGame == NULL ) {
 		return;
 	}
 	
 	if( options.at( exitGame ).highlighted ) {
-		//mg->setExitConfirmation( mg->gui->addMessageBox( L"Exit?", L"Are you sure you want to exit?", true, ( irr::gui::EMBF_YES bitor irr::gui::EMBF_NO ) ) );
-		mg->displayExitConfirmation();
+		//mainGame->setExitConfirmation( mainGame->gui->addMessageBox( L"Exit?", L"Are you sure you want to exit?", true, ( irr::gui::EMBF_YES bitor irr::gui::EMBF_NO ) ) );
+		mainGame->displayExitConfirmation();
 	} else if( options.at( loadMaze ).highlighted ) {
-		//mg->setFileChooser( mg->gui->addFileOpenDialog( L"Select a Maze", true, 0, -1, true ) );
-		mg->showLoadMazeDialog();
+		//mainGame->setFileChooser( mainGame->gui->addFileOpenDialog( L"Select a Maze", true, 0, -1, true ) );
+		mainGame->showLoadMazeDialog();
 	} else if( options.at( saveMaze ).highlighted ) {
-		mg->showSaveMazeDialog();
+		mainGame->showSaveMazeDialog();
 	} else if( options.at( nextMaze ).highlighted ) {
-		if( mg->network.getIsServer() ) {
-			mg->newMaze();
+		if( mainGame->network.getIsServer() ) {
+			mainGame->newMaze();
 		} else {
-			if( mg->getDebugStatus() ) {
+			if( mainGame->getDebugStatus() ) {
 				std::wcout << L"Cannot create new maze: we're a client, not a server." << std::endl;
 			}
 		}
 	} else if( options.at( restartMaze ).highlighted ) {
-		mg->newMaze( mg->getRandomSeed() );
+		mainGame->newMaze( mainGame->getRandomSeed() );
 	} else if( options.at( backToGame ).highlighted ) {
-		mg->currentScreen = MainGame::MAINSCREEN;
+		mainGame->currentScreen = MainGame::MAINSCREEN;
 	} else if( options.at( freedom ).highlighted ) {
 		std::wstring message = stringConverter.toStdWString( PACKAGE_NAME );
 		message += L" is copyright 2012-2016 by James Dearing. Licensed under the GNU Affero General Public License, version 3.0 or (at your option) any later version, as published by the Free Software Foundation. See the file \"COPYING\" or https://www.gnu.org/licenses/agpl.html.\n\nThis means you're free to do what you want with this game: mod it, give copies to friends, sell it if you want. Whatever. It's Free software, Free as in Freedom. You should have received the program's source code with this copy; if you don't have it, you can get it from ";
@@ -167,10 +167,10 @@ void MenuManager::processSelection( MainGame* mg ) {
 		message += L" is distributed 'as is' in the hope that it will be fun, but WITHOUT ANY WARRANTY; without even the implied warranty of TITLE, MERCHANTABILITY, COMPLETE DESTRUCTION OF EVIL MONSTERS, or FITNESS FOR A PARTICULAR PURPOSE.";
 		message += L"\n\n";
 		message += L"Cybrinth uses a copy of the RakNet networking library. RakNet is owned by Oculus VR, Inc. It is available under the terms of a modified 2-clause BSD license. See src/RakNet/LICENSE for the copyright license, and src/RakNet/PATENTS for patent information, and src/RakNet/ORIGIN for the URL from which this copy of RakNet was downloaded; copies of LICENSE and PATENTS can also be obtained from there. The creators of Cybrinth claim no connection to RakNet or Oculus VR, and no responsibility for any bugs or features in RakNet.";
-		mg->gui->addMessageBox( L"Freedom", message.c_str() );
+		mainGame->gui->addMessageBox( L"Freedom", message.c_str() );
 	} else if( options.at( settings ).highlighted ) {
-		mg->currentScreen = MainGame::SETTINGSSCREEN;
-		mg->settingsScreen.changeToSettingsScreen();
+		mainGame->currentScreen = MainGame::SETTINGSSCREEN;
+		mainGame->settingsScreen.changeToSettingsScreen();
 	}
 }
 
@@ -252,6 +252,14 @@ void MenuManager::scrollSelection( bool up ) {
 void MenuManager::setFontAndResizeIcons( irr::IrrlichtDevice* device, irr::gui::IGUIFont* font ) {
 	for( decltype( options.size() ) o = 0; o < options.size(); ++o ) {
 		options.at( o ).setFontAndResizeIcon( device, font );
+	}
+}
+
+
+void MenuManager::setMainGame( MainGame* mg ) {
+	mainGame = mg;
+	for( decltype( options.size() ) o = 0; o < options.size(); ++o ) {
+		options.at( o ).setMainGame( mg );
 	}
 }
 

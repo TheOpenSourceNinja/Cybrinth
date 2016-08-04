@@ -42,10 +42,11 @@ class MenuManager {
 		MenuManager();
 		virtual ~MenuManager();
 
-		void processSelection( MainGame* mg );
+		void processSelection();
 
 		void scrollSelection( bool up );
 		void setFontAndResizeIcons( irr::IrrlichtDevice* device, irr::gui::IGUIFont* font );
+		void setMainGame( MainGame* mg );
 		void setPositions( uint_fast32_t windowHeight );
 		void setSelection( MenuOption::option_t selection );
 	protected:
@@ -59,7 +60,9 @@ class MenuManager {
 		uint_fast8_t highlightedOption;
 
 		uint_fast8_t loadMaze;
-
+		
+		MainGame* mainGame;
+		
 		uint_fast8_t nextMaze;
 
 		std::vector< MenuOption > options;

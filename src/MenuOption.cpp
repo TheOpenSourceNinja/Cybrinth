@@ -26,7 +26,7 @@
 	#include <iostream>
 #endif //HAVE_IOSTREAM
 #include <boost/filesystem.hpp>
-
+#include "MainGame.h"
 #include <irrlicht/irrlicht.h>
 
 MenuOption::MenuOption() {
@@ -47,6 +47,10 @@ MenuOption::~MenuOption() {
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::~MenuOption(): " << e.what() << std::endl;
 	}
+}
+
+void MenuOption::setMainGame( MainGame* mg ) {
+	mainGame = mg;
 }
 
 void MenuOption::setType( irr::IrrlichtDevice* device, option_t newType ) {
@@ -209,15 +213,41 @@ void MenuOption::draw( irr::IrrlichtDevice* device ) {
 		}
 		if( font not_eq nullptr ) {
 			irr::core::rect< irr::s32 > background( textX, y, textX + dimension.Width - iconTexture->getSize().Width, y + dimension.Height );
-			driver->draw2DRectangle( BLACK, background );
 			
+			irr::video::SColor backgroundColor;
 			irr::video::SColor textColor;
-			if( highlighted ) {
-				textColor = LIGHTCYAN;
-				driver->draw2DRectangleOutline( background, textColor );
-			} else {
-				textColor = CYAN;
+			switch( mainGame->settingsManager.colorMode ) {
+				case SettingsManager::COLOR_MODE_DO_NOT_USE:
+				case SettingsManager::FULLCOLOR: {
+					backgroundColor = BLACK;
+					
+					if( highlighted ) {
+						textColor = LIGHTCYAN;
+					} else {
+						textColor = CYAN;
+					}
+					
+					break;
+				}
+				case SettingsManager::GRAYSCALE: {
+					backgroundColor = BLACK_GRAYSCALE;
+					
+					if( highlighted ) {
+						textColor = LIGHTCYAN_GRAYSCALE;
+					} else {
+						textColor = CYAN_GRAYSCALE;
+					}
+					
+					break;
+				}
 			}
+			
+			driver->draw2DRectangle( backgroundColor, background );
+			
+			if( highlighted ) {
+				driver->draw2DRectangleOutline( background, textColor );
+			}
+			
 			font->draw( text, irr::core::rect< irr::s32 >( textX, y, dimension.Width, dimension.Height ), textColor );
 		} else {
 			throw( CustomException( L"Font is null" ) );
@@ -342,6 +372,8 @@ void MenuOption::loadTexture( irr::IrrlichtDevice* device ) {
 				irr::core::stringw textureName = iconTexture->getName().getInternalName(); //Needed when converting the image back to a texture
 				driver->removeTexture( iconTexture );
 				iconTexture = nullptr;
+				
+				mainGame->adjustImageColors( image );
 				
 				textureName += L"-recolored";
 				iconTexture = im.imageToTexture( driver, image, textureName );
