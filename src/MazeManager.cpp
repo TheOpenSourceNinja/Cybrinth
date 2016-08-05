@@ -120,6 +120,24 @@ void MazeManager::draw( irr::IrrlichtDevice* device, uint_fast16_t cellWidth, ui
 				acidProofWallShadowColor = BLACK_GRAYSCALE;
 				break;
 			}
+			case SettingsManager::GREENSCALE: {
+				wallColor = WHITE_GREENSCALE;
+				lockColor = BROWN_GREENSCALE;
+				acidProofWallColor = LIGHTGREEN_GREENSCALE;
+				wallShadowColor = BLACK_GREENSCALE;
+				lockShadowColor = MAGENTA_GREENSCALE;
+				acidProofWallShadowColor = BLACK_GREENSCALE;
+				break;
+			}
+			case SettingsManager::AMBERSCALE: {
+				wallColor = WHITE_AMBERSCALE;
+				lockColor = BROWN_AMBERSCALE;
+				acidProofWallColor = LIGHTGREEN_AMBERSCALE;
+				wallShadowColor = BLACK_AMBERSCALE;
+				lockShadowColor = MAGENTA_AMBERSCALE;
+				acidProofWallShadowColor = BLACK_AMBERSCALE;
+				break;
+			}
 		}
 		
 		irr::core::position2d< irr::s32 > shadowOffset( 1, 1 );

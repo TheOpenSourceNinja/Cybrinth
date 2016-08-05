@@ -44,17 +44,6 @@
  * @param image: the image to be colorized.
  */
 void MainGame::adjustImageColors( irr::video::IImage* image ) {
-	/*switch( settingsManager.colorMode ) {
-		case SettingsManager::FULLCOLOR: {
-			return; //no modification done
-		}
-		case SettingsManager::GRAYSCALE: {
-			lowPoint = BLACK_GRAYSCALE;
-			colorTwo = WHITE_GRAYSCALE;
-			break;
-		}
-	}*/
-	
 	
 	//Now, set pixels to their desired colors (interpolate between lowPoint and colorTwo instead of the lightest and darkest colors in the original file)
 	for( decltype( image->getDimension().Width ) x = 0; x < image->getDimension().Width; ++x ) {
@@ -83,6 +72,16 @@ void MainGame::adjustImageColors( irr::video::IImage* image ) {
 					case SettingsManager::GRAYSCALE: {
 						auto luminance = pixel.getLuminance();
 						pixel.set( pixel.getAlpha(), luminance, luminance, luminance );
+						break;
+					}
+					case SettingsManager::GREENSCALE: {
+						auto luminance = pixel.getLuminance();
+						pixel.set( pixel.getAlpha(), 0, luminance, 0 );
+						break;
+					}
+					case SettingsManager::AMBERSCALE: {
+						auto luminance = pixel.getLuminance();
+						pixel.set( pixel.getAlpha(), luminance, luminance, 0 );
 						break;
 					}
 				}
@@ -331,6 +330,14 @@ void MainGame::drawLoadingScreen() {
 							color = YELLOW_GRAYSCALE;
 							break;
 						}
+						case SettingsManager::GREENSCALE: {
+							color = YELLOW_GREENSCALE;
+							break;
+						}
+						case SettingsManager::AMBERSCALE: {
+							color = YELLOW_AMBERSCALE;
+							break;
+						}
 					}
 					
 					loadingFont->draw( loading, tempRectangle, color, true, true, &tempRectangle );
@@ -357,6 +364,14 @@ void MainGame::drawLoadingScreen() {
 							color = GRAY_GRAYSCALE;
 							break;
 						}
+						case SettingsManager::GREENSCALE: {
+							color = GRAY_GREENSCALE;
+							break;
+						}
+						case SettingsManager::AMBERSCALE: {
+							color = GRAY_AMBERSCALE;
+							break;
+						}
 					}
 					
 					driver->draw2DRectangleOutline( progressBarOutline, color );
@@ -375,6 +390,14 @@ void MainGame::drawLoadingScreen() {
 						}
 						case SettingsManager::GRAYSCALE: {
 							color = LIGHTGRAY_GRAYSCALE;
+							break;
+						}
+						case SettingsManager::GREENSCALE: {
+							color = LIGHTGRAY_GREENSCALE;
+							break;
+						}
+						case SettingsManager::AMBERSCALE: {
+							color = LIGHTGRAY_AMBERSCALE;
 							break;
 						}
 					}
@@ -396,6 +419,14 @@ void MainGame::drawLoadingScreen() {
 						}
 						case SettingsManager::GRAYSCALE: {
 							color = YELLOW_GRAYSCALE;
+							break;
+						}
+						case SettingsManager::GREENSCALE: {
+							color = YELLOW_GREENSCALE;
+							break;
+						}
+						case SettingsManager::AMBERSCALE: {
+							color = YELLOW_AMBERSCALE;
 							break;
 						}
 					}
@@ -433,6 +464,14 @@ void MainGame::drawLoadingScreen() {
 								color = LIGHTCYAN_GRAYSCALE;
 								break;
 							}
+							case SettingsManager::GREENSCALE: {
+								color = LIGHTCYAN_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								color = LIGHTCYAN_AMBERSCALE;
+								break;
+							}
 						}
 						
 						tipFont->draw( proTipPrefix, tempRectangle, color, true, true, &tempRectangle );
@@ -450,6 +489,14 @@ void MainGame::drawLoadingScreen() {
 							}
 							case SettingsManager::GRAYSCALE: {
 								color = WHITE_GRAYSCALE;
+								break;
+							}
+							case SettingsManager::GREENSCALE: {
+								color = WHITE_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								color = WHITE_AMBERSCALE;
 								break;
 							}
 						}
@@ -537,6 +584,14 @@ void MainGame::drawLoadingScreen() {
 				color = LIGHTMAGENTA_GRAYSCALE;
 				break;
 			}
+			case SettingsManager::GREENSCALE: {
+				color = LIGHTMAGENTA_GREENSCALE;
+				break;
+			}
+			case SettingsManager::AMBERSCALE: {
+				color = LIGHTMAGENTA_AMBERSCALE;
+				break;
+			}
 		}
 		
 		clockFont->draw( clockTime, tempRectangle, color, true, true, &tempRectangle );
@@ -557,6 +612,14 @@ void MainGame::drawLoadingScreen() {
 			}
 			case SettingsManager::GRAYSCALE: {
 				color = YELLOW_GRAYSCALE;
+				break;
+			}
+			case SettingsManager::GREENSCALE: {
+				color = YELLOW_GREENSCALE;
+				break;
+			}
+			case SettingsManager::AMBERSCALE: {
+				color = YELLOW_AMBERSCALE;
 				break;
 			}
 		}
@@ -584,6 +647,14 @@ void MainGame::drawLoadingScreen() {
 				color = YELLOW_GRAYSCALE;
 				break;
 			}
+			case SettingsManager::GREENSCALE: {
+				color = YELLOW_GREENSCALE;
+				break;
+			}
+			case SettingsManager::AMBERSCALE: {
+				color = YELLOW_AMBERSCALE;
+				break;
+			}
 		}
 		
 		textFont->draw( timerStr, tempRectangle, color, true, true, &tempRectangle );
@@ -604,6 +675,14 @@ void MainGame::drawLoadingScreen() {
 			}
 			case SettingsManager::GRAYSCALE: {
 				color = YELLOW_GRAYSCALE;
+				break;
+			}
+			case SettingsManager::GREENSCALE: {
+				color = YELLOW_GREENSCALE;
+				break;
+			}
+			case SettingsManager::AMBERSCALE: {
+				color = YELLOW_AMBERSCALE;
 				break;
 			}
 		}
@@ -631,6 +710,14 @@ void MainGame::drawLoadingScreen() {
 				color = YELLOW_GRAYSCALE;
 				break;
 			}
+			case SettingsManager::GREENSCALE: {
+				color = YELLOW_GREENSCALE;
+				break;
+			}
+			case SettingsManager::AMBERSCALE: {
+				color = YELLOW_AMBERSCALE;
+				break;
+			}
 		}
 		
 		textFont->draw( keyStr, tempRectangle, color, true, true, &tempRectangle );
@@ -651,6 +738,14 @@ void MainGame::drawLoadingScreen() {
 			}
 			case SettingsManager::GRAYSCALE: {
 				color = YELLOW_GRAYSCALE;
+				break;
+			}
+			case SettingsManager::GREENSCALE: {
+				color = YELLOW_GREENSCALE;
+				break;
+			}
+			case SettingsManager::AMBERSCALE: {
+				color = YELLOW_AMBERSCALE;
 				break;
 			}
 		}
@@ -675,6 +770,14 @@ void MainGame::drawLoadingScreen() {
 				color = YELLOW_GRAYSCALE;
 				break;
 			}
+			case SettingsManager::GREENSCALE: {
+				color = YELLOW_GREENSCALE;
+				break;
+			}
+			case SettingsManager::AMBERSCALE: {
+				color = YELLOW_AMBERSCALE;
+				break;
+			}
 		}
 		
 		textFont->draw( seedStr, tempRectangle, color, true, true, &tempRectangle );
@@ -697,6 +800,14 @@ void MainGame::drawLoadingScreen() {
 				}
 				case SettingsManager::GRAYSCALE: {
 					color = LIGHTMAGENTA_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					color = LIGHTMAGENTA_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = LIGHTMAGENTA_AMBERSCALE;
 					break;
 				}
 			}
@@ -724,6 +835,14 @@ void MainGame::drawLoadingScreen() {
 					color = LIGHTCYAN_GRAYSCALE;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					color = LIGHTCYAN_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = LIGHTCYAN_AMBERSCALE;
+					break;
+				}
 			}
 			
 			textFont->draw( theexit, tempRectangle, color, true, true, &tempRectangle );
@@ -748,6 +867,14 @@ void MainGame::drawLoadingScreen() {
 					color = YELLOW_GRAYSCALE;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					color = YELLOW_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = YELLOW_AMBERSCALE;
+					break;
+				}
 			}
 			
 			textFont->draw( nowplaying, tempRectangle, color, true, true, &tempRectangle );
@@ -767,6 +894,14 @@ void MainGame::drawLoadingScreen() {
 				}
 				case SettingsManager::GRAYSCALE: {
 					color = LIGHTGREEN_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					color = LIGHTGREEN_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = LIGHTGREEN_AMBERSCALE;
 					break;
 				}
 			}
@@ -791,6 +926,14 @@ void MainGame::drawLoadingScreen() {
 					color = YELLOW_GRAYSCALE;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					color = YELLOW_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = YELLOW_AMBERSCALE;
+					break;
+				}
 			}
 			
 			textFont->draw( by, tempRectangle, color, true, true, &tempRectangle );
@@ -810,6 +953,14 @@ void MainGame::drawLoadingScreen() {
 				}
 				case SettingsManager::GRAYSCALE: {
 					color = LIGHTGREEN_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					color = LIGHTGREEN_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = LIGHTGREEN_AMBERSCALE;
 					break;
 				}
 			}
@@ -834,6 +985,14 @@ void MainGame::drawLoadingScreen() {
 					color = YELLOW_GRAYSCALE;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					color = YELLOW_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = YELLOW_AMBERSCALE;
+					break;
+				}
 			}
 			
 			textFont->draw( fromalbum, tempRectangle, color, true, true, &tempRectangle );
@@ -853,6 +1012,14 @@ void MainGame::drawLoadingScreen() {
 				}
 				case SettingsManager::GRAYSCALE: {
 					color = LIGHTGRAY_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					color = LIGHTGRAY_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = LIGHTGRAY_AMBERSCALE;
 					break;
 				}
 			}
@@ -877,6 +1044,14 @@ void MainGame::drawLoadingScreen() {
 					color = YELLOW_GRAYSCALE;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					color = YELLOW_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = YELLOW_AMBERSCALE;
+					break;
+				}
 			}
 			
 			textFont->draw( volume, tempRectangle, color, true, true, &tempRectangle );
@@ -898,6 +1073,14 @@ void MainGame::drawLoadingScreen() {
 				}
 				case SettingsManager::GRAYSCALE: {
 					color = LIGHTRED_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					color = LIGHTRED_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = LIGHTRED_AMBERSCALE;
 					break;
 				}
 			}
@@ -941,6 +1124,14 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 					color = WHITE_GRAYSCALE;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					color = WHITE_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = WHITE_AMBERSCALE;
+					break;
+				}
 			}
 			
 			statsFont->draw( winnersLabel, tempRectangle, color, true, true, &tempRectangle );
@@ -964,6 +1155,14 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 				}
 				case SettingsManager::GRAYSCALE: {
 					color = WHITE_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					color = WHITE_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = WHITE_AMBERSCALE;
 					break;
 				}
 			}
@@ -991,6 +1190,14 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 					color = WHITE_GRAYSCALE;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					color = WHITE_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = WHITE_AMBERSCALE;
+					break;
+				}
 			}
 			
 			statsFont->draw( times, tempRectangle, color, true, true, &tempRectangle );
@@ -1014,6 +1221,14 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 				}
 				case SettingsManager::GRAYSCALE: {
 					color = WHITE_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					color = WHITE_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = WHITE_AMBERSCALE;
 					break;
 				}
 			}
@@ -1041,6 +1256,14 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 					color = WHITE_GRAYSCALE;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					color = WHITE_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = WHITE_AMBERSCALE;
+					break;
+				}
 			}
 			
 			statsFont->draw( scores, tempRectangle, color, true, true, &tempRectangle );
@@ -1064,6 +1287,14 @@ void MainGame::drawStats( uint_fast32_t textY ) {
 				}
 				case SettingsManager::GRAYSCALE: {
 					color = WHITE_GRAYSCALE;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					color = WHITE_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					color = WHITE_AMBERSCALE;
 					break;
 				}
 			}
@@ -2436,6 +2667,14 @@ MainGame::MainGame() {
 						playerStart.at( p ).setColors( GRAY, LIGHTRED );
 						break;
 					}
+					case SettingsManager::GREENSCALE: {
+						playerStart.at( p ).setColors( GRAY_GREENSCALE, LIGHTRED_GREENSCALE );
+						break;
+					}
+					case SettingsManager::AMBERSCALE: {
+						playerStart.at( p ).setColors( GRAY_AMBERSCALE, LIGHTRED_AMBERSCALE );
+						break;
+					}
 				}
 			}
 		}
@@ -2475,6 +2714,14 @@ MainGame::MainGame() {
 			case SettingsManager::COLOR_MODE_DO_NOT_USE:
 			case SettingsManager::FULLCOLOR: {
 				goal.setColors( GRAY, LIGHTGREEN );
+				break;
+			}
+			case SettingsManager::GREENSCALE: {
+				goal.setColors( GRAY_GREENSCALE, LIGHTGREEN_GREENSCALE );
+				break;
+			}
+			case SettingsManager::AMBERSCALE: {
+				goal.setColors( GRAY_AMBERSCALE, LIGHTGREEN_AMBERSCALE );
 				break;
 			}
 		}
@@ -4176,6 +4423,16 @@ void MainGame::setupBackground() {
 								lightStarColor = WHITE_GRAYSCALE;
 								break;
 							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = BLACK_GREENSCALE;
+								lightStarColor = WHITE_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = BLACK_AMBERSCALE;
+								lightStarColor = WHITE_AMBERSCALE;
+								break;
+							}
 						}
 						
 						break;
@@ -4191,6 +4448,16 @@ void MainGame::setupBackground() {
 							case SettingsManager::GRAYSCALE: {
 								darkStarColor = BLUE_GRAYSCALE;
 								lightStarColor = LIGHTBLUE_GRAYSCALE;
+								break;
+							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = BLUE_GREENSCALE;
+								lightStarColor = LIGHTBLUE_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = BLUE_AMBERSCALE;
+								lightStarColor = LIGHTBLUE_AMBERSCALE;
 								break;
 							}
 						}
@@ -4209,6 +4476,16 @@ void MainGame::setupBackground() {
 								lightStarColor = LIGHTGREEN_GRAYSCALE;
 								break;
 							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = GREEN_GREENSCALE;
+								lightStarColor = LIGHTGREEN_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = GREEN_AMBERSCALE;
+								lightStarColor = LIGHTGREEN_AMBERSCALE;
+								break;
+							}
 						}
 						break;
 					}
@@ -4223,6 +4500,16 @@ void MainGame::setupBackground() {
 							case SettingsManager::GRAYSCALE: {
 								darkStarColor = CYAN_GRAYSCALE;
 								lightStarColor = LIGHTCYAN_GRAYSCALE;
+								break;
+							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = CYAN_GREENSCALE;
+								lightStarColor = LIGHTCYAN_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = CYAN_AMBERSCALE;
+								lightStarColor = LIGHTCYAN_AMBERSCALE;
 								break;
 							}
 						}
@@ -4241,6 +4528,16 @@ void MainGame::setupBackground() {
 								lightStarColor = LIGHTRED_GRAYSCALE;
 								break;
 							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = RED_GREENSCALE;
+								lightStarColor = LIGHTRED_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = RED_AMBERSCALE;
+								lightStarColor = LIGHTRED_AMBERSCALE;
+								break;
+							}
 						}
 						break;
 					}
@@ -4255,6 +4552,16 @@ void MainGame::setupBackground() {
 							case SettingsManager::GRAYSCALE: {
 								darkStarColor = MAGENTA_GRAYSCALE;
 								lightStarColor = LIGHTMAGENTA_GRAYSCALE;
+								break;
+							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = MAGENTA_GREENSCALE;
+								lightStarColor = LIGHTMAGENTA_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = MAGENTA_AMBERSCALE;
+								lightStarColor = LIGHTMAGENTA_AMBERSCALE;
 								break;
 							}
 						}
@@ -4273,6 +4580,16 @@ void MainGame::setupBackground() {
 								lightStarColor = LIGHTGRAY_GRAYSCALE;
 								break;
 							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = GRAY_GREENSCALE;
+								lightStarColor = LIGHTGRAY_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = GRAY_AMBERSCALE;
+								lightStarColor = LIGHTGRAY_AMBERSCALE;
+								break;
+							}
 						}
 						break;
 					}
@@ -4287,6 +4604,16 @@ void MainGame::setupBackground() {
 							case SettingsManager::GRAYSCALE: {
 								darkStarColor = YELLOW_GRAYSCALE;
 								lightStarColor = BROWN_GRAYSCALE;
+								break;
+							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = YELLOW_GREENSCALE;
+								lightStarColor = BROWN_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = YELLOW_AMBERSCALE;
+								lightStarColor = BROWN_AMBERSCALE;
 								break;
 							}
 						}
@@ -4326,6 +4653,14 @@ void MainGame::setupBackground() {
 						}
 						case SettingsManager::GRAYSCALE: {
 							color = WHITE_GRAYSCALE;
+							break;
+						}
+						case SettingsManager::GREENSCALE: {
+							color = WHITE_GREENSCALE;
+							break;
+						}
+						case SettingsManager::AMBERSCALE: {
+							color = WHITE_AMBERSCALE;
 							break;
 						}
 					}
@@ -4434,6 +4769,16 @@ void MainGame::setupBackground() {
 								lightStarColor = WHITE_GRAYSCALE;
 								break;
 							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = BLACK_GREENSCALE;
+								lightStarColor = WHITE_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = BLACK_AMBERSCALE;
+								lightStarColor = WHITE_AMBERSCALE;
+								break;
+							}
 						}
 						
 						break;
@@ -4449,6 +4794,16 @@ void MainGame::setupBackground() {
 							case SettingsManager::GRAYSCALE: {
 								darkStarColor = BLUE_GRAYSCALE;
 								lightStarColor = LIGHTBLUE_GRAYSCALE;
+								break;
+							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = BLUE_GREENSCALE;
+								lightStarColor = LIGHTBLUE_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = BLUE_AMBERSCALE;
+								lightStarColor = LIGHTBLUE_AMBERSCALE;
 								break;
 							}
 						}
@@ -4467,6 +4822,16 @@ void MainGame::setupBackground() {
 								lightStarColor = LIGHTGREEN_GRAYSCALE;
 								break;
 							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = GREEN_GREENSCALE;
+								lightStarColor = LIGHTGREEN_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = GREEN_AMBERSCALE;
+								lightStarColor = LIGHTGREEN_AMBERSCALE;
+								break;
+							}
 						}
 						break;
 					}
@@ -4481,6 +4846,16 @@ void MainGame::setupBackground() {
 							case SettingsManager::GRAYSCALE: {
 								darkStarColor = CYAN_GRAYSCALE;
 								lightStarColor = LIGHTCYAN_GRAYSCALE;
+								break;
+							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = CYAN_GREENSCALE;
+								lightStarColor = LIGHTCYAN_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = CYAN_AMBERSCALE;
+								lightStarColor = LIGHTCYAN_AMBERSCALE;
 								break;
 							}
 						}
@@ -4499,6 +4874,16 @@ void MainGame::setupBackground() {
 								lightStarColor = LIGHTRED_GRAYSCALE;
 								break;
 							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = RED_GREENSCALE;
+								lightStarColor = LIGHTRED_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = RED_AMBERSCALE;
+								lightStarColor = LIGHTRED_AMBERSCALE;
+								break;
+							}
 						}
 						break;
 					}
@@ -4513,6 +4898,16 @@ void MainGame::setupBackground() {
 							case SettingsManager::GRAYSCALE: {
 								darkStarColor = MAGENTA_GRAYSCALE;
 								lightStarColor = LIGHTMAGENTA_GRAYSCALE;
+								break;
+							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = MAGENTA_GREENSCALE;
+								lightStarColor = LIGHTMAGENTA_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = MAGENTA_AMBERSCALE;
+								lightStarColor = LIGHTMAGENTA_AMBERSCALE;
 								break;
 							}
 						}
@@ -4531,6 +4926,16 @@ void MainGame::setupBackground() {
 								lightStarColor = LIGHTGRAY_GRAYSCALE;
 								break;
 							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = GRAY_GREENSCALE;
+								lightStarColor = LIGHTGRAY_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = GRAY_AMBERSCALE;
+								lightStarColor = LIGHTGRAY_AMBERSCALE;
+								break;
+							}
 						}
 						break;
 					}
@@ -4545,6 +4950,16 @@ void MainGame::setupBackground() {
 							case SettingsManager::GRAYSCALE: {
 								darkStarColor = YELLOW_GRAYSCALE;
 								lightStarColor = BROWN_GRAYSCALE;
+								break;
+							}
+							case SettingsManager::GREENSCALE: {
+								darkStarColor = YELLOW_GREENSCALE;
+								lightStarColor = BROWN_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								darkStarColor = YELLOW_AMBERSCALE;
+								lightStarColor = BROWN_AMBERSCALE;
 								break;
 							}
 						}
@@ -4599,6 +5014,14 @@ void MainGame::setupBackground() {
 								backgroundColor = BLACK_GRAYSCALE;
 								break;
 							}
+							case SettingsManager::GREENSCALE: {
+								backgroundColor = BLACK_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								backgroundColor = BLACK_AMBERSCALE;
+								break;
+							}
 						}
 						
 						break;
@@ -4615,6 +5038,14 @@ void MainGame::setupBackground() {
 								backgroundColor = BLUE_GRAYSCALE;
 								break;
 							}
+							case SettingsManager::GREENSCALE: {
+								backgroundColor = BLUE_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								backgroundColor = BLUE_AMBERSCALE;
+								break;
+							}
 						}
 						
 						break;
@@ -4629,6 +5060,14 @@ void MainGame::setupBackground() {
 							}
 							case SettingsManager::GRAYSCALE: {
 								backgroundColor = GRAY_GRAYSCALE;
+								break;
+							}
+							case SettingsManager::GREENSCALE: {
+								backgroundColor = GRAY_GREENSCALE;
+								break;
+							}
+							case SettingsManager::AMBERSCALE: {
+								backgroundColor = GRAY_AMBERSCALE;
 								break;
 							}
 						}
@@ -4947,6 +5386,14 @@ void MainGame::setNumPlayers( uint_fast8_t newNumPlayers ) {
 				playerStart.at( ps ).setColors( GRAY, LIGHTRED );
 				break;
 			}
+			case SettingsManager::GREENSCALE: {
+				playerStart.at( ps ).setColors( GRAY_GREENSCALE, LIGHTRED_GREENSCALE );
+				break;
+			}
+			case SettingsManager::AMBERSCALE: {
+				playerStart.at( ps ).setColors( GRAY_AMBERSCALE, LIGHTRED_AMBERSCALE );
+				break;
+			}
 		}
 	}
 	
@@ -4974,6 +5421,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 					colorOne = BLACK;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = BLACK_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = BLACK_AMBERSCALE;
+					break;
+				}
 			}
 			
 			break;
@@ -4987,6 +5442,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 				}
 				case SettingsManager::FULLCOLOR: {
 					colorOne = BLUE;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = BLUE_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = BLUE_AMBERSCALE;
 					break;
 				}
 			}
@@ -5004,6 +5467,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 					colorOne = GREEN;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = GREEN_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = GREEN_AMBERSCALE;
+					break;
+				}
 			}
 			
 			break;
@@ -5017,6 +5488,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 				}
 				case SettingsManager::FULLCOLOR: {
 					colorOne = CYAN;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = CYAN_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = CYAN_AMBERSCALE;
 					break;
 				}
 			}
@@ -5034,6 +5513,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 					colorOne = RED;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = RED_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = RED_AMBERSCALE;
+					break;
+				}
 			}
 			
 			break;
@@ -5047,6 +5534,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 				}
 				case SettingsManager::FULLCOLOR: {
 					colorOne = MAGENTA;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = MAGENTA_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = MAGENTA_AMBERSCALE;
 					break;
 				}
 			}
@@ -5064,6 +5559,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 					colorOne = BROWN;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = BROWN_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = BROWN_AMBERSCALE;
+					break;
+				}
 			}
 			
 			break;
@@ -5077,6 +5580,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 				}
 				case SettingsManager::FULLCOLOR: {
 					colorOne = GRAY;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = GRAY_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = GRAY_AMBERSCALE;
 					break;
 				}
 			}
@@ -5094,6 +5605,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 					colorOne = LIGHTGRAY;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = LIGHTGRAY_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = LIGHTGRAY_AMBERSCALE;
+					break;
+				}
 			}
 			
 			break;
@@ -5107,6 +5626,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 				}
 				case SettingsManager::FULLCOLOR: {
 					colorOne = LIGHTBLUE;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = LIGHTBLUE_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = LIGHTBLUE_AMBERSCALE;
 					break;
 				}
 			}
@@ -5124,6 +5651,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 					colorOne = LIGHTGREEN;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = LIGHTGREEN_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = LIGHTGREEN_AMBERSCALE;
+					break;
+				}
 			}
 			
 			break;
@@ -5137,6 +5672,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 				}
 				case SettingsManager::FULLCOLOR: {
 					colorOne = LIGHTCYAN;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = LIGHTCYAN_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = LIGHTCYAN_AMBERSCALE;
 					break;
 				}
 			}
@@ -5154,6 +5697,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 					colorOne = LIGHTRED;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = LIGHTRED_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = LIGHTRED_AMBERSCALE;
+					break;
+				}
 			}
 			
 			break;
@@ -5167,6 +5718,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 				}
 				case SettingsManager::FULLCOLOR: {
 					colorOne = LIGHTMAGENTA;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = LIGHTMAGENTA_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = LIGHTMAGENTA_AMBERSCALE;
 					break;
 				}
 			}
@@ -5184,6 +5743,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 					colorOne = YELLOW;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = YELLOW_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = YELLOW_AMBERSCALE;
+					break;
+				}
 			}
 			
 			break;
@@ -5199,6 +5766,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 					colorOne = WHITE;
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = WHITE_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = WHITE_AMBERSCALE;
+					break;
+				}
 			}
 			
 			break;
@@ -5212,6 +5787,14 @@ irr::video::SColor MainGame::getColorBasedOnNum( uint_fast8_t num ) {
 				}
 				case SettingsManager::FULLCOLOR: {
 					colorOne = BLACK;
+					break;
+				}
+				case SettingsManager::GREENSCALE: {
+					colorOne = BLACK_GREENSCALE;
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					colorOne = BLACK_AMBERSCALE;
 					break;
 				}
 			}

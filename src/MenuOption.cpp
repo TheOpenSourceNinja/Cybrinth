@@ -240,6 +240,28 @@ void MenuOption::draw( irr::IrrlichtDevice* device ) {
 					
 					break;
 				}
+				case SettingsManager::GREENSCALE: {
+					backgroundColor = BLACK_GREENSCALE;
+					
+					if( highlighted ) {
+						textColor = LIGHTCYAN_GREENSCALE;
+					} else {
+						textColor = CYAN_GREENSCALE;
+					}
+					
+					break;
+				}
+				case SettingsManager::AMBERSCALE: {
+					backgroundColor = BLACK_AMBERSCALE;
+					
+					if( highlighted ) {
+						textColor = LIGHTCYAN_AMBERSCALE;
+					} else {
+						textColor = CYAN_AMBERSCALE;
+					}
+					
+					break;
+				}
 			}
 			
 			driver->draw2DRectangle( backgroundColor, background );
