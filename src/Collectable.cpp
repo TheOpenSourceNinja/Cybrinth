@@ -168,6 +168,14 @@ void Collectable::setType( type_t newType ) {
 						setColors( BROWN_GRAYSCALE, YELLOW_GRAYSCALE );
 						break;
 					}
+					case SettingsManager::GREENSCALE: {
+						setColors( BROWN_GREENSCALE, YELLOW_GREENSCALE );
+						break;
+					}
+					case SettingsManager::AMBERSCALE: {
+						setColors( BROWN_AMBERSCALE, YELLOW_AMBERSCALE );
+						break;
+					}
 				}
 				
 				break;
@@ -180,6 +188,14 @@ void Collectable::setType( type_t newType ) {
 					}
 					case SettingsManager::GRAYSCALE: {
 						setColors( BLUE_GRAYSCALE, LIGHTGREEN_GRAYSCALE );
+						break;
+					}
+					case SettingsManager::GREENSCALE: {
+						setColors( BLUE_GREENSCALE, LIGHTGREEN_GREENSCALE );
+						break;
+					}
+					case SettingsManager::AMBERSCALE: {
+						setColors( BLUE_AMBERSCALE, LIGHTGREEN_AMBERSCALE );
 						break;
 					}
 				}

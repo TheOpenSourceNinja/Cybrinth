@@ -51,7 +51,7 @@ class SettingsManager
 		bool botsKnowSolution;
 		bool botsKnowSolutionDefault;
 		
-		enum colorMode_t : uint_fast8_t { FULLCOLOR, GRAYSCALE, COLOR_MODE_DO_NOT_USE };
+		enum colorMode_t : uint_fast8_t { FULLCOLOR, GRAYSCALE, GREENSCALE, AMBERSCALE, COLOR_MODE_DO_NOT_USE };
 		colorMode_t colorMode;
 		colorMode_t colorModeDefault;
 		
