@@ -85,7 +85,7 @@
 #define INVISIBLE_GREENSCALE irr::video::SColor( 0, 0, 0, 0 )
 
 //Amberscale conversions:
-//Just the grayscale versions, with the blue channel set to zero, true amber being outside the sRGB colorspace.
+//Just the grayscale versions, with the blue channel set to zero (thus this should more properly be called yellowscale), true amber being outside the sRGB colorspace.
 #define BLACK_AMBERSCALE irr::video::SColor( 255, 0, 0, 0 )
 #define BLUE_AMBERSCALE irr::video::SColor( 255, 12, 12, 0 )
 #define GREEN_AMBERSCALE irr::video::SColor( 255, 122, 122, 0 )
