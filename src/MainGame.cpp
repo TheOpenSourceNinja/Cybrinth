@@ -1790,10 +1790,10 @@ void MainGame::loadClockFont() { //Load clockFont
 						do {
 							++lineNum;
 							
-							uint_fast8_t lineMax = 255;
-							std::wstring::value_type lineArray[ lineMax ];
+							int lineMaxLength = 640; //I'm not entirely sure if this is bytes, chars, or wide characters. What I do know is that prefs.cfg has some really long comments that brought line lengths above the previous limit of 255.
+							std::wstring::value_type lineArray[ lineMaxLength ];
 							
-							linePointer = fgetws( lineArray, lineMax, exitConfirmationsFile );
+							linePointer = fgetws( lineArray, lineMaxLength, exitConfirmationsFile );
 							if( !isNull( linePointer ) ) {
 								std::wstring line = linePointer;
 								
@@ -2286,12 +2286,12 @@ void MainGame::loadProTips() {
 							++lineNum;
 							
 							//std::wstring line;
-							uint_fast8_t lineMax = 255;
-							std::wstring::value_type lineArray[ lineMax ];
+							int lineMaxLength = 640; //I'm not entirely sure if this is bytes, chars, or wide characters. What I do know is that prefs.cfg has some really long comments that brought line lengths above the previous limit of 255.
+							std::wstring::value_type lineArray[ lineMaxLength ];
 							
 							//getline( proTipsFile, line );
 							//proTipsFile.getline( lineArray, lineMax );
-							linePointer = fgetws( lineArray, lineMax, proTipsFile );
+							linePointer = fgetws( lineArray, lineMaxLength, proTipsFile );
 							if( !isNull( linePointer ) ) {
 								std::wstring line = linePointer;
 								
