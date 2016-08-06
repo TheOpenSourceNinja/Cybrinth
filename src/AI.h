@@ -48,7 +48,7 @@ class AI {
 		 */
 		virtual ~AI();
 
-		enum algorithm_t : uint_fast8_t { DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH, RIGHT_HAND_RULE, LEFT_HAND_RULE, DIJKSTRA, ALGORITHM_DO_NOT_USE };
+		enum algorithm_t : uint_fast8_t { RANDOM_DEPTH_FIRST_SEARCH, ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH, RIGHT_HAND_RULE, LEFT_HAND_RULE, DIJKSTRA, HEURISTIC_DEPTH_FIRST_SEARCH, ALGORITHM_DO_NOT_USE };
 
 		/**
 		 * Returns the algorithm most closely matching a given string
@@ -171,6 +171,13 @@ class AI {
 		 * Calls other solution-finding functions depending on the algorithm.
 		 */
 		void findSolution();
+		
+		/**
+		 * @brief Finds a solution using a modified Depth-First search algorithm. Works by calling findSolutionIDDFS() with the max depth possible and the chooseBest argument set to true.
+		 * @param startPosition
+		 */
+		void findSolutionBFS( irr::core::position2d< uint_fast8_t > startPosition );
+		
 		/**
 		 * Finds a solution using Depth-First Search. Works by calling findSolutionIDDFS() with the max depth possible.
 		 * @param startPosition: the position from which to start searching.
@@ -186,11 +193,11 @@ class AI {
 		/**
 		 * Finds a solution using the Iterative Deepening Depth-First Search algorithm. Does so by calling the other version of findSolutionIDDFS() over and over again with increasing depth limits.
 		 */
-		void findSolutionIDDFS( irr::core::position2d< uint_fast8_t > startPosition );
+		void findSolutionIDDFS( irr::core::position2d< uint_fast8_t > startPosition, bool chooseBest = false );
 		/**
 		 * Finds a solution using the Iterative Deepening Depth-First Search algorithm. Does so by calling the other version of findSolutionIDDFS() over and over again with increasing depth limits.
 		 */
-		void findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > startPosition, uint_fast16_t depthLimit, bool canDissolveWalls );
+		void findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > startPosition, uint_fast16_t depthLimit, bool canDissolveWalls, bool chooseBest = false );
 
 		MainGame * mg; ///< A pointer to the MainGame.
 

@@ -51,7 +51,7 @@ SettingsManager::SettingsManager() {
 	alwaysServerDefault = true;
 	isServerDefault = true;
 	botsKnowSolutionDefault = false;
-	botAlgorithmDefault = AI::DEPTH_FIRST_SEARCH;
+	botAlgorithmDefault = AI::RANDOM_DEPTH_FIRST_SEARCH;
 	botMovementDelayDefault = 300;
 	hideUnseenDefault = false;
 	backgroundAnimationsDefault = true;
@@ -262,7 +262,7 @@ void SettingsManager::savePrefs() {
 							
 							{
 								AI temp;
-								fputws( std::wstring( possiblePrefs.at( ALGORITHM ) + L"\t" + temp.stringFromAlgorithm( botAlgorithm ) + defaultString + temp.stringFromAlgorithm( botAlgorithmDefault ) + L". Controls which algorithm bots use to solve the maze. Possible values are Depth-First Search (will always find a way to a key/goal, not necessarily the nearest key/goal), Iterative Deepening Depth-First Search (will always find the nearest key/goal, but is really slow. May cause the game to freeze for short periods of time. Not recommended for slow computers!), Left Hand Rule and Right Hand Rule (inefficient), and Dijkstra (experimental!).\n" ).c_str(), prefsFile );
+								fputws( std::wstring( possiblePrefs.at( ALGORITHM ) + L"\t" + temp.stringFromAlgorithm( botAlgorithm ) + defaultString + temp.stringFromAlgorithm( botAlgorithmDefault ) + L". Controls which algorithm bots use to solve the maze. Possible values are Random Depth-First Search (will always find a way to a key/goal, not necessarily the nearest key/goal), Iterative Deepening Depth-First Search (will always find the nearest key/goal, but is really slow. May cause the game to freeze for short periods of time. Not recommended for slow computers!), Heuristic Depth-First Search (a version of DFS that tries to move towards the nearest key), Left Hand Rule and Right Hand Rule (inefficient), and Dijkstra (experimental!).\n" ).c_str(), prefsFile );
 							}
 							
 							fputws( std::wstring( possiblePrefs.at( SOLUTION_KNOWN ) + L"\t" + sc.toStdWString( botsKnowSolution ) + defaultString + sc.toStdWString( botsKnowSolutionDefault ) + L". Whether the bots know the solution or have to find it as they play. Note that they do not necessarily know the *best* solution, just one that works.\n" ).c_str(), prefsFile );
