@@ -426,7 +426,7 @@ void SettingsScreen::changeToSettingsScreen() {
 				auto botAlgorithmListBoxRectangle = Rectangle( botAlgorithmTextRectangle.LowerRightCorner.X + 1, itemY, driver->getScreenSize().Width, driver->getScreenSize().Height );
 				botAlgorithmListBox = environment->addListBox( botAlgorithmListBoxRectangle, multiplayerTab, BOT_ALGORITHM_LISTBOX_ID, true );
 				
-				for( uint_fast8_t algorithm = AI::DEPTH_FIRST_SEARCH; algorithm != AI::ALGORITHM_DO_NOT_USE; ++algorithm ) {
+				for( uint_fast8_t algorithm = AI::RANDOM_DEPTH_FIRST_SEARCH; algorithm != AI::ALGORITHM_DO_NOT_USE; ++algorithm ) {
 					botAlgorithmListBox->addItem( AI::stringFromAlgorithm( ( AI::algorithm_t ) algorithm ).c_str() );
 				}
 				

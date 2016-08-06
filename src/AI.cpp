@@ -31,7 +31,7 @@
 
 AI::AI() : controlsPlayer(0) {
 	try {
-		setup( nullptr, false, DEPTH_FIRST_SEARCH, 300 ); //setup( pointer to MainGame, whether to start solved, the algorithm to use, and the movement delay )
+		setup( nullptr, false, RANDOM_DEPTH_FIRST_SEARCH, 300 ); //setup( pointer to MainGame, whether to start solved, the algorithm to use, and the movement delay )
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::AI(): " << e.what() << std::endl;
 	}
@@ -49,7 +49,7 @@ AI::~AI() {
 }
 
 AI::algorithm_t AI::algorithmFromString( std::wstring input ) {
-	std::vector< std::wstring > possibleChoices = { stringFromAlgorithm( DEPTH_FIRST_SEARCH ), stringFromAlgorithm( ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH ), stringFromAlgorithm( RIGHT_HAND_RULE ), stringFromAlgorithm( LEFT_HAND_RULE ), stringFromAlgorithm( DIJKSTRA ) };
+	std::vector< std::wstring > possibleChoices = { stringFromAlgorithm( RANDOM_DEPTH_FIRST_SEARCH ), stringFromAlgorithm( ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH ), stringFromAlgorithm( RIGHT_HAND_RULE ), stringFromAlgorithm( LEFT_HAND_RULE ), stringFromAlgorithm( DIJKSTRA ), stringFromAlgorithm( HEURISTIC_DEPTH_FIRST_SEARCH ) };
 	
 	std::wstring choice;
 	{
@@ -60,7 +60,7 @@ AI::algorithm_t AI::algorithmFromString( std::wstring input ) {
 	algorithm_t result = ALGORITHM_DO_NOT_USE;
 	
 	if( choice == possibleChoices.at( 0 ) ) { //DFS
-		result = DEPTH_FIRST_SEARCH;
+		result = RANDOM_DEPTH_FIRST_SEARCH;
 	} else if( choice == possibleChoices.at( 1 ) ) { //IDDFS
 		result = ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH;
 	} else if( choice == possibleChoices.at( 2 ) ) {
@@ -69,6 +69,8 @@ AI::algorithm_t AI::algorithmFromString( std::wstring input ) {
 		result = LEFT_HAND_RULE;
 	} else if( choice == possibleChoices.at( 4 ) ) {
 		result = DIJKSTRA;
+	} else if( choice == possibleChoices.at( 5 ) ) {
+		result = HEURISTIC_DEPTH_FIRST_SEARCH;
 	}
 	
 	return result;
@@ -217,7 +219,7 @@ void AI::findSolution() {
 			Player* p = mg->getPlayer( controlsPlayer );
 			irr::core::position2d< uint_fast8_t > currentPosition( p->getX(), p->getY() );
 			switch( algorithm ) {
-				case DEPTH_FIRST_SEARCH: {
+				case RANDOM_DEPTH_FIRST_SEARCH: {
 					pretendCellsVisited.clear();
 					findSolutionDFS( currentPosition );
 					solved = true;
@@ -238,6 +240,12 @@ void AI::findSolution() {
 				}
 				case DIJKSTRA: {
 					findSolutionDijkstra( currentPosition );
+					break;
+				}
+				case HEURISTIC_DEPTH_FIRST_SEARCH: {
+					pretendCellsVisited.clear();
+					findSolutionBFS( currentPosition );
+					solved = true;
 					break;
 				}
 				default: {
@@ -261,6 +269,36 @@ void AI::findSolution() {
 		}
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::findSolution(): " << e.what() << std::endl;
+	}
+}
+
+/**
+* @brief Finds a solution using a modified Depth-First search algorithm. Works by calling findSolutionIDDFS() with the max depth possible and the chooseBest argument set to true.
+* @param startPosition
+*/
+void AI::findSolutionBFS( irr::core::position2d< uint_fast8_t > startPosition ) {
+	try {
+		std::vector< irr::core::position2d< uint_fast8_t > > partialSolution;
+		//Instead of adding a bunch of code for DFS, just do IDDFS with the deepest max depth possible.
+		uint_fast16_t maxDepth = static_cast< uint_fast16_t > ( mg->getMazeManager()->cols ) * static_cast< uint_fast16_t > ( mg->getMazeManager()->rows );
+		pretendCellsVisited.clear();
+		IDDFSDeadEnds.clear();
+		findSolutionIDDFS( partialSolution, startPosition, maxDepth, false, true );
+
+		{ //Reverses the order of the solution, so we don't start at the wrong end
+			std::vector< irr::core::position2d< uint_fast8_t > > tempSolution;
+			while( not solution.empty() ) {
+				tempSolution.push_back( solution.back() );
+				solution.pop_back();
+			}
+			while( not tempSolution.empty() ) {
+				solution.insert( solution.begin(), tempSolution.back() );
+				tempSolution.pop_back();
+			}
+		}
+		solution.push_back( startPosition );
+	} catch( std::exception &e ) {
+		std::wcerr << L"Error in AI::findSolutionBFS(): " << e.what() << std::endl;
 	}
 }
 
@@ -444,7 +482,7 @@ void AI::findSolutionDijkstra( irr::core::position2d< uint_fast8_t > startPositi
 	}
 }
 
-void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > startPosition ) {
+void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > startPosition, bool chooseBest ) {
 	try {
 		std::vector< irr::core::position2d< uint_fast8_t > > partialSolution;
 		
@@ -453,7 +491,7 @@ void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > startPosition 
 		if( noKeysLeft ) { //If there aren't any keys left, the only thing left to try for is the goal. There's no point in using a less-than-maximum depth limit in that case.
 			pretendCellsVisited.clear();
 			IDDFSDeadEnds.clear();
-			findSolutionIDDFS( partialSolution, startPosition, maxDepth, false );
+			findSolutionIDDFS( partialSolution, startPosition, maxDepth, false, chooseBest );
 		} else {
 			IDDFSDeadEnds.clear();
 			for( decltype( maxDepth ) i = 1; solution.empty() and i <= maxDepth; ++i ) {
@@ -461,7 +499,7 @@ void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > startPosition 
 					std::wcout << L"In IDDFS loop, i=" << i << std::endl;
 				}
 				pretendCellsVisited.clear();
-				findSolutionIDDFS( partialSolution, startPosition, i, false );
+				findSolutionIDDFS( partialSolution, startPosition, i, false, chooseBest );
 			}
 		}
 
@@ -482,7 +520,7 @@ void AI::findSolutionIDDFS( irr::core::position2d< uint_fast8_t > startPosition 
 	}
 }
 
-void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > currentPosition, uint_fast16_t depthLimit, bool canDissolveWalls ) {
+void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > > partialSolution, irr::core::position2d< uint_fast8_t > currentPosition, uint_fast16_t depthLimit, bool canDissolveWalls, bool chooseBest ) {
 	try {
 		if( mg->getDebugStatus() ) {
 			std::wcout << L"findSolutionIDDFS: currentPosition: " << currentPosition.X << L"x" << currentPosition.Y << L" goal: " << mg->getGoal()->getX() << L"x" << mg->getGoal()->getY() << L" depthLimit: " << depthLimit << std::endl;
@@ -563,9 +601,96 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 					partialSolution.pop_back();
 				} else {
 					while( not possibleDirections.empty() ) { //for( uint_fast8_t i = 0; ( i < possibleDirections.size() and solution.empty() ); ++i ) { //changed decltype( possibleDirections.size() ) to uint_fast8_t because the size of possibleDirections can never exceed 4 but could be stored in a needlessly large integer type.
-						uint_fast8_t choiceInt = mg->getRandomNumber() % possibleDirections.size(); //rand() % possibleDirections.size();
-						direction_t choice = possibleDirections.at( choiceInt );
-						//direction_t choice = possibleDirections.at( i );
+						
+						uint_fast8_t choiceInt;// = mg->getRandomNumber() % possibleDirections.size();
+						direction_t choice = UP;
+						
+						if( not chooseBest ) {
+							choiceInt = mg->getRandomNumber() % possibleDirections.size();
+							choice = possibleDirections.at( choiceInt );
+						} else {
+							//TODO: Finish.
+							//First, decide whether to try for a key/acid (default) or the goal (if all keys have been collected)...
+							
+							//See bool noKeysLeft
+							
+							//Second, figure out which one is closest as the crow flies.
+							
+							decltype( mg->getNumCollectables() ) nearestCollectable = 0;
+							uint_fast16_t minDistance = UINT_FAST16_MAX;
+							if( noKeysLeft ) {
+								auto goal = mg->getGoal();
+								minDistance = sqrt( pow( ( int_fast16_t ) currentPosition.X - ( int_fast16_t ) goal->getX(), 2 ) + pow( ( int_fast16_t ) currentPosition.Y - ( int_fast16_t ) goal->getY(), 2 ) );
+							} else {
+								for( decltype( mg->getNumCollectables() ) c = 0; c < mg->getNumCollectables(); ++c ) {
+									auto collectable = mg->getCollectable( c );
+									decltype( minDistance ) distance = sqrt( pow( ( int_fast16_t ) currentPosition.X - ( int_fast16_t ) collectable->getX(), 2 ) + pow( ( int_fast16_t ) currentPosition.Y - ( int_fast16_t ) collectable->getY(), 2 ) );
+									if( distance <= minDistance ) {
+										nearestCollectable = c;
+										minDistance = distance;
+									}
+								}
+							}
+							
+							//Finally, figure out which direction would move us least far away.
+							irr::core::vector2d< uint_fast8_t > destination;
+							if( noKeysLeft ) {
+								auto goal = mg->getGoal();
+								destination.X = goal->getX();
+								destination.Y = goal->getY();
+							} else {
+								destination.X = mg->getCollectable( nearestCollectable )->getX();
+								destination.Y = mg->getCollectable( nearestCollectable )->getY();
+							}
+							
+							minDistance = UINT_FAST16_MAX; //Now we're reusing the minDistance variable to figure out which move will get us least far away
+							for( uint_fast8_t possibility = 0; possibility < possibleDirections.size(); ++possibility ) {
+								switch( possibleDirections.at( possibility ) ) {
+									case UP: {
+										decltype( minDistance ) distance = sqrt( pow( ( int_fast16_t ) currentPosition.X - ( int_fast16_t ) destination.X, 2 ) + pow( ( int_fast16_t ) currentPosition.Y - 1 - ( int_fast16_t ) destination.Y, 2 ) );
+										if( distance <= minDistance ) {
+											minDistance = distance;
+											choice = UP;
+										}
+										break;
+									}
+									case DOWN: {
+										decltype( minDistance ) distance = sqrt( pow( ( int_fast16_t ) currentPosition.X - ( int_fast16_t ) destination.X, 2 ) + pow( ( int_fast16_t ) currentPosition.Y + 1 - ( int_fast16_t ) destination.Y, 2 ) );
+										if( distance <= minDistance ) {
+											minDistance = distance;
+											choice = DOWN;
+										}
+										break;
+									}
+									case LEFT: {
+										decltype( minDistance ) distance = sqrt( pow( ( int_fast16_t ) currentPosition.X - 1 - ( int_fast16_t ) destination.X, 2 ) + pow( ( int_fast16_t ) currentPosition.Y - ( int_fast16_t ) destination.Y, 2 ) );
+										if( distance <= minDistance ) {
+											minDistance = distance;
+											choice = LEFT;
+										}
+										break;
+									}
+									case RIGHT: {
+										decltype( minDistance ) distance = sqrt( pow( ( int_fast16_t ) currentPosition.X + 1 - ( int_fast16_t ) destination.X, 2 ) + pow( ( int_fast16_t ) currentPosition.Y - ( int_fast16_t ) destination.Y, 2 ) );
+										if( distance <= minDistance ) {
+											minDistance = distance;
+											choice = RIGHT;
+										}
+										break;
+									}
+								}
+							}
+							
+							//Now, figure out (for later erasure) which index in possibleDirections corresponds to our chosen direction
+							for( uint_fast8_t index = 0; index < possibleDirections.size(); ++index ) {
+								if( possibleDirections.at( index ) == choice ) {
+									choiceInt = index;
+									break;
+								}
+							}
+							
+						}
+						
 						auto newDepthLimit = depthLimit - 1;
 						switch( choice ) {
 							case UP: {
@@ -614,6 +739,8 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 				return;
 			}
 		}
+	} catch( CustomException e ) {
+		std::wcerr << L"Error in AI::findSolutionIDDFS(): " << e.what() << std::endl;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::findSolutionIDDFS(): " << e.what() << std::endl;
 	}
@@ -682,7 +809,7 @@ void AI::move() {
 		} else {
 
 			switch( algorithm ) {
-				case DEPTH_FIRST_SEARCH: {
+				case RANDOM_DEPTH_FIRST_SEARCH: {
 					irr::core::position2d< uint_fast8_t > currentPosition( mg->getPlayer( controlsPlayer )->getX(), mg->getPlayer( controlsPlayer )->getY() );
 					
 					if( pathTaken.size() == 0 ) { //Ensures that the player's start position is marked as visited
@@ -993,6 +1120,214 @@ void AI::move() {
 					}
 					break;
 				}
+				
+				case HEURISTIC_DEPTH_FIRST_SEARCH: {
+					irr::core::position2d< uint_fast8_t > currentPosition( mg->getPlayer( controlsPlayer )->getX(), mg->getPlayer( controlsPlayer )->getY() );
+					
+					if( pathTaken.size() == 0 ) { //Ensures that the player's start position is marked as visited
+						pathTaken.push_back( currentPosition );
+					}
+					
+					if( not alreadyVisited( currentPosition ) ) {
+						cellsVisited.push_back( currentPosition );
+					}
+					
+					std::vector< direction_t > possibleDirections;
+					if( not ( currentPosition.X == mg->getGoal()->getX() and currentPosition.Y == mg->getGoal()->getY() ) ) {
+
+						//Check for locks
+						if( mg->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y ].hasLock() ) {
+							pathsToLockedCells.push_back( std::vector< irr::core::position2d< uint_fast8_t > >() );
+							pathsToLockedCells.back().push_back( currentPosition );
+							pathsToLockedCells.back().push_back( currentPosition );
+						}
+						if( currentPosition.X < ( mg->getMazeManager()->cols - 1 ) and mg->getMazeManager()->maze[ currentPosition.X + 1 ][ currentPosition.Y ].hasLeftLock() ) {
+							pathsToLockedCells.push_back( std::vector< irr::core::position2d< uint_fast8_t > >() );
+							pathsToLockedCells.back().push_back( currentPosition );
+							pathsToLockedCells.back().push_back( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) );
+						}
+						if( currentPosition.Y < ( mg->getMazeManager()->rows - 1 ) and mg->getMazeManager()->maze[ currentPosition.X ][ currentPosition.Y + 1 ].hasTopLock() ) {
+							pathsToLockedCells.push_back( std::vector< irr::core::position2d< uint_fast8_t > >() );
+							pathsToLockedCells.back().push_back( currentPosition );
+							pathsToLockedCells.back().push_back( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) );
+						}
+
+						//See which direction(s) the bot can move
+						if( currentPosition.Y > 0 and effectivelyNoTopWall( currentPosition.X, currentPosition.Y ) and not alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y - 1 ) ) ) {
+							possibleDirections.push_back( UP );
+						}
+						if( currentPosition.X > 0 and effectivelyNoLeftWall( currentPosition.X, currentPosition.Y ) and not alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X - 1, currentPosition.Y ) ) ) {
+							possibleDirections.push_back( LEFT );
+						}
+						if( currentPosition.Y < (mg->getMazeManager()->rows - 1) and effectivelyNoTopWall( currentPosition.X, currentPosition.Y + 1 ) and not alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X, currentPosition.Y + 1 ) ) ) {
+							possibleDirections.push_back( DOWN );
+						}
+						if( currentPosition.X < (mg->getMazeManager()->cols - 1) and effectivelyNoLeftWall( currentPosition.X + 1, currentPosition.Y ) and not alreadyVisited( irr::core::position2d< uint_fast8_t >( currentPosition.X + 1, currentPosition.Y ) ) ) {
+							possibleDirections.push_back( RIGHT );
+						}
+					}
+					
+					
+					
+					//If we can't go anywhere new, go back to previous position
+					if( possibleDirections.size() == 0 and pathTaken.size() not_eq 0 and not ( currentPosition.X == mg->getGoal()->getX() and currentPosition.Y == mg->getGoal()->getY() ) ) {
+						pathTaken.pop_back();
+						irr::core::position2d< uint_fast8_t > oldPosition = pathTaken.back();
+						
+						for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
+							if( pathsToLockedCells.at( o ).back() not_eq currentPosition ) {
+								pathsToLockedCells.at( o ).push_back( currentPosition );
+							} else {
+								pathsToLockedCells.at( o ).pop_back();
+								//pathsToLockedCells.at( o ).push_back( currentPosition );
+							}
+						}
+						if( oldPosition.X < currentPosition.X ) {
+							mg->movePlayerOnX( controlsPlayer, -1, false );
+						} else if( oldPosition.X > currentPosition.X ) {
+							mg->movePlayerOnX( controlsPlayer, 1, false );
+						} else if( oldPosition.Y < currentPosition.Y ) {
+							mg->movePlayerOnY( controlsPlayer, -1, false );
+						} else { //if( oldPosition.Y > currentPosition.Y ) {
+							mg->movePlayerOnY( controlsPlayer, 1, false );
+						}
+					} else if ( not ( currentPosition.X == mg->getGoal()->getX() and currentPosition.Y == mg->getGoal()->getY() ) ) { //Go to next position
+							
+						direction_t choice = UP;
+						
+						//TODO: Finish.
+						//First, decide whether to try for a key/acid (default) or the goal (if all keys have been collected)...
+						
+						//See bool noKeysLeft
+						
+						//Second, figure out which one is closest as the crow flies.
+						
+						decltype( mg->getNumCollectables() ) nearestCollectable = 0;
+						uint_fast16_t minDistance = UINT_FAST16_MAX;
+						if( noKeysLeft ) {
+							auto goal = mg->getGoal();
+							minDistance = sqrt( pow( ( int_fast16_t ) currentPosition.X - ( int_fast16_t ) goal->getX(), 2 ) + pow( ( int_fast16_t ) currentPosition.Y - ( int_fast16_t ) goal->getY(), 2 ) );
+						} else {
+							for( decltype( mg->getNumCollectables() ) c = 0; c < mg->getNumCollectables(); ++c ) {
+								auto collectable = mg->getCollectable( c );
+								decltype( minDistance ) distance = sqrt( pow( ( int_fast16_t ) currentPosition.X - ( int_fast16_t ) collectable->getX(), 2 ) + pow( ( int_fast16_t ) currentPosition.Y - ( int_fast16_t ) collectable->getY(), 2 ) );
+								if( distance <= minDistance ) {
+									nearestCollectable = c;
+									minDistance = distance;
+								}
+							}
+						}
+						
+						//Finally, figure out which direction would move us least far away.
+						irr::core::vector2d< uint_fast8_t > destination;
+						if( noKeysLeft ) {
+							auto goal = mg->getGoal();
+							destination.X = goal->getX();
+							destination.Y = goal->getY();
+						} else {
+							destination.X = mg->getCollectable( nearestCollectable )->getX();
+							destination.Y = mg->getCollectable( nearestCollectable )->getY();
+						}
+						
+						minDistance = UINT_FAST16_MAX; //Now we're reusing the minDistance variable to figure out which move will get us least far away
+						for( uint_fast8_t possibility = 0; possibility < possibleDirections.size(); ++possibility ) {
+							switch( possibleDirections.at( possibility ) ) {
+								case UP: {
+									decltype( minDistance ) distance = sqrt( pow( ( int_fast16_t ) currentPosition.X - ( int_fast16_t ) destination.X, 2 ) + pow( ( int_fast16_t ) currentPosition.Y - 1 - ( int_fast16_t ) destination.Y, 2 ) );
+									if( distance <= minDistance ) {
+										minDistance = distance;
+										choice = UP;
+									}
+									break;
+								}
+								case DOWN: {
+									decltype( minDistance ) distance = sqrt( pow( ( int_fast16_t ) currentPosition.X - ( int_fast16_t ) destination.X, 2 ) + pow( ( int_fast16_t ) currentPosition.Y + 1 - ( int_fast16_t ) destination.Y, 2 ) );
+									if( distance <= minDistance ) {
+										minDistance = distance;
+										choice = DOWN;
+									}
+									break;
+								}
+								case LEFT: {
+									decltype( minDistance ) distance = sqrt( pow( ( int_fast16_t ) currentPosition.X - 1 - ( int_fast16_t ) destination.X, 2 ) + pow( ( int_fast16_t ) currentPosition.Y - ( int_fast16_t ) destination.Y, 2 ) );
+									if( distance <= minDistance ) {
+										minDistance = distance;
+										choice = LEFT;
+									}
+									break;
+								}
+								case RIGHT: {
+									decltype( minDistance ) distance = sqrt( pow( ( int_fast16_t ) currentPosition.X + 1 - ( int_fast16_t ) destination.X, 2 ) + pow( ( int_fast16_t ) currentPosition.Y - ( int_fast16_t ) destination.Y, 2 ) );
+									if( distance <= minDistance ) {
+										minDistance = distance;
+										choice = RIGHT;
+									}
+									break;
+								}
+							}
+						}
+						
+						switch( choice ) {
+							case UP: {
+								irr::core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y - 1 );
+								pathTaken.push_back( position );
+								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
+									if( pathsToLockedCells.at( o ).back() not_eq position ) {
+										pathsToLockedCells.at( o ).push_back( position );
+									} else {
+										pathsToLockedCells.at( o ).pop_back();
+									}
+								}
+								mg->movePlayerOnY( controlsPlayer, -1, false );
+							} break;
+							case DOWN: {
+								irr::core::position2d< uint_fast8_t > position( currentPosition.X, currentPosition.Y + 1 );
+								pathTaken.push_back( position );
+								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
+									if( pathsToLockedCells.at( o ).back() not_eq position ) {
+										pathsToLockedCells.at( o ).push_back( position );
+									} else {
+										pathsToLockedCells.at( o ).pop_back();
+									}
+								}
+								mg->movePlayerOnY( controlsPlayer, 1, false );
+							} break;
+							case LEFT: {
+								irr::core::position2d< uint_fast8_t > position( currentPosition.X - 1, currentPosition.Y );
+								pathTaken.push_back( position );
+								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
+									if( pathsToLockedCells.at( o ).back() not_eq position ) {
+										pathsToLockedCells.at( o ).push_back( position );
+									} else {
+										pathsToLockedCells.at( o ).pop_back();
+									}
+								}
+								mg->movePlayerOnX( controlsPlayer, -1, false );
+							} break;
+							case RIGHT: {
+								irr::core::position2d< uint_fast8_t > position( currentPosition.X + 1, currentPosition.Y );
+								pathTaken.push_back( position );
+								for( decltype( pathsToLockedCells.size() ) o = 0; o < pathsToLockedCells.size(); ++o ) {
+									if( pathsToLockedCells.at( o ).back() not_eq position ) {
+										pathsToLockedCells.at( o ).push_back( position );
+									} else {
+										pathsToLockedCells.at( o ).pop_back();
+									}
+								}
+								mg->movePlayerOnX( controlsPlayer, 1, false );
+							} break;
+						}
+					}
+					
+					if( mg->getDebugStatus() ) {
+						for( decltype( pathsToLockedCells.size() ) d = 0; d < pathsToLockedCells.size(); ++d ) {
+							std::wcout << L"pathsToLockedCells.at( " << d << L" ).size(): " << pathsToLockedCells.at( d ).size() << std::endl;
+						}
+					}
+					
+					break;
+				}
+				
 				default: {
 					std::wcerr << L"The current algorithm cannot be used when bots don't know the solution." << std::endl;
 					break;
@@ -1055,8 +1390,8 @@ void AI::setup( MainGame *newGM, bool newStartSolved, algorithm_t newAlgorithm, 
 
 std::wstring AI::stringFromAlgorithm( algorithm_t input ) {
 	switch( input ) {
-		case DEPTH_FIRST_SEARCH: {
-			return L"depth-first search";
+		case RANDOM_DEPTH_FIRST_SEARCH: {
+			return L"random depth-first search";
 		}
 		case ITERATIVE_DEEPENING_DEPTH_FIRST_SEARCH: {
 			return L"iterative deepening depth-first search";
@@ -1069,6 +1404,9 @@ std::wstring AI::stringFromAlgorithm( algorithm_t input ) {
 		}
 		case DIJKSTRA: {
 			return L"dijkstra";
+		}
+		case HEURISTIC_DEPTH_FIRST_SEARCH: {
+			return L"heuristic depth-first search";
 		}
 		default: {
 			return L"Unrecognized algorithm";
