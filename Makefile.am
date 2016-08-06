@@ -29,8 +29,8 @@ remove-compiled-images:
 
 install-data-local:
 	mkdir --parents --mode=655 @datadir@/Cybrinth
-	cp --recursive ./music @datadir@/Cybrinth/music
-	cp --recursive ./images @datadir@/Cybrinth/images
+	cp --recursive ./Music @datadir@/Cybrinth/Music
+	cp --recursive ./Images @datadir@/Cybrinth/Images
 	chmod --recursive 555 @datadir@/Cybrinth/
 
 .PHONY: compiled-images remove-compiled-images
