@@ -4,7 +4,9 @@
 
 DEB_BUILD_HARDENING = 1 #If you have hardening wrapper scripts installed (Ubuntu/Debian package "hardening-wrapper"), this should make them harden the program
 
-AM_CPPFLAGS = -Og -g -Wpedantic -Wall -Wextra -Wno-write-strings $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS) $(SDLDEPS_CFLAGS)
+IMAGES_RESULT != [ `find ./Images -type f -printf "%T@\n" | sort | tail -n 1 | xargs printf "%.f"` -gt `find ./compiled-images -type f -printf "%T@\n" | sort | tail -n 1 | xargs printf "%.f"` ] && echo 1 || echo 0
+
+AM_CPPFLAGS = -Og -g -Wall -Wextra -Wno-write-strings -Wno-pedantic $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS) $(SDLDEPS_CFLAGS)
 AM_LDFLAGS = -lstdc++ -lm -pthread
 bin_PROGRAMS = cybrinth
 
@@ -22,7 +24,9 @@ clean-local: remove-compiled-images
 distclean-local: remove-compiled-images
 
 compiled-images:
-	cat gimp-save-as-xpm.py | ${XVFB_RUN_CMD} gimp --no-splash --no-interface --no-data --console-messages --batch-interpreter=python-fu-eval --batch -
+	if [ "$(IMAGES_RESULT)" -eq "1" ];\
+	then cat gimp-save-as-xpm.py | ${XVFB_RUN_CMD} gimp --no-splash --no-interface --no-data --console-messages --batch-interpreter=python-fu-eval --batch -;\
+	fi
 
 remove-compiled-images:
 	rm -rf compiled-images
