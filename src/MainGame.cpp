@@ -1827,10 +1827,10 @@ void MainGame::loadClockFont() { //Load clockFont
 			}
 		}
 		
-	} catch( CustomException e ) {
+	} catch( CustomException &e ) {
 		std::wcerr << L"Error in MainGame::loadExitConfirmations(): " << e.what() << std::endl;
 		return;
-	} catch( std::exception e ) {
+	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::loadExitConfirmations(): " << e.what() << std::endl;
 		return;
 	}
@@ -2326,7 +2326,7 @@ void MainGame::loadProTips() {
 			}
 		}
 		
-	} catch( CustomException e ) {
+	} catch( CustomException &e ) {
 		std::wcerr << L"Error in MainGame::loadProTips(): " << e.what() << std::endl;
 		return;
 	} catch( std::exception &e ) {
@@ -2895,7 +2895,7 @@ void MainGame::makeMusicList() {
 void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromServer ) {
 	try {
 		
-		if( not fromServer and( settingsManager.isServer or ( not settingsManager.isServer and p == myPlayer ) ) ) {
+		if( not fromServer and( settingsManager.isServer or p == myPlayer ) ) {
 			network.sendPlayerPosXMove( p, direction );
 		}
 		
@@ -2947,7 +2947,7 @@ void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromSe
 void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromServer ) {
 	try {
 		
-		if( not fromServer and ( settingsManager.isServer or ( not settingsManager.isServer and p == myPlayer ) ) ) {
+		if( not fromServer and ( settingsManager.isServer or p == myPlayer ) ) {
 			network.sendPlayerPosYMove( p, direction );
 		}
 		
@@ -5825,7 +5825,7 @@ void MainGame::setObjectColorBasedOnNum( Object* object, uint_fast8_t num ) {
 		
 		object->setColors( colorOne, colorTwo );
 		
-	} catch ( CustomException e ) {
+	} catch ( CustomException &e ) {
 		std::wcerr << L"Error in MainGame::setObjectColorBasedOnNum(): " << e.what() << std::endl;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::setObjectColorBasedOnNum(): " << e.what() << std::endl;

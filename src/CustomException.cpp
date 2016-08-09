@@ -18,16 +18,14 @@
 
 #include "CustomException.h"
 
-CustomException::CustomException( std::wstring newMessage ) {
-	message = newMessage;
+CustomException::CustomException( std::wstring newMessage ) : message( newMessage ) {
 }
 
 CustomException::~CustomException() {
 	//dtor
 }
 
-CustomException::CustomException( const CustomException& other ) {
-	message = other.message;
+CustomException::CustomException( const CustomException& other ) : message( other.message ) {
 }
 
 std::wstring CustomException::what() {

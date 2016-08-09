@@ -39,28 +39,28 @@ class ControlMapping {
 		virtual ~ControlMapping();
 		irr::EKEY_CODE getKey();
 		void setKey( irr::EKEY_CODE val );
-		uint_fast8_t getControllerButton();
+		uint_fast8_t getControllerButton() const;
 		void setControllerButton( uint_fast8_t val );
-		uint_fast8_t getControllerNumber();
+		uint_fast8_t getControllerNumber() const;
 		void setControllerNumber( uint_fast8_t val );
-		action_t getAction();
+		action_t getAction() const;
 		void setAction( action_t val );
 		irr::EMOUSE_INPUT_EVENT getMouseEvent();
-		bool getMouseWheelUp();
-		uint_fast8_t getPlayer();
+		bool getMouseWheelUp() const;
+		uint_fast8_t getPlayer() const;
 		void setPlayer( uint_fast8_t val );
 		void setMouseEvent( irr::EMOUSE_INPUT_EVENT val );
 		void setMouseWheelUp( bool val );
-		joystickDirection_t getJoystickDirection();
+		joystickDirection_t getJoystickDirection() const;
 		void setJoystickDirection( joystickDirection_t val );
-		uint_fast8_t getJoystickAxis();
+		uint_fast8_t getJoystickAxis() const;
 		void setJoystickAxis( uint_fast8_t val );
 		void setMouseDirection( mouseDirection_t val );
-		mouseDirection_t getMouseDirection();
-		int_fast16_t getJoystickDeadZone();
+		mouseDirection_t getMouseDirection() const;
+		int_fast16_t getJoystickDeadZone() const;
 		void setJoystickDeadZonePercent( uint_fast8_t percent );
 
-		bool operator==( ControlMapping other );
+		bool operator==( ControlMapping other ) const;
 
 		bool activated; //To be set, unset, and accessed by MainGame. Indicates whether the relevant button has been pressed, or joystick moved, etc. Ensures smooth player movements.
 		bool controlsAPlayer;

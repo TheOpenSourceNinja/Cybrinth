@@ -32,28 +32,28 @@ class MazeCell {
 		enum border_t : uint_fast8_t { ACIDPROOF, LOCK, WALL, NONE };
 		MazeCell();
 		virtual ~MazeCell();
-		border_t getTop();
+		border_t getTop() const;
 		void setTop( border_t val );
-		border_t getLeft();
+		border_t getLeft() const;
 		void setLeft( border_t val );
-		border_t getBottom();
+		border_t getBottom() const;
 		void setOriginalBottom( border_t val );
-		border_t getRight();
+		border_t getRight() const;
 		void setOriginalRight( border_t val );
 		void setOriginalTop( border_t val );
 		void setOriginalLeft( border_t val );
-		border_t getOriginalTop(); //For those solving algorithms that absolutely cannot be used on mazes that are no longer simply connected.
-		border_t getOriginalLeft();
+		border_t getOriginalTop() const; //For those solving algorithms that absolutely cannot be used on mazes that are no longer simply connected.
+		border_t getOriginalLeft() const;
 		void removeLocks();
 		bool visited; //Used by the maze generation algorithm to ensure there are no loops, by canGetTo() to indicate which cells it's already look at, and during play for the players' own use.
 		uint_fast16_t distanceFromStart;
 		uint_fast16_t id;
-		bool isDeadEnd();
-		irr::video::SColor getVisitorColor();
+		bool isDeadEnd() const;
+		irr::video::SColor getVisitorColor() const;
 		void setVisitorColor( irr::video::SColor color );
 		bool hasLock();
-		bool hasLeftLock();
-		bool hasTopLock();
+		bool hasLeftLock() const;
+		bool hasTopLock() const;
 		bool topVisible;
 		bool leftVisible;
 		bool bottomVisible;

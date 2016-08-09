@@ -41,7 +41,7 @@ class Collectable : public Object {
 		
 		void draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_fast16_t height );
 		
-		type_t getType();
+		type_t getType() const;
 		
 		void loadTexture( irr::IrrlichtDevice* device );
 		void loadTexture( irr::IrrlichtDevice* device, uint_fast8_t size );

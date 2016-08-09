@@ -105,7 +105,7 @@ void Collectable::draw( irr::IrrlichtDevice* device, uint_fast16_t width, uint_f
 	}
 }
 
-Collectable::type_t Collectable::getType() {
+Collectable::type_t Collectable::getType() const {
 	return type;
 }
 

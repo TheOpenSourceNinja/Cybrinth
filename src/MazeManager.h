@@ -49,8 +49,8 @@ class MazeManager {
 
 		void draw( irr::IrrlichtDevice* device, uint_fast16_t cellWidth, uint_fast16_t cellHeight );
 
-		irr::core::stringw getFileTypeExtension();
-		irr::core::stringw getFileTypeName();
+		irr::core::stringw getFileTypeExtension() const;
+		irr::core::stringw getFileTypeName() const;
 		bool hideUnseen;
 
 		bool loadFromFile();

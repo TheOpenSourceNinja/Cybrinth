@@ -190,11 +190,11 @@ void MazeManager::draw( irr::IrrlichtDevice* device, uint_fast16_t cellWidth, ui
 	}
 }
 
-irr::core::stringw MazeManager::getFileTypeExtension() {
+irr::core::stringw MazeManager::getFileTypeExtension() const {
 	return fileTypeExtension;
 }
 
-irr::core::stringw MazeManager::getFileTypeName() {
+irr::core::stringw MazeManager::getFileTypeName() const {
 	return fileTypeName;
 }
 
@@ -599,6 +599,7 @@ MazeManager::MazeManager() {
 		rows = 0;
 		maze = nullptr;
 		mainGame = nullptr;
+		settingsManager = nullptr;
 		StringConverter sc;
 		fileTypeName = sc.toIrrlichtStringW( PACKAGE_NAME );
 		fileTypeName.append( L" maze" );

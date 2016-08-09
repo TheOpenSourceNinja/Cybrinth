@@ -53,7 +53,7 @@ void MazeCell::setVisitorColor( irr::video::SColor color ) {
 	}
 }
 
-irr::video::SColor MazeCell::getVisitorColor() {
+irr::video::SColor MazeCell::getVisitorColor() const {
 	try {
 		return visitorColor;
 	} catch ( std::exception &e ) {
@@ -69,7 +69,7 @@ MazeCell::~MazeCell() {
 	}
 }
 
-MazeCell::border_t MazeCell::getTop() {
+MazeCell::border_t MazeCell::getTop() const {
 	try {
 		return top;
 	} catch ( std::exception &e ) {
@@ -78,7 +78,7 @@ MazeCell::border_t MazeCell::getTop() {
 	}
 }
 
-MazeCell::border_t MazeCell::getOriginalTop() {
+MazeCell::border_t MazeCell::getOriginalTop() const {
 	try {
 		return originalTop;
 	} catch ( std::exception &e ) {
@@ -104,7 +104,7 @@ void MazeCell::setOriginalTop( border_t val ) {
 	}
 }
 
-MazeCell::border_t MazeCell::getOriginalLeft() {
+MazeCell::border_t MazeCell::getOriginalLeft() const {
 	try {
 		return originalLeft;
 	} catch ( std::exception &e ) {
@@ -113,7 +113,7 @@ MazeCell::border_t MazeCell::getOriginalLeft() {
 	}
 }
 
-MazeCell::border_t MazeCell::getLeft() {
+MazeCell::border_t MazeCell::getLeft() const {
 	try {
 		return left;
 	} catch ( std::exception &e ) {
@@ -139,7 +139,7 @@ void MazeCell::setOriginalLeft( border_t val ) {
 	}
 }
 
-MazeCell::border_t MazeCell::getBottom() {
+MazeCell::border_t MazeCell::getBottom() const {
 	try {
 		return bottom;
 	} catch ( std::exception &e ) {
@@ -156,7 +156,7 @@ void MazeCell::setOriginalBottom( border_t val ) {
 	}
 }
 
-MazeCell::border_t MazeCell::getRight() {
+MazeCell::border_t MazeCell::getRight() const {
 	try {
 		return right;
 	} catch ( std::exception &e ) {
@@ -208,7 +208,7 @@ bool MazeCell::hasLock() {
 	}
 }
 
-bool MazeCell::hasLeftLock() {
+bool MazeCell::hasLeftLock() const {
 	try {
 		if( left == LOCK ) {
 			return true;
@@ -221,7 +221,7 @@ bool MazeCell::hasLeftLock() {
 	}
 }
 
-bool MazeCell::hasTopLock() {
+bool MazeCell::hasTopLock() const {
 	try {
 		if( top == LOCK ) {
 			return true;
@@ -234,7 +234,7 @@ bool MazeCell::hasTopLock() {
 	}
 }
 
-bool MazeCell::isDeadEnd() {
+bool MazeCell::isDeadEnd() const {
 	try {
 		bool result = false;
 		if ( top == NONE and left not_eq NONE and bottom not_eq NONE and right not_eq NONE ) {

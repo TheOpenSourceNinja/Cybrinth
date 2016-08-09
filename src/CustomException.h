@@ -24,10 +24,14 @@
 
 class CustomException : public std::exception {
 	public:
-		CustomException( std::wstring newMessage );
+		explicit CustomException( std::wstring newMessage );
 		virtual ~CustomException();
 		CustomException( const CustomException& other );
+		
+		#pragma clang diagnostic push
+		#pragma clang diagnostic ignored "-Woverloaded-virtual"
 		std::wstring what();
+		#pragma clang diagnostic pop
 	protected:
 		std::wstring message;
 	private:

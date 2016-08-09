@@ -35,18 +35,18 @@ class MenuOption {
 		MenuOption();
 		virtual ~MenuOption();
 
-		bool contains( irr::core::position2d< uint_fast32_t > test );
-		bool contains( uint_fast32_t testX, uint_fast32_t testY );
+		bool contains( irr::core::position2d< uint_fast32_t > test ) const;
+		bool contains( uint_fast32_t testX, uint_fast32_t testY ) const;
 		void createTexture( irr::IrrlichtDevice* device );
 
 		void draw( irr::IrrlichtDevice* device );
 		
-		uint_fast16_t getHeight();
-		uint_fast16_t getWidth();
-		uint_fast16_t getMiddleX();
-		uint_fast16_t getMiddleY();
-		uint_fast16_t getX();
-		uint_fast16_t getY();
+		uint_fast16_t getHeight() const;
+		uint_fast16_t getWidth() const;
+		uint_fast16_t getMiddleX() const;
+		uint_fast16_t getMiddleY() const;
+		uint_fast16_t getX() const;
+		uint_fast16_t getY() const;
 
 		bool highlighted;
 
