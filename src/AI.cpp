@@ -602,7 +602,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 				} else {
 					while( not possibleDirections.empty() ) { //for( uint_fast8_t i = 0; ( i < possibleDirections.size() and solution.empty() ); ++i ) { //changed decltype( possibleDirections.size() ) to uint_fast8_t because the size of possibleDirections can never exceed 4 but could be stored in a needlessly large integer type.
 						
-						uint_fast8_t choiceInt;// = mg->getRandomNumber() % possibleDirections.size();
+						uint_fast8_t choiceInt = 0;// = mg->getRandomNumber() % possibleDirections.size();
 						direction_t choice = UP;
 						
 						if( not chooseBest ) {
@@ -739,7 +739,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 				return;
 			}
 		}
-	} catch( CustomException e ) {
+	} catch( CustomException &e ) {
 		std::wcerr << L"Error in AI::findSolutionIDDFS(): " << e.what() << std::endl;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in AI::findSolutionIDDFS(): " << e.what() << std::endl;
@@ -749,7 +749,7 @@ void AI::findSolutionIDDFS( std::vector< irr::core::position2d< uint_fast8_t > >
 	}
 }
 
-uint_fast8_t AI::getPlayer() {
+uint_fast8_t AI::getPlayer() const {
 	return controlsPlayer;
 }
 

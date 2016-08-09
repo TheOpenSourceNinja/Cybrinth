@@ -274,7 +274,7 @@ void MenuOption::draw( irr::IrrlichtDevice* device ) {
 		} else {
 			throw( CustomException( L"Font is null" ) );
 		}
-	} catch( CustomException e ) {
+	} catch( CustomException &e ) {
 		std::wcerr << L"Custom exception thrown in MenuOption::draw(): " << e.what() << std::endl;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MenuOption::draw(): " << e.what() << std::endl;
@@ -297,23 +297,23 @@ void MenuOption::setY( uint_fast16_t val ) {
 	}
 }
 
-uint_fast16_t MenuOption::getX() {
+uint_fast16_t MenuOption::getX() const {
 	return x;
 }
 
-uint_fast16_t MenuOption::getMiddleX() {
+uint_fast16_t MenuOption::getMiddleX() const {
 	return x + ( dimension.Width / 2 );
 }
 
-uint_fast16_t MenuOption::getY() {
+uint_fast16_t MenuOption::getY() const {
 	return y;
 }
 
-uint_fast16_t MenuOption::getMiddleY() {
+uint_fast16_t MenuOption::getMiddleY() const {
 	return y + ( dimension.Height / 2 );
 }
 
-bool MenuOption::contains( irr::core::position2d< uint_fast32_t > test ) {
+bool MenuOption::contains( irr::core::position2d< uint_fast32_t > test ) const {
 	try {
 		return ( ( test.X >= x and test.Y >= y ) and ( test.X <= x + dimension.Width and test.Y <= y + dimension.Height ) );
 	} catch ( std::exception &e ) {
@@ -322,7 +322,7 @@ bool MenuOption::contains( irr::core::position2d< uint_fast32_t > test ) {
 	}
 }
 
-bool MenuOption::contains( uint_fast32_t testX, uint_fast32_t testY ) {
+bool MenuOption::contains( uint_fast32_t testX, uint_fast32_t testY ) const {
 	try {
 		return contains( irr::core::position2d< decltype( testX ) >( testX, testY ) );
 	} catch ( std::exception &e ) {
@@ -426,10 +426,10 @@ void MenuOption::createTexture( irr::IrrlichtDevice* device ) {
 	}
 }
 
-uint_fast16_t MenuOption::getHeight() {
+uint_fast16_t MenuOption::getHeight() const {
 	return dimension.Height;
 }
 
-uint_fast16_t MenuOption::getWidth() {
+uint_fast16_t MenuOption::getWidth() const {
 	return dimension.Width;
 }

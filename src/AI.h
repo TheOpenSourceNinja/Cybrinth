@@ -73,7 +73,7 @@ class AI {
 		 * Used by MainGame to see which player this bot controls.
 		 * @return the number of the player controlled by this AI.
 		 */
-		uint_fast8_t getPlayer();
+		uint_fast8_t getPlayer() const;
 
 		/**
 		 * Called by MainGame to tell this bot that a key has been found.

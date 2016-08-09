@@ -20,6 +20,8 @@
 #include "MainGame.h"
 
 MenuManager::MenuManager() {
+	mainGame = nullptr;
+	
 	{
 		MenuOption temp;
 		temp.setType( nullptr, MenuOption::NEW_MAZE );
@@ -99,7 +101,7 @@ void MenuManager::findHighlights( int_fast32_t x, int_fast32_t y ) {
 	
 	uint_fast64_t minDistance = UINT_FAST64_MAX;
 	for( decltype( options.size() ) o = 0; o < options.size(); ++o ) {
-		decltype( minDistance ) distance = sqrt( pow( abs( ( decltype( minDistance ) ) x - ( decltype( minDistance ) ) options.at( o ).getMiddleX() ), 2 ) + pow( abs( ( decltype( minDistance ) ) y - ( decltype( minDistance ) ) options.at( o ).getMiddleY() ), 2 ) );
+		decltype( minDistance ) distance = sqrt( pow( abs( ( int_fast64_t ) x - ( int_fast64_t ) options.at( o ).getMiddleX() ), 2 ) + pow( abs( ( int_fast64_t ) y - ( int_fast64_t ) options.at( o ).getMiddleY() ), 2 ) );
 		if( distance < minDistance ) {
 			options.at( currentHighlight ).highlighted = false;
 			currentHighlight = o;

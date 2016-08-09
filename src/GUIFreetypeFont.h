@@ -94,7 +94,7 @@ class CGUIFreetypeFont : public irr::gui::IGUIFont {
 	public:
 
 		//! constructor
-		CGUIFreetypeFont( irr::video::IVideoDriver* Driver );
+		explicit CGUIFreetypeFont( irr::video::IVideoDriver* Driver );
 
 		//! destructor
 		virtual ~CGUIFreetypeFont();

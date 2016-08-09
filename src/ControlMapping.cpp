@@ -22,7 +22,7 @@
 	#include <iostream>
 #endif //HAVE_IOSTREAM
 
-ControlMapping::action_t ControlMapping::getAction() {
+ControlMapping::action_t ControlMapping::getAction() const {
 	try {
 		return action;
 	} catch ( std::exception &e ) {
@@ -31,7 +31,7 @@ ControlMapping::action_t ControlMapping::getAction() {
 	}
 }
 
-uint_fast8_t ControlMapping::getControllerButton() {
+uint_fast8_t ControlMapping::getControllerButton() const {
 	try {
 		return controllerButton;
 	} catch ( std::exception &e ) {
@@ -40,7 +40,7 @@ uint_fast8_t ControlMapping::getControllerButton() {
 	}
 }
 
-uint_fast8_t ControlMapping::getControllerNumber() {
+uint_fast8_t ControlMapping::getControllerNumber() const {
 	try {
 		return controllerNumber;
 	} catch ( std::exception &e ) {
@@ -61,7 +61,7 @@ irr::EKEY_CODE ControlMapping::getKey() {
 /** Access mouseWheelUp
 * \return The current value of mouseWheelUp
 */
-bool ControlMapping::getMouseWheelUp() {
+bool ControlMapping::getMouseWheelUp() const {
 	return mouseWheelUp;
 }
 
@@ -69,7 +69,7 @@ void ControlMapping::setMouseDirection( mouseDirection_t val ) {
 	mouseDirection = val;
 }
 
-ControlMapping::mouseDirection_t ControlMapping::getMouseDirection() {
+ControlMapping::mouseDirection_t ControlMapping::getMouseDirection() const {
 	return mouseDirection;
 }
 
@@ -80,7 +80,7 @@ irr::EMOUSE_INPUT_EVENT ControlMapping::getMouseEvent() {
 	return mouseEvent;
 }
 
-uint_fast8_t ControlMapping::getPlayer() {
+uint_fast8_t ControlMapping::getPlayer() const {
 	try {
 		return player;
 	} catch ( std::exception &e ) {
@@ -145,7 +145,7 @@ void ControlMapping::setPlayer( uint_fast8_t val ) {
 	}
 }
 
-ControlMapping::joystickDirection_t ControlMapping::getJoystickDirection() {
+ControlMapping::joystickDirection_t ControlMapping::getJoystickDirection() const {
 	return joystickDirection;
 }
 
@@ -153,7 +153,7 @@ void ControlMapping::setJoystickDirection( joystickDirection_t val ) {
 	joystickDirection = val;
 }
 
-uint_fast8_t ControlMapping::getJoystickAxis() {
+uint_fast8_t ControlMapping::getJoystickAxis() const {
 	return joystickAxis;
 }
 
@@ -171,11 +171,11 @@ void ControlMapping::setJoystickDeadZonePercent( uint_fast8_t percent ) {
 	joystickDeadZone = percent32;
 }
 
-int_fast16_t ControlMapping::getJoystickDeadZone() {
+int_fast16_t ControlMapping::getJoystickDeadZone() const {
 	return joystickDeadZone;
 }
 
-bool ControlMapping::operator==( ControlMapping other ) {
+bool ControlMapping::operator==( ControlMapping other ) const {
 	return ( key == other.getKey() and mouseEvent == other.mouseEvent and controllerButton == other.controllerButton and controllerNumber == other.controllerNumber and mouseWheelUp == other.mouseWheelUp and action == other.action and player == other.player and joystickDirection == other.joystickDirection and joystickAxis == other.joystickAxis and mouseDirection == other.mouseDirection and joystickDeadZone == other.joystickDeadZone );
 }
 
