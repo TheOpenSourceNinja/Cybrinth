@@ -2,11 +2,11 @@
 
 #Note: Consider making a new makefile based on examples from http://nuclear.mutantstargoat.com/articles/make/
 
-DEB_BUILD_HARDENING = 1 #If you have hardening wrapper scripts installed (Ubuntu/Debian package "hardening-wrapper"), this should make them harden the program
+export DEB_BUILD_HARDENING:= 1 #If you have hardening wrapper scripts installed (Ubuntu/Debian package "hardening-wrapper"), this should make them harden the program
 
 IMAGES_RESULT != [ `find ./Images -type f -printf "%T@\n" | sort | tail -n 1 | xargs printf "%.f"` -gt `find ./compiled-images -type f -printf "%T@\n" | sort | tail -n 1 | xargs printf "%.f"` ] && echo 1 || echo 0
 
-AM_CPPFLAGS = -Og -g -Wall -Wextra -Wno-write-strings -Wno-pedantic $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS) $(SDLDEPS_CFLAGS)
+AM_CPPFLAGS = -O0 -g -Wall -Wextra -Wno-write-strings -Wno-pedantic $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS) $(SDLDEPS_CFLAGS)
 AM_LDFLAGS = -lstdc++ -lm -pthread
 bin_PROGRAMS = cybrinth
 
