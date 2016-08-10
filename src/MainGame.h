@@ -55,7 +55,7 @@
 class MainGame : public irr::IEventReceiver {
 	public:
 		//Functions----------------------------------
-		MainGame();
+		MainGame( std::wstring fileToLoad, bool runAsScreenSaver );
 		virtual ~MainGame();
 		
 		void adjustImageColors( irr::video::IImage* image );
@@ -98,7 +98,7 @@ class MainGame : public irr::IEventReceiver {
 		void pickLogo();
 		
 		void resetThings();
-		uint_fast8_t run( std::wstring fileToLoad ); //If a file was specified on the command line, it will be passed to run().
+		uint_fast8_t run(); //If a file was specified on the command line, it will be passed to run().
 		
 		void setControls();
 		//void setExitConfirmation( irr::gui::IGUIWindow* newWindow );
@@ -151,6 +151,8 @@ class MainGame : public irr::IEventReceiver {
 		void drawSidebarText();
 		void drawStats( uint_fast32_t textY );
 		
+		bool firstMaze; //If we're loading from a file specified on the command line, we don't want to reset the random seed when generating the first maze.
+		
 		bool haveShownLogo;
 		
 		bool isNull( void* ptr );
@@ -161,6 +163,7 @@ class MainGame : public irr::IEventReceiver {
 		void loadMusicFont();
 		void loadNextSong();
 		void loadProTips();
+		bool loadSeedFromFile( boost::filesystem::path src );
 		void loadStatsFont();
 		void loadTipFont();
 		

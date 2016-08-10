@@ -23,26 +23,37 @@
 	//What can we do if someone doesn't have iostream? I don't know.
 #endif //HAVE_IOSTREAM
 
+#include "StringConverter.h"
+
 int main( int argc, char *argv[] ) {
 	//PACKAGE_NAME, PACKAGE_VERSION, and PACKAGE_BUGREPORT are defined by Autoconf and passed to the compiler by command line arguments - you won't find them in any header. The same goes for HAVE_IOSTREAM above.
 	std::wcout << L"Now starting " << PACKAGE_NAME << L" version " << PACKAGE_VERSION << L". Please report bugs to " << PACKAGE_BUGREPORT << L". Enjoy!" << std::endl;
 	
 	try {
-		MainGame mg; //Lots of stuff gets set up in the MainGame constructor
-		
 		std::wstring fileToLoad = L"";
 		
+		bool runAsScreenSaver = false;
+		
 		if( argc > 1 ) {
-			if( argc not_eq 2 ) {
-				std::wcerr << L"Too many command line arguments. " << PACKAGE_NAME << L" expects only one argument on the command line: the name of a file from which to load a maze." << std::endl;
-				return EXIT_FAILURE;
-			} else {
-				StringConverter sc;  //In order to ensure different languages can be displayed properly, this game uses wide character strings wherever possible. Usually std::wstrings, but sometimes irr::core::stringws are more convenient.
-				fileToLoad = sc.toStdWString( argv[ 1 ] );
+			StringConverter sc;
+			
+			for( decltype( argc ) argNum = 1; argNum < argc; ++argNum ) {
+				
+				auto argument = sc.toStdString( argv[ argNum ] );
+				
+				if( argc > argNum + 1 and argument.compare( "-window-id" ) == 0 ) {
+					//The XScreenSaver daemon passes a window ID as both a command-line argument and as an environment variable.
+					runAsScreenSaver = true;
+					argNum += 1; //We ignore the window ID argument; the environment variable will be used.
+				} else if( argument.compare( "-run-as-screensaver" ) == 0 ) {
+					//The reason we ignore the window ID argument above is because the documentation for the GNOME-Screensaver daemon says it uses the environment variable. So we define this other command-line argument which any screensaver daemon should use.
+					runAsScreenSaver = true;
+				}
 			}
 		}
 		
-		return mg.run( fileToLoad ); //Now that everything's set up, transfer control to MainGame.run()
+		MainGame mg( fileToLoad, runAsScreenSaver ); //Lots of stuff gets set up in the MainGame constructor
+		return mg.run(); //Now that everything's set up, transfer control to MainGame.run()
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error caught by main(): " << e.what() << std::endl;
 		return EXIT_FAILURE;

@@ -41,36 +41,33 @@ class MazeManager {
 		MazeManager();
 		/** Default destructor */
 		virtual ~MazeManager();
-
+		
 		MazeCell** maze;
-
+		
 		bool canGetTo( uint_fast8_t startX, uint_fast8_t startY, uint_fast8_t goalX, uint_fast8_t goalY );
 		bool canGetToAllCollectables( uint_fast8_t startX, uint_fast8_t startY );
-
+		
 		void draw( irr::IrrlichtDevice* device, uint_fast16_t cellWidth, uint_fast16_t cellHeight );
-
+		
 		irr::core::stringw getFileTypeExtension() const;
 		irr::core::stringw getFileTypeName() const;
 		bool hideUnseen;
-
-		bool loadFromFile();
-		bool loadFromFile( boost::filesystem::path src );
-
+		
 		void makeCellsVisible( uint_fast8_t x, uint_fast8_t y );
 		void makeRandomLevel();
-
+		
 		void newMaze( uint_fast8_t newCols, uint_fast8_t newRows );
-
+		
 		void recurseRandom( uint_fast8_t x, uint_fast8_t y, uint_fast16_t depth, uint_fast16_t numSoFar );
-
+		
 		bool saveToFile( boost::filesystem::path dest );
 		
 		void setPointers( MainGame* newMainGame, SettingsManager* newSettingsManager );
-
+		
 		uint_fast8_t cols;
-
+		
 		MainGame* mainGame;
-
+		
 		uint_fast8_t rows;
 		
 		SettingsManager* settingsManager;

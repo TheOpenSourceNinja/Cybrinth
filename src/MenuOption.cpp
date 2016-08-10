@@ -341,39 +341,41 @@ void MenuOption::loadTexture( irr::IrrlichtDevice* device ) {
 			}
 			
 			{
-				boost::filesystem::path path( boost::filesystem::current_path()/L"Images" ); //TODO: Load icons from standard data directories.
+				SystemSpecificsManager system;
+				auto folderList = system.getImageFolders();
 				
-				//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
-				path = system_complete( path );
-				//path = absolute( path );
+				bool fileFound = false;
 				
-				while( ( not exists( path ) or not is_directory( path ) ) and path.has_parent_path() ) {
-					path = path.parent_path();
-				}
-				
-				if( exists( path ) ) {
-					boost::filesystem::recursive_directory_iterator end;
-					bool fileFound = false;
+				for( auto listIterator = folderList.begin(); listIterator != folderList.end() and not fileFound; ++listIterator ) {
+					boost::filesystem::path path = *listIterator;
 					
-					for( boost::filesystem::recursive_directory_iterator i( path ); i not_eq end and not fileFound; ++i ) {
-						if( not is_directory( i->path() ) ) { //We've found a file
-							irr::io::IFileSystem* fileSystem = device->getFileSystem();
-							StringConverter stringConverter;
-							irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
-							if( fileSystem->getFileBasename( filePath, false ) == fileName ) {
-								//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
-								for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount() and not fileFound; ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
-									irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
-								
-									if( loader->isALoadableFileExtension( filePath ) ) {
-										irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
-										if( loader->isALoadableFileFormat( file ) ) {
-											fileName = filePath;
-											fileFound = true;
+					//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
+					path = system_complete( path );
+					//path = absolute( path );
+					
+					if( exists( path ) ) {
+						boost::filesystem::recursive_directory_iterator end;
+						
+						for( boost::filesystem::recursive_directory_iterator i( path ); i not_eq end and not fileFound; ++i ) {
+							if( not is_directory( i->path() ) ) { //We've found a file
+								irr::io::IFileSystem* fileSystem = device->getFileSystem();
+								StringConverter stringConverter;
+								irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
+								if( fileSystem->getFileBasename( filePath, false ) == fileName ) {
+									//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
+									for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount() and not fileFound; ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
+										irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
+									
+										if( loader->isALoadableFileExtension( filePath ) ) {
+											irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
+											if( loader->isALoadableFileFormat( file ) ) {
+												fileName = filePath;
+												fileFound = true;
+												file->drop();
+												break;
+											}
 											file->drop();
-											break;
 										}
-										file->drop();
 									}
 								}
 							}
@@ -404,7 +406,7 @@ void MenuOption::loadTexture( irr::IrrlichtDevice* device ) {
 			setDimension( device->getVideoDriver() );
 		}
 	} catch ( std::exception &e ) {
-		std::wcerr << L"Error in Object::loadTexture(): " << e.what() << std::endl;
+		std::wcerr << L"Error in MenuOption::loadTexture(): " << e.what() << std::endl;
 	}
 }
 

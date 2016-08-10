@@ -217,6 +217,7 @@ void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, std::
 			StringConverter sc;
 			textureFilePath = sc.toIrrlichtStringW( usableFiles.at( mg->getRandomNumber() % usableFiles.size() ).wstring() );
 			
+			std::wcout << L"Chosen texture file path: " << textureFilePath.c_str() << std::endl;
 			Object::loadTexture( device, size, textureFilePath );
 		}
 		
