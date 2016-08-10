@@ -28,6 +28,7 @@
 
 #include "CustomException.h"
 #include "SystemSpecificsManager.h"
+#include "PreprocessorCommands.h"
 
 std::wstring SystemSpecificsManager::getEnvironmentVariable( std::string name ) {
 	char * result = getenv( name.c_str() );
@@ -57,7 +58,6 @@ std::wstring SystemSpecificsManager::getEnvironmentVariable( std::wstring name )
 
 std::vector< boost::filesystem::path > SystemSpecificsManager::getDataFolders() {
 	std::vector< boost::filesystem::path > dataFolders;
-	dataFolders.push_back( boost::filesystem::current_path() );
 	
 	std::wstring common = L"Cybrinth";
 	
@@ -81,7 +81,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getDataFolders() 
 		boost::algorithm::split( dataDirsVector, dataDirsString, [](wchar_t c) { return c == L':'; } );
 		
 		for( decltype( dataDirsVector.size() ) i = 0; i < dataDirsVector.size(); ++i ) {
-			dataFolders.push_back( dataDirsVector.at( i ) );
+			dataFolders.push_back( dataDirsVector.at( i ) + common );
 		}
 		
 	#elif defined MACOSX
@@ -106,6 +106,8 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getDataFolders() 
 		}
 	#endif //What about other operating systems? I don't know where BSD etc. put their picture files.
 	
+	dataFolders.push_back( boost::filesystem::current_path() );
+	
 	for( decltype( dataFolders.size() ) i = 0; i < dataFolders.size(); i++ ) {
 		if( not canBeUsedAsFolder( dataFolders.at( i ) ) ) {
 			dataFolders.erase( dataFolders.begin() + i );
@@ -118,7 +120,12 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getDataFolders() 
 
 std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() {
 	std::vector< boost::filesystem::path > fontFolders;
-	fontFolders.push_back( boost::filesystem::current_path() );
+	
+	{
+		auto dataFolders = getDataFolders();
+		fontFolders.insert( fontFolders.end(), dataFolders.begin(), dataFolders.end() );
+	}
+	
 	#if defined WINDOWS
 		try {
 			fontFolders.push_back( getEnvironmentVariable( "%SYSTEMROOT%" ) + L"\Fonts" );
@@ -155,10 +162,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getFontFolders() 
 		fontFolders.push_back( L"/usr/local/lib/X11/fonts/" );
 	#endif //What about other operating systems? I don't know where BSD etc. put their font files.
 	
-	{
-		auto dataFolders = getDataFolders();
-		fontFolders.insert( fontFolders.end(), dataFolders.begin(), dataFolders.end() );
-	}
+	fontFolders.push_back( boost::filesystem::current_path() );
 	
 	{
 		auto iter = std::unique( fontFolders.begin(), fontFolders.end() );
@@ -213,7 +217,6 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders()
 		
 		for( decltype( dataDirsVector.size() ) i = 0; i < dataDirsVector.size(); ++i ) {
 			imageFolders.push_back( dataDirsVector.at( i ) + common );
-			imageFolders.push_back( dataDirsVector.at( i ) );
 		}
 		
 	#elif defined MACOSX
@@ -221,20 +224,14 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getImageFolders()
 		imageFolders.push_back( L"/Network/Library/Pictures/" + common );
 		imageFolders.push_back( L"/System/Library/Pictures/" + common );
 		imageFolders.push_back( L"/System Folder/Pictures/" + common );
-		imageFolders.push_back( L"/Library/Pictures/" );
-		imageFolders.push_back( L"/Network/Library/Pictures/" );
-		imageFolders.push_back( L"/System/Library/Pictures/" );
-		imageFolders.push_back( L"/System Folder/Pictures/" );
 		try {
 			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Pictures/" + common );
-			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Pictures/" );
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
 	#else
 		try {
 			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Pictures/" + common );
-			imageFolders.push_back( getEnvironmentVariable( L"HOME" ) + L"/Pictures/" );
 		} catch( std::exception &error ) {
 			//Environment variable not found, so ignore it. Do nothing.
 		}
@@ -417,6 +414,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 			}
 			configFolders.push_back( folderString + L"/" + packageName );
 			configFolders.push_back( folderString );
+			configFolders.push_back( L"/usr/local/share/" + packageName );
 			
 		}
 		
@@ -486,6 +484,7 @@ std::vector< boost::filesystem::path > SystemSpecificsManager::getConfigFolders(
 			}
 			configFolders.push_back( folderString + L"/" + packageName );
 			configFolders.push_back( folderString );
+			configFolders.push_back( L"/usr/local/share/" + packageName );
 			
 		}
 		

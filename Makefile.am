@@ -35,6 +35,10 @@ install-data-local:
 	mkdir --parents --mode=655 @datadir@/Cybrinth
 	cp --recursive ./Music @datadir@/Cybrinth/Music
 	cp --recursive ./Images @datadir@/Cybrinth/Images
+	cp --recursive ./Fonts @datadir@/Cybrinth/Fonts
+	cp ./protips.txt @datadir@/Cybrinth/protips.txt
+	cp ./exitConfirmations.txt @datadir@/Cybrinth/exitConfirmations.txt
+	cp ./credits.txt @datadir@/Cybrinth/credits.txt
 	chmod --recursive 555 @datadir@/Cybrinth/
 
 .PHONY: compiled-images remove-compiled-images

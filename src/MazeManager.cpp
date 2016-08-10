@@ -198,50 +198,7 @@ irr::core::stringw MazeManager::getFileTypeName() const {
 	return fileTypeName;
 }
 
-bool MazeManager::loadFromFile() {
-	try {
-		return loadFromFile( L"default.maz" );
-	} catch( std::exception &e ) {
-		std::wcerr << L"Error in MazeManager::loadFromFile(): " << e.what() << std::endl;
-		return false;
-	}
-}
 
-bool MazeManager::loadFromFile( boost::filesystem::path src ) {
-	try {
-		//cppcheck-suppress duplicateIf
-		if( mainGame == 0 or mainGame == NULL or mainGame == nullptr ) {
-			throw( CustomException( L"setMainGame() has not been called yet." ) );
-		}
-		if( mainGame->getDebugStatus() ) {
-			std::wcout << L"Trying to load from file " << src.wstring() << std::endl;
-		}
-		
-		if( not exists( src ) ) {
-			throw( CustomException( std::wstring( L"File not found: " ) + src.wstring() ) );
-		} else if( is_directory( src ) ) {
-			throw( CustomException( std::wstring( L"Directory specified, file needed: " ) + src.wstring() ) );
-		}
-		
-		boost::filesystem::wifstream file; //Identical to a standard C++ fstream, except it takes Boost paths
-		file.open( src, boost::filesystem::wifstream::binary );
-
-		if( file.is_open() ) {
-			decltype( mainGame->getRandomSeed() ) newRandomSeed;
-			file >> newRandomSeed;
-			file.close();
-			mainGame->newMaze( newRandomSeed );
-			return true;
-		} else {
-			throw( CustomException( std::wstring( L"Cannot open file: \"" ) + src.wstring() + L"\"" ) );
-		}
-	} catch( const boost::filesystem::filesystem_error &e ) {
-		std::wcerr << L"Boost Filesystem error in MazeManager::loadFromFile(): " << e.what() << std::endl;
-	} catch( std::exception &e ) {
-		std::wcerr << L"non-Boost-Filesystem error in MazeManager::loadFromFile(): " << e.what() << std::endl;
-	}
-	return false;
-}
 
 //Figures out which cells should be visible from the given position
 void MazeManager::makeCellsVisible( uint_fast8_t x, uint_fast8_t y ) {

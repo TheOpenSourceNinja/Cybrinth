@@ -24,7 +24,7 @@
 #include <boost/filesystem.hpp>
 #include "StringConverter.h"
 
-
+#include "SystemSpecificsManager.h"
 
 Object::Object() {
 	try {
@@ -152,46 +152,47 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 			texture = nullptr;
 		}
 		
-		{
-			boost::filesystem::path path( boost::filesystem::current_path()/L"Images" ); //TODO: Load textures from standard data directories.
+		texture = driver->getTexture( fileName );
+		
+		if( texture == NULL or texture == nullptr ) {
+			std::vector< boost::filesystem::path > loadableTextures;
 			
-			//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
-			path = system_complete( path );
-			//path = absolute( path );
-			
-			while( ( not exists( path ) or not is_directory( path ) ) and path.has_parent_path() ) {
-				path = path.parent_path();
-			}
-			
-			if( exists( path ) ) {
-				boost::filesystem::recursive_directory_iterator end;
-				bool fileFound = false;
+			SystemSpecificsManager system;
+			auto textureSearchLocations = system.getImageFolders();
+			bool fileFound = false;
+			for( auto locationIterator = textureSearchLocations.begin(); locationIterator != textureSearchLocations.end() and not fileFound; ++locationIterator ) {
+				boost::filesystem::path path = *locationIterator / L"items";
 				
-				for( boost::filesystem::recursive_directory_iterator i( path ); i not_eq end and not fileFound; ++i ) {
-					if( not is_directory( i->path() ) ) { //We've found a file
-						irr::io::IFileSystem* fileSystem = device->getFileSystem();
-						StringConverter stringConverter;
-						irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
-						if( fileSystem->getFileBasename( filePath, false ) == fileName ) {
-							//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
-							for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount() and not fileFound; ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
-								irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
-							
-								if( loader->isALoadableFileExtension( filePath ) ) {
-									irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
-									if( loader->isALoadableFileFormat( file ) ) {
-										fileName = filePath;
-										fileFound = true;
+				if( exists( path ) ) {
+					boost::filesystem::recursive_directory_iterator end;
+					
+					for( boost::filesystem::recursive_directory_iterator i( path ); i not_eq end and not fileFound; ++i ) {
+						if( not is_directory( i->path() ) ) { //We've found a file
+							irr::io::IFileSystem* fileSystem = device->getFileSystem();
+							StringConverter stringConverter;
+							irr::io::path filePath = stringConverter.toIrrlichtStringW( i->path().wstring() );
+							if( fileSystem->getFileBasename( filePath, false ) == fileName ) {
+								//Asks Irrlicht if the file is loadable. This way the game is certain to accept any file formats the library can use.
+								for( decltype( driver->getImageLoaderCount() ) loaderNum = 0; loaderNum < driver->getImageLoaderCount() and not fileFound; ++loaderNum ) { //Irrlicht uses a different image loader for each file type. Loop through them all, ask each if it can load the file.
+									irr::video::IImageLoader* loader = driver->getImageLoader( loaderNum );
+								
+									if( loader->isALoadableFileExtension( filePath ) ) {
+										irr::io::IReadFile* file = fileSystem->createAndOpenFile( filePath );
+										if( loader->isALoadableFileFormat( file ) ) {
+											fileName = filePath;
+											fileFound = true;
+											file->drop();
+											break;
+										}
 										file->drop();
-										break;
 									}
-									file->drop();
 								}
 							}
 						}
 					}
 				}
 			}
+			
 		}
 		
 		texture = driver->getTexture( fileName );
@@ -217,6 +218,7 @@ void Object::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, irr::
 			texture = resizer.imageToTexture( driver, image, textureName );
 		}
 	} catch ( std::exception &e ) {
+		std::wcerr << L"fileName: \"" << fileName.c_str() << L"\"" << std::endl;
 		std::wcerr << L"Error in Object::loadTexture(): " << e.what() << std::endl;
 	}
 }

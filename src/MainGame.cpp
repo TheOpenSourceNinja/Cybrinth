@@ -1519,15 +1519,6 @@ Collectable* MainGame::getKey( uint_fast8_t key ) {
 std::vector< boost::filesystem::path > MainGame::getLoadableTexturesList( boost::filesystem::path searchLocation ) {
 	//Which is better: system_complete() or absolute()? On my computer they seem to do the same thing. Both are part of Boost Filesystem.
 	searchLocation = system_complete( searchLocation );
-	//logoPath = absolute( logoPath );
-	
-	while( ( not exists( searchLocation ) or not is_directory( searchLocation ) ) and searchLocation.has_parent_path() ) {
-		if( settingsManager.debug ) {
-			std::wcout << L"Path " << searchLocation.wstring() << L" does not exist or is not a directory. Checking parent path " << searchLocation.parent_path().wstring() << std::endl;
-		}
-		
-		searchLocation = searchLocation.parent_path();
-	}
 	
 	std::vector< boost::filesystem::path > textureList;
 	
@@ -1968,12 +1959,13 @@ void MainGame::loadFonts() {
 			}
 		}
 
-
+		
 		
 		{ //Load statsFont
 			irr::core::dimension2d< uint_fast32_t > fontDimensions;
 			
 			if( fontFile not_eq "" ) {
+				
 				auto aboveStats = loadingFont->getDimension( loading.c_str() ).Height * 2 + std::max( tipFont->getDimension( proTipPrefix.c_str() ).Height, tipFont->getDimension( proTips.at( currentProTip ).c_str() ).Height );
 				
 				uint_fast32_t size = screenSize.Width / settingsManager.getNumPlayers() / 3; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
@@ -2026,7 +2018,8 @@ void MainGame::loadFonts() {
 					} while( size > builtInFontHeight and not isNull( statsFont ) and ( fontDimensions.Width >= screenSize.Width  or fontDimensions.Height + aboveStats >= screenSize.Height ) );
 				}
 			}
-
+			
+			
 			if( fontFile == "" or isNull( statsFont ) or statsFont->getDimension( heightTestString.c_str() ).Height <= gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height ) {
 				statsFont = gui->getBuiltInFont();
 			}
@@ -2339,6 +2332,48 @@ void MainGame::loadProTips() {
 	}
 }
 
+
+/**
+ * @brief Loads the random seed (used to generate mazes) from a file
+ * @param src: the file to load
+ * @return whether the file was read successfully
+ */
+bool MainGame::loadSeedFromFile( boost::filesystem::path src ) {
+	try {
+		if( not src.empty() ) {
+			if( getDebugStatus() ) {
+				std::wcout << L"Trying to load from file " << src.wstring() << std::endl;
+			}
+			
+			if( not exists( src ) ) {
+				throw( CustomException( std::wstring( L"File not found: " ) + src.wstring() ) );
+			} else if( is_directory( src ) ) {
+				throw( CustomException( std::wstring( L"Directory specified, file needed: " ) + src.wstring() ) );
+			}
+			
+			boost::filesystem::wifstream file; //Identical to a standard C++ fstream, except it takes Boost paths
+			file.open( src, boost::filesystem::wifstream::binary );
+
+			if( file.is_open() ) {
+				decltype( randomSeed ) newRandomSeed;
+				file >> newRandomSeed;
+				file.close();
+				setRandomSeed( newRandomSeed );
+				return true;
+			} else {
+				throw( CustomException( std::wstring( L"Cannot open file: \"" ) + src.wstring() + L"\"" ) );
+			}
+		}
+	} catch( const boost::filesystem::filesystem_error &e ) {
+		std::wcerr << L"Boost Filesystem error in MainGame::loadSeedFromFile(): " << e.what() << std::endl;
+	} catch( CustomException &e ) {
+		std::wcerr << L"non-Boost-Filesystem error in MainGame::loadSeedFromFile(): " << e.what() << std::endl;
+	} catch( std::exception &e ) {
+		std::wcerr << L"non-Boost-Filesystem error in MainGame::loadSeedFromFile(): " << e.what() << std::endl;
+	}
+	return false;
+}
+
 /**
  * Loads the tip font. Guesses a size that will work, keeps adjusting the size and reloading the font until everything fits.
  */
@@ -2447,7 +2482,7 @@ MainGame::~MainGame() {
  * This object's constructor. Does lots of very important stuff.
  * Since this constructor is so big, maybe some parts should be split off into separate functions for readability.
  */
-MainGame::MainGame() {
+MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false ) {
 	try {
 		#ifdef DEBUG //Not the last place debug is set to true or false; look at readPrefs()
 			debug = true;
@@ -2505,7 +2540,13 @@ MainGame::MainGame() {
 		
 		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system);
 		
-		setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows makeMusicList() (called by SettingsManager when it reads prefs), loadProTips(), and pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generated.
+		//Initializing the random number generator here allows makeMusicList() (called by SettingsManager when it reads prefs), loadProTips(), and pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generated.
+		if( not loadSeedFromFile( fileToLoad ) ) {
+			setRandomSeed( time( nullptr ) );
+			firstMaze = false;
+		} else {
+			firstMaze = true;
+		}
 		
 		settingsManager.readPrefs();
 		network.setPort( settingsManager.networkPort );
@@ -2544,26 +2585,64 @@ MainGame::MainGame() {
 		bool sbuffershadows = false; //Would not be visible anyway since this game is 2D
 		IEventReceiver* receiver = this;
 		
-		device = createDevice( settingsManager.driverType, screenSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver ); //Most of these parameters were read from the preferences file
-		
-		if( isNull( device ) ) {
-			std::wcerr << L"Error: Cannot create device. Trying other driver types." << std::endl;
+		//device = createDevice( settingsManager.driverType, screenSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver ); //Most of these parameters were read from the preferences file
+		{
+			irr::SIrrlichtCreationParameters params;
+			params.DriverType = settingsManager.driverType;
+			params.WindowSize = screenSize;
+			params.Bits = settingsManager.getBitsPerPixel();
+			params.Fullscreen = settingsManager.fullscreen;
+			params.Stencilbuffer = sbuffershadows;
+			params.Vsync = settingsManager.vsync;
+			params.EventReceiver = receiver;
 			
-			//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
-			for( auto i = ( uint_fast8_t ) irr::video::EDT_COUNT; isNull( device ) and i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
-				if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
-					settingsManager.driverType = ( irr::video::E_DRIVER_TYPE ) i;
-					device = createDevice( settingsManager.driverType, screenSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver );
+			if( runAsScreenSaver ) {
+				try {
+					auto idString = system.getEnvironmentVariable( L"XSCREENSAVER_WINDOW" );
+					std::wcout << L"idString: \"" << idString << L"\"" << std::endl;
+					void * idPointer = nullptr;
+					int idInt = swscanf( idString.c_str(), L"%p", &idPointer );
+					std::wcout << L"idInt: " << idInt << L" idPointer: " << idPointer << std::endl;
+					params.WindowId = idPointer;
+				} catch( std::exception &e ) {
+					std::cout << e.what() << std::endl;
+					exit( EXIT_FAILURE );
 				}
 			}
 			
+			device = createDeviceEx( params );
+			
 			if( isNull( device ) ) {
-				std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
-				device = createDevice( irr::video::EDT_NULL, screenSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver );
-				settingsManager.debug = true;
+				std::wcerr << L"Error: Cannot create device. Trying other driver types." << std::endl;
+				
+				//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
+				for( auto i = ( uint_fast8_t ) irr::video::EDT_COUNT; isNull( device ) and i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
+					if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
+						settingsManager.driverType = ( irr::video::E_DRIVER_TYPE ) i;
+						params.DriverType = settingsManager.driverType;
+						device = createDeviceEx( params );
+					}
+				}
+				
+				if( isNull( device ) ) {
+					std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
+					settingsManager.debug = true;
+					params.DriverType = irr::video::EDT_NULL;
+					device = createDeviceEx( params );
+					
+					if( isNull( device ) ) {
+						throw( CustomException( L"Unable to create the device using any driver types" ) );
+					}
+				}
+				
+			} else if ( settingsManager.debug ) {
+				std::wcout << L"Got the new device" << std::endl;
 			}
-		} else if ( settingsManager.debug ) {
-			std::wcout << L"Got the new device" << std::endl;
+		}
+		
+		if( runAsScreenSaver ) {
+			//The screen saver preview window might be really tiny
+			screenSize = device->getVideoDriver()->getScreenSize();
 		}
 		
 		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system);
@@ -2645,17 +2724,40 @@ MainGame::MainGame() {
 		playerStart.resize( settingsManager.getNumPlayers() );
 		playerAssigned.resize( settingsManager.getNumPlayers() );
 		
+		
 		{
-			auto textureSearchLocation = boost::filesystem::path( boost::filesystem::current_path()/L"Images/players" );
+			//auto textureSearchLocation = boost::filesystem::path( boost::filesystem::current_path()/L"Images/players" );
 			
-			std::vector< boost::filesystem::path > loadableTextures = getLoadableTexturesList( textureSearchLocation );
+			//std::vector< boost::filesystem::path > loadableTextures = getLoadableTexturesList( textureSearchLocation );
+			
+			std::vector< boost::filesystem::path > loadableTextures;
+			auto textureSearchLocations = system.getImageFolders();
+			for( auto locationIterator = textureSearchLocations.begin(); locationIterator != textureSearchLocations.end(); ++locationIterator ) {
+				auto textureList = getLoadableTexturesList( *locationIterator / L"players" );
+				for( auto textureIterator = textureList.begin(); textureIterator != textureList.end(); ++textureIterator ) {
+					loadableTextures.push_back( *textureIterator );
+				}
+			}
+			
 			
 			for( decltype( settingsManager.getNumPlayers() ) p = 0; p < settingsManager.getNumPlayers(); ++p ) {
+				
+				std::wcout << L"settingsManager.getNumPlayers(): " << (int) settingsManager.getNumPlayers() << std::endl;
+				std::wcout << L"p: " << (int) p << std::endl;
+				
 				player.at( p ).setPlayerNumber( p );
+				std::wcout << L"test1" << std::endl;
 				setObjectColorBasedOnNum( &( player.at( p ) ), p );
+				std::wcout << L"test2" << std::endl;
 				player.at( p ).setMG( this );
+				std::wcout << L"test3" << std::endl;
+				std::wcout << L"loadableTextures size: " << loadableTextures.size() << std::endl;
+				
 				player.at( p ).loadTexture( device, 100, loadableTextures );
+				std::wcout << L"test4" << std::endl;
 				playerAssigned.at( p ) = false;
+				
+				std::wcout << L"test5" << std::endl;
 				
 				switch( settingsManager.colorMode ) {
 					case SettingsManager::GRAYSCALE: {
@@ -2678,6 +2780,8 @@ MainGame::MainGame() {
 				}
 			}
 		}
+		
+		
 		
 		if( settingsManager.isServer ) {
 			setMyPlayer( 0 );
@@ -3053,7 +3157,11 @@ void MainGame::newMaze() {
 			std::wcout << L"newMaze() called with no arguments" << std::endl;
 		}
 		
-		newMaze( getRandomNumber() );
+		if( firstMaze ) {
+			newMaze( randomSeed );
+		} else {
+			newMaze( getRandomNumber() );
+		}
 		
 		if( settingsManager.debug ) {
 			std::wcout << L"end of newMaze() with no arguments" << std::endl;
@@ -3069,10 +3177,12 @@ void MainGame::newMaze() {
  * --- boost::filesystem::path src: the file from which to load the maze.
  */
 void MainGame::newMaze( boost::filesystem::path src ) {
-	if( not mazeManager.loadFromFile( src ) ) {
+	if( not loadSeedFromFile( src ) ) {
 		//If we get this far, it's an error. Probably a file not found. Fail gracefully by starting a new maze anyway.
 		gui->addMessageBox( L"Could not use file", L"Unable to load maze from file. Generating a new maze." );
 		newMaze( getRandomNumber() );
+	} else {
+		newMaze( randomSeed );
 	}
 }
 
@@ -3446,7 +3556,15 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 		
 		boost::filesystem::path logoPath( boost::filesystem::current_path()/L"Images/logos" );
 		
-		auto logoList = getLoadableTexturesList( logoPath);
+		std::vector< boost::filesystem::path > logoList = getLoadableTexturesList( logoPath );
+		
+		auto folders = system.getImageFolders();
+		for( auto iter = folders.begin(); logoList.empty() and iter != folders.end(); ++iter ) {
+			auto tempLogoList = getLoadableTexturesList( *iter / L"logos" );
+			for( auto innerIter = tempLogoList.begin(); innerIter != tempLogoList.end(); ++innerIter ) {
+				logoList.push_back( *innerIter );
+			}
+		}
 		
 		if( logoList.size() > 0 ) {
 			std::vector< boost::filesystem::path >::iterator newEnd = std::unique( logoList.begin(), logoList.end() ); //unique "removes all but the first element from every consecutive group of equivalent elements in the range [first,last)." (source: http://www.cplusplus.com/reference/algorithm/unique/ )
@@ -3739,26 +3857,14 @@ void MainGame::resetThings() {
  * The game's main loop. Should only be called by main() in main.cpp
  * Returns: EXIT_SUCCESS if the game exits normally, EXIT_FAILURE if an exception is caught.
  */
-uint_fast8_t MainGame::run( std::wstring fileToLoad ) {
+uint_fast8_t MainGame::run() {
 	try {
 		if( settingsManager.debug ) {
 			std::wcout << L"run() called" << std::endl;
 		}
 		
-		bool firstFileLoaded; //Indicates whether fileToLoad was loaded at the start of the program. If a file to load is specified on the command line, this will only be false until that file gets loaded and then will remain true for the rest of the program's run. If no file is specified, this will always be true.
-		if( not fileToLoad.empty() ) {
-			firstFileLoaded = false;
-		} else {
-			firstFileLoaded = true; //No file specified, so no need to try to load it.
-		}
-		
 		while( device->run() and not donePlaying ) {
-			if( firstFileLoaded ) {
-				newMaze();
-			} else {
-				newMaze( fileToLoad );
-				firstFileLoaded = true;
-			}
+			newMaze();
 			
 			haveShownLogo = true; //This should only ever be false at the start of the program.
 			
@@ -3950,9 +4056,9 @@ void MainGame::setControls() {
 		for( auto it = configFolders.begin(); it not_eq configFolders.end(); ++it ) {
 			boost::filesystem::path controlsPath( *it/L"controls.cfg" );
 			if( exists( controlsPath ) and not is_directory( controlsPath ) ) {
-				if( settingsManager.debug ) {
+				//if( settingsManager.debug ) {
 					std::wcout << L"Loading controls from file " << controlsPath.wstring() << std::endl;
-				}
+				//}
 				boost::filesystem::wifstream controlsFile;
 				controlsFile.open( controlsPath );
 				
@@ -4333,6 +4439,8 @@ void MainGame::setControls() {
 		if( not controlsFileFound ) {
 			throw( CustomException( std::wstring( L"controls.cfg does not exist or is not readable in any of the folders that were searched." ) ) );
 		}
+	} catch( CustomException &e ) {
+		std::wcerr << L"Error in MainGame::setControls(): " << e.what() << std::endl;
 	} catch( std::exception &e ) {
 		std::wcerr << L"Error in MainGame::setControls(): " << e.what() << std::endl;
 	}
@@ -5102,13 +5210,13 @@ void MainGame::setupBackground() {
 							std::wcout << L"background path is absolute? " << backgroundPath.is_absolute() << std::endl;
 						}
 
-						while( ( not exists( backgroundPath ) or not is_directory( backgroundPath ) ) and backgroundPath.has_parent_path() and not useBackgroundsSubfolder ) {
+						/*while( ( not exists( backgroundPath ) or not is_directory( backgroundPath ) ) and backgroundPath.has_parent_path() and not useBackgroundsSubfolder ) {
 							if( settingsManager.debug ) {
 								std::wcout << L"Path " << backgroundPath.wstring() << L" does not exist or is not a directory. Checking parent path " << backgroundPath.parent_path().wstring() << std::endl;
 							}
 
 							backgroundPath = backgroundPath.parent_path();
-						}
+						}*/
 
 						if( backgroundList.empty() and exists( backgroundPath ) ) {
 							boost::filesystem::recursive_directory_iterator end;
