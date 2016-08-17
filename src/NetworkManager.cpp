@@ -382,7 +382,7 @@ void NetworkManager::sendPlayerPos( uint_fast8_t playerNum ) {
 	}
 	
 	if( mg->getDebugStatus() ) {
-		std::wcout << L"Sent message number " << messageNumber << std::endl;
+		//std::wcout << L"Sent message number " << messageNumber << std::endl;
 	}
 }
 
@@ -407,7 +407,7 @@ void NetworkManager::sendPlayerPosXMove( uint_fast8_t playerNum, int_fast8_t dir
 	}
 	
 	if( mg->getDebugStatus() ) {
-		std::wcout << L"Sent message number " << messageNumber << std::endl;
+		//std::wcout << L"Sent message number " << messageNumber << std::endl;
 	}
 }
 
@@ -432,7 +432,7 @@ void NetworkManager::sendPlayerPosYMove( uint_fast8_t playerNum, int_fast8_t dir
 	}
 	
 	if( mg->getDebugStatus() ) {
-		std::wcout << L"Sent message number " << messageNumber << std::endl;
+		//std::wcout << L"Sent message number " << messageNumber << std::endl;
 	}
 }
 
@@ -657,6 +657,6 @@ void NetworkManager::tellNewClientItsPlayer( uint_fast8_t playerNum ) {
 	}
 	
 	if( mg->getDebugStatus() ) {
-		std::wcout << L"Sent message number " << messageNumber << std::endl;
+		//std::wcout << L"Sent message number " << messageNumber << std::endl;
 	}
 }

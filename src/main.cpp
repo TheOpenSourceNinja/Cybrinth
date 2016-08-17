@@ -34,12 +34,16 @@ int main( int argc, char *argv[] ) {
 		
 		bool runAsScreenSaver = false;
 		
+		std::wcout << L"Number of arguments: " << argc << std::endl;
+		
 		if( argc > 1 ) {
 			StringConverter sc;
 			
 			for( decltype( argc ) argNum = 1; argNum < argc; ++argNum ) {
 				
 				auto argument = sc.toStdString( argv[ argNum ] );
+				
+				std::wcout << sc.toStdWString( argument ) << std::endl;
 				
 				if( argc > argNum + 1 and argument.compare( "-window-id" ) == 0 ) {
 					//The XScreenSaver daemon passes a window ID as both a command-line argument and as an environment variable.

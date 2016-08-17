@@ -155,6 +155,7 @@ class MainGame : public irr::IEventReceiver {
 		
 		bool haveShownLogo;
 		
+		bool isScreenSaver;
 		bool isNull( void* ptr );
 		
 		void loadClockFont();
