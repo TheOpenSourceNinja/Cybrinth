@@ -1527,8 +1527,7 @@ distclean-local: remove-compiled-images
 
 compiled-images:
 	if [ "$(IMAGES_RESULT)" -eq "1" ];\
-	then Xvfb;\
-	cat gimp-save-as-xpm.py | ${XVFB_RUN_CMD} gimp --no-splash --no-interface --no-data --console-messages --batch-interpreter=python-fu-eval --batch -;\
+	then cat gimp-save-as-xpm.py | ${XVFB_RUN_CMD} gimp --no-splash --no-interface --no-data --console-messages --batch-interpreter=python-fu-eval --batch -;\
 	fi
 
 remove-compiled-images:
