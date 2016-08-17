@@ -3,7 +3,7 @@
 
 import os
 
-imageDir = "src/images"
+imageDir = "Images"
 compiledImageDir = "compiled-images"
 
 def convertImage( filePath ):
