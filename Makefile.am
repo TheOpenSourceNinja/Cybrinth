@@ -33,6 +33,7 @@ remove-compiled-images:
 	rm -rf compiled-images
 
 install-data-local:
+	cat gimp-save-as-png.py | ${XVFB_RUN_CMD} gimp --no-splash --no-interface --no-data --console-messages --batch-interpreter=python-fu-eval --batch -;\
 	mkdir --parents --mode=655 @datadir@/Cybrinth
 	cp --recursive ./Music @datadir@/Cybrinth/Music
 	cp --recursive ./Images @datadir@/Cybrinth/Images

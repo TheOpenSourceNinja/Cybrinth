@@ -86,6 +86,7 @@
     <File Name="configure.ac"/>
     <File Name="Makefile.am"/>
     <File Name="exitConfirmations.txt"/>
+    <File Name="gimp-save-as-xpm.py"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

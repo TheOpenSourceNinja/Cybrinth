@@ -1875,7 +1875,11 @@ void MainGame::loadFonts() {
 		
 		//These were split off into separate functions because they are needed more often than loadFonts()
 		loadTipFont();
-		loadMusicFont();
+		
+		if( settingsManager.getPlayMusic() ) {
+			loadMusicFont();
+		}
+		
 		loadClockFont();
 
 		{ //Load loadingFont
@@ -2029,13 +2033,16 @@ void MainGame::loadFonts() {
 			}
 		}
 		
-		menuManager.setFontAndResizeIcons( device, clockFont ); //Why use clockFont? Because I'm too lazy to implement loading another font.
-		settingsScreen.setButtonFont( clockFont );
-		settingsScreen.setTextFont( textFont );
-		settingsScreen.setupIconsAndStuff();
-		
-		uint_fast32_t size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect readability on large or small screens, but it's better on large screens than the built-in font.
-		gui->getSkin()->setFont( fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts ) );
+		if( not isScreenSaver ) {
+			menuManager.setFontAndResizeIcons( device, clockFont ); //Why use clockFont? Because I'm too lazy to implement loading another font.
+			
+			settingsScreen.setButtonFont( clockFont );
+			settingsScreen.setTextFont( textFont );
+			settingsScreen.setupIconsAndStuff();
+			
+			uint_fast32_t size = 12; //The GUI adjusts window sizes based on the text within them, so no need (hopefully) to use different font sizes for different window sizes. May affect readability on large or small screens, but it's better on large screens than the built-in font.
+			gui->getSkin()->setFont( fontManager.GetTtFont( driver, fontFile, size, antiAliasFonts ) );
+		}
 		
 		if( settingsManager.debug ) {
 			std::wcout << L"end of loadFonts()" << std::endl;
@@ -2485,7 +2492,7 @@ MainGame::~MainGame() {
 MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false ) {
 	try {
 		#ifdef DEBUG //Not the last place debug is set to true or false; look at readPrefs()
-			debug = true;
+			settingsManager.debug = true;
 		#else
 			settingsManager.debug = false;
 		#endif
@@ -2531,6 +2538,8 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 		backgroundColor = BLACK; //Every background should set this in setupBackground(); putting it here just in case.
 		backgroundFilePath = L"";
 		music = nullptr;
+		isScreenSaver = runAsScreenSaver;
+		enableController = false; //This gets set in setControls(), but only if that function gets called.
 		
 		device = irr::createDevice( irr::video::EDT_NULL ); //Must create a device before calling readPrefs();
 		
@@ -2549,14 +2558,19 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 		}
 		
 		settingsManager.readPrefs();
-		network.setPort( settingsManager.networkPort );
+		
+		setMyPlayer( UINT8_MAX ); //Must call this before setControls() so that controls which affect player number "mine" will work. setMyPlayer() will be called again later to set the correct player number; the number used here doesn't matter.
+		
+		if( not isScreenSaver ) {
+			network.setPort( settingsManager.networkPort );
+			setControls();
+		} else {
+			settingsManager.setPlayMusic( false );
+		}
 		
 		if ( settingsManager.debug ) {
 			std::wcout << L"Read prefs, now setting controls" << std::endl;
 		}
-		
-		setMyPlayer( UINT8_MAX ); //Must call this before setControls() so that controls which affect player number "mine" will work. setMyPlayer() will be called again later to set the correct player number; the number used here doesn't matter.
-		setControls();
 		
 		if( settingsManager.fullscreen ) {
 			irr::video::IVideoModeList* vmList = device->getVideoModeList();
@@ -2576,38 +2590,38 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 			screenSize = settingsManager.getWindowSize();
 		}
 		
-		viewportSize.set( screenSize.Width - ( screenSize.Width / sideDisplaySizeDenominator ), screenSize.Height - 1 );
-		
 		device->closeDevice(); //Signals to the existing device that it needs to close itself on next run() so that we can create a new device
 		device->run(); //This is next run()
 		device->drop(); //Cleans up after the device
 		
-		bool sbuffershadows = false; //Would not be visible anyway since this game is 2D
-		IEventReceiver* receiver = this;
-		
-		//device = createDevice( settingsManager.driverType, screenSize, settingsManager.getBitsPerPixel(), settingsManager.fullscreen, sbuffershadows, settingsManager.vsync, receiver ); //Most of these parameters were read from the preferences file
 		{
 			irr::SIrrlichtCreationParameters params;
 			params.DriverType = settingsManager.driverType;
 			params.WindowSize = screenSize;
 			params.Bits = settingsManager.getBitsPerPixel();
 			params.Fullscreen = settingsManager.fullscreen;
-			params.Stencilbuffer = sbuffershadows;
+			params.Stencilbuffer = false;
 			params.Vsync = settingsManager.vsync;
-			params.EventReceiver = receiver;
+			params.EventReceiver = this;
 			
 			if( runAsScreenSaver ) {
+				//std::wcerr << L"Running as screensaver" << std::endl;
 				try {
 					auto idString = system.getEnvironmentVariable( L"XSCREENSAVER_WINDOW" );
-					std::wcout << L"idString: \"" << idString << L"\"" << std::endl;
+					//std::wcout << L"idString: \"" << idString << L"\"" << std::endl;
 					void * idPointer = nullptr;
 					int idInt = swscanf( idString.c_str(), L"%p", &idPointer );
-					std::wcout << L"idInt: " << idInt << L" idPointer: " << idPointer << std::endl;
-					params.WindowId = idPointer;
+					//std::wcout << L"idInt: " << idInt << L" idPointer: " << idPointer << std::endl;
+					
+					if( idInt >= 1 ) {
+						params.WindowId = idPointer;
+					}
 				} catch( std::exception &e ) {
 					std::cout << e.what() << std::endl;
 					exit( EXIT_FAILURE );
 				}
+			} else {
+				//std::wcerr << L"Not running as screensaver" << std::endl;
 			}
 			
 			device = createDeviceEx( params );
@@ -2643,7 +2657,10 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 		if( runAsScreenSaver ) {
 			//The screen saver preview window might be really tiny
 			screenSize = device->getVideoDriver()->getScreenSize();
+			settingsManager.setWindowSize( screenSize );
 		}
+		
+		viewportSize.set( screenSize.Width - ( screenSize.Width / sideDisplaySizeDenominator ), screenSize.Height - 1 );
 		
 		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system);
 		
@@ -2706,15 +2723,19 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 			setupMusicStuff();
 		}*/
 		
-		settingsScreen.setPointers( this, device, nullptr, nullptr, &settingsManager );
-		settingsScreen.setupIconsAndStuff(); //Icon size might depend on screen/window size; that's why we call this after readPrefs()
+		if( not isScreenSaver ) {
+			settingsScreen.setPointers( this, device, nullptr, nullptr, &settingsManager );
+			settingsScreen.setupIconsAndStuff(); //Icon size might depend on screen/window size; that's why we call this after readPrefs()
+		}
 		
 		loadFonts();
 		//settingsScreen.setTextFont( textFont );
 		
-		menuManager.setMainGame( this );
-		menuManager.setPositions( screenSize.Height );
-		menuManager.loadIcons( device );
+		if( not isScreenSaver ) {
+			menuManager.setMainGame( this );
+			menuManager.setPositions( screenSize.Height );
+			menuManager.loadIcons( device );
+		}
 
 		if ( settingsManager.debug ) {
 			std::wcout << L"Resizing player and playerStart vectors to " << settingsManager.getNumPlayers() << std::endl;
@@ -2742,22 +2763,18 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 			
 			for( decltype( settingsManager.getNumPlayers() ) p = 0; p < settingsManager.getNumPlayers(); ++p ) {
 				
-				std::wcout << L"settingsManager.getNumPlayers(): " << (int) settingsManager.getNumPlayers() << std::endl;
-				std::wcout << L"p: " << (int) p << std::endl;
-				
 				player.at( p ).setPlayerNumber( p );
-				std::wcout << L"test1" << std::endl;
+				
 				setObjectColorBasedOnNum( &( player.at( p ) ), p );
-				std::wcout << L"test2" << std::endl;
+				
 				player.at( p ).setMG( this );
-				std::wcout << L"test3" << std::endl;
-				std::wcout << L"loadableTextures size: " << loadableTextures.size() << std::endl;
+				
 				
 				player.at( p ).loadTexture( device, 100, loadableTextures );
-				std::wcout << L"test4" << std::endl;
+				
 				playerAssigned.at( p ) = false;
 				
-				std::wcout << L"test5" << std::endl;
+				
 				
 				switch( settingsManager.colorMode ) {
 					case SettingsManager::GRAYSCALE: {
@@ -2861,8 +2878,10 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 			std::wcout << L"controller support is not enabled." << std::endl;
 		}
 		
-		//Set up networking
-		network.setup( this, settingsManager.isServer );
+		if( not isScreenSaver ) {
+			//Set up networking
+			network.setup( this, settingsManager.isServer );
+		}
 		
 		timer = device->getTimer();
 		
@@ -2999,7 +3018,7 @@ void MainGame::makeMusicList() {
 void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromServer ) {
 	try {
 		
-		if( not fromServer and( settingsManager.isServer or p == myPlayer ) ) {
+		if( not isScreenSaver and not fromServer and( settingsManager.isServer or p == myPlayer ) ) {
 			network.sendPlayerPosXMove( p, direction );
 		}
 		
@@ -3051,7 +3070,7 @@ void MainGame::movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromSe
 void MainGame::movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromServer ) {
 	try {
 		
-		if( not fromServer and ( settingsManager.isServer or p == myPlayer ) ) {
+		if( not isScreenSaver and not fromServer and ( settingsManager.isServer or p == myPlayer ) ) {
 			network.sendPlayerPosYMove( p, direction );
 		}
 		
@@ -3199,7 +3218,7 @@ void MainGame::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 		
 		allPlayersReady( false );
 		
-		if( settingsManager.isServer ) {
+		if( settingsManager.isServer and not isScreenSaver ) {
 			network.sendMaze( newRandomSeed );
 		}
 		
@@ -3222,7 +3241,9 @@ void MainGame::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 		
 		setLoadingPercentage( 100 );
 		
-		network.ImReadyToPlay();
+		if( not isScreenSaver ) {
+			network.ImReadyToPlay();
+		}
 		
 		if( settingsManager.debug ) {
 			std::wcout << L"end of newMaze() with an argument" << std::endl;
@@ -3894,7 +3915,7 @@ uint_fast8_t MainGame::run() {
 					loadNextSong();
 				}
 				
-				{
+				if( not isScreenSaver ) {
 					auto time = timer->getRealTime(); //getRealTime() works even if the timer is stopped, as it is when the game is paused.
 					if( time >= lastTimeControlsProcessed + controlProcessDelay or time < lastTimeControlsProcessed ) {
 						processControls();
@@ -3902,8 +3923,20 @@ uint_fast8_t MainGame::run() {
 					}
 				}
 				
+				if( settingsManager.debug ) {
+					if( currentScreen != LOADINGSCREEN ) {
+						std::wcout << L"currentScreen is not LOADINGSCREEN" << std::endl;
+					}
+					
+					if( device->isWindowActive() ) {
+						std::wcout << L"Window is ACTIVE" << std::endl;
+					} else {
+						std::wcout << L"Window is INACTIVE" << std::endl;
+					}
+					
+				}
 				
-				if( ( currentScreen != LOADINGSCREEN and device->isWindowActive() ) or settingsManager.debug ) {
+				if( ( currentScreen != LOADINGSCREEN and ( isScreenSaver or device->isWindowActive() ) ) or settingsManager.debug ) {
 					//It's the bots' turn to move now.
 					if( currentScreen == MAINSCREEN and settingsManager.getNumBots() > 0 ) {
 						for( decltype( settingsManager.getNumBots() ) i = 0; i < settingsManager.getNumBots(); ++i ) {
@@ -3981,25 +4014,25 @@ uint_fast8_t MainGame::run() {
 
 					won = ( winners.size() >= settingsManager.getNumPlayers() ); //If all the players are on the winners list, we've won.
 
-				} else if( not device->isWindowActive() ) { //if(( not showingLoadingScreen and device->isWindowActive() ) or debug )
+				} else if( not device->isWindowActive() and not isScreenSaver ) { //if(( not showingLoadingScreen and device->isWindowActive() ) or debug )
 					if( currentScreen != MENUSCREEN and currentScreen != SETTINGSSCREEN ) {
 						currentScreen = MENUSCREEN;
 					}
 					device->yield();
 				}
-
+				
 				if( currentScreen == MENUSCREEN and not timer->isStopped() ) {
 					timer->stop();
 				} else if( currentScreen not_eq MENUSCREEN and timer->isStopped() ) {
 					timer->start();
 				}
-
+				
 				//TODO: add networking stuff here
-				if( settingsManager.isServer or network.getConnectionStatus() ) {
+				if( ( settingsManager.isServer or network.getConnectionStatus() ) and not isScreenSaver ) {
 					network.processPackets();
 				}
 				
-				if( !settingsManager.isServer and !network.getConnectionStatus() ) {
+				if( !settingsManager.isServer and ( isScreenSaver or not network.getConnectionStatus() ) ) {
 					donePlaying = true;
 				}
 			}
