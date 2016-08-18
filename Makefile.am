@@ -54,7 +54,7 @@ remove-compiled-images:
 
 install-data-local:
 	cat gimp-save-as-png.py | ${XVFB_RUN_CMD} gimp --no-splash --no-interface --no-data --console-messages --batch-interpreter=python-fu-eval --batch -;\
-	mkdir --parents --mode=655 @datadir@/Cybrinth
+	mkdir --parents --mode=7777 @datadir@/Cybrinth
 	cp --recursive ./Music @datadir@/Cybrinth/Music
 	cp --recursive ./Images @datadir@/Cybrinth/Images
 	cp --recursive ./Fonts @datadir@/Cybrinth/Fonts
@@ -62,5 +62,8 @@ install-data-local:
 	cp ./exitConfirmations.txt @datadir@/Cybrinth/exitConfirmations.txt
 	cp ./credits.txt @datadir@/Cybrinth/credits.txt
 	chmod --recursive 555 @datadir@/Cybrinth/
+
+uninstall-local:
+	rm -rf @datadir@/Cybrinth/
 
 .PHONY: compiled-images remove-compiled-images
