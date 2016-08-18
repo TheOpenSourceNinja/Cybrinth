@@ -929,12 +929,12 @@ void XPMImageLoader::loadCollectableImage( irr::video::IVideoDriver* driver, irr
 	switch( type ) {
 		case Collectable::KEY: {
 			#include "compiled-images/items/key.xpm"
-			xpm = key_xpm;
+			xpm = key;
 			break;
 		}
 		case Collectable::ACID: {
 			#include "compiled-images/items/acid.xpm"
-			xpm = acid_xpm;
+			xpm = acid;
 			break;
 		}
 		default: {
@@ -951,62 +951,62 @@ void XPMImageLoader::loadMenuOptionImage( irr::video::IVideoDriver* driver, irr:
 	switch( type ) {
 		case MenuOption::NEW_MAZE: {
 			#include "compiled-images/menu icons/new_maze.xpm"
-			xpm = new_maze_xpm;
+			xpm = new_maze;
 			break;
 		}
 		case MenuOption::RESTART_MAZE: {
 			#include "compiled-images/menu icons/restart_maze.xpm"
-			xpm = restart_maze_xpm;
+			xpm = restart_maze;
 			break;
 		}
 		case MenuOption::LOAD_MAZE: {
 			#include "compiled-images/menu icons/load_maze.xpm"
-			xpm = load_maze_xpm;
+			xpm = load_maze;
 			break;
 		}
 		case MenuOption::SAVE_MAZE: {
 			#include "compiled-images/menu icons/save_maze.xpm"
-			xpm = save_maze_xpm;
+			xpm = save_maze;
 			break;
 		}
 		case MenuOption::SETTINGS: {
 			#include "compiled-images/menu icons/settings.xpm"
-			xpm = settings_xpm;
+			xpm = settings;
 			break;
 		}
 		case MenuOption::EXIT_GAME: {
 			#include "compiled-images/menu icons/exit_game.xpm"
-			xpm = exit_game_xpm;
+			xpm = exit_game;
 			break;
 		}
 		case MenuOption::BACK_TO_GAME: {
 			#include "compiled-images/menu icons/back_to_game.xpm"
-			xpm = back_to_game_xpm;
+			xpm = back_to_game;
 			break;
 		}
 		case MenuOption::FREEDOM: {
 			#include "compiled-images/menu icons/freedom.xpm"
-			xpm = freedom_xpm;
+			xpm = freedom;
 			break;
 		}
 		case MenuOption::CANCEL: {
 			#include "compiled-images/menu icons/cancel.xpm"
-			xpm = cancel_xpm;
+			xpm = cancel;
 			break;
 		}
 		case MenuOption::OK: {
 			#include "compiled-images/menu icons/ok.xpm"
-			xpm = ok_xpm;
+			xpm = ok;
 			break;
 		}
 		case MenuOption::UNDO_CHANGES: {
 			#include "compiled-images/menu icons/undo_changes.xpm"
-			xpm = undo_changes_xpm;
+			xpm = undo_changes;
 			break;
 		}
 		case MenuOption::RESET_TO_DEFAULTS: {
 			#include "compiled-images/menu icons/reset_to_defaults.xpm"
-			xpm = reset_to_defaults_xpm;
+			xpm = reset_to_defaults;
 			break;
 		}
 		default: {
@@ -1023,17 +1023,17 @@ void XPMImageLoader::loadOtherImage( irr::video::IVideoDriver* driver, irr::vide
 	switch( type ) {
 		case PLAYER: {
 			#include "compiled-images/players/poker_chip.xpm"
-			xpm = poker_chip_xpm;
+			xpm = poker_chip;
 			break;
 		}
 		case GOAL: {
 			#include "compiled-images/goal.xpm"
-			xpm = goal_xpm;
+			xpm = goal;
 			break;
 		}
 		case START: {
 			#include "compiled-images/start.xpm"
-			xpm = start_xpm;
+			xpm = start;
 			break;
 		}
 	}
