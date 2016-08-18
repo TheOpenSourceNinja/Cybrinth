@@ -25,7 +25,25 @@ distclean-local: remove-compiled-images
 
 compiled-images:
 	if [ "$(IMAGES_RESULT)" -eq "1" ];\
-	then cat gimp-save-as-xpm.py | ${XVFB_RUN_CMD} gimp --no-splash --no-interface --no-data --console-messages --batch-interpreter=python-fu-eval --batch -;\
+	then rm -rf ./compiled-images ;\
+	mkdir ./compiled-images ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/items/key.xcf ./compiled-images/items/key.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/items/acid.xcf ./compiled-images/items/acid.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/goal.xcf ./compiled-images/goal.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/start.xcf ./compiled-images/start.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/menu icons/new_maze.xcf ./compiled-images/menu icons/new_maze.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/menu icons/restart_maze.xcf ./compiled-images/menu icons/restart_maze.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/menu icons/load_maze.xcf ./compiled-images/menu icons/load_maze.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/menu icons/save_maze.xcf ./compiled-images/menu icons/save_maze.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/menu icons/settings.xcf ./compiled-images/menu icons/settings.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/menu icons/exit_game.xcf ./compiled-images/menu icons/exit_game.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/menu icons/back_to_game.xcf ./compiled-images/menu icons/back_to_game.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/menu icons/freedom.xcf ./compiled-images/menu icons/freedom.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/menu icons/cancel.xcf ./compiled-images/menu icons/cancel.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/menu icons/ok.xcf ./compiled-images/menu icons/ok.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/menu icons/undo_changes.xcf ./compiled-images/menu icons/undo_changes.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/menu icons/reset_to_defaults.xcf ./compiled-images/menu icons/reset_to_defaults.xpm ;\
+	convert -background 'rgba(0,0,0,0)' -flatten ./Images/players/poker_chip.xcf ./compiled-images/players/poker_chip.xpm ;\
 	fi
 
 remove-compiled-images:
