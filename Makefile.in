@@ -1556,14 +1556,14 @@ remove-compiled-images:
 
 install-data-local:
 	cat gimp-save-as-png.py | ${XVFB_RUN_CMD} gimp --no-splash --no-interface --no-data --console-messages --batch-interpreter=python-fu-eval --batch -;\
-	mkdir --parents --mode=7777 @datadir@/Cybrinth
-	cp --recursive ./Music @datadir@/Cybrinth/Music
-	cp --recursive ./Images @datadir@/Cybrinth/Images
-	cp --recursive ./Fonts @datadir@/Cybrinth/Fonts
-	cp ./protips.txt @datadir@/Cybrinth/protips.txt
-	cp ./exitConfirmations.txt @datadir@/Cybrinth/exitConfirmations.txt
-	cp ./credits.txt @datadir@/Cybrinth/credits.txt
-	chmod --recursive 555 @datadir@/Cybrinth/
+	mkdir --parents --mode=7777 $(DESTDIR)@datadir@/Cybrinth
+	cp --recursive ./Music $(DESTDIR)@datadir@/Cybrinth/Music
+	cp --recursive ./Images $(DESTDIR)@datadir@/Cybrinth/Images
+	cp --recursive ./Fonts $(DESTDIR)@datadir@/Cybrinth/Fonts
+	cp ./protips.txt $(DESTDIR)@datadir@/Cybrinth/protips.txt
+	cp ./exitConfirmations.txt $(DESTDIR)@datadir@/Cybrinth/exitConfirmations.txt
+	cp ./credits.txt $(DESTDIR)@datadir@/Cybrinth/credits.txt
+	chmod --recursive 555 $(DESTDIR)@datadir@/Cybrinth/
 
 uninstall-local:
 	rm -rf @datadir@/Cybrinth/
