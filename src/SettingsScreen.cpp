@@ -459,6 +459,8 @@ void SettingsScreen::changeToSettingsScreen() {
 				
 				auto timeFormatEditBoxRectangle = Rectangle( 1 + timeFormatTextRectangle.LowerRightCorner.X, timeFormatTextRectangle.UpperLeftCorner.Y, driver->getScreenSize().Width, timeFormatTextRectangle.LowerRightCorner.Y );
 				timeFormatEditBox = environment->addEditBox( settingsManager->timeFormat.c_str(), timeFormatEditBoxRectangle, true, miscTab, TIME_FORMAT_EDITBOX_ID );
+				timeFormatEditBox->setMultiLine( false );
+				timeFormatEditBox->setWordWrap( false );
 				
 				itemY = 1 + timeFormatEditBoxRectangle.LowerRightCorner.Y;
 				
@@ -469,6 +471,8 @@ void SettingsScreen::changeToSettingsScreen() {
 				
 				auto dateFormatEditBoxRectangle = Rectangle( 1 + dateFormatTextRectangle.LowerRightCorner.X, dateFormatTextRectangle.UpperLeftCorner.Y, driver->getScreenSize().Width, dateFormatTextRectangle.LowerRightCorner.Y );
 				dateFormatEditBox = environment->addEditBox( settingsManager->dateFormat.c_str(), dateFormatEditBoxRectangle, true, miscTab, DATE_FORMAT_EDITBOX_ID );
+				dateFormatEditBox->setMultiLine( false );
+				dateFormatEditBox->setWordWrap( false );
 			}
 		}
 	} catch( std::exception e ) {
@@ -508,16 +512,20 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 							case TIME_FORMAT_EDITBOX_ID: {
 								settingsChanged = true;
 								settingsManager->timeFormat = timeFormatEditBox->getText();
+								break;
 							}
 							case DATE_FORMAT_EDITBOX_ID: {
 								settingsChanged = true;
 								settingsManager->dateFormat = dateFormatEditBox->getText();
+								break;
 							}
 							default: {
 								CustomException e( L"Unhandled editbox ID" );
 								throw( e );
 							}
 						}
+						
+						break;
 					}
 					case irr::gui::EGET_SPINBOX_CHANGED: {
 						switch( id ) {
