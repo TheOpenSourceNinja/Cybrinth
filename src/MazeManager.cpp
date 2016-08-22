@@ -202,7 +202,7 @@ irr::core::stringw MazeManager::getFileTypeName() const {
 
 //Figures out which cells should be visible from the given position
 void MazeManager::makeCellsVisible( uint_fast8_t x, uint_fast8_t y ) {
-	if( hideUnseen ) { //No need to do anything if they're all visible anyway
+	if( settingsManager->getHideUnseen() ) { //No need to do anything if they're all visible anyway
 		for( auto yprime = y; yprime <= y; --yprime ) { //When yprime wraps around, we're done
 			maze[ x ][ yprime ].topVisible = true;
 			if( maze[ x ][ yprime ].getTop() not_eq MazeCell::NONE ) {
@@ -247,13 +247,6 @@ void MazeManager::makeRandomLevel() {
 		//Set whether the cells are visible. Those on the border are changed later.
 		for( decltype( cols ) x = 0; x < cols; ++x ) {
 			for( decltype( rows ) y = 0; y < rows; ++y ) {
-				maze[ x ][ y ].topVisible = not hideUnseen;
-				maze[ x ][ y ].leftVisible = not hideUnseen;
-			}
-		}
-		
-		for( decltype( cols ) x = 0; x < cols; ++x ) {
-			for( decltype( rows ) y = 0; y < rows; ++y ) {
 				maze[ x ][ y ].setOriginalTop( MazeCell::WALL );
 				maze[ x ][ y ].setOriginalLeft( MazeCell::WALL );
 				maze[ x ][ y ].setOriginalRight( MazeCell::NONE );
@@ -261,6 +254,7 @@ void MazeManager::makeRandomLevel() {
 				maze[ x ][ y ].visited = false;
 			}
 		}
+		setAllCellsVisibility();
 		
 		mainGame->setLoadingPercentage( mainGame->getLoadingPercentage() + 1 );
 		mainGame->drawAll();
@@ -291,13 +285,14 @@ void MazeManager::makeRandomLevel() {
 		mainGame->drawAll();
 		
 		//Add walls at maze borders
+		//Add walls at maze borders
 		for( decltype( cols ) x = 0; x < cols; ++x ) {
 			maze[ x ][ 0 ].setOriginalTop( MazeCell::ACIDPROOF );
 			maze[ x ][ 0 ].topVisible = true;
 			maze[ x ][ rows-1 ].setOriginalBottom( MazeCell::ACIDPROOF );
 			maze[ x ][ rows-1 ].bottomVisible = true;
 		}
-
+		
 		for( decltype( rows ) y = 0; y < rows; ++y ) {
 			maze[ 0 ][ y ].setOriginalLeft( MazeCell::ACIDPROOF );
 			maze[ 0 ][ y ].leftVisible = true;
@@ -562,7 +557,6 @@ MazeManager::MazeManager() {
 		fileTypeName.append( L" maze" );
 		fileTypeExtension = fileTypeName.subString( 0, 1 ) + L"maze"; //Irrlicht 1.8 or later can use fileTypeName.subString( 0, 1, true ) + L"maze";
 		fileTypeExtension.make_lower(); //This line is not necessary in Irrlicht 1.8+ because subString() works differently.
-		hideUnseen = false;
 	} catch ( std::exception &e ) {
 		std::wcerr << L"Error in MazeManager::MazeManager(): " << e.what() << std::endl;
 	}
@@ -728,6 +722,16 @@ bool MazeManager::saveToFile( boost::filesystem::path dest ) {
 	} catch( std::exception &e ) {
 		std::wcerr << L"non-Boost-Filesystem error in MazeManager::saveToFile(): " << e.what() << std::endl;
 		return false;
+	}
+}
+
+void MazeManager::setAllCellsVisibility() {
+	//Set whether the cells are visible. Those on the border are changed later.
+	for( decltype( cols ) x = 0; x < cols; ++x ) {
+		for( decltype( rows ) y = 0; y < rows; ++y ) {
+			maze[ x ][ y ].topVisible = not settingsManager->getHideUnseen();
+			maze[ x ][ y ].leftVisible = not settingsManager->getHideUnseen();
+		}
 	}
 }
 

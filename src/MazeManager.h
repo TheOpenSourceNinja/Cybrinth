@@ -62,6 +62,7 @@ class MazeManager {
 		
 		bool saveToFile( boost::filesystem::path dest );
 		
+		void setAllCellsVisibility();
 		void setPointers( MainGame* newMainGame, SettingsManager* newSettingsManager );
 		
 		uint_fast8_t cols;

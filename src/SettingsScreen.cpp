@@ -440,8 +440,17 @@ void SettingsScreen::changeToSettingsScreen() {
 				
 				irr::core::stringw debugCheckBoxText = L"Debug";
 				auto debugTextDimensions = font->getDimension( debugCheckBoxText.c_str() );
-				auto debugTextRectangle = Rectangle( 0, itemY, 0 + 30 + debugTextDimensions.Width, itemY + debugTextDimensions.Height );
-				debugCheckBox = environment->addCheckBox( settingsManager->debug, debugTextRectangle, miscTab, DEBUG_CHECKBOX_ID, debugCheckBoxText.c_str() );
+				auto debugCheckBoxRectangle = Rectangle( 0, itemY, 0 + 30 + debugTextDimensions.Width, itemY + debugTextDimensions.Height );
+				debugCheckBox = environment->addCheckBox( settingsManager->debug, debugCheckBoxRectangle, miscTab, DEBUG_CHECKBOX_ID, debugCheckBoxText.c_str() );
+				
+				itemY = 1 + debugCheckBoxRectangle.LowerRightCorner.Y;
+				
+				irr::core::stringw hideUnseenCheckBoxText = L"Hide unseen maze areas";
+				auto hideUnseenTextDimensions = font->getDimension( hideUnseenCheckBoxText.c_str() );
+				auto hideUnseenCheckBoxRectangle = Rectangle( 0, itemY, 0 + 30 + hideUnseenTextDimensions.Width, itemY + hideUnseenTextDimensions.Height );
+				hideUnseenCheckBox = environment->addCheckBox( settingsManager->getHideUnseen(), hideUnseenCheckBoxRectangle, miscTab, HIDE_UNSEEN_CHECKBOX_ID, hideUnseenCheckBoxText.c_str() );
+				
+				itemY = 1 + hideUnseenCheckBoxRectangle.LowerRightCorner.Y;
 			}
 		}
 	} catch( std::exception e ) {
@@ -566,6 +575,10 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 					}
 					case irr::gui::EGET_CHECKBOX_CHANGED: {
 						switch( id ) {
+							case HIDE_UNSEEN_CHECKBOX_ID: {
+								settingsChanged = true;
+								settingsManager->setHideUnseen( hideUnseenCheckBox->isChecked() );
+							}
 							case DEBUG_CHECKBOX_ID: {
 								settingsChanged = true;
 								settingsManager->debug = debugCheckBox->isChecked();

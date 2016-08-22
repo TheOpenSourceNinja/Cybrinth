@@ -123,6 +123,11 @@ void SettingsManager::setFullscreenResolution( irr::core::dimension2d< irr::u32 
 	}
 }
 
+void SettingsManager::setHideUnseen( bool newHideUnseen ) {
+	hideUnseen = newHideUnseen;
+	mazeManager->setAllCellsVisibility();
+}
+
 void SettingsManager::setMusicVolume( uint_fast8_t newVolume ) {
 	musicVolume = std::min( newVolume, ( decltype( musicVolume ) ) 100 );
 	mainGame->musicVolumeChanged();
@@ -297,7 +302,7 @@ void SettingsManager::savePrefs() {
 							
 							fputws( std::wstring( possiblePrefs.at( DEBUG ) + L"\t" + sc.toStdWString( debug ) + defaultString + sc.toStdWString( debugDefault ) + L". Makes the program output more text to standard output. Also makes the AIs insanely fast.\n" ).c_str(), prefsFile );
 							
-							fputws( std::wstring( possiblePrefs.at( HIDE_UNSEEN ) + L"\t" + sc.toStdWString( mazeManager->hideUnseen ) + defaultString + sc.toStdWString( hideUnseenDefault ) + L". Hides parts of the maze that no player has seen yet (seen means unobstructed line-of-sight from any player's position)\n" ).c_str(), prefsFile );
+							fputws( std::wstring( possiblePrefs.at( HIDE_UNSEEN ) + L"\t" + sc.toStdWString( hideUnseen ) + defaultString + sc.toStdWString( hideUnseenDefault ) + L". Hides parts of the maze that no player has seen yet (seen means unobstructed line-of-sight from any player's position)\n" ).c_str(), prefsFile );
 							
 							fputws( std::wstring( possiblePrefs.at( TIME_FORMAT ) + L"\t" + timeFormat + defaultString + timeFormatDefault + L". Must be in wcsftime format. See http://www.cplusplus.com/reference/ctime/strftime/ for a format reference.\n" ).c_str(), prefsFile );
 							
@@ -329,6 +334,10 @@ AI::algorithm_t SettingsManager::getBotAlgorithm() {
 
 irr::core::dimension2d< irr::u32 > SettingsManager::getFullscreenResolution() {
 	return fullscreenResolution;
+}
+
+bool SettingsManager::getHideUnseen() {
+	return hideUnseen;
 }
 
 irr::core::dimension2d< irr::u32 > SettingsManager::getMinimumWindowSize() {
@@ -649,7 +658,7 @@ void SettingsManager::readPrefs() {
 										}
 										
 										case HIDE_UNSEEN: { //L"hide unseen maze areas"
-											mazeManager->hideUnseen = wStringToBool( choice );
+											hideUnseen = wStringToBool( choice );
 											break;
 										}
 										
@@ -756,9 +765,7 @@ void SettingsManager::resetToDefaults() {
 		mainGame->musicSettingChanged();
 	}
 	
-	if( mazeManager != nullptr ) {
-		mazeManager->hideUnseen = hideUnseenDefault;
-	}
+	hideUnseen = hideUnseenDefault;
 	
 	if( device != nullptr ) {
 		fullscreenResolution = device->getVideoModeList()->getDesktopResolution();

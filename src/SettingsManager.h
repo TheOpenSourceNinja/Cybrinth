@@ -66,6 +66,7 @@ class SettingsManager
 		
 		uint_fast8_t getBitsPerPixel();
 		AI::algorithm_t getBotAlgorithm();
+		bool getHideUnseen();
 		irr::core::dimension2d< irr::u32 > getMinimumWindowSize();
 		uint_fast8_t getMusicVolume();
 		uint_fast8_t getNumBots();
@@ -88,6 +89,7 @@ class SettingsManager
 		void setBitsPerPixel( uint_fast8_t newBPP );
 		void setBotAlgorithm( AI::algorithm_t newAlgorithm );
 		void setFullscreenResolution( irr::core::dimension2d< irr::u32 > newResolution );
+		void setHideUnseen( bool newHideUnseen );
 		void setMusicVolume( uint_fast8_t newVolume );
 		void setNumBots( uint_fast8_t newNumBots );
 		void setNumPlayers( uint_fast8_t newNumPlayers );
@@ -115,6 +117,7 @@ class SettingsManager
 		irr::core::dimension2d< irr::u32 > fullscreenResolution;
 		irr::core::dimension2d< irr::u32 > fullscreenResolutionDefault;
 		
+		bool hideUnseen;
 		bool hideUnseenDefault;
 		
 		MainGame* mainGame;
