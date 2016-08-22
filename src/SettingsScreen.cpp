@@ -430,7 +430,7 @@ void SettingsScreen::changeToSettingsScreen() {
 					botAlgorithmListBox->addItem( AI::stringFromAlgorithm( ( AI::algorithm_t ) algorithm ).c_str() );
 				}
 				
-				botAlgorithmListBox->setSelected( AI::stringFromAlgorithm( settingsManager->botAlgorithm ).c_str() );
+				botAlgorithmListBox->setSelected( AI::stringFromAlgorithm( settingsManager->getBotAlgorithm() ).c_str() );
 				
 				itemY = 1 + std::max( botAlgorithmTextRectangle.LowerRightCorner.Y, botAlgorithmListBoxRectangle.LowerRightCorner.Y );
 			}
@@ -728,7 +728,7 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 						switch( id ) {
 							case BOT_ALGORITHM_LISTBOX_ID: {
 								settingsChanged = true;
-								settingsManager->botAlgorithm = (AI::algorithm_t) botAlgorithmListBox->getSelected();
+								settingsManager->setBotAlgorithm( ( AI::algorithm_t ) botAlgorithmListBox->getSelected() );
 								break;
 							}
 							default: {

@@ -83,6 +83,8 @@ class MainGame : public irr::IEventReceiver {
 		irr::core::dimension2d< irr::u32 > getScreenSize();
 		PlayerStart* getStart( uint_fast8_t ps );
 		
+		bool isNull( void* ptr );
+		
 		void movePlayerOnX( uint_fast8_t p, int_fast8_t direction, bool fromServer );
 		void movePlayerOnY( uint_fast8_t p, int_fast8_t direction, bool fromServer );
 		void musicSettingChanged(); //Called by settingsManager to notify us the playMusic setting has been changed.
@@ -156,7 +158,6 @@ class MainGame : public irr::IEventReceiver {
 		bool haveShownLogo;
 		
 		bool isScreenSaver;
-		bool isNull( void* ptr );
 		
 		void loadClockFont();
 		void loadExitConfirmations();

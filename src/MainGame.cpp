@@ -2823,7 +2823,7 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 				playerAssigned.at( p ) = true;
 				player.at( bot.at( i ).getPlayer() ).isHuman = false;
 				//bot.at( i ).setup( mazeManager.maze, mazeManager.cols, mazeManager.rows, this, botsKnowSolution, botAlgorithm, botMovementDelay );
-				bot.at( i ).setup( this, settingsManager.botsKnowSolution, settingsManager.botAlgorithm, settingsManager.botMovementDelay );
+				bot.at( i ).setup( this, settingsManager.botsKnowSolution, settingsManager.getBotAlgorithm(), settingsManager.botMovementDelay );
 			}
 		}
 		
@@ -3230,7 +3230,7 @@ void MainGame::newMaze( std::minstd_rand::result_type newRandomSeed ) {
 		cellWidth = ( viewportSize.Width ) / mazeManager.cols;
 		cellHeight = ( viewportSize.Height ) / mazeManager.rows;
 		for( decltype( settingsManager.getNumBots() ) b = 0; b < settingsManager.getNumBots(); ++b ) {
-			bot.at( b ).setup( this, settingsManager.botsKnowSolution, settingsManager.botAlgorithm, settingsManager.botMovementDelay );
+			bot.at( b ).setup( this, settingsManager.botsKnowSolution, settingsManager.getBotAlgorithm(), settingsManager.botMovementDelay );
 		}
 		
 		if( numLocks == 0 ) {
