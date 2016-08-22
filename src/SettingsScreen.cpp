@@ -451,6 +451,24 @@ void SettingsScreen::changeToSettingsScreen() {
 				hideUnseenCheckBox = environment->addCheckBox( settingsManager->getHideUnseen(), hideUnseenCheckBoxRectangle, miscTab, HIDE_UNSEEN_CHECKBOX_ID, hideUnseenCheckBoxText.c_str() );
 				
 				itemY = 1 + hideUnseenCheckBoxRectangle.LowerRightCorner.Y;
+				
+				irr::core::stringw timeFormatTextString = L"Time format";
+				auto timeFormatTextDimensions = font->getDimension( timeFormatTextString.c_str() );
+				auto timeFormatTextRectangle = Rectangle( 0, itemY, 0 + timeFormatTextDimensions.Width, itemY + timeFormatTextDimensions.Height );
+				timeFormatText = environment->addStaticText( timeFormatTextString.c_str(), timeFormatTextRectangle, false, true, miscTab );
+				
+				auto timeFormatEditBoxRectangle = Rectangle( 1 + timeFormatTextRectangle.LowerRightCorner.X, timeFormatTextRectangle.UpperLeftCorner.Y, driver->getScreenSize().Width, timeFormatTextRectangle.LowerRightCorner.Y );
+				timeFormatEditBox = environment->addEditBox( settingsManager->timeFormat.c_str(), timeFormatEditBoxRectangle, true, miscTab, TIME_FORMAT_EDITBOX_ID );
+				
+				itemY = 1 + timeFormatEditBoxRectangle.LowerRightCorner.Y;
+				
+				irr::core::stringw dateFormatTextString = L"Date format";
+				auto dateFormatTextDimensions = font->getDimension( dateFormatTextString.c_str() );
+				auto dateFormatTextRectangle = Rectangle( 0, itemY, 0 + dateFormatTextDimensions.Width, itemY + dateFormatTextDimensions.Height );
+				dateFormatText = environment->addStaticText( dateFormatTextString.c_str(), dateFormatTextRectangle, false, true, miscTab );
+				
+				auto dateFormatEditBoxRectangle = Rectangle( 1 + dateFormatTextRectangle.LowerRightCorner.X, dateFormatTextRectangle.UpperLeftCorner.Y, driver->getScreenSize().Width, dateFormatTextRectangle.LowerRightCorner.Y );
+				dateFormatEditBox = environment->addEditBox( settingsManager->dateFormat.c_str(), dateFormatEditBoxRectangle, true, miscTab, DATE_FORMAT_EDITBOX_ID );
 			}
 		}
 	} catch( std::exception e ) {
@@ -480,6 +498,27 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 				auto id = event.GUIEvent.Caller->getID();
 				
 				switch( event.GUIEvent.EventType ) {
+					case irr::gui::EGET_EDITBOX_MARKING_CHANGED: {
+						//do nothing: merely clicking in an editbox means nothing
+						break;
+					}
+					case irr::gui::EGET_EDITBOX_ENTER: //deliberate fall-through
+					case irr::gui::EGET_EDITBOX_CHANGED: {
+						switch( id ) {
+							case TIME_FORMAT_EDITBOX_ID: {
+								settingsChanged = true;
+								settingsManager->timeFormat = timeFormatEditBox->getText();
+							}
+							case DATE_FORMAT_EDITBOX_ID: {
+								settingsChanged = true;
+								settingsManager->dateFormat = dateFormatEditBox->getText();
+							}
+							default: {
+								CustomException e( L"Unhandled editbox ID" );
+								throw( e );
+							}
+						}
+					}
 					case irr::gui::EGET_SPINBOX_CHANGED: {
 						switch( id ) {
 							case BOT_MOVEMENT_DELAY_SPINBOX_ID: {
