@@ -93,6 +93,26 @@ void SettingsManager::setBitsPerPixel( uint_fast8_t newBPP ) {
 	}
 }
 
+void SettingsManager::setBotAlgorithm( AI::algorithm_t newAlgorithm ) {
+	botAlgorithm = newAlgorithm;
+	switch( botAlgorithm ) {
+		case AI::DIJKSTRA: {
+			botsKnowSolution = true; //Dijkstra's algorithm only works if bots know the solution beforehand
+			if( ( mainGame != nullptr and mainGame != NULL ) and not mainGame->isNull( mainGame->settingsScreen.botsKnowSolutionCheckBox ) ) {
+				mainGame->settingsScreen.botsKnowSolutionCheckBox->setChecked( true );
+				mainGame->settingsScreen.botsKnowSolutionCheckBox->setEnabled( false );
+			}
+			break;
+		}
+		default: {
+			if( ( mainGame != nullptr and mainGame != NULL ) and not mainGame->isNull( mainGame->settingsScreen.botsKnowSolutionCheckBox ) ) {
+				mainGame->settingsScreen.botsKnowSolutionCheckBox->setEnabled( true );
+			}
+			break;
+		}
+	}
+}
+
 void SettingsManager::setFullscreenResolution( irr::core::dimension2d< irr::u32 > newResolution ) {
 	if( allowSmallSize || newResolution.Width >= minimumWindowSize.Width ) {
 		fullscreenResolution.Width = newResolution.Width;
@@ -109,8 +129,11 @@ void SettingsManager::setMusicVolume( uint_fast8_t newVolume ) {
 }
 
 void SettingsManager::setPlayMusic( bool newSetting ) {
+	auto oldPlayMusic = playMusic;
 	playMusic = newSetting;
-	mainGame->musicSettingChanged();
+	if( oldPlayMusic not_eq playMusic ) {
+		mainGame->musicSettingChanged();
+	}
 }
 
 void SettingsManager::savePrefs() {
@@ -298,6 +321,10 @@ void SettingsManager::savePrefs() {
 
 uint_fast8_t SettingsManager::getBitsPerPixel() {
 	return bitsPerPixel;
+}
+
+AI::algorithm_t SettingsManager::getBotAlgorithm() {
+	return botAlgorithm;
 }
 
 irr::core::dimension2d< irr::u32 > SettingsManager::getFullscreenResolution() {

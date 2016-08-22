@@ -44,8 +44,6 @@ class SettingsManager
 		bool backgroundAnimations;
 		bool backgroundAnimationsDefault;
 		
-		AI::algorithm_t botAlgorithm;
-		AI::algorithm_t botAlgorithmDefault;
 		uint_fast16_t botMovementDelay;
 		uint_fast16_t botMovementDelayDefault;
 		bool botsKnowSolution;
@@ -67,6 +65,7 @@ class SettingsManager
 		irr::core::dimension2d< irr::u32 > getFullscreenResolution();
 		
 		uint_fast8_t getBitsPerPixel();
+		AI::algorithm_t getBotAlgorithm();
 		irr::core::dimension2d< irr::u32 > getMinimumWindowSize();
 		uint_fast8_t getMusicVolume();
 		uint_fast8_t getNumBots();
@@ -87,6 +86,7 @@ class SettingsManager
 		
 		void savePrefs();
 		void setBitsPerPixel( uint_fast8_t newBPP );
+		void setBotAlgorithm( AI::algorithm_t newAlgorithm );
 		void setFullscreenResolution( irr::core::dimension2d< irr::u32 > newResolution );
 		void setMusicVolume( uint_fast8_t newVolume );
 		void setNumBots( uint_fast8_t newNumBots );
@@ -105,6 +105,8 @@ class SettingsManager
 	private:
 		uint_fast8_t bitsPerPixel;
 		uint_fast8_t bitsPerPixelDefault;
+		AI::algorithm_t botAlgorithm;
+		AI::algorithm_t botAlgorithmDefault;
 		
 		irr::IrrlichtDevice* device;
 		std::vector< std::wstring > driverTypes = { L"opengl", L"direct3d9", L"direct3d8", L"burning's video", L"software", L"null" };

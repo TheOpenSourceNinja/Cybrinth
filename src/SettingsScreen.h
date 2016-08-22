@@ -31,6 +31,7 @@ class SettingsScreen : public irr::IEventReceiver {
 		virtual ~SettingsScreen();
 		
 		irr::video::SColor backgroundColor; //Used by MainGame when it calls driver->beginScene()
+		irr::gui::IGUICheckBox* botsKnowSolutionCheckBox; //Can be checked/unchecked by SettingsManager based on chosen algorithm
 		
 		void changeToSettingsScreen();
 		void changeFromSettingsScreen();
@@ -55,7 +56,6 @@ class SettingsScreen : public irr::IEventReceiver {
 		irr::gui::IGUIStaticText* botAlgorithmText;
 		irr::gui::IGUISpinBox* botMovementDelaySpinBox;
 		irr::gui::IGUIStaticText* botMovementDelayText;
-		irr::gui::IGUICheckBox* botsKnowSolutionCheckBox;
 		irr::gui::IGUICheckBox* bpp16CheckBox;
 		irr::gui::IGUICheckBox* bpp32CheckBox;
 		irr::gui::IGUIStaticText* bppText;
