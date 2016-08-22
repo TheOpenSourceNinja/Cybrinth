@@ -166,7 +166,7 @@ void SettingsManager::savePrefs() {
 						fputws( std::wstring( commentMark + L"Preference and value must be separated by a tab character, not spaces.\n" ).c_str(), prefsFile );
 						fputws( std::wstring( commentMark + L"Any preference not specified here will use its default value. The same goes for things specified in invalid ways (i.e. so badly spelled that the spell checker doesn't recognize them).\n" ).c_str(), prefsFile );
 						fputws( std::wstring( commentMark + L"Preferences are not case-sensitive. \"Play music\" is the same as \"PLAY muSic\".\n" ).c_str(), prefsFile );
-						fputws( std::wstring( commentMark + L"Preferences and values do not have to be spelled correctly: \"treu\" will be interepreted as \"true\", \"flse\" as \"false\", etc.\n" ).c_str(), prefsFile );
+						fputws( std::wstring( commentMark + L"Preferences and values do not have to be spelled correctly: \"treu\" will be interpreted as \"true\", \"flse\" as \"false\", etc.\n" ).c_str(), prefsFile );
 						fputws( L"\n", prefsFile );
 						
 						//Done with header comments-------------
