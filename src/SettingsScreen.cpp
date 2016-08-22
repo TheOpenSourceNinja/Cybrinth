@@ -436,7 +436,12 @@ void SettingsScreen::changeToSettingsScreen() {
 			}
 			
 			{ //Miscellaneous tab
+				decltype( mainGame->getScreenSize().Height ) itemY = 0;
 				
+				irr::core::stringw debugCheckBoxText = L"Debug";
+				auto debugTextDimensions = font->getDimension( debugCheckBoxText.c_str() );
+				auto debugTextRectangle = Rectangle( 0, itemY, 0 + 30 + debugTextDimensions.Width, itemY + debugTextDimensions.Height );
+				debugCheckBox = environment->addCheckBox( settingsManager->debug, debugTextRectangle, miscTab, DEBUG_CHECKBOX_ID, debugCheckBoxText.c_str() );
 			}
 		}
 	} catch( std::exception e ) {
@@ -561,6 +566,11 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 					}
 					case irr::gui::EGET_CHECKBOX_CHANGED: {
 						switch( id ) {
+							case DEBUG_CHECKBOX_ID: {
+								settingsChanged = true;
+								settingsManager->debug = debugCheckBox->isChecked();
+								break;
+							}
 							case ALWAYS_SERVER_CHECKBOX_ID: {
 								settingsChanged = true;
 								settingsManager->alwaysServer = alwaysServerCheckBox->isChecked();
