@@ -502,10 +502,6 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 				auto id = event.GUIEvent.Caller->getID();
 				
 				switch( event.GUIEvent.EventType ) {
-					case irr::gui::EGET_EDITBOX_MARKING_CHANGED: {
-						//do nothing: merely clicking in an editbox means nothing
-						break;
-					}
 					case irr::gui::EGET_EDITBOX_ENTER: //deliberate fall-through
 					case irr::gui::EGET_EDITBOX_CHANGED: {
 						switch( id ) {
@@ -814,6 +810,7 @@ bool SettingsScreen::OnEvent( const irr::SEvent& event ) {
 					case irr::gui::EGET_ELEMENT_FOCUSED:
 					case irr::gui::EGET_TAB_CHANGED:
 					case irr::gui::EGET_LISTBOX_SELECTED_AGAIN:
+					case irr::gui::EGET_EDITBOX_MARKING_CHANGED:
 					case irr::gui::EGET_ELEMENT_LEFT: {
 						break;
 					}
