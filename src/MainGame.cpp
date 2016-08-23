@@ -3643,6 +3643,33 @@ void MainGame::processControls() {
 	}
 }
 
+
+/**
+ * @brief Prompts the user for the IP and port of the server to which to connect
+ */
+void MainGame::promptForServerIP() {
+	
+	//This function currently only gets called by MenuManager, thus it's impossible for currentScreen to be anything other than MENUSCREEN. I have learned to prepare for the impossible.
+	if( currentScreen != MENUSCREEN ) {
+		//We don't want to interrupt gameplay by popping up a dialog over the play screen; thus we must ensure the game is paused by changing to the menu screen.
+		currentScreen = MENUSCREEN;
+	}
+	
+	settingsManager.isServer = false;
+	
+	std::wstring newIP = L"";
+	std::wcout << L"Server IP: ";
+	std::wcin >> newIP;
+	network.setIP( newIP );
+	
+	uint_fast16_t newPort;
+	std::wcout << L"Port: ";
+	std::wcin >> newPort;
+	network.setPort( newPort );
+	
+	network.setup( this, settingsManager.isServer );
+}
+
 /**
  * Resets miscellaneous stuff between mazes.
  */
@@ -3803,19 +3830,6 @@ uint_fast8_t MainGame::run() {
 						processControls();
 						lastTimeControlsProcessed = time;
 					}
-				}
-				
-				if( settingsManager.debug ) {
-					if( currentScreen != LOADINGSCREEN ) {
-						std::wcout << L"currentScreen is not LOADINGSCREEN" << std::endl;
-					}
-					
-					if( device->isWindowActive() ) {
-						std::wcout << L"Window is ACTIVE" << std::endl;
-					} else {
-						std::wcout << L"Window is INACTIVE" << std::endl;
-					}
-					
 				}
 				
 				if( ( currentScreen != LOADINGSCREEN and ( isScreenSaver or device->isWindowActive() ) ) or settingsManager.debug ) {

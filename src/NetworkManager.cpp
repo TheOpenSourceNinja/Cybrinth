@@ -506,6 +506,18 @@ std::string NetworkManager::getPort() {
 	return serverPort;
 }
 
+void NetworkManager::setIP( std::wstring newIP ) {
+	try {
+		StringConverter sc;
+		std::string tempStr = sc.toStdString( newIP );
+		serverIP = tempStr;
+	} catch( boost::bad_lexical_cast &e ) {
+		std::wcerr << L"Error in NetworkManager::setIP(): not a valid IP (bad lexical cast)." << std::endl;
+	} catch( std::exception e ) {
+		std::wcerr << L"Error in NetworkManager::setIP(): " << e.what() << std::endl;
+	}
+}
+
 void NetworkManager::setPort( uint_fast16_t newPort ) {
 	try {
 		StringConverter sc;
@@ -539,7 +551,7 @@ void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
 	}
 	
 	RakNet::SocketDescriptor socketDescriptor;
-	socketDescriptor.socketFamily = AF_INET;
+	socketDescriptor.socketFamily = AF_INET6;
 	if( isServer ) {
 		socketDescriptor.port = atoi( serverPort.c_str() );
 	}

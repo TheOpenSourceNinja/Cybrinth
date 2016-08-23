@@ -21,6 +21,10 @@
 #include "SocketDefines.h"
 #include "RakNetSocket2.h"
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
 
 #if   defined(_WIN32)
 // extern __int64 _strtoui64(const char*, char**, int); // needed for Code::Blocks. Does not compile on Visual Studio 2010

@@ -172,7 +172,7 @@ void MenuManager::processSelection() {
 		mainGame->currentScreen = MainGame::SETTINGSSCREEN;
 		mainGame->settingsScreen.changeToSettingsScreen();
 	} else if( options.at( joinServer ).highlighted ) {
-		//TODO: Add stuff for connecting to server here
+		mainGame->promptForServerIP();
 	}
 }
 

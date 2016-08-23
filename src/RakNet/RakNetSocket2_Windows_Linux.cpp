@@ -19,6 +19,10 @@
 
 #if RAKNET_SUPPORT_IPV6==1
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
 void PrepareAddrInfoHints2(addrinfo *hints)
 {
 	memset(hints, 0, sizeof (addrinfo)); // make sure the struct is empty

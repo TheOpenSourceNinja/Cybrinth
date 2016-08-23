@@ -98,6 +98,7 @@ class MainGame : public irr::IEventReceiver {
 		bool OnEvent( const irr::SEvent& event );
 		
 		void pickLogo();
+		void promptForServerIP();
 		
 		void resetThings();
 		uint_fast8_t run(); //If a file was specified on the command line, it will be passed to run().

@@ -15,6 +15,10 @@
 #ifndef RAKNETSOCKET2_BERKLEY_CPP
 #define RAKNETSOCKET2_BERKLEY_CPP
 
+#if RAKNET_SUPPORT_IPV6==1
+#define _stricmp strcmp
+#endif
+
 // Every platform except windows store 8 and native client supports Berkley sockets
 #if !defined(WINDOWS_STORE_RT) && !defined(__native_client__)
 

@@ -23,6 +23,10 @@
 #include "VitaIncludes.h"
 #include "errno.h"
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
 #ifndef INVALID_SOCKET
 #define INVALID_SOCKET -1
 #endif
