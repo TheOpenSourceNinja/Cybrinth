@@ -36,6 +36,12 @@ MenuManager::MenuManager() {
 	}
 	{
 		MenuOption temp;
+		temp.setType( nullptr, MenuOption::JOIN_SERVER );
+		joinServer = options.size();
+		options.push_back( temp );
+	}
+	{
+		MenuOption temp;
 		temp.setType( nullptr, MenuOption::LOAD_MAZE );
 		loadMaze = options.size();
 		options.push_back( temp );
@@ -109,14 +115,6 @@ void MenuManager::findHighlights( int_fast32_t x, int_fast32_t y ) {
 			minDistance = distance;
 		}
 	}
-	
-	/*options.at( exitGame ).highlighted = ( options.at( exitGame ).contains( x, y ) );
-	options.at( loadMaze ).highlighted = ( options.at( loadMaze ).contains( x, y ) );
-	options.at( saveMaze ).highlighted = ( options.at( saveMaze ).contains( x, y ) );
-	options.at( nextMaze ).highlighted = ( options.at( nextMaze ).contains( x, y ) );
-	options.at( restartMaze ).highlighted = ( options.at( restartMaze ).contains( x, y ) );
-	options.at( backToGame ).highlighted = ( options.at( backToGame ).contains( x, y ) );
-	options.at( freedom ).highlighted = ( options.at( freedom ).contains( x, y ) );*/
 }
 
 /**
@@ -173,6 +171,8 @@ void MenuManager::processSelection() {
 	} else if( options.at( settings ).highlighted ) {
 		mainGame->currentScreen = MainGame::SETTINGSSCREEN;
 		mainGame->settingsScreen.changeToSettingsScreen();
+	} else if( options.at( joinServer ).highlighted ) {
+		//TODO: Add stuff for connecting to server here
 	}
 }
 
@@ -194,57 +194,9 @@ void MenuManager::scrollSelection( bool up ) {
 			nextHighlight = options.size() - 1;
 		}
 		
-		/*if( nextMaze.highlighted ) {
-			nextMaze.highlighted = false;
-			freedom.highlighted = true;
-		} else if( restartMaze.highlighted ) {
-			restartMaze.highlighted = false;
-			nextMaze.highlighted = true;
-		} else if( loadMaze.highlighted ) {
-			loadMaze.highlighted = false;
-			restartMaze.highlighted = true;
-		} else if( saveMaze.highlighted ) {
-			saveMaze.highlighted = false;
-			loadMaze.highlighted = true;
-		} else if( exitGame.highlighted ) {
-			exitGame.highlighted = false;
-			saveMaze.highlighted = true;
-		} else if( backToGame.highlighted ) {
-			backToGame.highlighted = false;
-			exitGame.highlighted = true;
-		} else if( freedom.highlighted ) {
-			freedom.highlighted = false;
-			backToGame.highlighted = true;
-		} else { //if none are highlighted
-			backToGame.highlighted = true;
-		}*/
 	} else {
 		nextHighlight = ( currentHighlight + 1 ) % options.size();
-	
-		/*if( nextMaze.highlighted ) {
-			nextMaze.highlighted = false;
-			restartMaze.highlighted = true;
-		} else if( restartMaze.highlighted ) {
-			restartMaze.highlighted = false;
-			loadMaze.highlighted = true;
-		} else if( loadMaze.highlighted ) {
-			loadMaze.highlighted = false;
-			saveMaze.highlighted = true;
-		} else if( saveMaze.highlighted ) {
-			saveMaze.highlighted = false;
-			exitGame.highlighted = true;
-		} else if( exitGame.highlighted ) {
-			exitGame.highlighted = false;
-			backToGame.highlighted = true;
-		} else if( backToGame.highlighted ) {
-			backToGame.highlighted = false;
-			freedom.highlighted = true;
-		} else if( freedom.highlighted ) {
-			freedom.highlighted = false;
-			nextMaze.highlighted = true;
-		} else { //if none are highlighted
-			backToGame.highlighted = true;
-		}*/
+		
 	}
 	
 	options.at( currentHighlight ).highlighted = false;

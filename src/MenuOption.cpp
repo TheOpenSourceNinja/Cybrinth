@@ -73,6 +73,11 @@ void MenuOption::setType( irr::IrrlichtDevice* device, option_t newType ) {
 				fileName = L"restart_maze";
 				break;
 			}
+			case JOIN_SERVER: {
+				newText = L"Join server";
+				fileName = L"join_server";
+				break;
+			}
 			case LOAD_MAZE: {
 				newText = L"Load maze";
 				fileName = L"load_maze";
@@ -163,18 +168,6 @@ void MenuOption::setDimension( irr::video::IVideoDriver* driver ) {
 	try {
 		dimension = irr::core::dimension2d< uint_fast16_t >( 0, 0 );
 		irr::core::dimension2d< uint_fast16_t > desiredIconDimension = irr::core::dimension2d< uint_fast16_t >( 0, 0 );
-		/*if( iconTexture not_eq nullptr ) {
-			dimension = iconTexture->getSize();
-		}
-		if( font not_eq nullptr ) {
-			StringConverter sc;
-			auto tempDimension = font->getDimension( sc.toStdWString( text ).c_str() ); //sc.toWCharArray( text ) );
-			dimension.Width += tempDimension.Width;
-			if( tempDimension.Height > dimension.Height ) {
-				dimension.Height = tempDimension.Height;
-			}
-			desiredIconDimension.Height = tempDimension.Height;
-		}*/
 		
 		if( font not_eq nullptr ) {
 			StringConverter sc;

@@ -30,7 +30,7 @@ class MainGame; //Avoids circular dependency
 
 class MenuOption {
 	public:
-		enum option_t : uint_fast8_t { BACK_TO_GAME, CANCEL, CONTROLS, EXIT_GAME, FREEDOM, LOAD_MAZE, NEW_MAZE, NUMBOTS, OK, RESET_TO_DEFAULTS, RESTART_MAZE, SAVE_MAZE, SETTINGS, UNDO_CHANGES, DO_NOT_USE };
+		enum option_t : uint_fast8_t { JOIN_SERVER, BACK_TO_GAME, CANCEL, CONTROLS, EXIT_GAME, FREEDOM, LOAD_MAZE, NEW_MAZE, NUMBOTS, OK, RESET_TO_DEFAULTS, RESTART_MAZE, SAVE_MAZE, SETTINGS, UNDO_CHANGES, DO_NOT_USE };
 
 		MenuOption();
 		virtual ~MenuOption();

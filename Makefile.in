@@ -1548,6 +1548,7 @@ compiled-images:
 	convert -background 'rgba(0,0,0,0)' -flatten "./Images/menu icons/ok.svg" "./compiled-images/menu icons/ok.xpm" ;\
 	convert -background 'rgba(0,0,0,0)' -flatten "./Images/menu icons/undo_changes.svg" "./compiled-images/menu icons/undo_changes.xpm" ;\
 	convert -background 'rgba(0,0,0,0)' -flatten "./Images/menu icons/reset_to_defaults.svg" "./compiled-images/menu icons/reset_to_defaults.xpm" ;\
+	convert -background 'rgba(0,0,0,0)' -flatten "./Images/menu icons/join_server.svg" "./compiled-images/menu icons/join_server.xpm" ;\
 	convert -background 'rgba(0,0,0,0)' -flatten "./Images/players/poker_chip.xcf" "./compiled-images/players/poker_chip.xpm" ;\
 	fi
 

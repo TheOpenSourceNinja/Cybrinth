@@ -58,6 +58,8 @@ class MenuManager {
 		uint_fast8_t freedom;
 
 		uint_fast8_t highlightedOption;
+		
+		uint_fast8_t joinServer;
 
 		uint_fast8_t loadMaze;
 		
