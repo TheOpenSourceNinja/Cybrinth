@@ -2566,6 +2566,12 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 			setControls();
 		} else {
 			settingsManager.setPlayMusic( false );
+			
+			if( settingsManager.getNumBots() == 0 ) {
+				settingsManager.setNumBots( 1 );
+			}
+			
+			settingsManager.setNumPlayers( settingsManager.getNumBots() );
 		}
 		
 		if ( settingsManager.debug ) {
@@ -3885,7 +3891,11 @@ uint_fast8_t MainGame::run() {
 		}
 		
 		while( device->run() and not donePlaying ) {
-			newMaze();
+			if( settingsManager.isServer ) { //If we're not a server, and thus are connecting to one, then the server will send us a random seed. We will generate a new maze at that time.
+				newMaze();
+			} else {
+				network.processPackets();
+			}
 			
 			haveShownLogo = true; //This should only ever be false at the start of the program.
 			
