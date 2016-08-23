@@ -1674,6 +1674,61 @@ PlayerStart* MainGame::getStart( uint_fast8_t ps ) {
 }
 
 /**
+ * @brief Does what the name says: initializes a bunch of variables. I made this function because I'm trying to shorten the MainGame() constructor.
+ */
+void MainGame::initializeVariables( bool runAsScreenSaver ) {
+	#ifdef DEBUG //Not the last place debug is set to true or false; look at readPrefs()
+		settingsManager.debug = true;
+	#else
+		settingsManager.debug = false;
+	#endif
+	if( settingsManager.debug ) {
+		std::wcout << L"MainGame constructor called" << std::endl;
+	}
+	//Just wanted to be totally sure that these point to nullptr before.
+	clockFont = nullptr;
+	loadingFont = nullptr;
+	musicTagFont = nullptr;
+	statsFont = nullptr;
+	textFont = nullptr;
+	tipFont = nullptr;
+	backgroundTexture = nullptr;
+	loadMazeDialog = nullptr;
+	saveMazeDialog = nullptr;
+	exitConfirmation = nullptr;
+	logoTexture = nullptr;
+	device = nullptr;
+	gui = nullptr;
+	currentScreen = LOADINGSCREEN;
+	loading = L"Loading...";
+	proTipPrefix = L"Pro tip: ";
+	winnersLabel = L"Winners: ";
+	steps = L"Steps: ";
+	times = L"Times: ";
+	keysFoundPerPlayer = L"Keys found: ";
+	scores = L"Scores: ";
+	scoresTotal = L"Total scores: ";
+	mazeManager.setPointers( this, &settingsManager );
+	settingsManager.isServer = false;
+	antiAliasFonts = true;
+	currentExitConfirmation = 0;
+	currentProTip = 0;
+	sideDisplaySizeDenominator = 6; //What fraction of the screen's width is set aside for displaying text, statistics, etc. during play.
+	currentDirectory = boost::filesystem::current_path();
+	haveShownLogo = false;
+	donePlaying = false;
+	fillBackgroundTextureAfterLoading = false;
+	haveFilledBackgroundTextureAfterLoading = false;
+	lastTimeControlsProcessed = 0;
+	controlProcessDelay = 100;
+	backgroundColor = BLACK; //Every background should set this in setupBackground(); putting it here just in case.
+	backgroundFilePath = L"";
+	music = nullptr;
+	isScreenSaver = runAsScreenSaver;
+	enableController = false; //This gets set in setControls(), but only if that function gets called.
+}
+
+/**
  * Checks whether a pointer is equal to any of the values likely to represent null.
  * Arguments:
  * --- void* ptr: Some pointer.
@@ -2381,6 +2436,79 @@ bool MainGame::loadSeedFromFile( boost::filesystem::path src ) {
 	return false;
 }
 
+void MainGame::loadTextures() {
+	//auto textureSearchLocation = boost::filesystem::path( boost::filesystem::current_path()/L"Images/players" );
+	
+	//std::vector< boost::filesystem::path > loadableTextures = getLoadableTexturesList( textureSearchLocation );
+	
+	std::vector< boost::filesystem::path > loadableTextures;
+	auto textureSearchLocations = system.getImageFolders();
+	for( auto locationIterator = textureSearchLocations.begin(); locationIterator != textureSearchLocations.end(); ++locationIterator ) {
+		auto textureList = getLoadableTexturesList( *locationIterator / L"players" );
+		for( auto textureIterator = textureList.begin(); textureIterator != textureList.end(); ++textureIterator ) {
+			loadableTextures.push_back( *textureIterator );
+		}
+	}
+	
+	
+	for( decltype( settingsManager.getNumPlayers() ) p = 0; p < settingsManager.getNumPlayers(); ++p ) {
+		
+		player.at( p ).setPlayerNumber( p );
+		
+		setObjectColorBasedOnNum( &( player.at( p ) ), p );
+		
+		player.at( p ).setMG( this );
+		
+		
+		player.at( p ).loadTexture( device, 100, loadableTextures );
+		
+		playerAssigned.at( p ) = false;
+		
+		
+		
+		switch( settingsManager.colorMode ) {
+			case SettingsManager::GRAYSCALE: {
+				playerStart.at( p ).setColors( GRAY_GRAYSCALE, LIGHTRED_GRAYSCALE );
+				break;
+			}
+			case SettingsManager::COLOR_MODE_DO_NOT_USE:
+			case SettingsManager::FULLCOLOR: {
+				playerStart.at( p ).setColors( GRAY, LIGHTRED );
+				break;
+			}
+			case SettingsManager::GREENSCALE: {
+				playerStart.at( p ).setColors( GRAY_GREENSCALE, LIGHTRED_GREENSCALE );
+				break;
+			}
+			case SettingsManager::AMBERSCALE: {
+				playerStart.at( p ).setColors( GRAY_AMBERSCALE, LIGHTRED_AMBERSCALE );
+				break;
+			}
+		}
+	}
+	
+	switch( settingsManager.colorMode ) {
+		case SettingsManager::GRAYSCALE: {
+			goal.setColors( GRAY_GRAYSCALE, LIGHTGREEN_GRAYSCALE );
+			break;
+		}
+		case SettingsManager::COLOR_MODE_DO_NOT_USE:
+		case SettingsManager::FULLCOLOR: {
+			goal.setColors( GRAY, LIGHTGREEN );
+			break;
+		}
+		case SettingsManager::GREENSCALE: {
+			goal.setColors( GRAY_GREENSCALE, LIGHTGREEN_GREENSCALE );
+			break;
+		}
+		case SettingsManager::AMBERSCALE: {
+			goal.setColors( GRAY_AMBERSCALE, LIGHTGREEN_AMBERSCALE );
+			break;
+		}
+	}
+	goal.loadTexture( device );
+}
+
 /**
  * Loads the tip font. Guesses a size that will work, keeps adjusting the size and reloading the font until everything fits.
  */
@@ -2491,55 +2619,7 @@ MainGame::~MainGame() {
  */
 MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false ) {
 	try {
-		#ifdef DEBUG //Not the last place debug is set to true or false; look at readPrefs()
-			settingsManager.debug = true;
-		#else
-			settingsManager.debug = false;
-		#endif
-		if( settingsManager.debug ) {
-			std::wcout << L"MainGame constructor called" << std::endl;
-		}
-		//Just wanted to be totally sure that these point to nullptr before.
-		clockFont = nullptr;
-		loadingFont = nullptr;
-		musicTagFont = nullptr;
-		statsFont = nullptr;
-		textFont = nullptr;
-		tipFont = nullptr;
-		backgroundTexture = nullptr;
-		loadMazeDialog = nullptr;
-		saveMazeDialog = nullptr;
-		exitConfirmation = nullptr;
-		logoTexture = nullptr;
-		device = nullptr;
-		gui = nullptr;
-		currentScreen = LOADINGSCREEN;
-		loading = L"Loading...";
-		proTipPrefix = L"Pro tip: ";
-		winnersLabel = L"Winners: ";
-		steps = L"Steps: ";
-		times = L"Times: ";
-		keysFoundPerPlayer = L"Keys found: ";
-		scores = L"Scores: ";
-		scoresTotal = L"Total scores: ";
-		mazeManager.setPointers( this, &settingsManager );
-		settingsManager.isServer = false;
-		antiAliasFonts = true;
-		currentExitConfirmation = 0;
-		currentProTip = 0;
-		sideDisplaySizeDenominator = 6; //What fraction of the screen's width is set aside for displaying text, statistics, etc. during play.
-		currentDirectory = boost::filesystem::current_path();
-		haveShownLogo = false;
-		donePlaying = false;
-		fillBackgroundTextureAfterLoading = false;
-		haveFilledBackgroundTextureAfterLoading = false;
-		lastTimeControlsProcessed = 0;
-		controlProcessDelay = 100;
-		backgroundColor = BLACK; //Every background should set this in setupBackground(); putting it here just in case.
-		backgroundFilePath = L"";
-		music = nullptr;
-		isScreenSaver = runAsScreenSaver;
-		enableController = false; //This gets set in setControls(), but only if that function gets called.
+		initializeVariables( runAsScreenSaver );
 		
 		device = irr::createDevice( irr::video::EDT_NULL ); //Must create a device before calling readPrefs();
 		
@@ -2549,20 +2629,30 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 		
 		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system);
 		
+		settingsManager.readPrefs();
+		
+		if( not isScreenSaver ) {
+			//Set up networking
+			network.setPort( settingsManager.networkPort );
+			network.setup( this, settingsManager.isServer );
+		}
+		
 		//Initializing the random number generator here allows makeMusicList() (called by SettingsManager when it reads prefs), loadProTips(), and pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generated.
 		if( not loadSeedFromFile( fileToLoad ) ) {
-			setRandomSeed( time( nullptr ) );
+			if( settingsManager.isServer ) {
+				setRandomSeed( time( nullptr ) );
+			} else {
+				network.processPackets();
+			}
 			firstMaze = false;
 		} else {
 			firstMaze = true;
 		}
 		
-		settingsManager.readPrefs();
-		
 		setMyPlayer( UINT8_MAX ); //Must call this before setControls() so that controls which affect player number "mine" will work. setMyPlayer() will be called again later to set the correct player number; the number used here doesn't matter.
+		setupDevice(); //Must call this before setControls() because setControls() calls device->activateJoysticks()
 		
 		if( not isScreenSaver ) {
-			network.setPort( settingsManager.networkPort );
 			setControls();
 		} else {
 			settingsManager.setPlayMusic( false );
@@ -2572,92 +2662,6 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 			}
 			
 			settingsManager.setNumPlayers( settingsManager.getNumBots() );
-		}
-		
-		if ( settingsManager.debug ) {
-			std::wcout << L"Read prefs, now setting controls" << std::endl;
-		}
-		
-		if( settingsManager.fullscreen ) {
-			irr::video::IVideoModeList* vmList = device->getVideoModeList();
-			
-			auto desiredResolution = settingsManager.getFullscreenResolution();
-			
-			if( settingsManager.autoDetectFullscreenResolution ) {
-				desiredResolution = vmList->getDesktopResolution();
-			}
-			
-			if( settingsManager.allowSmallSize ) {
-				screenSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), desiredResolution ); //Gets a video resolution between minimum (1,1) and maximum (fullscreen resolution setting)
-			} else {
-				screenSize = vmList->getVideoModeResolution( settingsManager.getMinimumWindowSize(), desiredResolution );
-			}
-		} else {
-			screenSize = settingsManager.getWindowSize();
-		}
-		
-		device->closeDevice(); //Signals to the existing device that it needs to close itself on next run() so that we can create a new device
-		device->run(); //This is next run()
-		device->drop(); //Cleans up after the device
-		
-		{
-			irr::SIrrlichtCreationParameters params;
-			params.DriverType = settingsManager.driverType;
-			params.WindowSize = screenSize;
-			params.Bits = settingsManager.getBitsPerPixel();
-			params.Fullscreen = settingsManager.fullscreen;
-			params.Stencilbuffer = false;
-			params.Vsync = settingsManager.vsync;
-			params.EventReceiver = this;
-			
-			if( runAsScreenSaver ) {
-				//std::wcerr << L"Running as screensaver" << std::endl;
-				try {
-					auto idString = system.getEnvironmentVariable( L"XSCREENSAVER_WINDOW" );
-					//std::wcout << L"idString: \"" << idString << L"\"" << std::endl;
-					void * idPointer = nullptr;
-					int idInt = swscanf( idString.c_str(), L"%p", &idPointer );
-					//std::wcout << L"idInt: " << idInt << L" idPointer: " << idPointer << std::endl;
-					
-					if( idInt >= 1 ) {
-						params.WindowId = idPointer;
-					}
-				} catch( std::exception &e ) {
-					std::cout << e.what() << std::endl;
-					exit( EXIT_FAILURE );
-				}
-			} else {
-				//std::wcerr << L"Not running as screensaver" << std::endl;
-			}
-			
-			device = createDeviceEx( params );
-			
-			if( isNull( device ) ) {
-				std::wcerr << L"Error: Cannot create device. Trying other driver types." << std::endl;
-				
-				//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
-				for( auto i = ( uint_fast8_t ) irr::video::EDT_COUNT; isNull( device ) and i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
-					if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
-						settingsManager.driverType = ( irr::video::E_DRIVER_TYPE ) i;
-						params.DriverType = settingsManager.driverType;
-						device = createDeviceEx( params );
-					}
-				}
-				
-				if( isNull( device ) ) {
-					std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
-					settingsManager.debug = true;
-					params.DriverType = irr::video::EDT_NULL;
-					device = createDeviceEx( params );
-					
-					if( isNull( device ) ) {
-						throw( CustomException( L"Unable to create the device using any driver types" ) );
-					}
-				}
-				
-			} else if ( settingsManager.debug ) {
-				std::wcout << L"Got the new device" << std::endl;
-			}
 		}
 		
 		if( runAsScreenSaver ) {
@@ -2670,23 +2674,7 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 		
 		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system);
 		
-		driver = device->getVideoDriver(); //Not sure if this would be possible with a null device, which is why we don't exit
-		if( isNull( driver ) ) {
-			throw( CustomException( std::wstring( L"Cannot get video driver" ) ) );
-		} else if ( settingsManager.debug ) {
-			std::wcout << L"Got the video driver" << std::endl;
-		}
-		
-		driver->setTextureCreationFlag( irr::video::ETCF_NO_ALPHA_CHANNEL, false );
-		driver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, false );
-		if( settingsManager.driverType == irr::video::EDT_SOFTWARE or settingsManager.driverType == irr::video:: EDT_BURNINGSVIDEO ) {
-			driver->setTextureCreationFlag( irr::video::ETCF_OPTIMIZED_FOR_SPEED, true );
-		} else {
-			driver->setTextureCreationFlag( irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true );
-		}
-		if( settingsManager.driverType == irr::video::EDT_SOFTWARE ) {
-			driver->setTextureCreationFlag( irr::video::ETCF_ALLOW_NON_POWER_2, false );
-		}
+		setupDriver();
 		
 		pickLogo();
 		driver->beginScene( false, false ); //These falses specify whether the back buffer and z buffer should be cleared. Since this is the first time drawing anything, there's no need to clear anything beforehand.
@@ -2717,17 +2705,12 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 			device->getLogger()->setLogLevel( irr::ELL_ERROR );
 		}
 		
-		backgroundSceneManager = device->getSceneManager(); //Not sure if this would be possible with a null device, which is why we don't exit
+		backgroundSceneManager = device->getSceneManager();
 		if( isNull( backgroundSceneManager ) ) {
 			throw( CustomException( std::wstring( L"Cannot get scene manager" ) ) );
 		} else if ( settingsManager.debug ) {
 			std::wcout << L"Got the scene manager" << std::endl;
 		}
-		
-		
-		/*if( settingsManager.getPlayMusic() ) { //Commenting this out because I think settingsManager, when reading the prefs, calls setupMusicStuff()
-			setupMusicStuff();
-		}*/
 		
 		if( not isScreenSaver ) {
 			settingsScreen.setPointers( this, device, nullptr, nullptr, &settingsManager );
@@ -2735,7 +2718,6 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 		}
 		
 		loadFonts();
-		//settingsScreen.setTextFont( textFont );
 		
 		if( not isScreenSaver ) {
 			menuManager.setMainGame( this );
@@ -2751,60 +2733,7 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 		playerStart.resize( settingsManager.getNumPlayers() );
 		playerAssigned.resize( settingsManager.getNumPlayers() );
 		
-		
-		{
-			//auto textureSearchLocation = boost::filesystem::path( boost::filesystem::current_path()/L"Images/players" );
-			
-			//std::vector< boost::filesystem::path > loadableTextures = getLoadableTexturesList( textureSearchLocation );
-			
-			std::vector< boost::filesystem::path > loadableTextures;
-			auto textureSearchLocations = system.getImageFolders();
-			for( auto locationIterator = textureSearchLocations.begin(); locationIterator != textureSearchLocations.end(); ++locationIterator ) {
-				auto textureList = getLoadableTexturesList( *locationIterator / L"players" );
-				for( auto textureIterator = textureList.begin(); textureIterator != textureList.end(); ++textureIterator ) {
-					loadableTextures.push_back( *textureIterator );
-				}
-			}
-			
-			
-			for( decltype( settingsManager.getNumPlayers() ) p = 0; p < settingsManager.getNumPlayers(); ++p ) {
-				
-				player.at( p ).setPlayerNumber( p );
-				
-				setObjectColorBasedOnNum( &( player.at( p ) ), p );
-				
-				player.at( p ).setMG( this );
-				
-				
-				player.at( p ).loadTexture( device, 100, loadableTextures );
-				
-				playerAssigned.at( p ) = false;
-				
-				
-				
-				switch( settingsManager.colorMode ) {
-					case SettingsManager::GRAYSCALE: {
-						playerStart.at( p ).setColors( GRAY_GRAYSCALE, LIGHTRED_GRAYSCALE );
-						break;
-					}
-					case SettingsManager::COLOR_MODE_DO_NOT_USE:
-					case SettingsManager::FULLCOLOR: {
-						playerStart.at( p ).setColors( GRAY, LIGHTRED );
-						break;
-					}
-					case SettingsManager::GREENSCALE: {
-						playerStart.at( p ).setColors( GRAY_GREENSCALE, LIGHTRED_GREENSCALE );
-						break;
-					}
-					case SettingsManager::AMBERSCALE: {
-						playerStart.at( p ).setColors( GRAY_AMBERSCALE, LIGHTRED_AMBERSCALE );
-						break;
-					}
-				}
-			}
-		}
-		
-		
+		loadTextures();
 		
 		if( settingsManager.isServer ) {
 			setMyPlayer( 0 );
@@ -2833,67 +2762,10 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 			}
 		}
 		
-		switch( settingsManager.colorMode ) {
-			case SettingsManager::GRAYSCALE: {
-				goal.setColors( GRAY_GRAYSCALE, LIGHTGREEN_GRAYSCALE );
-				break;
-			}
-			case SettingsManager::COLOR_MODE_DO_NOT_USE:
-			case SettingsManager::FULLCOLOR: {
-				goal.setColors( GRAY, LIGHTGREEN );
-				break;
-			}
-			case SettingsManager::GREENSCALE: {
-				goal.setColors( GRAY_GREENSCALE, LIGHTGREEN_GREENSCALE );
-				break;
-			}
-			case SettingsManager::AMBERSCALE: {
-				goal.setColors( GRAY_AMBERSCALE, LIGHTGREEN_AMBERSCALE );
-				break;
-			}
-		}
-		goal.loadTexture( device );
-		
-		if( enableController and device->activateJoysticks( controllerInfo ) and settingsManager.debug ) { //activateJoysticks fills controllerInfo with info about each controller
-			std::wcout << L"controller support is enabled and " << controllerInfo.size() << L" controller(s) are present." << std::endl;
-
-			for( decltype( controllerInfo.size() ) controller = 0; controller < controllerInfo.size(); ++controller ) {
-				std::wcout << L"controller " << controller << L":" << std::endl;
-				std::wcout << L"\tName: '" << stringConverter.toStdWString( controllerInfo[ controller ].Name ).c_str() << L"'" << std::endl; //stringConverter.toWCharArray( controllerInfo[ controller ].Name ) << L"'" << std::endl;
-				std::wcout << L"\tAxes: " << controllerInfo[ controller ].Axes << std::endl;
-				std::wcout << L"\tButtons: " << controllerInfo[ controller ].Buttons << std::endl;
-
-				std::wcout << L"\tHat is: ";
-
-				switch( controllerInfo[controller ].PovHat ) {
-					case irr::SJoystickInfo::POV_HAT_PRESENT:
-						std::wcout << L"present" << std::endl;
-						break;
-
-					case irr::SJoystickInfo::POV_HAT_ABSENT:
-						std::wcout << L"absent" << std::endl;
-						break;
-
-					case irr::SJoystickInfo::POV_HAT_UNKNOWN:
-					default:
-						std::wcout << L"unknown" << std::endl;
-						break;
-				}
-			}
-		} else if( settingsManager.debug ) {
-			std::wcout << L"controller support is not enabled." << std::endl;
-		}
-		
-		if( not isScreenSaver ) {
-			//Set up networking
-			network.setup( this, settingsManager.isServer );
-		}
-		
 		timer = device->getTimer();
 		
 		loadExitConfirmations();
 		
-
 		if( settingsManager.debug ) {
 			std::wcout << L"end of MainGame constructor" << std::endl;
 		}
@@ -4500,6 +4372,37 @@ void MainGame::setControls() {
 			}
 		}
 	}
+	
+	
+	if( enableController and device->activateJoysticks( controllerInfo ) and settingsManager.debug ) { //activateJoysticks fills controllerInfo with info about each controller
+		std::wcout << L"controller support is enabled and " << controllerInfo.size() << L" controller(s) are present." << std::endl;
+		
+		for( decltype( controllerInfo.size() ) controller = 0; controller < controllerInfo.size(); ++controller ) {
+			std::wcout << L"controller " << controller << L":" << std::endl;
+			std::wcout << L"\tName: '" << stringConverter.toStdWString( controllerInfo[ controller ].Name ).c_str() << L"'" << std::endl; //stringConverter.toWCharArray( controllerInfo[ controller ].Name ) << L"'" << std::endl;
+			std::wcout << L"\tAxes: " << controllerInfo[ controller ].Axes << std::endl;
+			std::wcout << L"\tButtons: " << controllerInfo[ controller ].Buttons << std::endl;
+			
+			std::wcout << L"\tHat is: ";
+			
+			switch( controllerInfo[controller ].PovHat ) {
+				case irr::SJoystickInfo::POV_HAT_PRESENT:
+					std::wcout << L"present" << std::endl;
+					break;
+					
+				case irr::SJoystickInfo::POV_HAT_ABSENT:
+					std::wcout << L"absent" << std::endl;
+					break;
+					
+				case irr::SJoystickInfo::POV_HAT_UNKNOWN:
+				default:
+					std::wcout << L"unknown" << std::endl;
+					break;
+			}
+		}
+	} else if( settingsManager.debug ) {
+		std::wcout << L"controller support is not enabled." << std::endl;
+	}
 }
 
 /**
@@ -5349,13 +5252,123 @@ void MainGame::setupBackground() {
 	}
 }
 
+void MainGame::setupDevice() {
+	if( settingsManager.fullscreen ) {
+		irr::video::IVideoModeList* vmList = device->getVideoModeList();
+		
+		auto desiredResolution = settingsManager.getFullscreenResolution();
+		
+		if( settingsManager.autoDetectFullscreenResolution ) {
+			desiredResolution = vmList->getDesktopResolution();
+		}
+		
+		if( settingsManager.allowSmallSize ) {
+			screenSize = vmList->getVideoModeResolution( irr::core::dimension2d< irr::u32 >( 1, 1 ), desiredResolution ); //Gets a video resolution between minimum (1,1) and maximum (fullscreen resolution setting)
+		} else {
+			screenSize = vmList->getVideoModeResolution( settingsManager.getMinimumWindowSize(), desiredResolution );
+		}
+	} else {
+		screenSize = settingsManager.getWindowSize();
+	}
+	
+	device->closeDevice(); //Signals to the existing device that it needs to close itself on next run() so that we can create a new device
+	device->run(); //This is next run()
+	device->drop(); //Cleans up after the device
+	
+	{
+		irr::SIrrlichtCreationParameters params;
+		params.DriverType = settingsManager.driverType;
+		params.WindowSize = screenSize;
+		params.Bits = settingsManager.getBitsPerPixel();
+		params.Fullscreen = settingsManager.fullscreen;
+		params.Stencilbuffer = false;
+		params.Vsync = settingsManager.vsync;
+		params.EventReceiver = this;
+		
+		if( isScreenSaver ) {
+			//std::wcerr << L"Running as screensaver" << std::endl;
+			try {
+				auto idString = system.getEnvironmentVariable( L"XSCREENSAVER_WINDOW" );
+				//std::wcout << L"idString: \"" << idString << L"\"" << std::endl;
+				void * idPointer = nullptr;
+				int idInt = swscanf( idString.c_str(), L"%p", &idPointer );
+				//std::wcout << L"idInt: " << idInt << L" idPointer: " << idPointer << std::endl;
+				
+				if( idInt >= 1 ) {
+					params.WindowId = idPointer;
+				}
+			} catch( std::exception &e ) {
+				std::cout << e.what() << std::endl;
+				exit( EXIT_FAILURE );
+			}
+		} else {
+			//std::wcerr << L"Not running as screensaver" << std::endl;
+		}
+		
+		device = createDeviceEx( params );
+		
+		if( isNull( device ) ) {
+			std::wcerr << L"Error: Cannot create device. Trying other driver types." << std::endl;
+			
+			//Driver types included in the E_DRIVER_TYPE enum may not actually be supported; it depends on how Irrlicht is compiled.
+			for( auto i = ( uint_fast8_t ) irr::video::EDT_COUNT; isNull( device ) and i not_eq ( uint_fast8_t ) irr::video::EDT_NULL; --i ) {
+				if( device->isDriverSupported( ( irr::video::E_DRIVER_TYPE ) i ) ) {
+					settingsManager.driverType = ( irr::video::E_DRIVER_TYPE ) i;
+					params.DriverType = settingsManager.driverType;
+					device = createDeviceEx( params );
+				}
+			}
+			
+			if( isNull( device ) ) {
+				std::wcerr << L"Error: No graphical output driver types are available. Using NULL type!! Also enabling debug." << std::endl;
+				settingsManager.debug = true;
+				params.DriverType = irr::video::EDT_NULL;
+				device = createDeviceEx( params );
+			
+				if( isNull( device ) ) {
+					throw( CustomException( L"Unable to create the device using any driver types" ) );
+				}
+			}
+			
+		} else if ( settingsManager.debug ) {
+			std::wcout << L"Got the new device" << std::endl;
+		}
+	}
+}
+
+/**
+ * @brief Sets settings for the video driver.
+ */
+void MainGame::setupDriver() {
+	driver = device->getVideoDriver();
+	if( isNull( driver ) ) {
+		throw( CustomException( std::wstring( L"Cannot get video driver" ) ) );
+	} else if ( settingsManager.debug ) {
+		std::wcout << L"Got the video driver" << std::endl;
+	}
+	
+	driver->setTextureCreationFlag( irr::video::ETCF_NO_ALPHA_CHANNEL, false );
+	driver->setTextureCreationFlag( irr::video::ETCF_CREATE_MIP_MAPS, false );
+	if( settingsManager.driverType == irr::video::EDT_SOFTWARE or settingsManager.driverType == irr::video:: EDT_BURNINGSVIDEO ) {
+		driver->setTextureCreationFlag( irr::video::ETCF_OPTIMIZED_FOR_SPEED, true );
+	} else {
+		driver->setTextureCreationFlag( irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true );
+	}
+	if( settingsManager.driverType == irr::video::EDT_SOFTWARE ) {
+		driver->setTextureCreationFlag( irr::video::ETCF_ALLOW_NON_POWER_2, false );
+	}
+}
+
+/**
+ * @brief Initializes the audio driver.
+ */
 void MainGame::setupMusicStuff() {
 	if( SDL_Init( SDL_INIT_AUDIO ) == -1 ) {
 		std::wcerr << L"Cannot initialize SDL audio." << std::endl;
 		settingsManager.setPlayMusic( false );
 	}
 	
-	{//Set the audio properties we hope to get: sample rate, channels, etc.
+	if( not settingsManager.getPlayMusic() ) { //Set the audio properties we hope to get: sample rate, channels, etc.
 		int audioRate = MIX_DEFAULT_FREQUENCY; //MIX_DEFAULT_FREQUENCY is 22050 Hz, half the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
 		Uint16 audioFormat = MIX_DEFAULT_FORMAT; //AUDIO_S16SYS according to documentation. CDs use signed 16-bit audio. SYS means use the system's native endianness.
 		int audioChannels = MIX_DEFAULT_CHANNELS; //2 according to documentation. Almost everything uses stereo. I wish surround sound were more common.
@@ -5384,7 +5397,7 @@ void MainGame::setupMusicStuff() {
 				} else {
 					std::wcout << L"unknown";
 				}
-			std::wcout << L")";
+				std::wcout << L")";
 			//cppcheck-suppress duplicateIf
 			} else if( audioFormat == AUDIO_S16SYS ) {
 				std::wcout << L"AUDIO_S16SYS (equivalent to ";
@@ -5398,7 +5411,7 @@ void MainGame::setupMusicStuff() {
 				} else {
 					std::wcout << L"unknown";
 				}
-			std::wcout << L")";
+				std::wcout << L")";
 			} else if( audioFormat == AUDIO_U8 ) {
 				std::wcout << L"AUDIO_U8";
 			} else if( audioFormat == AUDIO_S8 ) {

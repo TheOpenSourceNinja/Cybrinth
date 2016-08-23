@@ -153,11 +153,7 @@ class MainGame : public irr::IEventReceiver {
 		void drawSidebarText();
 		void drawStats( uint_fast32_t textY );
 		
-		bool firstMaze; //If we're loading from a file specified on the command line, we don't want to reset the random seed when generating the first maze.
-		
-		bool haveShownLogo;
-		
-		bool isScreenSaver;
+		void initializeVariables( bool runAsScreenSaver );
 		
 		void loadClockFont();
 		void loadExitConfirmations();
@@ -167,6 +163,7 @@ class MainGame : public irr::IEventReceiver {
 		void loadProTips();
 		bool loadSeedFromFile( boost::filesystem::path src );
 		void loadStatsFont();
+		void loadTextures();
 		void loadTipFont();
 		
 		void makeMusicList();
@@ -175,6 +172,8 @@ class MainGame : public irr::IEventReceiver {
 		void processControls();
 		
 		void setupBackground();
+		void setupDevice();
+		void setupDriver();
 		void setupMusicStuff();
 		void startLoadingScreen();
 		
@@ -189,7 +188,13 @@ class MainGame : public irr::IEventReceiver {
 		
 		bool fillBackgroundTextureAfterLoading; //The "STARTRAILS" background animation requires this
 		
+		bool firstMaze; //If we're loading from a file specified on the command line, we don't want to reset the random seed when generating the first maze.
+		
 		bool haveFilledBackgroundTextureAfterLoading;
+		
+		bool haveShownLogo;
+		
+		bool isScreenSaver;
 		
 		bool musicPlaying;
 		
