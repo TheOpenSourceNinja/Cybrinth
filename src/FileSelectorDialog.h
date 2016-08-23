@@ -66,7 +66,7 @@ class FileSelectorDialog : public irr::gui::IGUIFileOpenDialog {
 		virtual const irr::io::path& getDirectoryName();
 		/**
 		\brief called if an event happened.
-		\param even - the event that happened
+		\param event - the event that happened
 		\return a bool
 		*/
 		virtual bool OnEvent( const irr::SEvent& event );
