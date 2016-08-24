@@ -41,7 +41,7 @@ class NetworkManager {
 		
 		bool getConnectionStatus();
 		bool getIsServer();
-		std::string getPort();
+		uint_fast16_t getPort();
 		
 		void ImReadyToPlay();
 		
@@ -92,7 +92,7 @@ class NetworkManager {
 		std::string serializeS32( int32_t input );
 		
 		std::string serverIP; //Clients need to know this
-		std::string serverPort;
+		uint_fast16_t serverPort;
 		
 		enum command_t : uint8_t { NEWMAZE, TELEPORTPLAYER, MOVEPLAYERONX, MOVEPLAYERONY, TELLPLAYERNUMBER, READYTOPLAY };
 };

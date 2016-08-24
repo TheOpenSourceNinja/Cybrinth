@@ -502,7 +502,7 @@ uint32_t NetworkManager::deSerializeU32( std::string input ) {
 	return result;
 }
 
-std::string NetworkManager::getPort() {
+uint_fast16_t NetworkManager::getPort() {
 	return serverPort;
 }
 
@@ -519,15 +519,7 @@ void NetworkManager::setIP( std::wstring newIP ) {
 }
 
 void NetworkManager::setPort( uint_fast16_t newPort ) {
-	try {
-		StringConverter sc;
-		std::string tempStr = sc.toStdString( newPort );
-		serverPort = tempStr;
-	} catch( boost::bad_lexical_cast &e ) {
-		std::wcerr << L"Error in NetworkManager::setPort(): not a valid port number." << std::endl;
-	} catch( std::exception e ) {
-		std::wcerr << L"Error in NetworkManager::setPort(): " << e.what() << std::endl;
-	}
+	serverPort = newPort;
 }
 
 void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
@@ -553,7 +545,7 @@ void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
 	RakNet::SocketDescriptor socketDescriptor;
 	socketDescriptor.socketFamily = AF_INET6;
 	if( isServer ) {
-		socketDescriptor.port = atoi( serverPort.c_str() );
+		socketDescriptor.port = serverPort;
 	}
 	
 	auto startupState = me->Startup( maxConnections, &socketDescriptor, 1 );
@@ -566,7 +558,7 @@ void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
 		me->SetUnreliableTimeout( 5000 ); //The number of milliseconds to wait before timing out an unreliable connection. Set to 0 or less to disable timeout. No magic number here; I just guessed that 5 seconds would be good.
 		
 		if( not isServer ) {
-			RakNet::ConnectionAttemptResult car = me->Connect( serverIP.c_str(), atoi( serverPort.c_str() ), password.c_str(), password.length() );
+			RakNet::ConnectionAttemptResult car = me->Connect( serverIP.c_str(), serverPort, password.c_str(), password.length() );
 			isConnected = ( car == RakNet::CONNECTION_ATTEMPT_STARTED );
 		}
 		
@@ -614,7 +606,7 @@ void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
 				break;
 			}
 			case RakNet::SOCKET_PORT_ALREADY_IN_USE: {
-				std::wcerr << L"Socket port " << serverPort.c_str() << " already in use." << std::endl;
+				std::wcerr << L"Socket port " << serverPort << " already in use." << std::endl;
 				break;
 			}
 			case RakNet::SOCKET_FAILED_TO_BIND: {
