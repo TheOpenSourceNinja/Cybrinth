@@ -63,6 +63,10 @@ install-data-local:
 	cp ./exitConfirmations.txt $(DESTDIR)@datadir@/Cybrinth/exitConfirmations.txt
 	cp ./credits.txt $(DESTDIR)@datadir@/Cybrinth/credits.txt
 	chmod --recursive 555 $(DESTDIR)@datadir@/Cybrinth/
+	mkdir --parents --mode=7777 $(DESTDIR)@sysconfdir@/Cybrinth
+	cp ./prefs.cfg $(DESTDIR)@sysconfdir@/Cybrinth/prefs.cfg
+	cp ./controls.cfg $(DESTDIR)@sysconfdir@/Cybrinth/controls.cfg
+	chmod --recursive 555 $(DESTDIR)@datadir@/Cybrinth/
 
 uninstall-local:
 	rm -rf @datadir@/Cybrinth/
