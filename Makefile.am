@@ -6,7 +6,7 @@ export DEB_BUILD_HARDENING:= 1 #If you have hardening wrapper scripts installed 
 
 IMAGES_RESULT != [ `find ./Images -type f -printf "%T@\n" | sort | tail -n 1 | xargs printf "%.f"` -gt `find ./compiled-images -type f -printf "%T@\n" | sort | tail -n 1 | xargs printf "%.f"` ] && echo 1 || echo 0
 
-AM_CPPFLAGS = -O0 -g -Wall -Wextra -Wno-write-strings -Wno-pedantic $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS) $(SDLDEPS_CFLAGS)
+AM_CPPFLAGS = -Wall -Wextra -Wno-write-strings -Wno-pedantic $(IRRLICHT_CFLAGS) $(BOOSTFILESYSTEM_CFLAGS) $(BOOSTSYSTEM_CFLAGS) $(DEPS_CFLAGS) $(SDLDEPS_CFLAGS)
 AM_LDFLAGS = -lstdc++ -lm -pthread
 bin_PROGRAMS = cybrinth
 
