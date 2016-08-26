@@ -537,7 +537,8 @@ void NetworkManager::setup( MainGame* newGM, bool newIsServer ) {
 	
 	uint_fast8_t maxConnections;
 	if( isServer ) {
-		maxConnections = UINT8_MAX; //A server can have many clients
+		//maxConnections = UINT8_MAX; //A server can have many clients
+		maxConnections = mg->settingsManager.getNumPlayers() - mg->settingsManager.getNumBots() - 1;
 	} else {
 		maxConnections = 1; //A client only connects to one server
 	}
