@@ -2631,6 +2631,10 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 		
 		settingsManager.readPrefs();
 		
+		if( settingsManager.getPlayMusic() ) {
+			musicSettingChanged();
+		}
+		
 		if( not isScreenSaver ) {
 			//Set up networking
 			network.setPort( settingsManager.networkPort );
@@ -2671,8 +2675,6 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 		}
 		
 		viewportSize.set( screenSize.Width - ( screenSize.Width / sideDisplaySizeDenominator ), screenSize.Height - 1 );
-		
-		settingsManager.setPointers( device, this, &mazeManager, &network, &spellChecker, &system);
 		
 		setupDriver();
 		
@@ -5382,7 +5384,7 @@ void MainGame::setupMusicStuff() {
 		settingsManager.setPlayMusic( false );
 	}
 	
-	if( not settingsManager.getPlayMusic() ) { //Set the audio properties we hope to get: sample rate, channels, etc.
+	if( settingsManager.getPlayMusic() ) { //Set the audio properties we hope to get: sample rate, channels, etc.
 		int audioRate = MIX_DEFAULT_FREQUENCY; //MIX_DEFAULT_FREQUENCY is 22050 Hz, half the standard sample rate for CDs, and so makes a good 'lowest common denominator' for anything related to audio.
 		Uint16 audioFormat = MIX_DEFAULT_FORMAT; //AUDIO_S16SYS according to documentation. CDs use signed 16-bit audio. SYS means use the system's native endianness.
 		int audioChannels = MIX_DEFAULT_CHANNELS; //2 according to documentation. Almost everything uses stereo. I wish surround sound were more common.

@@ -23,9 +23,17 @@
 	//What can we do if someone doesn't have iostream? I don't know.
 #endif //HAVE_IOSTREAM
 
+#include <locale>
+#include <codecvt>
+
 #include "StringConverter.h"
 
 int main( int argc, char *argv[] ) {
+	const std::locale utf8Locale = std::locale( std::locale(), new std::codecvt_utf8< wchar_t > );
+	std::locale::global( utf8Locale ); //Sets the C++ global locale but not the C global locale. In theory, this should make the whole program use UTF-8 for reading and writing files.
+	std::wcout.imbue( utf8Locale ); //In theory, this should make the whole program use UTF-8 for reading and writing to standard input/output.
+	std::wcin.imbue( utf8Locale );
+	
 	//PACKAGE_NAME, PACKAGE_VERSION, and PACKAGE_BUGREPORT are defined by Autoconf and passed to the compiler by command line arguments - you won't find them in any header. The same goes for HAVE_IOSTREAM above.
 	std::wcout << L"Now starting " << PACKAGE_NAME << L" version " << PACKAGE_VERSION << L". Please report bugs to " << PACKAGE_BUGREPORT << L". Enjoy!" << std::endl;
 	
