@@ -29,10 +29,10 @@
 #include "StringConverter.h"
 
 int main( int argc, char *argv[] ) {
-	const std::locale utf8Locale = std::locale( std::locale(), new std::codecvt_utf8< wchar_t > );
+	const std::locale utf8Locale( std::locale(), new std::codecvt_utf8< wchar_t > ); //This program and its libraries use wide character strings extensively, hence the wchar_t
 	std::locale::global( utf8Locale ); //Sets the C++ global locale but not the C global locale. In theory, this should make the whole program use UTF-8 for reading and writing files.
-	std::wcout.imbue( utf8Locale ); //In theory, this should make the whole program use UTF-8 for reading and writing to standard input/output.
-	std::wcin.imbue( utf8Locale );
+	//std::wcout.imbue( utf8Locale ); //In theory, this should make the whole program use UTF-8 for reading and writing to standard input/output.
+	//std::wcin.imbue( utf8Locale );
 	
 	//PACKAGE_NAME, PACKAGE_VERSION, and PACKAGE_BUGREPORT are defined by Autoconf and passed to the compiler by command line arguments - you won't find them in any header. The same goes for HAVE_IOSTREAM above.
 	std::wcout << L"Now starting " << PACKAGE_NAME << L" version " << PACKAGE_VERSION << L". Please report bugs to " << PACKAGE_BUGREPORT << L". Enjoy!" << std::endl;
@@ -49,15 +49,15 @@ int main( int argc, char *argv[] ) {
 			
 			for( decltype( argc ) argNum = 1; argNum < argc; ++argNum ) {
 				
-				auto argument = sc.toStdString( argv[ argNum ] );
+				auto argument = sc.toStdWString( argv[ argNum ] );
 				
-				std::wcout << sc.toStdWString( argument ) << std::endl;
+				std::wcout << argument << std::endl;
 				
-				if( argc > argNum + 1 and argument.compare( "-window-id" ) == 0 ) {
+				if( argc > argNum + 1 and argument.compare( L"-window-id" ) == 0 ) {
 					//The XScreenSaver daemon passes a window ID as both a command-line argument and as an environment variable.
 					runAsScreenSaver = true;
 					argNum += 1; //We ignore the window ID argument; the environment variable will be used.
-				} else if( argument.compare( "-run-as-screensaver" ) == 0 ) {
+				} else if( argument.compare( L"-run-as-screensaver" ) == 0 ) {
 					//The reason we ignore the window ID argument above is because the documentation for the GNOME-Screensaver daemon says it uses the environment variable. So we define this other command-line argument which any screensaver daemon should use.
 					runAsScreenSaver = true;
 				}

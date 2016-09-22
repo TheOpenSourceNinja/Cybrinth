@@ -1826,22 +1826,20 @@ void MainGame::loadClockFont() { //Load clockFont
 						std::wcout << L"Loading exit confirmations from file " << exitConfirmationsPath.wstring() << std::endl;
 					}
 					
-					FILE* exitConfirmationsFile = fopen( exitConfirmationsPath.c_str(), "r" );
+					boost::filesystem::wfstream exitConfirmationsFile;
+					exitConfirmationsFile.open( exitConfirmationsPath, boost::filesystem::wfstream::in );
+					exitConfirmationsFile.imbue( std::locale() ); //Can't tell if this line is necessary. main.cpp sets the global C++ locale to use codecvt_utf8, and we want to read and write UTF-8 files so we imbue the file stream with the global locale.
 					
-					if( !isNull( exitConfirmationsFile ) ) {
-						uint_fast16_t lineNum = 0;
-						
-						wchar_t* linePointer;
-						
-						do {
+					if( exitConfirmationsFile.is_open() ) {
+						uintmax_t lineNum = 0; //This used to be a uint_fast8_t, which should be good enough. However, when dealing with user input (such as a file), we don't want to make assumptions.
+					
+						while( exitConfirmationsFile.good() ) {
 							++lineNum;
+							std::wstring line;
+							getline( exitConfirmationsFile, line );
 							
-							int lineMaxLength = 640; //I'm not entirely sure if this is bytes, chars, or wide characters. What I do know is that prefs.cfg has some really long comments that brought line lengths above the previous limit of 255.
-							std::wstring::value_type lineArray[ lineMaxLength ];
-							
-							linePointer = fgetws( lineArray, lineMaxLength, exitConfirmationsFile );
-							if( !isNull( linePointer ) ) {
-								std::wstring line = linePointer;
+							//if( !isNull( linePointer ) ) {
+								//std::wstring line = linePointer;
 								
 								if( not line.empty() ) {
 									line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
@@ -1855,10 +1853,11 @@ void MainGame::loadClockFont() { //Load clockFont
 										}
 									}
 								}
-							}
-						} while( !isNull( linePointer ) );
+							//}
+						}// while( !isNull( linePointer ) );
 						
-						fclose( exitConfirmationsFile );
+						exitConfirmationsFile.close();
+						//fclose( exitConfirmationsFile );
 						
 						//The random number generator has already been seeded
 						shuffle( exitConfirmations.begin(), exitConfirmations.end(), randomNumberGenerator );
@@ -2324,49 +2323,35 @@ void MainGame::loadProTips() {
 					if( settingsManager.debug ) {
 						std::wcout << L"Loading pro tips from file " << proTipsPath.wstring() << std::endl;
 					}
-					/*boost::filesystem::wifstream proTipsFile;
-					proTipsFile.open( proTipsPath );*/
 					
-					/*std::wifstream proTipsFile;
-					proTipsFile.open( proTipsPath.string() );*/
+					boost::filesystem::wfstream proTipsFile;
+					proTipsFile.open( proTipsPath, boost::filesystem::wfstream::in );
+					proTipsFile.imbue( std::locale() ); //Can't tell if this line is necessary. main.cpp sets the global C++ locale to use codecvt_utf8, and we want to read and write UTF-8 files so we imbue the file stream with the global locale.
 					
-					FILE* proTipsFile = fopen( proTipsPath.c_str(), "r" );
+					if( proTipsFile.is_open() ) {
+						uintmax_t lineNum = 0; //This used to be a uint_fast8_t, which should be good enough. However, when dealing with user input (such as a file), we don't want to make assumptions.
 					
-					if( !isNull( proTipsFile ) ) { //proTipsFile.is_open() ) {
-						uint_fast16_t lineNum = 0;
-						
-						wchar_t* linePointer;
-						
-						do { //proTipsFile.good() ) {
+						while( proTipsFile.good() ) {
 							++lineNum;
-							
-							//std::wstring line;
-							int lineMaxLength = 640; //I'm not entirely sure if this is bytes, chars, or wide characters. What I do know is that prefs.cfg has some really long comments that brought line lengths above the previous limit of 255.
-							std::wstring::value_type lineArray[ lineMaxLength ];
-							
-							//getline( proTipsFile, line );
-							//proTipsFile.getline( lineArray, lineMax );
-							linePointer = fgetws( lineArray, lineMaxLength, proTipsFile );
-							if( !isNull( linePointer ) ) {
-								std::wstring line = linePointer;
+							std::wstring line;
+							getline( proTipsFile, line );
+								
+							if( not line.empty() ) {
+								line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
+								boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
 								
 								if( not line.empty() ) {
-									line = line.substr( 0, line.find( L"//" ) ); //Filters out comments
-									boost::algorithm::trim_all( line ); //Removes trailing and leading spaces, and spaces in the middle are reduced to one character
+									proTips.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
 									
-									if( not line.empty() ) {
-										proTips.push_back( stringConverter.toIrrlichtStringW( line ) ); //StringConverter converts between wstring (which is what getLine needs) and core::stringw (which is what Irrlicht needs)
-										
-										if( settingsManager.debug ) {
-											std::wcout << line << std::endl;
-										}
+									if( settingsManager.debug ) {
+										std::wcout << line << std::endl;
 									}
 								}
 							}
-						} while( !isNull( linePointer ) );
+						} // while( !isNull( linePointer ) );
 						
-						//proTipsFile.close();
-						fclose( proTipsFile );
+						proTipsFile.close();
+						//fclose( proTipsFile );
 						
 						//setRandomSeed( time( nullptr ) ); //Initializing the random number generator here allows shuffle() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generatred.
 						shuffle( proTips.begin(), proTips.end(), randomNumberGenerator );
