@@ -1,16 +1,13 @@
 Source: cybrinth
 Section: unknown
 Priority: optional
-Maintainer: James Dearing <james@james-Gazelle-Professional
->
-Build-Depends: debhelper (>=9),autotools-dev
+Maintainer: James Dearing <dearingj@lifetime.oregonstate.edu>
+Build-Depends: debhelper (>= 4.1.16), gimp, pkg-config, libfreetype6-dev, libtag1-dev, libsdl2-mixer-dev, libirrlicht-dev, libboost-filesystem-dev, automake, autoconf-archive
 Standards-Version: 3.9.6
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: git://anonscm.debian.org/collab-maint/cybrinth.git
-#Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/cybrinth.git
+Homepage: https://github.com/TheOpenSourceNinja/Cybrinth
 
 Package: cybrinth
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Description: Maze game
+ Cybrinth is a two-dimensional retro-inspired maze game for zero or more players.
