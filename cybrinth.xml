@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<screensaver name="cybrinth" _label="Cybrinth">
+
+	<command arg="-run-as-screensaver"/>
+
+  <!-- <video href="https://www.youtube.com/watch?v=abc123"/> -->
+	
+	<hgroup>
+		<vgroup>
+			<!-- This command line argument currently does nothing; I'm just putting this here so something will show up in screen saver settings -->
+			<!-- The % apparently gets replaced with the actual number -->
+			<number id="numBots" type="slider" arg="-numBots %"
+		            _label="Number of bots" _low-label="1" _high-label="255"
+		            low="1" high="255" default="1"/>
+		</vgroup>
+	</hgroup>
+ <!--<hgroup>
+  <vgroup>
+   <select id="mode">
+    <option id="random"    _label="Choose display mode randomly"/>
+    <option id="text"      _label="Display scrolling text" arg-set="-mode text"/>
+    <option id="slideshow" _label="Display images"         arg-set="-mode slideshow"/>
+    <option id="basic"     _label="Run basic programs"     arg-set="-mode basic"/>
+   </select>
+
+   <xscreensaver-text />
+  </vgroup>
+  <vgroup>
+   <number id="duration" type="slider" arg="-duration %"
+           _label="Duration" _low-label="10 seconds" _high-label="10 minutes"
+           low="10" high="600" default="60"/>
+
+   <xscreensaver-image />
+   <boolean id="showfps" _label="Show frame rate" arg-set="-fps"/>
+   <xscreensaver-updater />
+  </vgroup>
+
+   <vgroup>
+    <number id="tvcolor" type="slider" arg="-tv-color %"
+            _label="Color Knob" _low-label="Low" _high-label="High"
+            low="0" high="1000" default="70"/>
+    <number id="tvtint" type="slider" arg="-tv-tint %"
+            _label="Tint Knob" _low-label="Low" _high-label="High"
+            low="0" high="100" default="5"/>
+    <number id="tvbrightness" type="slider" arg="-tv-brightness %"
+            _label="Brightness Knob" _low-label="Low" _high-label="High"
+            low="0" high="200" default="150"/>
+    <number id="tvcontrast" type="slider" arg="-tv-contrast %"
+            _label="Contrast Knob" _low-label="Low" _high-label="High"
+            low="0" high="1500" default="1000"/>
+   </vgroup>
+  </hgroup>-->
+
+	<_description>
+Cybrinth continuously generates and then solves mazes.
+	</_description>
+</screensaver>
