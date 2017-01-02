@@ -1,0 +1,11 @@
+Package: Cybrinth
+Version: 2017-01-01
+Maintainer: James Dearing <dearingj@lifetime.oregonstate.edu>
+Section: games
+Homepage: https://github.com/TheOpenSourceNinja/Cybrinth
+Architecture: amd64
+Priority: optional
+Depends: libfreetype6, libtag1v5, libsdl2-mixer-2.0-0, libirrlicht1.8, libboost-filesystem1.61.0, libc6
+Description: Maze game
+ Cybrinth is a 2D retro-inspired maze game
+

@@ -1,0 +1,85 @@
+E: Cybrinth: unstripped-binary-or-object usr/bin/cybrinth
+E: Cybrinth: debian-changelog-file-missing
+E: Cybrinth: control-file-has-bad-permissions md5sums 0664 != 0644
+E: Cybrinth: bad-package-name
+E: Cybrinth: package-not-lowercase
+W: Cybrinth: non-standard-dir-perm usr/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/bin/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Fonts/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Fonts/Press Start 2P/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Fonts/Press Start 2P/LICENSE.txt
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Fonts/Ubuntu/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Fonts/Ubuntu/LICENSE
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Images/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Images/backgrounds/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Images/backgrounds/Art created for Cybrinth/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Images/backgrounds/Art created for Cybrinth/license.txt
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Images/backgrounds/Others/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Images/items/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Images/logos/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Images/menu icons/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Images/misc/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Images/players/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Aaron_235/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Aaron_235/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Alpha C/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Alpha C/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Andreas Viklund/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Andreas Viklund/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Drozerix/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Drozerix/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Eric Skiff/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Eric Skiff/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Firage/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Firage/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Hacker Blinks/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Hacker Blinks/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Harry Santos/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Harry Santos/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Kevin MacLeod/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Kevin MacLeod/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Maf/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Maf/Beyond the Pouet/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Maf/Beyond the Pouet/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Maf/Tututu/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Maf/Tututu/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Mysid/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Mysid/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/Skip Cloud/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/Skip Cloud/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/bondisurfer/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/bondisurfer/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/giannisfs/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/giannisfs/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/lightsoda/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/lightsoda/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/null1024/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/null1024/License
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/steal 4 ram/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/Cybrinth/Music/steal 4 ram/TvNewsLIES!/ 0775 != 0755
+W: Cybrinth: extra-license-file usr/share/Cybrinth/Music/steal 4 ram/TvNewsLIES!/License
+W: Cybrinth: non-standard-dir-perm usr/share/applications/ 0775 != 0755
+W: Cybrinth: non-standard-file-perm usr/share/applications/Cybrinth.desktop 0664 != 0644
+W: Cybrinth: non-standard-dir-perm usr/share/doc/ 0775 != 0755
+W: Cybrinth: non-standard-dir-perm usr/share/doc/Cybrinth/ 0775 != 0755
+W: Cybrinth: non-standard-file-perm usr/share/doc/Cybrinth/copyright 0664 != 0644
+E: Cybrinth: package-section-games-but-contains-no-game
+W: Cybrinth: binary-without-manpage usr/bin/cybrinth
+W: Cybrinth: duplicated-key-in-desktop-entry usr/share/applications/Cybrinth.desktop:12 Version
+W: Cybrinth: desktop-entry-uses-reserved-category Screensaver usr/share/applications/Cybrinth.desktop
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/giannisfs/electropop.ogg
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/Maf/Beyond the Pouet/05 - Crystal Pantoufle.ogg
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/Maf/Beyond the Pouet/10 - Shroomy.ogg
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/Maf/Beyond the Pouet/04 - Beavis II.ogg
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/Maf/Beyond the Pouet/03 - Astrosplif.ogg
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/Maf/Beyond the Pouet/14 - Zz.ogg
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/Maf/Beyond the Pouet/08 - Doxeh.ogg
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/Maf/Beyond the Pouet/07 - Sync.ogg
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/Maf/Beyond the Pouet/02 - Klonk.ogg
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/bondisurfer/ai shi te ru MASTER 1.flac
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/Maf/Beyond the Pouet/01 - Beyond The Pouet.ogg
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/Maf/Beyond the Pouet/13 - TNS2-g.ogg
+W: Cybrinth: executable-not-elf-or-script usr/share/Cybrinth/Music/Maf/Beyond the Pouet/09 - Poin.ogg
