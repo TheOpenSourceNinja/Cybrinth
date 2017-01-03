@@ -3,7 +3,7 @@
  * @author James Dearing <dearingj@lifetime.oregonstate.edu>
  * 
  * @section LICENSE
- * Copyright © 2012-2016.
+ * Copyright © 2012-2017.
  * This file is part of Cybrinth.
  *
  * Cybrinth is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -2635,17 +2635,13 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 		
 		settingsManager.readPrefs();
 		
-		if( settingsManager.getPlayMusic() ) {
-			musicSettingChanged();
-		}
-		
 		if( not isScreenSaver ) {
 			//Set up networking
 			network.setPort( settingsManager.networkPort );
 			network.setup( this, settingsManager.isServer );
 		}
 		
-		//Initializing the random number generator here allows makeMusicList() (called by SettingsManager when it reads prefs), loadProTips(), and pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generated.
+		//Initializing the random number generator here allows makeMusicList() (called by musicSettingChanged(), which in turn is called below and by SettingsManager), loadProTips(), and pickLogo() to use it. A new random seed will be chosen, or loaded from a file, before the first maze gets generated.
 		if( not loadSeedFromFile( fileToLoad ) ) {
 			if( settingsManager.isServer ) {
 				setRandomSeed( time( nullptr ) );
@@ -2655,6 +2651,10 @@ MainGame::MainGame( std::wstring fileToLoad = L"", bool runAsScreenSaver = false
 			firstMaze = false;
 		} else {
 			firstMaze = true;
+		}
+		
+		if( settingsManager.getPlayMusic() ) {
+			musicSettingChanged(); //Should be after the call to setRandomSeed() 
 		}
 		
 		setMyPlayer( UINT8_MAX ); //Must call this before setControls() so that controls which affect player number "mine" will work. setMyPlayer() will be called again later to set the correct player number; the number used here doesn't matter.

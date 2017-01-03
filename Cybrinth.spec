@@ -1,7 +1,7 @@
 #
 # spec file for package Cybrinth
 #
-# Copyright (c) 2016 James Dearing <dearingj@lifetime.oregonstate.edu>
+# Copyright (c) 2017 James Dearing <dearingj@lifetime.oregonstate.edu>
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -21,7 +21,7 @@ License:		AGPL-3.0+
 Group:			Amusements/Games/Other
 Summary:		Retro-themed 2D maze exploration game
 Version:		0.1
-Release:		0 
+Release:		0
 Source0:		%name-%version.tar.xz
 BuildRoot:		%{_tmppath}/%{name}-%{version}-build
 URL:	https://github.com/TheOpenSourceNinja/Cybrinth
@@ -35,14 +35,14 @@ AutoReqProv: yes
 %description
 A retro-themed two-dimensional maze exploration game inspired by Pac-Man and similar games.
 
-%prep 
+%prep
 %setup
 %configure
 
-%build 
+%build
 %make_build
 
-%install 
+%install
 %make_install
 
 %files

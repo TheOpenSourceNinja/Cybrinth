@@ -1,4 +1,4 @@
-# Cybrinth created by James Dearing, copyright 2012-2016 and licensed under the GNU AGPL (see the file COPYING)
+# Cybrinth created by James Dearing, copyright 2012-2017 and licensed under the GNU AGPL (see the file COPYING)
 
 #Note: Consider making a new makefile based on examples from http://nuclear.mutantstargoat.com/articles/make/
 
