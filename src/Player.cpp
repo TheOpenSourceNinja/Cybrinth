@@ -213,7 +213,7 @@ void Player::loadTexture( irr::IrrlichtDevice* device, uint_fast16_t size, std::
 		
 		texture = nullptr;
 		
-		{
+		if( not usableFiles.empty() ) {
 			StringConverter sc;
 			textureFilePath = sc.toIrrlichtStringW( usableFiles.at( mg->getRandomNumber() % usableFiles.size() ).wstring() );
 			
