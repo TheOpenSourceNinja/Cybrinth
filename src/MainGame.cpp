@@ -4074,14 +4074,7 @@ void MainGame::setControls() {
 			std::wcout << L"setControls() called" << std::endl;
 		}
 		
-		//Yeah, these are the only defaults so far.
-		//TODO: Add default controls.
-		enableController = false;
-		joystickDeadZoneDefaultPercent = 50;
-		std::map< uint_fast8_t, uint_fast8_t > joystickDeadZones;
-		for( uint_fast8_t i = 0; i < UINT_FAST8_MAX; ++i ) {
-			joystickDeadZones[ i ] = joystickDeadZoneDefaultPercent;
-		}
+		setDefaultControls();
 		
 		std::vector< boost::filesystem::path > configFolders = system.getConfigFolders(); // Flawfinder: ignore
 		bool controlsFileFound = false;
@@ -4520,6 +4513,63 @@ void MainGame::setControls() {
 		}
 	} else if( settingsManager.debug ) {
 		std::wcout << L"controller support is not enabled." << std::endl;
+	}
+}
+
+/**
+ * @brief Does what it says on the tin.
+ */
+void MainGame::setDefaultControls() {
+	//Yeah, these are the only defaults so far.
+	//TODO: Add default controls.
+	enableController = false;
+	joystickDeadZoneDefaultPercent = 50;
+	std::map< uint_fast8_t, uint_fast8_t > joystickDeadZones;
+	for( uint_fast8_t i = 0; i < UINT_FAST8_MAX; ++i ) {
+		joystickDeadZones[ i ] = joystickDeadZoneDefaultPercent;
+	}
+	
+	{
+		ControlMapping temp;
+		temp.setKey( irr::KEY_ESCAPE );
+		temp.setAction( ControlMapping::ACTION_MENU_ACTIVATE );
+		controls.push_back( temp );
+	}
+	{
+		ControlMapping temp;
+		temp.setKey( irr::KEY_UP );
+		temp.setAction( ControlMapping::ACTION_PLAYER_UP );
+		controls.push_back( temp );
+	}
+	{
+		ControlMapping temp;
+		temp.setKey( irr::KEY_DOWN );
+		temp.setAction( ControlMapping::ACTION_PLAYER_DOWN );
+		controls.push_back( temp );
+	}
+	{
+		ControlMapping temp;
+		temp.setKey( irr::KEY_LEFT );
+		temp.setAction( ControlMapping::ACTION_PLAYER_LEFT );
+		controls.push_back( temp );
+	}
+	{
+		ControlMapping temp;
+		temp.setKey( irr::KEY_RIGHT );
+		temp.setAction( ControlMapping::ACTION_PLAYER_RIGHT );
+		controls.push_back( temp );
+	}
+	{
+		ControlMapping temp;
+		temp.setKey( irr::KEY_UP );
+		temp.setAction( ControlMapping::ACTION_MENU_UP );
+		controls.push_back( temp );
+	}
+	{
+		ControlMapping temp;
+		temp.setKey( irr::KEY_DOWN );
+		temp.setAction( ControlMapping::ACTION_MENU_DOWN );
+		controls.push_back( temp );
 	}
 }
 

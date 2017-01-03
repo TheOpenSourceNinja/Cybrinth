@@ -172,6 +172,7 @@ class MainGame : public irr::IEventReceiver {
 		
 		void processControls();
 		
+		void setDefaultControls();
 		void setupBackground();
 		void setupDevice();
 		void setupDriver();
