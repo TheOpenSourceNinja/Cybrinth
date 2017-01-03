@@ -1009,6 +1009,11 @@ void XPMImageLoader::loadMenuOptionImage( irr::video::IVideoDriver* driver, irr:
 			xpm = reset_to_defaults;
 			break;
 		}
+		case MenuOption::JOIN_SERVER: {
+			#include "compiled-images/menu icons/join_server.xpm"
+			xpm = join_server;
+			break;
+		}
 		default: {
 			std::wcerr << L"Error in XPMImageLoader::loadMenuOptionImage(): Type " << ( unsigned int ) type << " not handled in switch statement." << std::endl;
 			break;
