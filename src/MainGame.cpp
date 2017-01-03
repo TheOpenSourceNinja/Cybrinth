@@ -27,6 +27,7 @@
 #include <SDL.h>
 #include <fileref.h>
 #include <tag.h>
+#include <algorithm>
 
 //TODO: Implement an options screen (working on it: see SettingsScreen.h/.cpp)
 //TODO: Add control switcher item (icon: yin-yang using players' colors?)
@@ -1798,7 +1799,7 @@ void MainGame::loadClockFont() { //Load clockFont
 	}
 	
 	if( settingsManager.debug ) {
-		std::wcout << L"clockFont is loaded" << std::endl;
+		//std::wcout << L"clockFont is loaded" << std::endl;
 	}
 }
 
@@ -2791,19 +2792,86 @@ void MainGame::makeMusicList() {
 		
 		musicList.clear(); //The music list should be empty anyway, since makeMusicList() only gets called once, but just in case...
 		
-		if( settingsManager.debug ) {
-			std::wcout << L"makeMusicList() called" << std::endl;
+		std::vector< std::wstring > allowedFileExtensions;
+		
+		//if( settingsManager.debug ) {
 			decltype( Mix_GetNumMusicDecoders() ) numMusicDecoders = Mix_GetNumMusicDecoders();
-			std::wcout << L"There are " << numMusicDecoders << L" music decoders available. They are:" << std::endl;
-
-			for( decltype( numMusicDecoders ) decoder = 0; decoder < numMusicDecoders; ++decoder ) {
-				std::wcout << decoder << L": " << Mix_GetMusicDecoder( decoder ) << std::endl;
+			
+			if( settingsManager.debug ) {
+				std::wcout << L"There are " << numMusicDecoders << L" music decoders available. They are:" << std::endl;
 			}
+			
+			for( decltype( numMusicDecoders ) decoder = 0; decoder < numMusicDecoders; ++decoder ) {
+				std::wstring decoderName = stringConverter.toStdWString( Mix_GetMusicDecoder( decoder ) );
+				
+				if( settingsManager.debug ) {
+					std::wcout << decoder << L": \"" << decoderName << L"\"" << std::endl;
+				}
+				
+				{
+					//These are all the decoders I know of as of 2017-01-02:
+					static std::map< std::wstring, uint_fast8_t > names = {
+						{ L"WAVE", 0 },
+						{ L"MODPLUG", 1 },
+						{ L"OGG", 2 },
+						{ L"FLAC", 3 },
+						{ L"MP3", 4 },
+						{ L"TIMIDITY", 5 }
+					};
+					
+					try {
+						//These are all the file extensions I could think of for each decoder. Feel free to add more.
+						switch( names.at( decoderName ) ) {
+							case 0: {
+								allowedFileExtensions.push_back( L".wav" );
+								allowedFileExtensions.push_back( L".wave" );
+								break;
+							}
+							case 1: {
+								allowedFileExtensions.push_back( L".mod" );
+								break;
+							}
+							case 2: {
+								allowedFileExtensions.push_back( L".ogg" );
+								allowedFileExtensions.push_back( L".oga" );
+								allowedFileExtensions.push_back( L".ogm" );
+								break;
+							}
+							case 3: {
+								allowedFileExtensions.push_back( L".flac" );
+								allowedFileExtensions.push_back( L".fla" );
+								break;
+							}
+							case 4: {
+								allowedFileExtensions.push_back( L".mp3" );
+								break;
+							}
+							case 5: {
+								allowedFileExtensions.push_back( L".mid" );
+								break;
+							}
+						}
+					} catch( const std::out_of_range& err ) {
+						//This allows for decoders not yet known to me: the decoder name might be used as an extension
+						boost::algorithm::to_lower( decoderName );
+						allowedFileExtensions.push_back( L"." + decoderName );
+						std::wcerr << L"Unknown music decoder: \"" << decoderName << L"\"" << std::endl;
+					}
+				}
+			}
+		//}
+		
+		if( settingsManager.debug ) {
+			std::wcout << L"Allowed file extensions for music: ";
+			for( auto it = allowedFileExtensions.begin(); it != allowedFileExtensions.end(); ++it ) {
+				std::wcout << *it << L", ";
+			}
+			std::wcout << std::endl;
 		}
 		
 		auto folderList = system.getMusicFolders();
 		
-		//If musicPath (defined inside the for loop inside the following while loop) has a backgrounds subfolder, we want to find backgrounds there first.
+		//If musicPath (defined inside the for loop inside the following while loop) has a Music subfolder, we want to find music there first.
 		bool useMusicSubfolder = true;
 		for( uint_fast8_t repeat = 0; repeat < 2; ++repeat ) {
 			
@@ -2835,13 +2903,34 @@ void MainGame::makeMusicList() {
 					
 					for( boost::filesystem::recursive_directory_iterator i( musicPath ); i not_eq end; ++i ) {
 						if( not is_directory( i->path() ) ) { //We've found a file
-							//Attempts to load a file as music. If successful, unload the file and add it to musicList.
-							//This way the game is certain to accept any file formats the music library can use.
-							Mix_Music* temp = Mix_LoadMUS( i->path().c_str() );
+							/* Attempts to load a file as music. If successful, unload the file and add it to musicList.
+							 * This way the game is certain to accept any file formats the music library can use.
+							 * The problem is, it can accept non-music files too. Such as the Cybrinth executable.
+							 * For now, we work around this by only allowing certain extensions based on the music decoders already enumerated.
+							 * This is non-ideal because file extensions don't necessarily reflect their actual type, and certain file types (e.g. OGG containers) may have multiple extensions which we may not have thought to allow (e.g. the OGG container can use .ogg, .oga, .ogm, or potentally something else)
+							 * TODO: Find a better way to detect music file formats.
+							 * */
 							
-							if( not isNull( temp ) ) {
-								musicList.push_back( i->path() );
-								Mix_FreeMusic( temp );
+							auto extension = i->path().extension().wstring();
+							
+							if( settingsManager.debug ) {
+								std::wcout << L"Music file extension: \"" << extension << L"\"" << std::endl;
+							}
+							
+							if( std::find( allowedFileExtensions.begin(), allowedFileExtensions.end(), extension ) != allowedFileExtensions.end() ) {
+								Mix_Music* temp = Mix_LoadMUS( i->path().c_str() );
+								
+								if( not isNull( temp ) ) {
+									musicList.push_back( i->path() );
+									
+									if( settingsManager.debug ) {
+										std::wcout << L"Appending file to music list: " << i->path() << std::endl;
+									}
+									
+									Mix_FreeMusic( temp );
+								}
+							} else if( settingsManager.debug ) {
+								std::wcout << L"File extension disallowed for music: \"" << extension << L"\"" << std::endl; 
 							}
 						}
 					}
@@ -3771,7 +3860,17 @@ void MainGame::resetThings() {
 		}
 		timer->setTime( 0 );
 		timer->start();
-		currentProTip = ( currentProTip + 1 ) % proTips.size();
+		
+		if( not proTips.empty() ) {
+			currentProTip = ( currentProTip + 1 ) % proTips.size(); //This generates a floating point error if proTips.size() is 0, hence the surrounding if block.
+		} else {
+			currentProTip = 0;
+		}
+		
+		if( settingsManager.debug ) {
+			std::wcout << L"Current pro tip #: " << currentProTip << std::endl;
+		}
+		
 		loadTipFont();
 		startLoadingScreen();
 		lastTimeControlsProcessed = timer->getTime();
