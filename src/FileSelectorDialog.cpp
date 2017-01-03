@@ -28,7 +28,7 @@ irr::s32 FileSelectorDialog::numFileSelectors = 0;
 
 //! constructor
 FileSelectorDialog::FileSelectorDialog( const irr::core::stringw title, irr::gui::IGUIEnvironment* environment, IGUIElement* parent, irr::s32 id, E_FILESELECTOR_TYPE type ) : IGUIFileOpenDialog( environment, parent, id, irr::core::rect< irr::s32 >( ( parent->getAbsolutePosition().getWidth() - FOD_WIDTH ) / 2, ( parent->getAbsolutePosition().getHeight() - FOD_HEIGHT ) / 2, ( parent->getAbsolutePosition().getWidth() - FOD_WIDTH) / 2 + FOD_WIDTH, ( parent->getAbsolutePosition().getHeight() - FOD_HEIGHT ) / 2 + FOD_HEIGHT ) ), Dragging( false ), FileNameText( 0 ), FileList( 0 ), DialogType( type ) {
-	#ifdef _DEBUG
+	#ifdef DEBUGFLAG
 		IGUIElement::setDebugName("FileSelectorDialog");
 	#endif   
 	

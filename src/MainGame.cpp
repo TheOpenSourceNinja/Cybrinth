@@ -1677,7 +1677,7 @@ PlayerStart* MainGame::getStart( uint_fast8_t ps ) {
  * @brief Does what the name says: initializes a bunch of variables. I made this function because I'm trying to shorten the MainGame() constructor.
  */
 void MainGame::initializeVariables( bool runAsScreenSaver ) {
-	#ifdef DEBUG //Not the last place debug is set to true or false; look at readPrefs()
+	#ifdef DEBUGFLAG //Not the last place debug is set to true or false; look at readPrefs()
 		settingsManager.debug = true;
 	#else
 		settingsManager.debug = false;
@@ -1925,7 +1925,8 @@ void MainGame::loadFonts() {
 			}
 		}
 		
-		heightTestString = L"()*^&v.ygj";
+		heightTestString = L"()*^&v.ygj|\U0001F5FB\u222B"; //Just a bunch of characters that usually tend to have high tops or low bottoms
+		//Lol: "The tallest Unicode character in the current standard (Unicode 6.1) is [Mount Fuji emoji], U+1F5FB MOUNT FUJI, which is 3776 meters tall." https://stackoverflow.com/questions/9208489/tallest-unicode-character#9746990
 		
 		//These were split off into separate functions because they are needed more often than loadFonts()
 		loadTipFont();
@@ -2024,7 +2025,24 @@ void MainGame::loadFonts() {
 			
 			if( fontFile not_eq "" ) {
 				
-				auto aboveStats = loadingFont->getDimension( loading.c_str() ).Height * 2 + std::max( tipFont->getDimension( proTipPrefix.c_str() ).Height, tipFont->getDimension( proTips.at( currentProTip ).c_str() ).Height );
+				decltype( loadingFont->getDimension( L"" ).Height ) aboveStats;
+				
+				{
+					decltype( tipFont->getDimension( L"" ).Height ) proTipHeight;
+					if( proTips.empty() ) {
+						proTipHeight = 0;
+					} else {
+						
+						if( currentProTip >= proTips.size() ) {
+							//This code should be unreachable - currentProTip is always less than proTips.size() - I'm just adding this because I'm paranoid:
+							currentProTip = 0;
+						}
+						
+						proTipHeight = tipFont->getDimension( proTips.at( currentProTip ).c_str() ).Height;
+					}
+					
+					aboveStats = loadingFont->getDimension( loading.c_str() ).Height * 2 + std::max( tipFont->getDimension( proTipPrefix.c_str() ).Height, proTipHeight );
+				}
 				
 				uint_fast32_t size = screenSize.Width / settingsManager.getNumPlayers() / 3; //A quick approximation of the size we'll need the text to be. This is not exact because size is actually an indicator of font height, but numPlayers and hence the needed width are more likely to vary.
 				uint_fast8_t builtInFontHeight = gui->getBuiltInFont()->getDimension( heightTestString.c_str() ).Height;

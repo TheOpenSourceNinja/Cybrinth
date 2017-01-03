@@ -322,8 +322,8 @@ CGUIFreetypeFont::CGUIFreetypeFont( irr::video::IVideoDriver* driver )
 	: Driver( driver )
 	, TrueTypeFace( 0 ) {
 	try {
-		#ifdef DEBUG
-		setDebugName( "CGUIFreetypeFont" );
+		#ifdef DEBUGFLAG
+			setDebugName( "CGUIFreetypeFont" );
 		#endif
 
 		if( Driver )

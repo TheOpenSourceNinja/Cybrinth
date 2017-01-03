@@ -361,7 +361,7 @@ irr::core::dimension2d< irr::u32 > SettingsManager::getWindowSize() {
  */
 void SettingsManager::readPrefs() {
 	try {
-		#if defined DEBUG
+		#if defined DEBUGFLAG
 			debug = true;
 		#else
 			debug = false;
@@ -521,7 +521,7 @@ void SettingsManager::readPrefs() {
 										}
 										
 										case DEBUG: { //L"debug"
-											#ifndef DEBUG
+											#ifndef DEBUGFLAG
 												debug = wStringToBool( choice );
 											#endif
 											
