@@ -3618,12 +3618,14 @@ bool MainGame::OnEvent( const irr::SEvent& event ) {
 void MainGame::processControls() {
 	try {
 		for( decltype( controls.size() ) k = 0; k < controls.size(); ++k ) {
-			if( controls.at( k ).activated ) {
-				if ( controls.at( k ).getMouseEvent() == irr::EMOUSE_INPUT_EVENT::EMIE_MOUSE_WHEEL ) { //There's no event for when the wheel stops moving, so we're manually deactivating those controls
-					controls.at( k ).activated = false;
+			auto currentControl = controls.at( k );
+			
+			if( currentControl.activated ) {
+				if ( currentControl.getMouseEvent() == irr::EMOUSE_INPUT_EVENT::EMIE_MOUSE_WHEEL ) { //There's no event for when the wheel stops moving, so we're manually deactivating those controls
+					currentControl.activated = false;
 				}
 				
-				switch( controls.at( k ).getAction() ) {
+				switch( currentControl.getAction() ) {
 					case ControlMapping::ACTION_MENU_ACTIVATE: {
 						switch( currentScreen ) {
 							case MENUSCREEN: {
@@ -3683,8 +3685,6 @@ void MainGame::processControls() {
 						} else {
 							settingsManager.setMusicVolume( 0 );
 						}
-						
-						musicVolumeChanged();//Mix_VolumeMusic( settingsManager.musicVolume * MIX_MAX_VOLUME / 100 );
 						break;
 					}
 					default: { //Handle player controls
@@ -3694,32 +3694,34 @@ void MainGame::processControls() {
 							ignoreKey = true;
 						}
 						
-						for( decltype( settingsManager.getNumBots() ) b = 0; not settingsManager.isServer and not ignoreKey and b < settingsManager.getNumBots(); ++b ) { //Ignore controls that affect bots
-							if( controls.at( k ).getPlayer() == bot.at( b ).getPlayer() ) {
+						//Ignore controls that affect bots
+						for( decltype( settingsManager.getNumBots() ) b = 0; not settingsManager.isServer and not ignoreKey and b < settingsManager.getNumBots(); ++b ) {
+							if( currentControl.getPlayer() == bot.at( b ).getPlayer() ) {
 								ignoreKey = true;
 							}
 						}
 						
-						if( not settingsManager.isServer and controls.at( k ).getPlayer() not_eq myPlayer ) {
+						//Only process controls for the current player
+						if( not settingsManager.isServer and currentControl.controlsAPlayer and currentControl.getPlayer() not_eq myPlayer ) {
 							ignoreKey = true;
 						}
 						
-						if( not ignoreKey ) {
-							switch( controls.at( k ).getAction() ) {
+						if( not ignoreKey and currentControl.controlsAPlayer ) {
+							switch( currentControl.getAction() ) {
 								case ControlMapping::ACTION_PLAYER_UP: {
-									movePlayerOnY( controls.at( k ).getPlayer(), -1, false );
+									movePlayerOnY( currentControl.getPlayer(), -1, false );
 									break;
 								}
 								case ControlMapping::ACTION_PLAYER_DOWN: {
-									movePlayerOnY( controls.at( k ).getPlayer(), 1, false );
+									movePlayerOnY( currentControl.getPlayer(), 1, false );
 									break;
 								}
 								case ControlMapping::ACTION_PLAYER_RIGHT: {
-									movePlayerOnX( controls.at( k ).getPlayer(), 1, false );
+									movePlayerOnX( currentControl.getPlayer(), 1, false );
 									break;
 								}
 								case ControlMapping::ACTION_PLAYER_LEFT: {
-									movePlayerOnX( controls.at( k ).getPlayer(), -1, false );
+									movePlayerOnX( currentControl.getPlayer(), -1, false );
 									break;
 								}
 								default: {
@@ -3751,6 +3753,8 @@ void MainGame::promptForServerIP() {
 	
 	settingsManager.isServer = false;
 	
+	
+	//TODO: Display this prompt graphically
 	std::wstring newIP = L"";
 	std::wcout << L"Server IP: ";
 	std::wcin >> newIP;
@@ -3805,28 +3809,28 @@ void MainGame::resetThings() {
 			if( settingsManager.debug ) {
 				std::wcout << L"Setting player " << winnersLoadingScreen.at( w ) << L"'s score to ";
 			}
-			{
+			{ //Give points to players based on what order they solved the maze - first winner gets the most, second gets slightly fewer, etc.
 				decltype( score ) temp = ( winnersLoadingScreen.size() - w ) * additiveMultiplier;
 				score += temp;
 				if( settingsManager.debug ) {
 					std::wcout << temp;
 				}
 			}
-			{
+			{ //Subtract points based on number of steps taken
 				decltype( score ) temp = ( player.at( winnersLoadingScreen.at( w ) ).stepsTakenLastMaze ) / subtractiveDivisor;
 				score -= temp;
 				if( settingsManager.debug ) {
 					std::wcout << L" - " << temp;
 				}
 			}
-			{
+			{ //Subtract points based on time taken
 				decltype( score ) temp = player.at( winnersLoadingScreen.at( w ) ).timeTakenLastMaze / 1000 / subtractiveDivisor; //The 1000 is for converting the time to seconds
 				score -= temp;
 				if( settingsManager.debug ) {
 					std::wcout << L" - " << temp;
 				}
 			}
-			{
+			{ //Add points based on number of keys collected
 				decltype( score ) temp = player.at( winnersLoadingScreen.at( w ) ).keysCollectedLastMaze * additiveMultiplier;
 				score += temp;
 				if( settingsManager.debug ) {
@@ -3836,25 +3840,25 @@ void MainGame::resetThings() {
 			
 			player.at( winnersLoadingScreen.at( w ) ).setScore( score );
 		}
-
+		
 		for( decltype( settingsManager.getNumBots() ) b = 0; b < settingsManager.getNumBots(); ++b ) {
 			bot.at( b ).reset();
 		}
-
+		
 		for( decltype( stuff.size() ) i = 0; i < stuff.size(); ++i ) {
 			stuff.at( i ).setColorMode( settingsManager.colorMode );
 			stuff.at( i ).loadTexture( device );
 		}
-
+		
 		for( decltype( mazeManager.cols ) x = 0; x < mazeManager.cols; ++x ) {
 			for( decltype( mazeManager.rows ) y = 0; y < mazeManager.rows; ++y ) {
 				mazeManager.maze[ x ][ y ].visited = false;
 			}
 		}
-
+		
 		won = false;
 		backgroundSceneManager->clear();
-
+		
 		if( settingsManager.showBackgrounds ) {
 			setupBackground();
 		}
@@ -4521,7 +4525,7 @@ void MainGame::setControls() {
  */
 void MainGame::setDefaultControls() {
 	//Yeah, these are the only defaults so far.
-	//TODO: Add default controls.
+	//TODO: Add more default controls.
 	enableController = false;
 	joystickDeadZoneDefaultPercent = 50;
 	std::map< uint_fast8_t, uint_fast8_t > joystickDeadZones;
@@ -4529,34 +4533,76 @@ void MainGame::setDefaultControls() {
 		joystickDeadZones[ i ] = joystickDeadZoneDefaultPercent;
 	}
 	
-	{
+	{ //The 'Esc' key opens the menu.
 		ControlMapping temp;
 		temp.setKey( irr::KEY_ESCAPE );
 		temp.setAction( ControlMapping::ACTION_MENU_ACTIVATE );
 		controls.push_back( temp );
 	}
-	{
+	{ //Some keyboards have a separate menu key, so we'll let people use that too.
+		ControlMapping temp;
+		temp.setKey( irr::KEY_MENU );
+		temp.setAction( ControlMapping::ACTION_MENU_ACTIVATE );
+		controls.push_back( temp );
+	}
+	{ //The 'Pause/Break' key should pause the game.
+		ControlMapping temp;
+		temp.setKey( irr::KEY_PAUSE );
+		temp.setAction( ControlMapping::ACTION_MENU_ACTIVATE );
+		controls.push_back( temp );
+	}
+	{ //Print screen.
+		ControlMapping temp;
+		temp.setKey( irr::KEY_PRINT );
+		temp.setAction( ControlMapping::ACTION_SCREENSHOT );
+		controls.push_back( temp );
+	}
+	{ //Not all computers have a print screen key, so let's accept the P key too.
+		ControlMapping temp;
+		temp.setKey( irr::KEY_KEY_P );
+		temp.setAction( ControlMapping::ACTION_SCREENSHOT );
+		controls.push_back( temp );
+	}
+	{ //I've never seen a keyboard with this key, but apparently they exist.
+		ControlMapping temp;
+		temp.setKey( irr::KEY_SNAPSHOT );
+		temp.setAction( ControlMapping::ACTION_SCREENSHOT );
+		controls.push_back( temp );
+	}
+	{ //Arrow key up
 		ControlMapping temp;
 		temp.setKey( irr::KEY_UP );
 		temp.setAction( ControlMapping::ACTION_PLAYER_UP );
+		if( settingsManager.getNumPlayers() > 0 ) {
+			temp.setPlayer( myPlayer );
+		}
 		controls.push_back( temp );
 	}
-	{
+	{ //Arrow key down
 		ControlMapping temp;
 		temp.setKey( irr::KEY_DOWN );
 		temp.setAction( ControlMapping::ACTION_PLAYER_DOWN );
+		if( settingsManager.getNumPlayers() > 0 ) {
+			temp.setPlayer( myPlayer );
+		}
 		controls.push_back( temp );
 	}
-	{
+	{ //Arrow key left
 		ControlMapping temp;
 		temp.setKey( irr::KEY_LEFT );
 		temp.setAction( ControlMapping::ACTION_PLAYER_LEFT );
+		if( settingsManager.getNumPlayers() > 0 ) {
+			temp.setPlayer( myPlayer );
+		}
 		controls.push_back( temp );
 	}
-	{
+	{ //Arrow key right
 		ControlMapping temp;
 		temp.setKey( irr::KEY_RIGHT );
 		temp.setAction( ControlMapping::ACTION_PLAYER_RIGHT );
+		if( settingsManager.getNumPlayers() > 0 ) {
+			temp.setPlayer( myPlayer );
+		}
 		controls.push_back( temp );
 	}
 	{
@@ -5669,7 +5715,7 @@ void MainGame::setMyPlayer( uint_fast8_t newPlayer ) {
 		}
 		
 		for( uint_fast8_t c = 0; c < controls.size(); ++c ) {
-			if( controls.at( c ).getPlayer() == myPlayer ) {
+			if( controls.at( c ).controlsAPlayer and controls.at( c ).getPlayer() == myPlayer ) {
 				controls.at( c ).setPlayer( newPlayer );
 			}
 		}
